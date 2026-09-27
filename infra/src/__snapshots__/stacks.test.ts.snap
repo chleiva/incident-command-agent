@@ -195,6 +195,9 @@ exports[`ApiStack > matches the snapshot 1`] = `
             "TRACES_BUCKET": {
               "Fn::ImportValue": "Ica-Data:ExportsOutputRefTracesBucketEEE0B20C02BB6EAC",
             },
+            "USER_POOL_ID": {
+              "Ref": "UserPool6BA7E5F2",
+            },
           },
         },
         "Handler": "index.handler",
@@ -393,6 +396,32 @@ exports[`ApiStack > matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "ApiFninlinePolicyAddedToExecutionRole0B34748E0",
+        "Roles": [
+          {
+            "Ref": "ApiFnServiceRoleD18AAE0E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiFninlinePolicyAddedToExecutionRole120C4F42D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cognito-idp:AdminGetUser",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "UserPool6BA7E5F2",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiFninlinePolicyAddedToExecutionRole120C4F42D",
         "Roles": [
           {
             "Ref": "ApiFnServiceRoleD18AAE0E",

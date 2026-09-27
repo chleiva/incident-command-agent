@@ -27,7 +27,15 @@ import { composeSystemPrompt, wrapScenarioData, wrapToolResult, wrapTwistData } 
 import { putTrace, traceLabel } from './trace';
 import type { ApprovalPolicy } from './approvals';
 import { AgentAbort, type RunContext } from './context';
+import { repairCall } from './call-repair';
 import { executeToolCall, type CallSite, type ToolCallInput, type ToolCallResult } from './execute';
+import {
+  MAX_REPORT_ATTEMPTS,
+  composeRuntimeReport,
+  executedActions,
+  mergeActions,
+  splitExtras,
+} from './report';
 import { ORCHESTRATOR_RUNTIME_TOOLS, reportTool, type RuntimeSite } from './tools';
 import { preview, summarise } from './util';
 
@@ -224,6 +232,14 @@ export async function runAgent(
   const policy: ApprovalPolicy = opts.policy ?? ctx.deps.approvalsPolicy ?? 'human';
   const maxReportRetries = opts.maxReportRetries ?? 2;
   let reportFailures = 0;
+  // Invalid (schema) or placeholder report attempts; at MAX_REPORT_ATTEMPTS the runtime composes the report.
+  let reportRejects = 0;
+  const reportRejectReasons: string[] = [];
+  let lastReportInput: Record<string, unknown> | undefined;
+  // Roles this agent may delegate to: a tool call named after one is normalised to `delegate` (call-repair.ts).
+  const delegateSchema = byName.get('delegate')?.inputSchema as
+    { properties?: { role?: { enum?: string[] } } } | undefined;
+  const delegable: string[] = delegateSchema?.properties?.role?.enum ?? [];
   let delegateCount = 0;
   const revision = opts.supersedesApprovalId
     ? { approvalId: opts.supersedesApprovalId, used: false }
@@ -414,6 +430,13 @@ export async function runAgent(
         ...(revision ? { revision } : {}),
       };
 
+      // Deterministic repairs before validation (recorded on agent.tool_call): role-named calls → delegate, leaked
+      // tool-call markup split back into its keys. Ids are unchanged, so every tool_result answers the ORIGINAL
+      // tool_use id and the provider conversation stays valid.
+      const calls: ToolCallInput[] = response.toolCalls.map((c) =>
+        repairCall(c, delegable, (n) => byName.has(n)),
+      );
+
       // Delegates start concurrently (Promise.all); other calls run in order; results keep the call order.
       const results = new Map<string, Promise<ToolCallResult>>();
       let reportCall: ToolCallInput | undefined;
@@ -421,7 +444,7 @@ export async function runAgent(
         const def = byName.get(c.name) ?? registryByName.get(c.name);
         return executeToolCall(s, def, c, { availableToRole: byName.has(c.name) });
       };
-      for (const c of response.toolCalls) {
+      for (const c of calls) {
         if (c.name === 'delegate' && byName.has('delegate')) {
           const sub = typeof c.input?.role === 'string' ? c.input.role : 'unknown';
           const childPath = `${agentPath}/${sub}.${++delegateCount}`;
@@ -430,7 +453,7 @@ export async function runAgent(
           results.set(c.id, p);
         }
       }
-      for (const c of response.toolCalls) {
+      for (const c of calls) {
         if (results.has(c.id)) continue;
         if (c.name === 'report' && !reportCall) {
           reportCall = c;
@@ -445,7 +468,7 @@ export async function runAgent(
       const toolResults: LlmMessage['content'] = [];
       let accepted: (AgentReport & Record<string, unknown>) | undefined;
       let acceptedErrors: string[] | undefined;
-      for (const c of response.toolCalls) {
+      for (const c of calls) {
         if (reportCall && c.id === reportCall.id) {
           const r = await handleReport(c);
           toolResults.push({ type: 'tool_result', toolUseId: c.id, content: r.content, isError: r.isError });
@@ -490,9 +513,16 @@ export async function runAgent(
         report?: AgentReport & Record<string, unknown>;
         errors?: string[];
       }> {
-        const res = await executeToolCall(site, report, c, { availableToRole: true });
-        if (!res.ok) return { content: res.content, isError: true };
         const input = (c.input ?? {}) as Record<string, unknown>;
+        // Schema (relaxed: actionsTaken optional, extra keys allowed) and placeholder checks run in the pipeline.
+        const res = await executeToolCall(site, report, c, { availableToRole: true });
+        if (!res.ok) {
+          reportRejects++;
+          lastReportInput = input;
+          reportRejectReasons.push(preview(res.content, 300));
+          if (reportRejects < MAX_REPORT_ATTEMPTS) return { content: res.content, isError: true };
+          return composedReport();
+        }
         const errors = opts.reportValidator?.(input) ?? [];
         if (errors.length && reportFailures < maxReportRetries) {
           reportFailures++;
@@ -507,9 +537,11 @@ export async function runAgent(
             isError: true,
           };
         }
-        let normalised = normaliseReport(input);
+        const { known, extras } = splitExtras(input, report.inputSchema);
+        let normalised = normaliseReport(known);
         // Status-like defect claims (deferrable, airworthy, AOG…) are blocked: the model's interpretation is a
-        // provisional reading only. The agent redrafts; after the retries the claims are redacted.
+        // provisional reading only. The agent redrafts; after the retries the claims are redacted. Only the model's
+        // own text is screened: the runtime's executed-action lines are appended afterwards.
         if (STATUS_SCREENED_ROLES.has(role)) {
           const findings: OutputFinding[] = reportTexts(normalised).flatMap(screenStatusClaims);
           if (findings.length) {
@@ -542,6 +574,11 @@ export async function runAgent(
             normalised = redactReport(normalised);
           }
         }
+        normalised = {
+          ...normalised,
+          actionsTaken: mergeActions(normalised.actionsTaken, executedActions(ctx, agentRunId)),
+          ...(extras ? { extras } : {}),
+        };
         normalised = withRecommendationDetails(normalised, ctx.sim.simMinute);
         const check = validateAgainst(AgentReportSchema as unknown as JSONSchema, normalised);
         if (!check.ok)
@@ -554,6 +591,25 @@ export async function runAgent(
           isError: false,
           report: normalised,
           errors,
+        };
+      }
+
+      /** After MAX_REPORT_ATTEMPTS invalid attempts the runtime writes the report (no model-invented reports). */
+      function composedReport() {
+        const base = STATUS_SCREENED_ROLES.has(role) ? redactReport(lastReportInput ?? {}) : lastReportInput;
+        const composed = composeRuntimeReport(
+          role,
+          base,
+          report.inputSchema,
+          executedActions(ctx, agentRunId),
+          reportRejects,
+        );
+        ctx.log({ msg: 'report composed by runtime', agentRunId, role, attempts: reportRejects });
+        return {
+          content: wrapToolResult('runtime:report', '{"accepted":true,"composedByRuntime":true}'),
+          isError: false,
+          report: withRecommendationDetails(normaliseReport(composed), ctx.sim.simMinute),
+          errors: reportRejectReasons.slice(-MAX_REPORT_ATTEMPTS),
         };
       }
     }

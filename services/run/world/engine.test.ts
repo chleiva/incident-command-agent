@@ -7,7 +7,13 @@ import { foldEvents, type EventDraft } from '@ica/schema';
 import { call, type createScriptedProvider, scriptByAgent, step } from '../llm/scripted';
 import { makeHarness, ofType, type Harness } from '../runtime/__fixtures__/harness';
 
-const REPORT = { summary: 'done', actionsTaken: [], openIssues: [], recommendations: [], citations: [] };
+const REPORT = {
+  summary: 'Handled the brief; nothing further outstanding.',
+  actionsTaken: [],
+  openIssues: [],
+  recommendations: [],
+  citations: [],
+};
 
 /** The orchestrator "works" for `n` iterations (each call = latencyMs of wall time), then reports. */
 function busyOrchestrator(n: number) {
@@ -21,7 +27,7 @@ function busyOrchestrator(n: number) {
         'Structuring.',
         call('report', {
           ...REPORT,
-          summary: 'twist',
+          summary: 'The twist delays NWD101 by twenty minutes.',
           effects: [{ op: 'delay', flight: 'NWD101', minutes: 20 }],
         }),
       ),

@@ -96,7 +96,7 @@ export function scriptByAgent(
     return step(
       'Done.',
       call('report', {
-        summary: `${info.role} finished`,
+        summary: `The ${info.role} agent finished its scripted brief.`,
         actionsTaken: [],
         openIssues: [],
         recommendations: [],

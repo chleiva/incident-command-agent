@@ -10,7 +10,13 @@ import { call, scriptByAgent, step } from '../llm/scripted';
 import { makeHarness, ofType } from './__fixtures__/harness';
 import { defaultRegistry } from './registry';
 
-const REPORT = { summary: 'done', actionsTaken: [], openIssues: [], recommendations: [], citations: [] };
+const REPORT = {
+  summary: 'Handled the brief; nothing further outstanding.',
+  actionsTaken: [],
+  openIssues: [],
+  recommendations: [],
+  citations: [],
+};
 
 describe('export_evidence_pack', () => {
   it('attaches the latest KpiSnapshot', async () => {

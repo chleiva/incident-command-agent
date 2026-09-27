@@ -125,6 +125,14 @@ export function ToolCallCard({ item, defaultOpen = false }: { item: ToolFeedItem
           </span>
         </p>
       )}
+      {(item.call.normalisedFrom || item.call.argsRepaired?.length) && (
+        <p className="mt-1 flex items-center gap-1 text-micro text-fg-subtle">
+          <Icon name="edit" size={10} />
+          {item.call.normalisedFrom
+            ? `Called as “${item.call.normalisedFrom}”; run as a delegation by the runtime.`
+            : `Arguments repaired by the runtime: ${item.call.argsRepaired!.join(', ')}.`}
+        </p>
+      )}
       {item.result?.deduplicatedFrom && (
         <p className="mt-1 flex items-center gap-1 text-micro text-fg-subtle">
           <Icon name="check" size={10} /> Retry of an earlier request: original result returned, nothing done
@@ -251,7 +259,11 @@ export function FeedLine({ item }: { item: Exclude<FeedItem, ToolFeedItem> }) {
           <span className="min-w-0 flex-1">
             <span className="flex items-center gap-2 text-caption text-fg-muted">
               <Icon name="check" size={12} className="text-good" /> Report
-              <AiDraftedBadge />
+              {item.report.composedByRuntime ? (
+                <Badge tone="warning">Composed by the runtime</Badge>
+              ) : (
+                <AiDraftedBadge />
+              )}
             </span>
             <span className="line-clamp-2 text-body text-fg">
               <GlossaryText text={item.report.summary} focusable={false} />
@@ -286,6 +298,12 @@ export function FeedLine({ item }: { item: Exclude<FeedItem, ToolFeedItem> }) {
               ) : null,
             )}
             {item.report.citations.length > 0 && <Citations citations={item.report.citations} />}
+            {item.report.extras && Object.keys(item.report.extras).length > 0 && (
+              <section>
+                <h4 className="caps text-fg-subtle">Additional fields</h4>
+                <Json value={item.report.extras} />
+              </section>
+            )}
             {(item.report.recommendationDetails ?? []).map((d) => (
               <section key={d.text} aria-label={`Recommendation: ${d.text}`}>
                 <h4 className="caps text-fg-subtle">Recommendation</h4>

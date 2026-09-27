@@ -24,7 +24,13 @@ import { makeHarness, ofType } from './__fixtures__/harness';
 import { defaultRegistry } from './registry';
 
 const S01 = getPublicScenario('s01-pushback-tug-contact') as Scenario;
-const REPORT = { summary: 'done', actionsTaken: [], openIssues: [], recommendations: [], citations: [] };
+const REPORT = {
+  summary: 'Handled the brief; nothing further outstanding.',
+  actionsTaken: [],
+  openIssues: [],
+  recommendations: [],
+  citations: [],
+};
 const MESSAGE = {
   cohortIds: ['c211-general', 'c211-families'],
   channel: 'sms',

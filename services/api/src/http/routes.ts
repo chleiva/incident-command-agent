@@ -450,5 +450,6 @@ export function createApiHandler(deps: ApiDeps) {
     corsOrigins: settings.corsOrigins,
     localOperatorName: settings.localOperatorName,
     log,
+    ...(deps.resolveUserName ? { resolveUserName: deps.resolveUserName } : {}),
   });
 }

@@ -97,3 +97,14 @@
 .animate-flash {
   animation: ica-flash 1.6s var(--ease-standard) 1;
 }
+
+@keyframes ica-boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [aria-hidden='true'][style*='ica-boot-spin'] {
+    animation: none !important;
+  }
+}

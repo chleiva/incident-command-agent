@@ -12,6 +12,9 @@ export interface JwtClaims {
   email?: string;
   username?: string;
   'cognito:username'?: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
   [claim: string]: unknown;
 }
 

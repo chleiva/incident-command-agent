@@ -12,7 +12,7 @@ import { demoScript } from './demo-script';
 import { MINIMAL, makeHarness, ofType, type Harness } from './__fixtures__/harness';
 
 const REPORT = {
-  summary: 'done',
+  summary: 'Handled the brief; nothing further outstanding.',
   actionsTaken: [],
   openIssues: [],
   recommendations: [],

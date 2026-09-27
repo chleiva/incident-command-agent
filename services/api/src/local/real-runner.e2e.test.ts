@@ -31,7 +31,13 @@ import { createLocalApp, type LocalApp } from './app';
 
 const FIXTURE_INDEX_DIR = fileURLToPath(new URL('../../../../data/fixtures/index/', import.meta.url));
 const S01 = getPublicScenario('s01-pushback-tug-contact') as Scenario;
-const REPORT = { summary: 'done', actionsTaken: [], openIssues: [], recommendations: [], citations: [] };
+const REPORT = {
+  summary: 'Handled the brief; nothing further outstanding.',
+  actionsTaken: [],
+  openIssues: [],
+  recommendations: [],
+  citations: [],
+};
 const MESSAGE = {
   requestId: '3e2d1c0b-aaaa-4bbb-8ccc-0123456789ab',
   cohortIds: ['c211-general', 'c211-families'],

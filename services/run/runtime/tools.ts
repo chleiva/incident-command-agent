@@ -19,6 +19,7 @@ import {
   type ToolOutcome,
 } from '@ica/schema';
 import type { Decision, RunContext } from './context';
+import { placeholderProblems, relaxReportSchema } from './report';
 
 export interface RuntimeSite {
   ctx: RunContext;
@@ -195,13 +196,18 @@ export const requestDecisionTool: RuntimeToolDefinition = {
   },
 };
 
-/** The report tool for a role: its input schema IS the role's reportSchema. Handled by the loop. */
+/**
+ * The report tool for a role: its input schema is the role's reportSchema, relaxed (actionsTaken optional, unknown
+ * keys kept as `extras`; see report.ts). Handled by the loop.
+ */
 export function reportTool(role: RoleDefinition, schemaOverride?: JSONSchema): RuntimeToolDefinition {
   return {
     name: 'report',
     description:
-      'Finish your work: return your structured report (summary, actions taken, open issues, recommendations, citations). Your turn ends when the report is accepted.',
-    inputSchema: schemaOverride ?? role.reportSchema ?? (AgentReportSchema as unknown as JSONSchema),
+      'Finish your work: return your structured report of what you actually found and did (summary, open issues, recommendations, citations; actionsTaken is optional: the runtime adds the tool calls you executed). Never send placeholder or test content. Your turn ends when the report is accepted.',
+    inputSchema: relaxReportSchema(
+      schemaOverride ?? role.reportSchema ?? (AgentReportSchema as unknown as JSONSchema),
+    ),
     tier: 'execute',
     system: 'runtime',
     roles: [role.role],
@@ -209,6 +215,12 @@ export function reportTool(role: RoleDefinition, schemaOverride?: JSONSchema): R
     runtime: true,
     handler: notDirect,
     async run(input) {
+      const problems = placeholderProblems(input);
+      if (problems.length)
+        return {
+          ok: false,
+          error: `placeholder content is not allowed; report what you actually did (${problems.join('; ')}).`,
+        };
       return { ok: true, data: input };
     },
   };

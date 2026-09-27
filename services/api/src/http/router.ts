@@ -15,9 +15,13 @@ import type { HttpEvent, HttpResult, JwtClaims } from './types';
 export const MAX_BODY_BYTES = 64 * 1024;
 
 export interface Principal {
-  /** Display name recorded on human decisions (email claim, else username, else sub). */
+  /** Display name recorded on human decisions (name/email claim, else the Cognito profile, else username). */
   name: string;
   sub?: string;
+  /** Cognito username (`cognito:username` on ID tokens, `username` on access tokens). */
+  username?: string;
+  /** True when `name` came from a human-readable claim (`name`, `given_name`/`family_name`, `email`). */
+  readable?: boolean;
 }
 
 export interface RouteContext {
@@ -92,10 +96,19 @@ export function matchRoute(
 
 export function principalFromClaims(claims: JwtClaims | undefined): Principal | null {
   if (!claims) return null;
-  const name = [claims.email, claims['cognito:username'], claims.username, claims.sub].find(
-    (v): v is string => typeof v === 'string' && v.length > 0,
-  );
-  return name ? { name, sub: typeof claims.sub === 'string' ? claims.sub : undefined } : null;
+  const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
+  const full = [str(claims.given_name), str(claims.family_name)].filter(Boolean).join(' ');
+  const readable = str(claims.name) ?? (full || undefined) ?? str(claims.email);
+  const username = str(claims['cognito:username']) ?? str(claims.username);
+  const sub = str(claims.sub);
+  const name = readable ?? username ?? sub;
+  if (!name) return null;
+  return {
+    name,
+    ...(sub ? { sub } : {}),
+    ...(username ? { username } : {}),
+    ...(readable ? { readable: true } : {}),
+  };
 }
 
 /** The human actor for API-written events. */
@@ -108,6 +121,25 @@ export interface RouterOptions {
   corsOrigins: string[];
   localOperatorName: string;
   log?: Logger;
+  /**
+   * Resolves a Cognito username to a display name when the token carries no readable claim (the SPA sends the
+   * access token: only `sub`/`username`). Lambda: `AdminGetUser`, cached per container (see user-names.ts).
+   */
+  resolveUserName?: (username: string) => Promise<string | null>;
+}
+
+/** A readable name for the principal: claims first, then the resolver, else the username/sub. */
+async function withDisplayName(p: Principal, opts: RouterOptions, log: Logger): Promise<Principal> {
+  if (p.readable || !opts.resolveUserName) return p;
+  const key = p.username ?? p.sub;
+  if (!key) return p;
+  try {
+    const name = await opts.resolveUserName(key);
+    return name ? { ...p, name, readable: true } : p;
+  } catch (err) {
+    log.warn('user name resolution failed', errorFields(err));
+    return p;
+  }
 }
 
 function corsHeaders(opts: RouterOptions, origin: string | undefined): Record<string, string> {
@@ -194,7 +226,9 @@ export function createRouter(routes: RouteTable, opts: RouterOptions) {
         let principal = principalFromClaims(event.requestContext?.authorizer?.jwt?.claims);
         if (!principal) {
           if (opts.authMode !== 'none') throw unauthorized();
-          principal = { name: opts.localOperatorName };
+          principal = { name: opts.localOperatorName, readable: true };
+        } else {
+          principal = await withDisplayName(principal, opts, log);
         }
         const ctx: RouteContext = {
           params: match.params,

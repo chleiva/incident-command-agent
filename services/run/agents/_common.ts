@@ -25,7 +25,8 @@ export const WORKING_STYLE = `Working style:
 - Notification and work-order tools take a requestId: generate a new UUID per request and reuse it only to retry the same request.
 - When you propose an action, add unresolvedChecks: what has not been verified yet, in plain words.`;
 
-export const DONE = `Done means: call the report tool once, with a short summary, the actions you took (with ids), open issues, recommendations and the citations you relied on. Optionally add recommendationDetails: for each recommendation, its text, unresolvedChecks (what is not yet verified) and citations.`;
+export const DONE = `Done means: call the report tool once, with a short summary of your real findings, the actions you took (with ids), open issues, recommendations and the citations you relied on. Optionally add recommendationDetails: for each recommendation, its text, unresolvedChecks (what is not yet verified) and citations.
+The report summarises what you actually found and did in this run. Never send placeholder or test content ("Test", "TBD", "n/a"): it is refused. Each report field is a separate argument; if the report is rejected, read the error (it lists the keys received, missing and unexpected) and fix only those fields.`;
 
 /**
  * A role report schema: the shared AgentReport plus optional role-specific fields. `provisionalReading` is only

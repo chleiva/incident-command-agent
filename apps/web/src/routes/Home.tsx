@@ -2,15 +2,18 @@
  * Copyright 2026 Incident Command Agent contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/** Home: the scenario picker, the AuthorBox, recent runs and the latest eval summary. */
-import type { EvalReport, RunMeta, ScenarioSummary } from '@ica/schema/browser';
+/**
+ * Home: the scenario picker, the AuthorBox and recent runs. The evaluation report is not fetched here: it is an
+ * offline QA artefact, loaded only on the /evals page (owner decision: keep evals out of the operational flow).
+ */
+import type { RunMeta, ScenarioSummary } from '@ica/schema/browser';
 import { useEffect, useState } from 'react';
 import { useRunActions } from '../app/actions';
 import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
 import { AuthorBox } from '../components/presenter/AuthorBox';
 import { ScenarioPicker } from '../components/presenter/ScenarioPicker';
-import { EvalSummary, RecentRuns } from '../components/home/HomePanels';
+import { RecentRuns } from '../components/home/HomePanels';
 import { Skeleton, type LoadStatus } from '../components/ui/primitives';
 
 function useLoad<T>(
@@ -41,7 +44,6 @@ export default function Home() {
   const actions = useRunActions();
   const scenarios = useLoad<ScenarioSummary[]>(() => api.listScenarios().then((r) => r.items));
   const runs = useLoad<RunMeta[]>(() => api.listRuns(12).then((r) => r.items));
-  const evals = useLoad<EvalReport>(() => api.getLatestEval());
   const [starting, setStarting] = useState<string | null>(null);
 
   return (
@@ -77,7 +79,6 @@ export default function Home() {
             ) : (
               <RecentRuns runs={runs.data ?? []} status={runs.status} error={runs.error} />
             )}
-            <EvalSummary report={evals.data} status={evals.status} error={evals.error} />
           </div>
         </div>
       </div>

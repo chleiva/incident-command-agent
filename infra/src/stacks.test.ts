@@ -289,6 +289,23 @@ describe('ApiStack', () => {
     expect(JSON.stringify(bedrock.findResources('AWS::IAM::Policy'))).toContain('bedrock:InvokeModel');
   });
 
+  it('lets only the api Lambda read users of its own pool (AdminGetUser, approver display names)', () => {
+    const withGetUser = Object.entries(api.findResources('AWS::IAM::Policy')).filter(([, p]) =>
+      JSON.stringify(p).includes('cognito-idp:AdminGetUser'),
+    );
+    expect(withGetUser).toHaveLength(1);
+    const statements = (
+      withGetUser[0]![1] as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }
+    ).Properties.PolicyDocument.Statement.filter((s) => s.Action === 'cognito-idp:AdminGetUser');
+    expect(statements).toHaveLength(1);
+    expect(JSON.stringify(statements[0]!.Resource)).toContain('UserPool');
+    expect(JSON.stringify(statements[0]!.Resource)).not.toContain('*');
+    const apiFn = Object.values(api.findResources('AWS::Lambda::Function')).find(
+      (f) => (f as { Properties: { Description?: string } }).Properties.Description === 'HTTP API router',
+    ) as { Properties: { Environment: { Variables: Record<string, unknown> } } };
+    expect(apiFn.Properties.Environment.Variables.USER_POOL_ID).toBeDefined();
+  });
+
   it('deploys config.json (WebRuntimeConfig, cognito mode) and outputs what the scripts need', () => {
     api.resourceCountIs('Custom::CDKBucketDeployment', 1);
     const outputs = Object.keys(api.toJSON().Outputs ?? {});

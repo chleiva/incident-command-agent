@@ -11,7 +11,13 @@ import { MINIMAL } from './__fixtures__/harness';
 import { fakeKnowledge, fakeRegistry } from './__fixtures__/registry';
 import { runAuthorWith } from './run';
 
-const REPORT = { summary: 'authored', actionsTaken: [], openIssues: [], recommendations: [], citations: [] };
+const REPORT = {
+  summary: 'Authored the scenario and checked it with validate_scenario.',
+  actionsTaken: [],
+  openIssues: [],
+  recommendations: [],
+  citations: [],
+};
 
 function deps(
   script: ReturnType<typeof scriptByAgent>,

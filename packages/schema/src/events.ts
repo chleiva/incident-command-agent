@@ -13,7 +13,7 @@
  */
 import { Type, type Static, type TObject } from '@sinclair/typebox';
 import {
-  AgentReportSchema,
+  AgentReportEventSchema,
   ApprovalScopeSchema,
   AssumptionSchema,
   CitationSchema,
@@ -147,6 +147,16 @@ export const EventPayloadSchemas = {
     args: Json,
     /** Addition (task 06): a synthetic call pushed by the presenter's "Demonstrate blocked action" control. */
     presenterTriggered: Opt(Type.Boolean()),
+    /**
+     * Addition (live-run fix): the model called a tool named after a role (e.g. `ground{brief}`); the runtime
+     * normalised it to `delegate{role, brief}` under the same toolCallId. Holds the original tool name.
+     */
+    normalisedFrom: Opt(Str),
+    /**
+     * Addition (live-run fix): argument keys the runtime recovered from a string value where the model leaked
+     * tool-call markup (`</parameter><parameter name="k">…`).
+     */
+    argsRepaired: Opt(Type.Array(Str)),
   }),
   'agent.tool_result': Type.Object({
     toolCallId: Str,
@@ -203,7 +213,7 @@ export const EventPayloadSchemas = {
     /** Role that will re-gather the evidence. */
     role: Opt(AgentRoleSchema),
   }),
-  'agent.report': Type.Object({ role: AgentRoleSchema, report: AgentReportSchema }),
+  'agent.report': Type.Object({ role: AgentRoleSchema, report: AgentReportEventSchema }),
   'agent.aborted': Type.Object({
     role: AgentRoleSchema,
     reason: literalUnion(AGENT_ABORT_REASONS),

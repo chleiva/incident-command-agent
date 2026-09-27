@@ -12,7 +12,7 @@
  * - Gaps are NOT detected here; the stream client (task 05) must re-fetch on a gap before applying.
  */
 import type {
-  AgentReport,
+  AgentReportEvent,
   ApprovalScope,
   Assumption,
   Citation,
@@ -41,7 +41,7 @@ export interface ProjectedAgent {
   iteration: number;
   toolCalls: number;
   lastThoughtSummary?: string;
-  report?: AgentReport;
+  report?: AgentReportEvent;
   abortReason?: string;
   /** Pending approval ids raised by this agent. */
   pendingApprovalIds: string[];

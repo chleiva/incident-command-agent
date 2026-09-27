@@ -204,6 +204,8 @@ export class ApiStack extends Stack {
         ...env,
         ...common,
         AUTH_MODE: 'cognito',
+        // Approver display names: the SPA's access token has no email/name claim (AdminGetUser, see below).
+        USER_POOL_ID: this.userPool.userPoolId,
         RUN_FUNCTION_NAME: this.runFn.functionName,
         AUTHOR_FUNCTION_NAME: authorFn.functionName,
         CORS_ORIGINS: [siteUrl, LOCAL_DEV_ORIGIN].join(','),
@@ -251,6 +253,10 @@ export class ApiStack extends Stack {
     const s3 = (actions: string[], resources: string[]) => new PolicyStatement({ actions, resources });
     apiFn.addToRolePolicy(
       s3(['s3:GetObject', 's3:PutObject'], [tracesBucket.arnForObjects('traces/*/export.json')]),
+    );
+    // Resolve the approver's display name from the user pool (read-only, this pool only).
+    apiFn.addToRolePolicy(
+      new PolicyStatement({ actions: ['cognito-idp:AdminGetUser'], resources: [this.userPool.userPoolArn] }),
     );
 
     for (const f of [this.runFn, authorFn]) {

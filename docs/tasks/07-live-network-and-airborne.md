@@ -1,8 +1,18 @@
 # Task 07 — Live network home, flight-first incident reporting, airborne incidents
 
-> Runs **after** the `feat/hybrid-search` and `fix/live-run-1` branches are merged into `main`. Two phases:
+> Runs **after** the `feat/hybrid-search` and `fix/live-run-1` branches are merged into `main`. Phase 0 (rebrand) runs first, then two phases:
 > - **Phase A** (domain, one agent) must be committed before **Phase B** (web, one agent) starts, because B consumes A's `@ica/network` package.
 > - Both phases stay within the rules in `CLAUDE.md`. Contract changes are additive and logged in `packages/schema/CONTRACTS.md` §11.
+
+## Delivery order (owner priority, 2026-09-27)
+
+The owner wants the **flight-map home first**: open the app, see the live network, pick a flight, then report an incident from a **simple list** plus a **free-text option**. Deliver in milestones and **commit at the end of each one, with everything green**, so the home can be deployed before the airborne depth lands:
+
+- **M0:** Phase 0, the Accent Air rebrand.
+- **M1:** `@ica/network` (the schedule, `flightStateAt` and `suitableAirports`), plus the web home as a live map with the flight list and flight panel. The home route `/` becomes the network view. The library becomes "Training scenarios", a secondary route or tab reachable from the nav.
+- **M2:** "Report incident" from the flight panel. It is a **simple list** of incident types applicable to the flight's phase, each with a one-line plain-language description, plus a **free-text box** ("Describe what's happening"). Picking a type starts immediately: the server builds the scenario with the templates from the flight context. Free text runs the Scenario Author seeded with the flight context. No multi-step wizard. Show a short preview line and a Start button. The ground incident types come first, using the existing ten scenario families as templates; the airborne types may show as "coming soon" until M3.
+  - This includes the API flight-context `POST /runs`, and mock mode working end to end.
+- **M3:** the airborne systems, tools, tiers and roles; the five airborne types in the list; the airborne scenarios, KPIs, evals and glossary; the cockpit airborne visuals.
 
 ## Owner decisions (2026-09-27)
 
@@ -11,16 +21,34 @@
    - **The commander flies and decides the aircraft.** Any tool that would instruct the flight deck (routing, altitude, whether to divert, choice of airport, landing overweight or not) is **forbidden** in code.
    - Agents may only **prepare options** (a suitability ranking of diversion airports) and coordinate on the ground, and must say so in plain language.
 2. **Product name: "Incident Coordination Agent".** Drop "Ground" everywhere Task 06 put it (UI, `<title>`, README, brand `productName`, docs, CDK descriptions, package descriptions, agent preamble). Keep the `@ica/*` scope, stack ids and resource names. Update ADR 0007.
-3. **Home screen:** a live network map built on a fictional Northwind Air day schedule, replayed against the **real wall clock** (time of day in UTC mapped onto the schedule). It is computed entirely in the browser, with **zero backend cost**.
+3. **Home screen:** a live network map built on a fictional Accent Air day schedule, replayed against the **real wall clock** (time of day in UTC mapped onto the schedule). It is computed entirely in the browser, with **zero backend cost**.
 4. **"Report incident" is template-first.** Picking an incident type builds a schema-valid scenario deterministically from the selected flight's context (free, instant). Optional free text goes to the Scenario Author for extra detail (one LLM call). The run then starts.
 5. **Real flight data:** none. OpenSky's terms and the anonymity rules rule it out. All flights, tails, crew and passengers are fictional; airports are real (OurAirports).
+
+## Phase 0 — rebrand the fictional carrier to Accent Air (runs first, alone)
+
+Owner decision (2026-09-27): the fictional carrier becomes **Accent Air**. Flight numbers become **`ACX1xx–ACX9xx`** (was `NWD…`) and tails **`AX-XXX`** (was `NW-XXX`); the main base stays MAN.
+- Replace every "Northwind" or "Northwind Air" occurrence: brand default (`carrierName`, `carrierCode: "ACX"`), UI strings, role prompts, docs (README, CLAUDE.md fixed identifiers, CONTRIBUTING, demo script, SOURCES, NOTICE if relevant, issue templates, specification references to the shipped carrier), evals rubrics and scripts, and data comments.
+- Update the schema validators and patterns (flight `^ACX\d{3}$`-style, tail `^AX-[A-Z]{3}$`), fixed-identifier docs, and all generated schema JSON. The contract change is breaking but deliberate. Log it in CONTRACTS.md §11 as an owner-approved rename.
+- Regenerate or rewrite every dataset that embeds codes:
+  - `scenarios/public/*.json` and `index.gen.ts`
+  - `packages/schema/fixtures/*`
+  - `evals/cases/*`
+  - eval replay fixtures, via the free scripted and baseline paths
+  - `apps/web` mock recordings
+  - Storybook fixtures
+  - `data/fixtures`, if they mention the carrier
+  - test expectations
+- Deterministic generators (names and ids) keep their seeds, so only the codes change.
+- Verify: `git grep -iE "northwind|\bNWD\d|NW-[A-Z]{3}"` returns nothing, apart from historical notes in this task file and ADRs. Every check passes (typecheck, lint, headers, tests, synth, web build, Storybook, Playwright, replay and baseline evals, hygiene).
+- Record the rename in `docs/adr/0007-product-name.md`, which covers the carrier as well as the product name.
 
 ## Phase A — domain: network, templates, airborne systems
 
 ### A1. `packages/network` (`@ica/network`, new, browser- and Node-safe, no Node APIs)
-- `generateDaySchedule(seed, dateUtc)`: Northwind Air's fictional day. It has about 60–80 flights across ~22 tails (A319/A320/A321), with MAN as the main base plus 2–3 secondary bases, and real European airports taken from `data/airports/stations.json`.
+- `generateDaySchedule(seed, dateUtc)`: Accent Air's fictional day. It has about 60–80 flights across ~22 tails (A319/A320/A321), with MAN as the main base plus 2–3 secondary bases, and real European airports taken from `data/airports/stations.json`.
   - Rotations must be realistic: turn times ≥ 35 min, first wave 06:00–07:30, night-stop at bases, and curfews respected.
-  - It's deterministic for a given seed and date. Flight numbers use `NWD1xx–NWD9xx`; tails use `NW-XXX`.
+  - It's deterministic for a given seed and date. Flight numbers use `ACX1xx–ACX9xx`; tails use `AX-XXX`.
 - `flightStateAt(flight, t)` returns the phase (`scheduled|boarding|taxi_out|airborne|approach|landed|at_gate|cancelled`) and, while airborne, the great-circle position (lat/lon), heading, altitude profile (climb, cruise, descent), ETA, progress and a notional fuel-endurance figure.
 - `suitableAirports(position, aircraftType, filters)`: candidate airports ranked by distance and suitability. Suitability comes from the capability data (A3). The output is **options only**.
 - Pure functions with unit tests: determinism, turn times, no overlapping legs per tail, correct phases around STD/STA, and positions on the great circle.
@@ -74,7 +102,7 @@
 - **Flight panel** (drawer):
   - Route and phase timeline (STD → off-blocks → airborne → STA), position and ETA, pax and cohort summary, crew FDP margin, the tail's rotation (reusing RotationGantt), and nearest suitable airports when airborne (options only, labelled as such).
   - Primary action: **"Report incident"**.
-- **Report incident dialog:**
+- **Report incident dialog** (keep it simple: a list plus free text; see M2):
   - Incident types filtered by phase, with a plain-language description for each.
   - An optional free-text box ("Add details (optional)"; typing enables the Author step, and the UI notes the extra 10–30 s and that it's an LLM call).
   - A preview card of the scenario that will run: trigger, key facts, twists.

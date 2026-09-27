@@ -112,6 +112,19 @@ export const AgentReportSchema = Type.Object({
 });
 export type AgentReport = Static<typeof AgentReportSchema>;
 
+/**
+ * Addition (live-run fix): the report as recorded on `agent.report`. The runtime adds `extras` (keys the model sent
+ * that the role's report schema does not define, preserved for the UI/evals) and `composedByRuntime` (the agent
+ * failed to return a valid report, so the runtime composed it from its executed tool calls). Never shown to the
+ * model as report arguments.
+ */
+export const AgentReportEventSchema = Type.Object({
+  ...AgentReportSchema.properties,
+  extras: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  composedByRuntime: Type.Optional(Type.Boolean()),
+});
+export type AgentReportEvent = Static<typeof AgentReportEventSchema>;
+
 export const RunTotalsSchema = Type.Object({
   inputTokens: Type.Integer({ minimum: 0 }),
   outputTokens: Type.Integer({ minimum: 0 }),

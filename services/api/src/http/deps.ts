@@ -29,6 +29,11 @@ export interface ApiDeps {
   settings: ApiSettings;
   /** Brand pack + stations inputs; the router adds features/limits and caches the result. */
   appConfigSource(): Promise<Pick<AppConfig, 'brand'> & { stations: AppConfig['stations'] }>;
+  /**
+   * Display name for a Cognito username when the JWT has no readable claim (Lambda: `AdminGetUser`, cached per
+   * container; see user-names.ts). Without it, the username is recorded.
+   */
+  resolveUserName?(username: string): Promise<string | null>;
   /** Presigned GET URL for a trace key (Lambda only). Without it, exports are always inline. */
   presign?(key: string): Promise<string>;
   now?(): Date;

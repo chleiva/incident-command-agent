@@ -19,7 +19,7 @@ const S01 = getPublicScenario('s01-pushback-tug-contact') as Scenario;
 const DUTY_MANAGER: Actor = { kind: 'human', name: 'Sam Okafor', roleTitle: 'Duty Manager' };
 
 const REPORT = {
-  summary: 'done',
+  summary: 'Handled the brief; nothing further outstanding.',
   actionsTaken: [],
   openIssues: [],
   recommendations: [],

@@ -6,6 +6,7 @@
  * `api` Lambda entry: API Gateway HTTP API (payload v2.0, JWT authorizer) → router. Built once per container.
  * `process.env.BRAND_PACK` and `process.env.STATIONS_JSON` are replaced at bundle time by infra (esbuild define).
  */
+import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
 import { LambdaClient } from '@aws-sdk/client-lambda';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -14,6 +15,7 @@ import { publicScenarios } from '@ica/scenarios';
 import { DEFAULT_BRAND, FALLBACK_STATIONS, parseBrandPack, parseStations } from '../config/app-config';
 import { settingsFromEnv } from '../config/settings';
 import { createApiHandler } from '../http/routes';
+import { createCognitoUserNameResolver } from '../http/user-names';
 import type { HttpEvent, HttpResult } from '../http/types';
 import { LambdaAuthorInvoker, LambdaRunLauncher } from '../runner/launchers';
 import { envRequired } from '../util/env';
@@ -34,6 +36,12 @@ function build() {
   const lambda = new LambdaClient({});
   const s3 = new S3Client({});
   const bucket = envRequired(env, 'TRACES_BUCKET');
+  const log = createLogger({ fn: 'api' });
+  // Approver names: the access token has no email/name claim, so look the user up (cached per container).
+  const userPoolId = env.USER_POOL_ID;
+  const resolveUserName = userPoolId
+    ? createCognitoUserNameResolver({ client: new CognitoIdentityProviderClient({}), userPoolId, log })
+    : undefined;
   return createApiHandler({
     store,
     traces,
@@ -45,7 +53,8 @@ function build() {
     appConfigSource: async () => ({ brand, stations }),
     presign: (key) =>
       getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn: 900 }),
-    log: createLogger({ fn: 'api' }),
+    log,
+    ...(resolveUserName ? { resolveUserName } : {}),
   });
 }
 

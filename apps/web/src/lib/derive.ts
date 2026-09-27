@@ -7,7 +7,7 @@
  * projection comes from the shared reducer; these only shape it for the zones.
  */
 import type {
-  AgentReport,
+  AgentReportEvent,
   AgentRole,
   Engineer,
   EngineeringDecision,
@@ -146,7 +146,7 @@ export type FeedItem =
   | ToolFeedItem
   | (FeedBase & { kind: 'thought'; summary: string; text: string })
   | (FeedBase & { kind: 'started'; brief: string })
-  | (FeedBase & { kind: 'report'; report: AgentReport })
+  | (FeedBase & { kind: 'report'; report: AgentReportEvent })
   | (FeedBase & { kind: 'aborted'; reason: string })
   | (FeedBase & { kind: 'blocked'; block: Payload<'guardrail.blocked'> })
   | (FeedBase & {

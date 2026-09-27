@@ -58,6 +58,10 @@ export interface ToolCallInput {
   id: string;
   name: string;
   input: Record<string, unknown>;
+  /** The loop normalised a role-named call (`ground{brief}`) to `delegate` (see call-repair.ts). */
+  normalisedFrom?: string;
+  /** Argument keys recovered from leaked tool-call markup (see call-repair.ts). */
+  argsRepaired?: string[];
 }
 
 export interface ToolCallResult {
@@ -422,6 +426,8 @@ export async function executeToolCall(
         tier: tool.tier,
         args,
         ...(site.presenterTriggered ? { presenterTriggered: true } : {}),
+        ...(call.normalisedFrom ? { normalisedFrom: call.normalisedFrom } : {}),
+        ...(call.argsRepaired?.length ? { argsRepaired: call.argsRepaired } : {}),
       },
       site.actor,
       envExtra(site),

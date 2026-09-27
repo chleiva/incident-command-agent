@@ -4,7 +4,12 @@
  */
 /**
  * Authentication. `mode:'none'` (local dev server, mock mode): no login. `mode:'cognito'`: the hosted UI with the
- * authorization-code flow + PKCE (oidc-client-ts), silent renew, bearer token on fetch, `token=` on the WebSocket.
+ * authorization-code flow + PKCE (oidc-client-ts), refresh-token renewal, bearer token on fetch, `token=` on the WebSocket.
+ *
+ * No iframe "silent sign-in": Cognito ignores `prompt=none` and serves `X-Frame-Options: DENY`, so an iframe attempt
+ * only waits for its timeout (a multi-second blank page). Sessions renew with the refresh token (a plain HTTPS call);
+ * without a usable session we go straight to the hosted UI. The session lives in localStorage so reloads and new tabs
+ * stay signed in (single-user app; strict CSP forbids inline script).
  * oidc-client-ts is loaded lazily so local and mock builds never download it.
  */
 import type { WebRuntimeConfig } from '@ica/schema/browser';
@@ -42,8 +47,9 @@ async function createCognitoAuth(auth: CognitoAuth): Promise<AuthSession> {
     post_logout_redirect_uri: auth.redirectUri,
     response_type: 'code', // authorization code + PKCE (S256) is the oidc-client-ts default
     scope: 'openid email profile',
+    // Renewal uses the refresh token (oidc-client-ts does not open an iframe when one is present).
     automaticSilentRenew: true,
-    userStore: new WebStorageStateStore({ store: window.sessionStorage }),
+    userStore: new WebStorageStateStore({ store: window.localStorage }),
   });
 
   // Returning from the hosted UI.
@@ -53,14 +59,25 @@ async function createCognitoAuth(auth: CognitoAuth): Promise<AuthSession> {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
+  const redirectToLogin = async (): Promise<AuthSession> => {
+    await manager.signinRedirect();
+    // The browser navigates away; keep the promise pending.
+    return new Promise<AuthSession>(() => {});
+  };
+
   let user = await manager.getUser();
-  if (!user || user.expired) {
+  if (!user) return redirectToLogin();
+  if (user.expired) {
+    // Refresh-token grant only: never fall back to the iframe flow (see header comment).
+    if (!user.refresh_token) return redirectToLogin();
     try {
       user = await manager.signinSilent();
     } catch {
-      await manager.signinRedirect();
-      // The browser navigates away; keep the promise pending.
-      return new Promise<AuthSession>(() => {});
+      user = null;
+    }
+    if (!user || user.expired) {
+      await manager.removeUser();
+      return redirectToLogin();
     }
   }
   manager.events.addUserLoaded((u) => {
