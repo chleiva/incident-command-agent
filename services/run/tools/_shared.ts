@@ -160,6 +160,8 @@ export async function knowledgeSearch(
       ...(h.section ? { section: h.section } : {}),
       ...(h.jurisdiction ? { jurisdiction: h.jurisdiction } : {}),
       ...(h.date ? { date: h.date } : {}),
+      // Structural context (source › section › jurisdiction › date; report synopsis / MEL item header): not quotable.
+      ...(h.header ? { context: h.header } : {}),
       quote: citations[i].quote,
       excerpt: h.text.length > 900 ? `${h.text.slice(0, 900)}…` : h.text,
     })),

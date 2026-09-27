@@ -218,7 +218,8 @@ swapOrCancelDecisionMin|null}}`. Formulas: task 02 (`services/run/world/kpi.ts`)
 - `RoleDefinition {role, title, systemPrompt (constant), tools (domain tool names), maxIterations?, temperature?,
   reportSchema, stop:'report_tool'}`. The runtime prepends its `DATA_HANDLING_PREAMBLE` and adds runtime tools.
 - `KnowledgeIndex.search({query, collections?, jurisdiction?, k?}) → KnowledgeHit[]`;
-  `KnowledgeHit {chunkId, sourceId, url, title, section?, jurisdiction?, date?, collection, text, score}`.
+  `KnowledgeHit {chunkId, sourceId, url, title, section?, jurisdiction?, date?, collection, text, score, docId?,
+  header?, rerankScore?}` (`text` is verbatim; `header` is the structural context, never quoted).
 - LLM layer: `LlmProvider {id, complete(LlmRequest) → LlmResponse}`; `LlmRequest {model, system, messages:
   LlmMessage[], tools: LlmToolSpec[], maxTokens, temperature ≤0.2, cacheHints?, signal?, meta?}`;
   `LlmMessage {role: user|assistant, content: (text{cache?} | tool_use{id,name,input} | tool_result{toolUseId,
@@ -352,3 +353,4 @@ Additions beyond the task-01 brief (all optional or new, none breaking):
 | network (task 07) | New package `@ica/network` (browser- and Node-safe): `generateDaySchedule(seed, date)`, `flightStateAt(flight, t)`, `suitableAirports(position, type, filters)` (options only, `OPTIONS_ONLY_NOTE`), `tailStatesAt`, `fdpMarginFor`, `cohortsFor`, station and airport-capability data (illustrative; fictional where invented) | the live-network home is computed in the browser at zero backend cost; the API rebuilds flight-context scenarios from the same code |
 | api (task 07) | `CreateRunRequest.scenarioId` optional (exactly one of `scenarioId` or the new `flightContext` is required, checked by the route); `flightContext {seed, date, flightId, at?}` (`FlightContextSchema`), `incidentType`, `text?`; `CreateRunResponse.{scenarioId?, screening?, authorFallback?}` | "Report incident" on a live-network flight: the server rebuilds the scenario with `@ica/network/templates` (never trusts a client scenario), runs the Scenario Author on screened free text, stores the scenario privately |
 | network (task 07) | `@ica/network/templates`: `INCIDENT_TYPES` (10 ground families + 5 airborne), `incidentContext`, `incidentTypesFor`, `buildScenarioFromFlight` (deterministic, schema-valid; `remap` for recordings), `authorRequestText`; `@ica/scenarios/templates` export (the static JSON index) | template-first incident reporting in the browser (preview, mock mode) and on the server (same code) |
+| runtime (hybrid search) | `KnowledgeHit.{docId?, header?, rerankScore?}` | hits are collapsed per logical document (report, MEL item, rule sub-paragraph, article); the structural context header is returned apart from the verbatim `text` (quotes stay verbatim); the Cohere Rerank 3.5 relevance when the reranker ordered the hit. The knowledge tools expose `header` as `context` |

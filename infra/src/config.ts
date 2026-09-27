@@ -68,10 +68,24 @@ export interface InfraConfig {
   webDistIsPlaceholder: boolean;
   /** Extra node_modules to install (not bundle) for the Run Lambda, e.g. native ONNX runtime. */
   runNodeModules: string[];
+  /**
+   * Knowledge retrieval in the Run/author Lambdas (`-c knowledge=…`): `hybrid` (default; BM25 + Cohere Embed v4 query
+   * embeddings + S3 Vectors + Cohere Rerank 3.5), `bm25` (no Bedrock calls), or `local` (MiniLM in-Lambda; needs
+   * `-c runNodeModules=@huggingface/transformers`).
+   */
+  knowledge: 'hybrid' | 'bm25' | 'local';
+  /** Region of Cohere Rerank 3.5 (`-c rerankRegion=…`; default eu-central-1, not offered in eu-west-2). */
+  rerankRegion: string;
   repoRoot: string;
 }
 
 export type ContextGetter = (key: string) => unknown;
+
+function knowledgeMode(v: string | undefined): InfraConfig['knowledge'] {
+  const m = (v ?? 'hybrid').toLowerCase();
+  if (m === 'hybrid' || m === 'bm25' || m === 'local') return m;
+  throw new Error(`-c knowledge must be hybrid|bm25|local (got "${v}")`);
+}
 
 function readDotEnv(file: string | null): Record<string, string> {
   if (!file || !existsSync(file)) return {};
@@ -154,6 +168,8 @@ export function loadInfraConfig(opts: LoadConfigOptions): InfraConfig {
     stationsJson: stationsRaw ? compactStations(stationsRaw) : undefined,
     webDistDir: hasDist ? dist : join(root, 'infra/assets/site-placeholder'),
     webDistIsPlaceholder: !hasDist,
+    knowledge: knowledgeMode(ctx('knowledge')),
+    rerankRegion: ctx('rerankRegion') ?? 'eu-central-1',
     runNodeModules: (ctx('runNodeModules') ?? '')
       .split(',')
       .map((s) => s.trim())

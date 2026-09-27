@@ -113,5 +113,11 @@ describe('fixture mini-corpus', () => {
     }
     for (const c of chunks.filter((x) => x.sourceId.startsWith('ASRS')))
       expect(c.meta?.disclaimer).toMatch(/not verified by NASA/);
+    // Structural chunk format (v2): every chunk has a docId and a context header kept apart from the verbatim text.
+    for (const c of chunks) {
+      expect(c.docId && c.chunkId.startsWith(`${c.docId}#`)).toBe(true);
+      expect(c.header).toMatch(/ › /);
+      expect(c.text.startsWith(c.header!)).toBe(false);
+    }
   });
 });

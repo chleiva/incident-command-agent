@@ -53,6 +53,28 @@ beforeAll(() => {
 }, 60_000);
 
 describe('DataStack', () => {
+  it('has the S3 Vectors bucket + index (1536, cosine, float32, hash non-filterable), retained by default', () => {
+    data.resourceCountIs('AWS::S3Vectors::VectorBucket', 1);
+    data.hasResource('AWS::S3Vectors::VectorBucket', {
+      DeletionPolicy: 'Retain',
+      Properties: { EncryptionConfiguration: { SseType: 'AES256' } },
+    });
+    data.hasResource('AWS::S3Vectors::Index', {
+      DeletionPolicy: 'Retain',
+      Properties: Match.objectLike({
+        Dimension: 1536,
+        DistanceMetric: 'cosine',
+        DataType: 'float32',
+        MetadataConfiguration: { NonFilterableMetadataKeys: ['hash'] },
+      }),
+    });
+    const outputs = Object.keys(data.toJSON().Outputs ?? {});
+    for (const o of ['VectorBucketName', 'VectorIndexName', 'VectorIndexArn']) expect(outputs).toContain(o);
+    const eph = Template.fromStack(build({ ephemeral: 'true' }).data);
+    eph.hasResource('AWS::S3Vectors::Index', { DeletionPolicy: 'Delete' });
+    eph.hasResource('AWS::S3Vectors::VectorBucket', { DeletionPolicy: 'Delete' });
+  });
+
   it('has the single table with stream, TTL, no PITR and GSI1 (projection ALL), retained by default', () => {
     data.hasResource('AWS::DynamoDB::Table', {
       DeletionPolicy: 'Retain',
@@ -165,18 +187,75 @@ describe('ApiStack', () => {
     });
     const runEnv = envs.find((v) => v.KNOWLEDGE_BUCKET && v.LLM_SECRET_ARN);
     expect(runEnv).toBeDefined();
-    // Names the Run/author handlers read (lambdaSecretIds, knowledgeS3PathFromEnv); BM25-only retrieval by default.
-    expect(runEnv).toMatchObject({ KB_EMBEDDINGS: 'none' });
+    // Names the Run/author handlers read (lambdaSecretIds, knowledgeS3PathFromEnv) and the hybrid-retrieval backends.
+    expect(runEnv).toMatchObject({
+      KB_EMBEDDINGS: 'cohere',
+      KB_VECTOR_STORE: 's3vectors',
+      KB_EMBED_MODEL: 'eu.cohere.embed-v4:0',
+      KB_EMBED_DIMS: '1536',
+      KB_RERANK: 'on',
+      KB_RERANK_MODEL: 'cohere.rerank-v3-5:0',
+      KB_RERANK_REGION: 'eu-central-1',
+    });
+    expect(runEnv?.KB_VECTOR_BUCKET).toBeDefined();
+    expect(runEnv?.KB_VECTOR_INDEX).toBeDefined();
     expect(runEnv?.SEARCH_SECRET_ARN).toBeDefined();
+    // Both runtime Lambdas (Run + author) get the same knowledge env.
+    expect(envs.filter((v) => v.KB_VECTOR_STORE === 's3vectors')).toHaveLength(2);
   });
 
-  it('keeps retrieval BM25-only in Lambda unless the local embedder is installed as a node module', () => {
-    expect(runtimeEmbeddingEnv({}, [])).toEqual({ KB_EMBEDDINGS: 'none' });
-    expect(runtimeEmbeddingEnv({ KB_EMBEDDINGS: 'openai' }, [])).toEqual({ KB_EMBEDDINGS: 'openai' });
-    expect(runtimeEmbeddingEnv({}, [LOCAL_EMBEDDER_PKG])).toMatchObject({
+  it('selects the knowledge backends by mode (hybrid default, bm25, local only with the node module)', () => {
+    const vec = { bucket: 'b', index: 'i', region: 'eu-west-2', rerankRegion: 'eu-central-1' };
+    expect(runtimeEmbeddingEnv('hybrid', [], vec)).toMatchObject({
+      KB_EMBEDDINGS: 'cohere',
+      KB_VECTOR_STORE: 's3vectors',
+      KB_VECTOR_BUCKET: 'b',
+      KB_VECTOR_INDEX: 'i',
+      KB_EMBED_REGION: 'eu-west-2',
+    });
+    expect(runtimeEmbeddingEnv('bm25', [], vec)).toEqual({
+      KB_EMBEDDINGS: 'none',
+      KB_VECTOR_STORE: 'none',
+      KB_RERANK: 'off',
+    });
+    expect(runtimeEmbeddingEnv('local', [], vec)).toMatchObject({ KB_EMBEDDINGS: 'none' });
+    expect(runtimeEmbeddingEnv('local', [LOCAL_EMBEDDER_PKG], vec)).toMatchObject({
       KB_EMBEDDINGS: 'local',
       KB_MODEL_CACHE: '/tmp/hf',
     });
+  });
+
+  it('grants the knowledge Lambdas exactly the Cohere embed/rerank models and QueryVectors on the index', () => {
+    const policies = Object.values(api.findResources('AWS::IAM::Policy'));
+    const statements = policies.flatMap(
+      (p) => p.Properties.PolicyDocument.Statement as { Sid?: string; Action: unknown; Resource: unknown }[],
+    );
+    const embed = statements.filter((st) => st.Sid === 'KnowledgeEmbedAndRerank');
+    expect(embed).toHaveLength(2); // Run + author
+    const res = JSON.stringify(embed[0].Resource);
+    expect(embed[0].Action).toBe('bedrock:InvokeModel');
+    expect(res).toContain('inference-profile/eu.cohere.embed-v4:0');
+    for (const r of [
+      'eu-north-1',
+      'eu-west-3',
+      'eu-south-1',
+      'eu-west-2',
+      'eu-south-2',
+      'eu-west-1',
+      'eu-central-1',
+    ])
+      expect(res).toContain(`:bedrock:${r}::foundation-model/cohere.embed-v4:0`);
+    expect(res).toContain(':bedrock:eu-central-1::foundation-model/cohere.rerank-v3-5:0');
+    expect(res).not.toContain('*');
+    const vq = statements.filter((st) => st.Sid === 'KnowledgeVectorQuery');
+    expect(vq).toHaveLength(2);
+    expect(vq[0].Action).toEqual(['s3vectors:GetVectors', 's3vectors:QueryVectors']);
+    expect(JSON.stringify(vq[0].Resource)).toContain('KnowledgeVectorIndexIndexArn');
+    // -c knowledge=bm25: no Bedrock or S3 Vectors grants at all.
+    const bm25 = JSON.stringify(Template.fromStack(build({ knowledge: 'bm25' }).api).toJSON());
+    expect(bm25).not.toContain('KnowledgeEmbedAndRerank');
+    expect(bm25).not.toContain('s3vectors:QueryVectors');
+    expect(bm25).toContain('"KB_EMBEDDINGS":"none"');
   });
 
   it('filters the stream to EVT# inserts with batch 100 and partial batch failures', () => {
@@ -279,14 +358,16 @@ describe('ApiStack', () => {
     api.hasResourceProperties('AWS::SNS::Subscription', { Protocol: 'email', Endpoint: 'ops@example.com' });
   });
 
-  it('grants least privilege: WS connect only writes WS# rows, bedrock only when configured', () => {
+  it('grants least privilege: WS connect only writes WS# rows, LLM bedrock wildcards only when configured', () => {
     const policies = JSON.stringify(api.findResources('AWS::IAM::Policy'));
     expect(policies).toContain('"dynamodb:LeadingKeys":["WS#*"]');
-    expect(policies).not.toContain('bedrock:InvokeModel');
+    // Only the knowledge statement (specific model ARNs) by default; the LLM wildcard grant needs LLM_PROVIDER=bedrock.
+    expect(policies).not.toContain('foundation-model/*');
+    expect(policies).not.toContain('bedrock:InvokeModelWithResponseStream');
     const bedrock = Template.fromStack(
       build({}, { ...DUMMY_ENV, LLM_FALLBACK_PROVIDER: 'bedrock', LLM_FALLBACK_MODEL: 'x' }).api,
     );
-    expect(JSON.stringify(bedrock.findResources('AWS::IAM::Policy'))).toContain('bedrock:InvokeModel');
+    expect(JSON.stringify(bedrock.findResources('AWS::IAM::Policy'))).toContain('foundation-model/*');
   });
 
   it('lets only the api Lambda read users of its own pool (AdminGetUser, approver display names)', () => {

@@ -3,20 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * On-disk knowledge index format (`data/index/`, `data/fixtures/index/`), version 1.
+ * On-disk knowledge index format (`data/index/`, `data/fixtures/index/`), version 2 (version 1 still loads).
  *
  *   manifest.json    IndexManifest
  *   chunks.jsonl     one ChunkRecord per line, in doc order (doc index = line number)
  *   bm25.json        Bm25Stats (terms, per-term offsets into the postings, doc lengths)
- *   postings.bin     Uint32 doc indexes for every term, concatenated in `terms` order
- *   tf.bin           Uint16 term frequencies aligned with postings.bin
- *   embeddings.bin   Int8 vectors, N × dim (only when manifest.embeddings.provider !== 'none')
+ *   postings.bin     v1: Uint32 doc indexes per term in `terms` order; v2: varint doc deltas + tf (encodePostings)
+ *   tf.bin           v1 only: Uint16 term frequencies aligned with postings.bin
+ *   embeddings.bin   Int8 vectors, N × dim (only when embeddings are stored in memory, `embeddings.store: 'memory'`)
  *   scales.bin       Float32 per-vector dequantisation scale, N
+ *
+ * With `embeddings.store: 's3vectors'` the vectors are NOT part of the Lambda-loaded files: the build writes them to
+ * `vectors/` (float32 `embeddings.f32` + `keys.jsonl` with the S3 Vectors key and filterable metadata per line), and
+ * `npm run kb:upload` puts them into the S3 Vectors index. Version 2 adds `ChunkRecord.docId` and `header` (the
+ * structural context header that is embedded and BM25-indexed with the text, stored apart so quotes stay verbatim).
  */
 import type { Jurisdiction, KnowledgeCollection } from '@ica/schema';
 import { tokenize } from './text';
 
-export const INDEX_VERSION = 1;
+export const INDEX_VERSION = 2;
+export const SUPPORTED_INDEX_VERSIONS: readonly number[] = [1, 2];
 export const INDEX_FILES = {
   manifest: 'manifest.json',
   chunks: 'chunks.jsonl',
@@ -25,6 +31,13 @@ export const INDEX_FILES = {
   tf: 'tf.bin',
   embeddings: 'embeddings.bin',
   scales: 'scales.bin',
+} as const;
+
+/** Vectors for the external store (not loaded by the Lambdas; synced by `kb:upload`). */
+export const VECTOR_FILES = {
+  dir: 'vectors',
+  data: 'vectors/embeddings.f32',
+  keys: 'vectors/keys.jsonl',
 } as const;
 
 export interface ChunkRecord {
@@ -37,20 +50,60 @@ export interface ChunkRecord {
   date?: string;
   collection: KnowledgeCollection;
   licence: string;
+  /** Verbatim source text (citation quotes are always substrings of this). */
   text: string;
+  /**
+   * The logical document this chunk belongs to (an MEL item, a rule sub-paragraph, an article, a report). Retrieval
+   * collapses several hits of one docId to the best one. Defaults to the chunkId.
+   */
+  docId?: string;
+  /**
+   * Deterministic structural context header (`source › section path › jurisdiction › date`, plus a report synopsis
+   * or MEL item header). Prepended to the text for embedding and BM25; never part of a quote.
+   */
+  header?: string;
   /** Free metadata (e.g. NASA ASRS disclaimer, MEL category). */
   meta?: Record<string, string>;
 }
 
-export type EmbeddingProvider = 'local' | 'openai' | 'bedrock' | 'none';
+/** `bedrock` is a deprecated alias of `cohere` (Cohere Embed v4 on Amazon Bedrock). */
+export type EmbeddingProvider = 'local' | 'openai' | 'cohere' | 'bedrock' | 'none';
+
+/** Where the dense vectors live: in the Lambda-loaded index (int8), in Amazon S3 Vectors, or nowhere. */
+export type VectorStoreKind = 'memory' | 's3vectors' | 'none';
+
+export interface ChunkStats {
+  chunks: number;
+  docs: number;
+  tokens: { total: number; mean: number; p10: number; p50: number; p90: number; max: number };
+  /** Docs split into more than one chunk. */
+  splitDocs: number;
+}
 
 export interface IndexManifest {
-  version: typeof INDEX_VERSION;
+  version: number;
   builtAt: string;
   chunkCount: number;
-  embeddings: { provider: EmbeddingProvider; model?: string; dim?: number; quantisation?: 'int8' };
-  bm25: { k1: number; b: number };
+  embeddings: {
+    provider: EmbeddingProvider;
+    model?: string;
+    dim?: number;
+    quantisation?: 'int8';
+    /** Bedrock inference profile or region the model was invoked through (cohere). */
+    profile?: string;
+    /** Input type used for the chunk embeddings (cohere: `search_document`; queries use `search_query`). */
+    inputType?: string;
+    /** Where the vectors are stored (default `memory` when embeddings.bin exists). */
+    store?: VectorStoreKind;
+    vectorCount?: number;
+  };
+  /** v2: `varint-delta-tf` = doc deltas and term frequencies interleaved in postings.bin (no tf.bin). */
+  bm25: { k1: number; b: number; encoding?: 'varint-delta-tf' };
+  /** v2: per-group shared chunk fields (see `compactChunks`). */
+  chunkDefaults?: Record<string, Partial<ChunkRecord>>;
   sources: { sourceId: string; collection: KnowledgeCollection; chunks: number; licence: string }[];
+  /** Per-collection chunking statistics (token estimate ≈ words / 0.75). */
+  chunking?: Record<string, ChunkStats>;
   notes?: string[];
 }
 
@@ -181,24 +234,27 @@ export function l2normalise(v: Float32Array): Float32Array {
 /** Serialise an index to a map of file name → bytes (the build writes them to disk; tests keep them in memory). */
 export function serialiseIndex(
   chunks: ChunkRecord[],
-  manifest: Omit<IndexManifest, 'chunkCount' | 'bm25' | 'version'>,
+  manifest: Omit<IndexManifest, 'chunkCount' | 'bm25' | 'version' | 'chunkDefaults'>,
   embeddings?: { vectors: Float32Array[]; dim: number },
 ): Record<string, Uint8Array | string> {
+  const store = manifest.embeddings.store ?? (manifest.embeddings.provider === 'none' ? 'none' : 'memory');
   const bm = buildBm25(chunks.map(indexText));
+  const compact = compactChunks(chunks);
+  const postings = encodePostings(bm.docs, bm.tf, bm.stats.offsets);
   const full: IndexManifest = {
     version: INDEX_VERSION,
     chunkCount: chunks.length,
-    bm25: { k1: bm.stats.k1, b: bm.stats.b },
+    bm25: { k1: bm.stats.k1, b: bm.stats.b, encoding: 'varint-delta-tf' },
     ...manifest,
+    chunkDefaults: compact.defaults,
   };
   const files: Record<string, Uint8Array | string> = {
     [INDEX_FILES.manifest]: JSON.stringify(full, null, 2) + '\n',
-    [INDEX_FILES.chunks]: chunks.map((c) => JSON.stringify(c)).join('\n') + '\n',
+    [INDEX_FILES.chunks]: compact.lines.join('\n') + '\n',
     [INDEX_FILES.bm25]: JSON.stringify(bm.stats),
-    [INDEX_FILES.postings]: new Uint8Array(bm.docs.buffer, bm.docs.byteOffset, bm.docs.byteLength),
-    [INDEX_FILES.tf]: new Uint8Array(bm.tf.buffer, bm.tf.byteOffset, bm.tf.byteLength),
+    [INDEX_FILES.postings]: postings,
   };
-  if (embeddings && manifest.embeddings.provider !== 'none') {
+  if (embeddings && manifest.embeddings.provider !== 'none' && store === 'memory') {
     const q = quantise(embeddings.vectors, embeddings.dim);
     files[INDEX_FILES.embeddings] = new Uint8Array(q.data.buffer, q.data.byteOffset, q.data.byteLength);
     files[INDEX_FILES.scales] = new Uint8Array(q.scales.buffer, q.scales.byteOffset, q.scales.byteLength);
@@ -206,9 +262,204 @@ export function serialiseIndex(
   return files;
 }
 
-/** The text BM25 and embeddings see: title + section + body (so titles are searchable). */
+// ------------------------------------------------------------------------------------------------ compaction
+/** Fields shared by every chunk of a group that are stored once in `manifest.chunkDefaults`. */
+const GROUP_FIELDS = ['url', 'licence', 'jurisdiction', 'collection', 'date'] as const;
+const GROUP_META = ['disclaimer', 'attribution'] as const;
+/** Metadata only needed at build time (S3 Vectors filter metadata; already in the context header). */
+const BUILD_ONLY_META = new Set(['phase', 'aircraftType']);
+
+/** Group of a chunk for compaction: the chunkId prefix (`asrs`, `mmel`, `easa`, `aaib` …). */
+export const chunkGroup = (c: ChunkRecord) => c.chunkId.split(/[-#]/)[0];
+
+/**
+ * Store fields that are identical across a group (licence, url, NASA disclaimer …) once per group. Lines carry `g`
+ * and omit those fields; `parseChunks(jsonl, manifest.chunkDefaults)` restores them.
+ */
+export function compactChunks(chunks: ChunkRecord[]): {
+  lines: string[];
+  defaults: Record<string, Partial<ChunkRecord>>;
+} {
+  const groups = new Map<string, ChunkRecord[]>();
+  for (const c of chunks) {
+    const g = chunkGroup(c);
+    const l = groups.get(g) ?? [];
+    l.push(c);
+    groups.set(g, l);
+  }
+  const defaults: Record<string, Partial<ChunkRecord>> = {};
+  for (const [g, list] of groups) {
+    if (list.length < 2) continue;
+    const d: Partial<ChunkRecord> & { meta?: Record<string, string> } = {};
+    for (const f of GROUP_FIELDS) {
+      const v = list[0][f];
+      if (v !== undefined && list.every((c) => c[f] === v)) (d as Record<string, unknown>)[f] = v;
+    }
+    for (const k of GROUP_META) {
+      const v = list[0].meta?.[k];
+      if (v !== undefined && list.every((c) => c.meta?.[k] === v)) (d.meta ??= {})[k] = v;
+    }
+    if (Object.keys(d).length) defaults[g] = d;
+  }
+  const lines = chunks.map((c) => {
+    const g = chunkGroup(c);
+    const d = defaults[g];
+    if (!d) return JSON.stringify(c);
+    const out: Record<string, unknown> = { g };
+    for (const [k, v] of Object.entries(c)) {
+      if (k === 'meta') continue;
+      if ((d as Record<string, unknown>)[k] === v) continue;
+      out[k] = v;
+    }
+    if (c.meta) {
+      const meta = Object.fromEntries(
+        Object.entries(c.meta).filter(([k, v]) => d.meta?.[k] !== v && !BUILD_ONLY_META.has(k)),
+      );
+      if (Object.keys(meta).length) out.meta = meta;
+    }
+    return JSON.stringify(out);
+  });
+  return { lines, defaults };
+}
+
+/**
+ * Postings with term frequencies interleaved: per posting a LEB128 varint of `(docDelta << 1) | (tf > 1)`, followed
+ * by one byte `min(tf, 255)` only when tf > 1 (most postings have tf = 1). Each term's list restarts from doc 0.
+ */
+export function encodePostings(docs: Uint32Array, tf: Uint16Array, offsets: number[]): Uint8Array {
+  const out: number[] = [];
+  for (let t = 0; t + 1 < offsets.length; t++) {
+    let prev = 0;
+    for (let i = offsets[t]; i < offsets[t + 1]; i++) {
+      const f = Math.min(tf[i], 255);
+      let v = (docs[i] - prev) * 2 + (f > 1 ? 1 : 0);
+      prev = docs[i];
+      while (v >= 0x80) {
+        out.push((v % 0x80) | 0x80);
+        v = Math.floor(v / 0x80);
+      }
+      out.push(v);
+      if (f > 1) out.push(f);
+    }
+  }
+  return Uint8Array.from(out);
+}
+
+export function decodePostings(bytes: Uint8Array, offsets: number[]): { docs: Uint32Array; tf: Uint16Array } {
+  const total = offsets[offsets.length - 1] ?? 0;
+  const docs = new Uint32Array(total);
+  const tf = new Uint16Array(total);
+  let p = 0;
+  for (let t = 0; t + 1 < offsets.length; t++) {
+    let prev = 0;
+    for (let i = offsets[t]; i < offsets[t + 1]; i++) {
+      let v = 0;
+      let mul = 1;
+      let b: number;
+      do {
+        b = bytes[p++];
+        v += (b & 0x7f) * mul;
+        mul *= 0x80;
+      } while (b & 0x80);
+      prev += Math.floor(v / 2);
+      docs[i] = prev;
+      tf[i] = v % 2 ? bytes[p++] : 1;
+    }
+  }
+  return { docs, tf };
+}
+
+/** Rebuild BM25 postings from index files (v1: raw Uint32 docs + Uint16 tf; v2: interleaved varint postings). */
+export function bm25FromFiles(
+  stats: Bm25Stats,
+  bm25: IndexManifest['bm25'],
+  postings: Uint8Array | undefined,
+  tf: Uint8Array | undefined,
+): Bm25Postings {
+  const p = postings ?? new Uint8Array();
+  if (bm25.encoding === 'varint-delta-tf') return { stats, ...decodePostings(p, stats.offsets) };
+  return { stats, docs: asTyped(p, Uint32Array), tf: asTyped(tf ?? new Uint8Array(), Uint16Array) };
+}
+
+/** Aggregate per-source chunk counts by source family (ASRS reports, MMEL items, … are one row each). */
+export function sourceFamily(sourceId: string): string {
+  return sourceId
+    .replace(/^(ASRS) ACN \d+$/, '$1')
+    .replace(/^(FAA MMEL A-320) .+$/, '$1')
+    .replace(/^(EU Reg 261\/2004) .+$/, '$1')
+    .replace(/^(EASA) .+$/, '$1 Easy Access Rules for Air Operations')
+    .replace(/^(AAIB) .+$/, '$1');
+}
+
+/**
+ * The text BM25 and embeddings see: the structural context header + the verbatim text (v2), or title + section +
+ * text for chunks without a header (v1 indexes, hand-made in-memory chunks).
+ */
 export function indexText(c: ChunkRecord): string {
+  if (c.header) return `${c.header}\n\n${c.text}`;
   return [c.title, c.section, c.text].filter(Boolean).join('\n');
+}
+
+/** The docId used for collapsing (the chunkId when a chunk has none). */
+export const docIdOf = (c: ChunkRecord): string => c.docId ?? c.chunkId;
+
+/** Jurisdiction value stored in vector metadata for chunks without one (they match every jurisdiction filter). */
+export const ANY_JURISDICTION = 'ANY';
+
+const META_MAX = 120;
+const clip = (s: string) => (s.length > META_MAX ? s.slice(0, META_MAX) : s);
+
+/**
+ * Filterable S3 Vectors metadata for a chunk (well under the 2 KB filterable-metadata limit: ≤ 8 keys, values clipped
+ * to 120 chars). Text is NOT stored in the vector store: it stays in the S3 chunk files.
+ */
+export function vectorMetadata(c: ChunkRecord): Record<string, string> {
+  const m: Record<string, string> = {
+    collection: c.collection,
+    jurisdiction: c.jurisdiction ?? ANY_JURISDICTION,
+    sourceId: clip(c.sourceId),
+    docId: clip(docIdOf(c)),
+  };
+  const meta = c.meta ?? {};
+  if (c.collection === 'mel') {
+    if (meta.itemNumber) m.itemNumber = meta.itemNumber;
+    if (meta.ataChapter) m.ataChapter = meta.ataChapter;
+  }
+  if (c.collection === 'precedent') {
+    if (meta.phase) m.phase = clip(meta.phase);
+    if (meta.aircraftType) m.aircraftType = clip(meta.aircraftType);
+  }
+  return m;
+}
+
+/** S3 Vectors metadata filter for a query (collections and jurisdiction; chunks without a jurisdiction always pass). */
+export function vectorFilter(q: {
+  collections?: readonly string[];
+  jurisdiction?: string;
+}): Record<string, unknown> | undefined {
+  const parts: Record<string, unknown>[] = [];
+  if (q.collections?.length)
+    parts.push(
+      q.collections.length === 1
+        ? { collection: { $eq: q.collections[0] } }
+        : { collection: { $in: [...q.collections] } },
+    );
+  if (q.jurisdiction) parts.push({ jurisdiction: { $in: [q.jurisdiction, ANY_JURISDICTION] } });
+  if (!parts.length) return undefined;
+  return parts.length === 1 ? parts[0] : { $and: parts };
+}
+
+/** Serialise float vectors (row-major N × dim) to little-endian float32 bytes, and back. */
+export function vectorsToBytes(vectors: Float32Array[], dim: number): Uint8Array {
+  const out = new Float32Array(vectors.length * dim);
+  vectors.forEach((v, i) => out.set(v.subarray(0, dim), i * dim));
+  return new Uint8Array(out.buffer);
+}
+
+export function vectorsFromBytes(bytes: Uint8Array, dim: number): Float32Array[] {
+  const all = asTyped(bytes, Float32Array);
+  const n = Math.floor(all.length / dim);
+  return Array.from({ length: n }, (_, i) => all.subarray(i * dim, (i + 1) * dim));
 }
 
 /** Copy bytes into a fresh, aligned buffer and view them as a typed array. */
@@ -221,9 +472,19 @@ export function asTyped<T extends Uint32Array | Uint16Array | Int8Array | Float3
   return new ctor(copy.buffer);
 }
 
-export function parseChunks(jsonl: string): ChunkRecord[] {
+export function parseChunks(
+  jsonl: string,
+  defaults: Record<string, Partial<ChunkRecord>> = {},
+): ChunkRecord[] {
   return jsonl
     .split('\n')
     .filter((l) => l.trim())
-    .map((l) => JSON.parse(l) as ChunkRecord);
+    .map((l) => {
+      const raw = JSON.parse(l) as ChunkRecord & { g?: string };
+      if (!raw.g) return raw;
+      const { g, ...c } = raw;
+      const d = defaults[g] ?? {};
+      const meta = d.meta || c.meta ? { ...d.meta, ...c.meta } : undefined;
+      return { ...d, ...c, ...(meta ? { meta } : {}) } as ChunkRecord;
+    });
 }

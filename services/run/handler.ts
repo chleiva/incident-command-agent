@@ -11,7 +11,9 @@
  * - `KNOWLEDGE_BUCKET`: the knowledge index at `s3://$KNOWLEDGE_BUCKET/index`, loaded ONCE per container
  * - `LLM_SECRET_ARN`, `SEARCH_SECRET_ARN`: Secrets Manager JSON secrets holding provider / search keys
  *   (default `ica/llm`, `ica/search`); search keys are copied into `process.env` for `web_search`
- * - `KB_EMBEDDINGS` (`none` in Lambda by default: BM25-only retrieval, see docs/deploy.md)
+ * - `KB_EMBEDDINGS`, `KB_VECTOR_STORE`/`KB_VECTOR_BUCKET`/`KB_VECTOR_INDEX`, `KB_EMBED_MODEL`/`KB_EMBED_DIMS`/
+ *   `KB_EMBED_REGION`, `KB_RERANK`/`KB_RERANK_MODEL`/`KB_RERANK_REGION`: hybrid retrieval (BM25 + Cohere Embed v4 →
+ *   S3 Vectors → Cohere Rerank 3.5), see services/run/knowledge/index.ts and docs/deploy.md
  * - `LLM_*`, `RUN_BUDGET_USD`, `RUN_HORIZON_MIN` (see .env.example)
  */
 import type { KnowledgeIndex, RunDeps, SecretStore, Store, TraceStore } from '@ica/schema';

@@ -51,7 +51,15 @@ describe('knowledge index (fixture mini-corpus)', () => {
       k: 3,
     });
     expect(idx.mode()).toBe('hybrid');
+    expect(idx.lastTrace()?.mode).toBe('hybrid'); // in-memory vectors: no rerank by default
     expect(hits[0].sourceId).toBe('EASA ORO.FTL.205');
+    expect(hits[0].header).toContain('ORO.FTL.205');
+    const disc = await idx.search({
+      query: "commander's discretion FDP extension",
+      collections: ['rules'],
+      k: 3,
+    });
+    expect(disc.map((h) => h.docId)).toContain('easa-ORO.FTL.205-f');
     const tow = await idx.search({ query: 'towbar shear pin pushback', collections: ['precedent'], k: 2 });
     expect(tow.map((h) => h.sourceId)).toContain('ASRS ACN 1577181');
   });

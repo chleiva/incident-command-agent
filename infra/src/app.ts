@@ -81,6 +81,11 @@ export function buildApp(opts: BuildAppOptions = {}): BuiltApp {
     table: data.table,
     tracesBucket: data.tracesBucket,
     knowledgeBucket: data.knowledgeBucket,
+    knowledgeVectors: {
+      bucketName: data.vectorBucketName,
+      indexName: data.vectorIndexName,
+      indexArn: data.vectorIndexArn,
+    },
     siteBucket: data.siteBucket,
     llmSecret: data.llmSecret,
     searchSecret: data.searchSecret,

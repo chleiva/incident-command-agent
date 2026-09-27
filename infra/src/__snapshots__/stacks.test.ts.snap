@@ -449,7 +449,40 @@ exports[`ApiStack > matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "FEATURE_WEB_SEARCH": "true",
-            "KB_EMBEDDINGS": "none",
+            "KB_EMBEDDINGS": "cohere",
+            "KB_EMBED_DIMS": "1536",
+            "KB_EMBED_MODEL": "eu.cohere.embed-v4:0",
+            "KB_EMBED_REGION": "eu-west-2",
+            "KB_RERANK": "on",
+            "KB_RERANK_MODEL": "cohere.rerank-v3-5:0",
+            "KB_RERANK_REGION": "eu-central-1",
+            "KB_VECTOR_BUCKET": {
+              "Fn::Select": [
+                1,
+                {
+                  "Fn::Split": [
+                    "/",
+                    {
+                      "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorBucketVectorBucketArnAA4297F4",
+                    },
+                  ],
+                },
+              ],
+            },
+            "KB_VECTOR_INDEX": {
+              "Fn::Select": [
+                3,
+                {
+                  "Fn::Split": [
+                    "/",
+                    {
+                      "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorIndexIndexArn8EEC6CFC",
+                    },
+                  ],
+                },
+              ],
+            },
+            "KB_VECTOR_STORE": "s3vectors",
             "KNOWLEDGE_BUCKET": {
               "Fn::ImportValue": "Ica-Data:ExportsOutputRefKnowledgeBucketD7C8B00D4F4CC779",
             },
@@ -686,6 +719,76 @@ exports[`ApiStack > matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "AuthorFninlinePolicyAddedToExecutionRole266D656EC",
+        "Roles": [
+          {
+            "Ref": "AuthorFnServiceRole46FC57E6",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AuthorFninlinePolicyAddedToExecutionRole3AD163DBC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "bedrock:InvokeModel",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:bedrock:eu-central-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-central-1::foundation-model/cohere.rerank-v3-5:0",
+                "arn:aws:bedrock:eu-north-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-south-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-south-2::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-west-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-west-2::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-west-3::foundation-model/cohere.embed-v4:0",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:bedrock:eu-west-2:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":inference-profile/eu.cohere.embed-v4:0",
+                    ],
+                  ],
+                },
+              ],
+              "Sid": "KnowledgeEmbedAndRerank",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AuthorFninlinePolicyAddedToExecutionRole3AD163DBC",
+        "Roles": [
+          {
+            "Ref": "AuthorFnServiceRole46FC57E6",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AuthorFninlinePolicyAddedToExecutionRole457EF27BB": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3vectors:GetVectors",
+                "s3vectors:QueryVectors",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorIndexIndexArn8EEC6CFC",
+              },
+              "Sid": "KnowledgeVectorQuery",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AuthorFninlinePolicyAddedToExecutionRole457EF27BB",
         "Roles": [
           {
             "Ref": "AuthorFnServiceRole46FC57E6",
@@ -2325,7 +2428,40 @@ exports[`ApiStack > matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "FEATURE_WEB_SEARCH": "true",
-            "KB_EMBEDDINGS": "none",
+            "KB_EMBEDDINGS": "cohere",
+            "KB_EMBED_DIMS": "1536",
+            "KB_EMBED_MODEL": "eu.cohere.embed-v4:0",
+            "KB_EMBED_REGION": "eu-west-2",
+            "KB_RERANK": "on",
+            "KB_RERANK_MODEL": "cohere.rerank-v3-5:0",
+            "KB_RERANK_REGION": "eu-central-1",
+            "KB_VECTOR_BUCKET": {
+              "Fn::Select": [
+                1,
+                {
+                  "Fn::Split": [
+                    "/",
+                    {
+                      "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorBucketVectorBucketArnAA4297F4",
+                    },
+                  ],
+                },
+              ],
+            },
+            "KB_VECTOR_INDEX": {
+              "Fn::Select": [
+                3,
+                {
+                  "Fn::Split": [
+                    "/",
+                    {
+                      "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorIndexIndexArn8EEC6CFC",
+                    },
+                  ],
+                },
+              ],
+            },
+            "KB_VECTOR_STORE": "s3vectors",
             "KNOWLEDGE_BUCKET": {
               "Fn::ImportValue": "Ica-Data:ExportsOutputRefKnowledgeBucketD7C8B00D4F4CC779",
             },
@@ -2577,6 +2713,76 @@ exports[`ApiStack > matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "RunFninlinePolicyAddedToExecutionRole2FB33A190",
+        "Roles": [
+          {
+            "Ref": "RunFnServiceRole295129E9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RunFninlinePolicyAddedToExecutionRole3E7F0F4B0": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "bedrock:InvokeModel",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:bedrock:eu-central-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-central-1::foundation-model/cohere.rerank-v3-5:0",
+                "arn:aws:bedrock:eu-north-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-south-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-south-2::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-west-1::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-west-2::foundation-model/cohere.embed-v4:0",
+                "arn:aws:bedrock:eu-west-3::foundation-model/cohere.embed-v4:0",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:bedrock:eu-west-2:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":inference-profile/eu.cohere.embed-v4:0",
+                    ],
+                  ],
+                },
+              ],
+              "Sid": "KnowledgeEmbedAndRerank",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RunFninlinePolicyAddedToExecutionRole3E7F0F4B0",
+        "Roles": [
+          {
+            "Ref": "RunFnServiceRole295129E9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RunFninlinePolicyAddedToExecutionRole41ABB33C6": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3vectors:GetVectors",
+                "s3vectors:QueryVectors",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorIndexIndexArn8EEC6CFC",
+              },
+              "Sid": "KnowledgeVectorQuery",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RunFninlinePolicyAddedToExecutionRole41ABB33C6",
         "Roles": [
           {
             "Ref": "RunFnServiceRole295129E9",
@@ -3473,6 +3679,28 @@ exports[`DataStack > matches the snapshot 1`] = `
         ],
       },
     },
+    "ExportsOutputFnGetAttKnowledgeVectorBucketVectorBucketArnAA4297F4": {
+      "Export": {
+        "Name": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorBucketVectorBucketArnAA4297F4",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "KnowledgeVectorBucket",
+          "VectorBucketArn",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttKnowledgeVectorIndexIndexArn8EEC6CFC": {
+      "Export": {
+        "Name": "Ica-Data:ExportsOutputFnGetAttKnowledgeVectorIndexIndexArn8EEC6CFC",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "KnowledgeVectorIndex",
+          "IndexArn",
+        ],
+      },
+    },
     "ExportsOutputFnGetAttSiteBucket397A1860ArnB404F589": {
       "Export": {
         "Name": "Ica-Data:ExportsOutputFnGetAttSiteBucket397A1860ArnB404F589",
@@ -3622,6 +3850,50 @@ exports[`DataStack > matches the snapshot 1`] = `
         "Ref": "TracesBucketEEE0B20C",
       },
     },
+    "VectorBucketName": {
+      "Value": {
+        "Fn::Select": [
+          1,
+          {
+            "Fn::Split": [
+              "/",
+              {
+                "Fn::GetAtt": [
+                  "KnowledgeVectorBucket",
+                  "VectorBucketArn",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    },
+    "VectorIndexArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "KnowledgeVectorIndex",
+          "IndexArn",
+        ],
+      },
+    },
+    "VectorIndexName": {
+      "Value": {
+        "Fn::Select": [
+          3,
+          {
+            "Fn::Split": [
+              "/",
+              {
+                "Fn::GetAtt": [
+                  "KnowledgeVectorIndex",
+                  "IndexArn",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    },
   },
   "Parameters": {
     "BootstrapVersion": {
@@ -3712,6 +3984,49 @@ exports[`DataStack > matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::S3::BucketPolicy",
+    },
+    "KnowledgeVectorBucket": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "EncryptionConfiguration": {
+          "SseType": "AES256",
+        },
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "incident-command-agent",
+          },
+        ],
+      },
+      "Type": "AWS::S3Vectors::VectorBucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "KnowledgeVectorIndex": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "DataType": "float32",
+        "Dimension": 1536,
+        "DistanceMetric": "cosine",
+        "MetadataConfiguration": {
+          "NonFilterableMetadataKeys": [
+            "hash",
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "incident-command-agent",
+          },
+        ],
+        "VectorBucketArn": {
+          "Fn::GetAtt": [
+            "KnowledgeVectorBucket",
+            "VectorBucketArn",
+          ],
+        },
+      },
+      "Type": "AWS::S3Vectors::Index",
+      "UpdateReplacePolicy": "Retain",
     },
     "LlmSecret60D8EC95": {
       "DeletionPolicy": "Delete",

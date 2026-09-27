@@ -10,44 +10,45 @@
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { chunkingReport } from '../src/chunking';
 import { createEmbedder } from '../src/embed';
 import { INDEX_FILES, indexText, parseChunks, serialiseIndex, type ChunkRecord } from '../src/format';
 import { RAW_DIR, writePrettyJson } from './lib';
 
 const FIXTURES = fileURLToPath(new URL('../fixtures/', import.meta.url));
-const CAA_DELAYS = 'caa-l-problems-and-rights-flight-delays-and-cancellations-delays';
-const CAA_CANCEL = 'caa-ems-and-rights-flight-delays-and-cancellations-cancellations';
 
 export const FIXTURE_CHUNK_IDS = [
-  // mel (FAA MMEL, public domain)
+  // mel (FAA MMEL, public domain): one chunk per item
   'mmel-49-10-01#1',
   'mmel-52-30-02#1',
   'mmel-52-30-04#1',
   'mmel-25-60-03#1',
   'mmel-32-47-01#1',
-  // rules (EASA, EU)
-  'easa-ORO.MLR.105#1',
-  'easa-ORO.FTL.205#1',
-  'easa-ORO.FTL.205#2',
-  'easa-ORO.FTL.225#1',
-  'easa-CAT.GEN.MPA.105#1',
-  // passenger rights (EU 261/2004; UK CAA)
+  // rules (EASA, EU): one chunk per IR sub-paragraph / AMC / GM element
+  'easa-ORO.MLR.105-a#1',
+  'easa-ORO.FTL.205-b#1',
+  'easa-ORO.FTL.205-d#1',
+  'easa-ORO.FTL.205-f#1',
+  'easa-AMC1-ORO.FTL.205-f#1',
+  'easa-ORO.FTL.225-b#1',
+  'easa-CAT.GEN.MPA.105-a#1',
+  // passenger rights (EU 261/2004 articles; UK CAA page sections)
   'eu261-art5#1',
   'eu261-art6#1',
   'eu261-art7#1',
   'eu261-art9#1',
   'eu261-art14#1',
-  `${CAA_DELAYS}#1`,
-  `${CAA_DELAYS}#2`,
-  `${CAA_CANCEL}#2`,
-  // procedures (UK CAA CAP 642; FAA AC; Airbus Safety First)
-  'caa-cap642#23',
-  'caa-cap642#27',
-  'faa-ac-5210-20a#36',
-  'airbus-lightning-strikes#1',
-  'airbus-preventing-inadvertent-slide-deployments#1',
-  'airbus-avoiding-fuel-spills-on-a320-family-aircraft#1',
-  // precedents (NASA ASRS, de-identified, public domain)
+  'caa-pr-delays-s002#1',
+  'caa-pr-delays-s005#1',
+  'caa-pr-cancellations-s003#1',
+  // procedures (UK CAA CAP 642; FAA AC; Airbus Safety First): heading-aware sections
+  'caa-cap642-s022#1',
+  'caa-cap642-s020#1',
+  'faa-ac-5210-20a-s017#1',
+  'airbus-lightning-strikes-s009#1',
+  'airbus-preventing-inadvertent-slide-deployments-s008#1',
+  'airbus-avoiding-fuel-spills-on-a320-family-aircraft-s002#1',
+  // precedents (NASA ASRS, de-identified, public domain): one report = one chunk
   'asrs-1577181#1',
   'asrs-1326952#1',
   'asrs-1795954#1',
@@ -69,7 +70,7 @@ async function main() {
   writeFileSync(FIXTURES + 'corpus.jsonl', chunks.map((c) => JSON.stringify(c)).join('\n') + '\n');
 
   const embedder = await createEmbedder({ provider: 'local', cacheDir: process.env.KB_MODEL_CACHE });
-  const vectors = await embedder!.embed(chunks.map((c) => indexText(c).slice(0, 2000)));
+  const vectors = await embedder!.embed(chunks.map((c) => indexText(c)));
   const bySource = new Map<
     string,
     { sourceId: string; collection: ChunkRecord['collection']; chunks: number; licence: string }
@@ -88,7 +89,15 @@ async function main() {
     chunks,
     {
       builtAt: '2026-09-26T00:00:00.000Z',
-      embeddings: { provider: 'local', model: embedder!.model, dim: embedder!.dim, quantisation: 'int8' },
+      embeddings: {
+        provider: 'local',
+        model: embedder!.model,
+        dim: embedder!.dim,
+        quantisation: 'int8',
+        store: 'memory',
+        vectorCount: vectors.length,
+      },
+      chunking: chunkingReport(chunks),
       sources: [...bySource.values()],
       notes: [
         'Fixture mini-corpus for tests and CI (no network). Rebuild with `npm run kb:fixtures -w @ica/kb`.',
@@ -108,6 +117,7 @@ async function main() {
     'APU inoperative dispatch',
     'flight duty period maximum sectors',
     'towbar shear pin pushback',
+    "commander's discretion FDP extension",
   ];
   const qv = await embedder!.embed(queries);
   await writePrettyJson(

@@ -77,6 +77,83 @@ export function estimateTokens(text: string): number {
   return Math.ceil(words / 0.75);
 }
 
+/** Abbreviations that end with a period but do not end a sentence (lower-cased, without the period). */
+const ABBREVIATIONS = new Set(
+  (
+    'no nos fig figs e.g i.e etc vs approx ref refs art arts para paras reg regs sect para mr mrs ms dr st ' +
+    'u.s u.k inc ltd co corp dept min max nr op cf al'
+  ).split(' '),
+);
+
+/**
+ * Sentence-safe split: breaks after `.`, `!`, `?` followed by whitespace and an upper-case letter, digit, quote or
+ * bracket, but never after a known abbreviation ("No.", "e.g."), a single capital initial ("J."), or inside a decimal
+ * ("3.5"). Line breaks are kept inside sentences. The concatenation of the pieces (joined by one space) reproduces the
+ * input modulo whitespace.
+ */
+export function splitSentences(text: string): string[] {
+  const out: string[] = [];
+  let start = 0;
+  const re = /[.!?]["')\]]?\s+(?=["'([]?[A-Z0-9•●])/g;
+  for (const m of text.matchAll(re)) {
+    const end = (m.index ?? 0) + m[0].trimEnd().length;
+    const before = text.slice(start, end);
+    const lastWord = (before.match(/(\S+)[.!?]["')\]]?$/)?.[1] ?? '').toLowerCase().replace(/^\(/, '');
+    if (m[0][0] === '.' && (ABBREVIATIONS.has(lastWord) || /^[a-z]$/i.test(lastWord))) continue;
+    const s = before.trim();
+    if (s) out.push(s);
+    start = (m.index ?? 0) + m[0].length;
+  }
+  const tail = text.slice(start).trim();
+  if (tail) out.push(tail);
+  return out;
+}
+
+/** Normalise a line for repeated-line detection: digits collapse to `#`, whitespace to one space. */
+function lineKey(line: string): string {
+  return line.trim().replace(/\d+/g, '#').replace(/\s+/g, ' ').toLowerCase();
+}
+
+/**
+ * Pre-clean paged text: drop running page headers/footers and repeated disclaimers, i.e. short lines (≤ `maxLen`
+ * chars) that recur — digits ignored — on at least `minShare` of the pages (and on ≥ 3 pages), plus any line matching
+ * `drop`. Returns the pages with those lines removed and whitespace normalised.
+ */
+export function stripRepeatedLines(
+  pages: string[],
+  opts: { minShare?: number; maxLen?: number; drop?: RegExp[] } = {},
+): string[] {
+  const minShare = opts.minShare ?? 0.3;
+  const maxLen = opts.maxLen ?? 140;
+  const counts = new Map<string, number>();
+  for (const p of pages) {
+    const seen = new Set<string>();
+    for (const l of p.split('\n')) {
+      if (!l.trim() || l.trim().length > maxLen) continue;
+      const k = lineKey(l);
+      if (!seen.has(k)) {
+        seen.add(k);
+        counts.set(k, (counts.get(k) ?? 0) + 1);
+      }
+    }
+  }
+  const threshold = Math.max(3, Math.ceil(pages.length * minShare));
+  const repeated = new Set([...counts].filter(([, n]) => n >= threshold).map(([k]) => k));
+  return pages.map((p) =>
+    cleanText(
+      p
+        .split('\n')
+        .filter((l) => {
+          const t = l.trim();
+          if (!t) return true;
+          if (t.length <= maxLen && repeated.has(lineKey(t))) return false;
+          return !(opts.drop ?? []).some((re) => re.test(t));
+        })
+        .join('\n'),
+    ),
+  );
+}
+
 /**
  * Split text into chunks of about `targetTokens` tokens on paragraph, then sentence, boundaries. Never returns an
  * empty chunk. Deterministic.

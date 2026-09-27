@@ -1,13 +1,47 @@
 {
-  "version": 1,
-  "chunkCount": 32,
-  "bm25": { "k1": 1.2, "b": 0.75 },
+  "version": 2,
+  "chunkCount": 34,
+  "bm25": { "k1": 1.2, "b": 0.75, "encoding": "varint-delta-tf" },
   "builtAt": "2026-09-26T00:00:00.000Z",
   "embeddings": {
     "provider": "local",
     "model": "Xenova/all-MiniLM-L6-v2",
     "dim": 384,
-    "quantisation": "int8"
+    "quantisation": "int8",
+    "store": "memory",
+    "vectorCount": 34
+  },
+  "chunking": {
+    "mel": {
+      "chunks": 5,
+      "docs": 5,
+      "splitDocs": 0,
+      "tokens": { "total": 900, "mean": 180, "p10": 88, "p50": 195, "p90": 258, "max": 258 }
+    },
+    "passenger_rights": {
+      "chunks": 8,
+      "docs": 8,
+      "splitDocs": 0,
+      "tokens": { "total": 2190, "mean": 274, "p10": 148, "p50": 254, "p90": 447, "max": 447 }
+    },
+    "precedent": {
+      "chunks": 8,
+      "docs": 8,
+      "splitDocs": 0,
+      "tokens": { "total": 4098, "mean": 512, "p10": 151, "p50": 518, "p90": 991, "max": 991 }
+    },
+    "procedure": {
+      "chunks": 6,
+      "docs": 6,
+      "splitDocs": 0,
+      "tokens": { "total": 2649, "mean": 442, "p10": 59, "p50": 519, "p90": 596, "max": 596 }
+    },
+    "rules": {
+      "chunks": 7,
+      "docs": 7,
+      "splitDocs": 0,
+      "tokens": { "total": 2537, "mean": 362, "p10": 79, "p50": 339, "p90": 784, "max": 784 }
+    }
   },
   "sources": [
     {
@@ -49,7 +83,13 @@
     {
       "sourceId": "EASA ORO.FTL.205",
       "collection": "rules",
-      "chunks": 2,
+      "chunks": 3,
+      "licence": "© European Union, 1998-2026 (EASA Easy Access Rules; re-use with attribution per EUR-Lex notice)"
+    },
+    {
+      "sourceId": "EASA AMC1 ORO.FTL.205(f)",
+      "collection": "rules",
+      "chunks": 1,
       "licence": "© European Union, 1998-2026 (EASA Easy Access Rules; re-use with attribution per EUR-Lex notice)"
     },
     {
@@ -187,5 +227,44 @@
   ],
   "notes": [
     "Fixture mini-corpus for tests and CI (no network). Rebuild with `npm run kb:fixtures -w @ica/kb`."
-  ]
+  ],
+  "chunkDefaults": {
+    "mmel": {
+      "url": "https://www.faa.gov/aircraft/draft_docs/mmel/MMEL_A-320_Rev_32_Draft.pdf",
+      "licence": "Public domain (US Government work, FAA MMEL); quoted verbatim",
+      "jurisdiction": "US",
+      "collection": "mel"
+    },
+    "easa": {
+      "url": "https://www.easa.europa.eu/en/document-library/easy-access-rules/easy-access-rules-air-operations",
+      "licence": "© European Union, 1998-2026 (EASA Easy Access Rules; re-use with attribution per EUR-Lex notice)",
+      "jurisdiction": "EU",
+      "collection": "rules",
+      "date": "2026-03"
+    },
+    "eu261": {
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32004R0261",
+      "licence": "© European Union, EUR-Lex; re-use authorised under Commission Decision 2011/833/EU",
+      "jurisdiction": "EU",
+      "collection": "passenger_rights",
+      "date": "2004-02-11"
+    },
+    "caa": { "jurisdiction": "UK" },
+    "airbus": {
+      "licence": "Airbus Safety First: articles may be reprinted without permission with acknowledgement to Airbus",
+      "collection": "procedure",
+      "meta": {
+        "attribution": "Reprinted with acknowledgement to Airbus (Safety First magazine, safetyfirst.airbus.com)."
+      }
+    },
+    "asrs": {
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies",
+      "jurisdiction": "US",
+      "collection": "precedent",
+      "meta": {
+        "disclaimer": "ASRS reports are submitted voluntarily and are not verified by NASA; they may be incomplete or inaccurate and must not be used to infer the frequency of any event."
+      }
+    }
+  }
 }

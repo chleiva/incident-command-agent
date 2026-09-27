@@ -57,20 +57,66 @@ export const HTTP_BURST_LIMIT = 40;
 export const LOCAL_EMBEDDER_PKG = '@huggingface/transformers';
 export const LOCAL_EMBEDDER_EXTERNALS = [LOCAL_EMBEDDER_PKG, 'onnxruntime-node', 'onnxruntime-web', 'sharp'];
 
+/** Cohere Embed v4 EU cross-region inference profile (the bare model id rejects on-demand calls). */
+export const COHERE_EMBED_PROFILE = 'eu.cohere.embed-v4:0';
+export const COHERE_EMBED_MODEL = 'cohere.embed-v4:0';
 /**
- * Retrieval mode for the Run/author Lambdas. Unless the local embedder is installed as a node module
- * (`-c runNodeModules=@huggingface/transformers`, with the model files at `KB_MODEL_CACHE`), a `local`-embedded
- * index is searched BM25-only in Lambda (`KB_EMBEDDINGS=none`); `openai`/`bedrock` query embedders are kept.
+ * Regions the EU embed profile routes to (`aws bedrock get-inference-profile --inference-profile-identifier
+ * eu.cohere.embed-v4:0`, 2026-09-27). Invoking a profile needs InvokeModel on the profile AND on the model in each.
+ */
+export const COHERE_EMBED_PROFILE_REGIONS = [
+  'eu-north-1',
+  'eu-west-3',
+  'eu-south-1',
+  'eu-west-2',
+  'eu-south-2',
+  'eu-west-1',
+  'eu-central-1',
+];
+export const COHERE_RERANK_MODEL = 'cohere.rerank-v3-5:0';
+export const KB_EMBED_DIMS = 1536;
+
+export interface KnowledgeVectorEnv {
+  bucket: string;
+  index: string;
+  /** Region of the embed inference profile (the stack region). */
+  region: string;
+  rerankRegion: string;
+}
+
+/**
+ * Knowledge retrieval env for the Run/author Lambdas (read by `services/run/knowledge`):
+ *   hybrid  BM25 + Cohere Embed v4 (`search_query`) → S3 Vectors → RRF → docId collapse → Cohere Rerank 3.5
+ *   bm25    BM25 only (no Bedrock / S3 Vectors calls)
+ *   local   MiniLM in the Lambda (only with `-c runNodeModules=@huggingface/transformers`; otherwise BM25)
  */
 export function runtimeEmbeddingEnv(
-  lambdaEnv: Record<string, string>,
+  mode: 'hybrid' | 'bm25' | 'local',
   runNodeModules: string[],
+  vectors?: KnowledgeVectorEnv,
 ): Record<string, string> {
-  const kb = (lambdaEnv.KB_EMBEDDINGS ?? 'local').toLowerCase();
-  if (kb !== 'local') return { KB_EMBEDDINGS: kb };
-  if (runNodeModules.includes(LOCAL_EMBEDDER_PKG))
-    return { KB_EMBEDDINGS: 'local', HF_HOME: '/tmp/hf', KB_MODEL_CACHE: '/tmp/hf' };
-  return { KB_EMBEDDINGS: 'none' };
+  if (mode === 'hybrid' && vectors)
+    return {
+      KB_EMBEDDINGS: 'cohere',
+      KB_VECTOR_STORE: 's3vectors',
+      KB_VECTOR_BUCKET: vectors.bucket,
+      KB_VECTOR_INDEX: vectors.index,
+      KB_EMBED_MODEL: COHERE_EMBED_PROFILE,
+      KB_EMBED_DIMS: String(KB_EMBED_DIMS),
+      KB_EMBED_REGION: vectors.region,
+      KB_RERANK: 'on',
+      KB_RERANK_MODEL: COHERE_RERANK_MODEL,
+      KB_RERANK_REGION: vectors.rerankRegion,
+    };
+  if (mode === 'local' && runNodeModules.includes(LOCAL_EMBEDDER_PKG))
+    return {
+      KB_EMBEDDINGS: 'local',
+      KB_VECTOR_STORE: 'memory',
+      KB_RERANK: 'off',
+      HF_HOME: '/tmp/hf',
+      KB_MODEL_CACHE: '/tmp/hf',
+    };
+  return { KB_EMBEDDINGS: 'none', KB_VECTOR_STORE: 'none', KB_RERANK: 'off' };
 }
 
 export interface ApiStackProps extends StackProps {
@@ -78,6 +124,8 @@ export interface ApiStackProps extends StackProps {
   table: ITable;
   tracesBucket: IBucket;
   knowledgeBucket: IBucket;
+  /** S3 Vectors bucket/index names + index ARN (DataStack). */
+  knowledgeVectors: { bucketName: string; indexName: string; indexArn: string };
   siteBucket: IBucket;
   llmSecret: ISecret;
   searchSecret?: ISecret;
@@ -160,7 +208,12 @@ export class ApiStack extends Stack {
       KNOWLEDGE_BUCKET: knowledgeBucket.bucketName,
       LLM_SECRET_ARN: props.llmSecret.secretArn,
       ...(props.searchSecret ? { SEARCH_SECRET_ARN: props.searchSecret.secretArn } : {}),
-      ...runtimeEmbeddingEnv(env, config.runNodeModules),
+      ...runtimeEmbeddingEnv(config.knowledge, config.runNodeModules, {
+        bucket: props.knowledgeVectors.bucketName,
+        index: props.knowledgeVectors.indexName,
+        region: this.region,
+        rerankRegion: config.rerankRegion,
+      }),
     };
     // The local embedder (transformers.js + onnxruntime-node native binding) cannot run from an esbuild bundle, so it
     // is left out unless explicitly installed with `-c runNodeModules=@huggingface/transformers` (docs/deploy.md).
@@ -265,6 +318,30 @@ export class ApiStack extends Stack {
       f.addToRolePolicy(s3(['s3:GetObject'], [knowledgeBucket.arnForObjects('*')]));
       f.addToRolePolicy(s3(['s3:ListBucket'], [knowledgeBucket.bucketArn]));
       f.addToRolePolicy(s3(['s3:GetObject', 's3:PutObject'], [tracesBucket.arnForObjects('traces/*')]));
+      if (config.knowledge === 'hybrid') {
+        // Query embeddings: the EU inference profile + the model in every region it routes to; rerank in Frankfurt.
+        f.addToRolePolicy(
+          new PolicyStatement({
+            sid: 'KnowledgeEmbedAndRerank',
+            actions: ['bedrock:InvokeModel'],
+            resources: [
+              `arn:${this.partition}:bedrock:${this.region}:${this.account}:inference-profile/${COHERE_EMBED_PROFILE}`,
+              ...COHERE_EMBED_PROFILE_REGIONS.map(
+                (r) => `arn:${this.partition}:bedrock:${r}::foundation-model/${COHERE_EMBED_MODEL}`,
+              ),
+              `arn:${this.partition}:bedrock:${config.rerankRegion}::foundation-model/${COHERE_RERANK_MODEL}`,
+            ],
+          }),
+        );
+        // QueryVectors with a metadata filter also needs GetVectors.
+        f.addToRolePolicy(
+          new PolicyStatement({
+            sid: 'KnowledgeVectorQuery',
+            actions: ['s3vectors:QueryVectors', 's3vectors:GetVectors'],
+            resources: [props.knowledgeVectors.indexArn],
+          }),
+        );
+      }
       if (config.bedrock) {
         f.addToRolePolicy(
           new PolicyStatement({

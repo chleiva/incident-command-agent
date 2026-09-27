@@ -18,6 +18,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1141.0",
     "@huggingface/transformers": "^4.3.0",
     "@ica/schema": "*",
     "cheerio": "^1.2.0",

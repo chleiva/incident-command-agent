@@ -60,8 +60,16 @@ export interface KnowledgeHit {
   jurisdiction?: Jurisdiction;
   date?: string;
   collection: KnowledgeCollection;
+  /** Verbatim chunk text (quotes are substrings of it). */
   text: string;
+  /** Fused retrieval score (reciprocal rank fusion of BM25 and vector ranks). */
   score: number;
+  /** The logical document (MEL item, rule sub-paragraph, article, report); hits are collapsed per docId. */
+  docId?: string;
+  /** Structural context header (`source › section path › jurisdiction › date` …); never quoted. */
+  header?: string;
+  /** Cohere Rerank relevance (0–1) when the reranker ordered this hit. */
+  rerankScore?: number;
 }
 
 export interface KnowledgeQuery {

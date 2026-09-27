@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * FAA A-320 MMEL (public domain, US Government work) as the MEL stand-in. One chunk per MMEL item: number, title,
- * repair category and the remarks/exceptions quoted verbatim. Plus the preamble/definitions pages.
+ * FAA A-320 MMEL (public domain, US Government work) as the MEL stand-in. One chunk per MMEL item (never split
+ * unless oversized): item number, title, repair category + interval, dispatch conditions and remarks/(M)(O) quoted
+ * verbatim, with a structural header. Plus the definitions/preamble, policy record and acronym pages as sections.
  */
+import { melItemChunks, sectionChunks, type Section } from '../../src/chunking';
 import type { ChunkRecord } from '../../src/format';
-import { cleanText } from '../../src/text';
+import { cleanText, stripRepeatedLines } from '../../src/text';
 import { download } from '../lib';
-import { makeChunks, pdfPages, type SourceStep } from './types';
+import { pdfPages, type SourceStep } from './types';
 
 export const MMEL_URL = 'https://www.faa.gov/aircraft/draft_docs/mmel/MMEL_A-320_Rev_32_Draft.pdf';
 const LICENCE = 'Public domain (US Government work, FAA MMEL); quoted verbatim';
@@ -71,12 +73,8 @@ export const mmelStep: SourceStep = {
           .replace(/ (?=\*{3})/g, '\n'),
       );
       if (!body) continue;
-      const cats = [
-        ...new Set([...body.matchAll(/(?:^|\n|\)\s)([A-D]) (?:\d+|-) (?:\d+|-)\b/g)].map((m) => m[1])),
-      ];
-      const text = `MMEL item ${num} ${item.title}\nRepair category: ${cats.join(', ') || 'see remarks'}\n\n${body}`;
       out.push(
-        ...makeChunks(
+        ...melItemChunks(
           {
             sourceId: `FAA MMEL A-320 ${num}`,
             url: MMEL_URL,
@@ -85,25 +83,39 @@ export const mmelStep: SourceStep = {
             jurisdiction: 'US',
             collection: 'mel',
             licence: LICENCE,
-            meta: { item: num, category: cats.join(',') },
           },
-          text,
-          { idPrefix: `mmel-${num}`, maxChunks: 4 },
+          { itemNumber: num, title: item.title, chapter: item.chapter, body },
         ),
       );
     }
+    // Preamble: keep the definitions/preamble, the policy application record and the acronyms (grouped by page
+    // title); skip the cover, contents, revision log and highlights of change.
+    const KEEP = /DEFINITIONS AND PREAMBLE|POLICY APPLICATION RECORD|LIST OF ACRONYMS/;
+    const cleaned = stripRepeatedLines(preamble, { minShare: 0.5 });
+    const sections: Section[] = [];
+    preamble.forEach((raw, i) => {
+      const title = raw.match(/^Airbus A320 (.+)$/m)?.[1]?.trim();
+      if (!title || !KEEP.test(title)) return;
+      const text = cleaned[i]
+        .replace(/^.*Airbus A320 .+$/m, '')
+        .replace(/^AIRCRAFT:$/m, '')
+        .trim();
+      const last = sections[sections.length - 1];
+      if (last && last.path[0] === title) last.text += `\n\n${text}`;
+      else sections.push({ path: [title], text });
+    });
     out.push(
-      ...makeChunks(
+      ...sectionChunks(
         {
           sourceId: 'FAA MMEL A-320 preamble',
           url: MMEL_URL,
-          title: 'A320 MMEL preamble, definitions and policy letters index',
+          title: 'A320 MMEL preamble, definitions and policy record',
           jurisdiction: 'US',
           collection: 'mel',
           licence: LICENCE,
         },
-        preamble.join('\n\n'),
-        { idPrefix: 'mmel-preamble', maxChunks: 40 },
+        sections,
+        { source: 'FAA MMEL A-320', docPrefix: 'mmel-preamble', maxChunks: 40 },
       ),
     );
     return out;

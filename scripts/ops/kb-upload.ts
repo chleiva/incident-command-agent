@@ -3,13 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * `npm run kb:upload [-- --delete] [--dry-run]`: syncs `data/index/` to `s3://<KnowledgeBucket>/index/` (where the
- * Run and author Lambdas load it: `loadKnowledgeIndex({source:'s3', path:'s3://<bucket>/index'})`) and, if present,
- * `data/models/` (local embedding model files) to `models/`. Unchanged files (same MD5/ETag) are skipped.
+ * `npm run kb:upload [-- --dry-run] [--keep-stale] [--delete]`
+ *
+ * 1. Vectors (index built with `KB_EMBEDDINGS=cohere`): `data/index/vectors/` → the Amazon S3 Vectors index from the
+ *    DataStack outputs (`VectorBucketName`, `VectorIndexName`), idempotently: only new/changed vectors are put (content
+ *    hash in metadata), stale keys are deleted (unless `--keep-stale`). The index dimension is checked first.
+ * 2. Files: the Lambda-loaded index files in `data/index/` (not `vectors/`) → `s3://<KnowledgeBucket>/index/` (where
+ *    the Run and author Lambdas load it) and, if present, `data/models/` → `models/`. Unchanged files (same MD5/ETag)
+ *    are skipped; `--delete` removes stale objects.
+ *
+ * Refuses an index built with `local`/`openai` embeddings: the Lambdas query with Cohere Embed v4 and would reject it
+ * (a BM25-only index, `KB_EMBEDDINGS=none`, is accepted with a warning).
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { S3VectorsClient } from '@aws-sdk/client-s3vectors';
+import type { IndexManifest } from '@ica/kb';
 import {
   REPO_ROOT,
   awsRegion,
@@ -22,6 +32,13 @@ import {
   requireOutput,
   stackName,
 } from './lib';
+import {
+  assertIndexMatches,
+  indexFilesToSync,
+  readLocalVectors,
+  syncVectors,
+  type VectorsClientLike,
+} from './vectors-sync';
 
 async function listRemote(s3: S3Client, bucket: string, prefix: string) {
   const out: { key: string; etag?: string }[] = [];
@@ -36,8 +53,14 @@ async function listRemote(s3: S3Client, bucket: string, prefix: string) {
   return out;
 }
 
-async function sync(s3: S3Client, bucket: string, dir: string, prefix: string, del: boolean, dry: boolean) {
-  const local = listLocalFiles(dir, prefix);
+async function sync(
+  s3: S3Client,
+  bucket: string,
+  local: ReturnType<typeof listLocalFiles>,
+  prefix: string,
+  del: boolean,
+  dry: boolean,
+) {
   const plan = planSync(local, await listRemote(s3, bucket, prefix));
   const byKey = new Map(local.map((l) => [l.key, l]));
   console.log(
@@ -66,18 +89,65 @@ async function sync(s3: S3Client, bucket: string, dir: string, prefix: string, d
 
 async function main() {
   loadDotEnv();
-  const indexDir = join(REPO_ROOT, 'data/index');
-  if (!existsSync(indexDir)) fail('data/index/ not found: run `npm run kb:build` first');
+  const indexDir = join(REPO_ROOT, 'data/index/');
+  if (!existsSync(join(indexDir, 'manifest.json')))
+    fail('data/index/ not found: run `npm run kb:build` first');
+  const manifest = JSON.parse(readFileSync(join(indexDir, 'manifest.json'), 'utf8')) as IndexManifest;
+  const e = manifest.embeddings;
+  if (e.provider === 'local' || e.provider === 'openai')
+    fail(
+      `data/index/ was built with KB_EMBEDDINGS=${e.provider}; the Lambdas query Cohere Embed v4 (S3 Vectors). ` +
+        'Rebuild with `KB_EMBEDDINGS=cohere npm run kb:build` (or KB_EMBEDDINGS=none for BM25 only).',
+    );
   const region = awsRegion();
   const stack = stackName('Data');
-  const bucket = requireOutput(await getStackOutputs(stack, { region }), 'KnowledgeBucketName', stack);
-  const s3 = new S3Client({ region });
-  const del = process.argv.includes('--delete');
+  const outputs = await getStackOutputs(stack, { region });
+  const bucket = requireOutput(outputs, 'KnowledgeBucketName', stack);
   const dry = process.argv.includes('--dry-run');
-  console.log(`Syncing the knowledge index to s3://${bucket}/`);
-  await sync(s3, bucket, indexDir, 'index/', del, dry);
+
+  if (e.store === 's3vectors') {
+    const vectorBucket = requireOutput(outputs, 'VectorBucketName', stack);
+    const vectorIndex = requireOutput(outputs, 'VectorIndexName', stack);
+    const client = new S3VectorsClient({ region }) as unknown as VectorsClientLike;
+    await assertIndexMatches(client, vectorBucket, vectorIndex, manifest);
+    const vectors = readLocalVectors(indexDir, manifest);
+    console.log(
+      `Syncing ${vectors.length} vectors (${e.model}, ${e.dim} dims) to ${vectorBucket}/${vectorIndex}`,
+    );
+    const res = await syncVectors(client, {
+      bucket: vectorBucket,
+      index: vectorIndex,
+      vectors,
+      dryRun: dry,
+      deleteStale: !process.argv.includes('--keep-stale'),
+      log: (m) => console.log(m),
+    });
+    console.log(
+      `  vectors: put ${res.put.length} (${res.putCalls} calls), unchanged ${res.unchanged.length}, ` +
+        `deleted ${dry ? 0 : res.remove.length}`,
+    );
+  } else console.warn('! BM25-only index (no vectors): the Lambdas will search BM25 only.');
+
+  const s3 = new S3Client({ region });
+  console.log(`Syncing the knowledge index files to s3://${bucket}/index/`);
+  await sync(
+    s3,
+    bucket,
+    indexFilesToSync(indexDir, 'index/'),
+    'index/',
+    process.argv.includes('--delete'),
+    dry,
+  );
   const models = join(REPO_ROOT, 'data/models');
-  if (existsSync(models)) await sync(s3, bucket, models, 'models/', del, dry);
+  if (existsSync(models))
+    await sync(
+      s3,
+      bucket,
+      listLocalFiles(models, 'models/'),
+      'models/',
+      process.argv.includes('--delete'),
+      dry,
+    );
   console.log('✔ Knowledge index uploaded (new Run Lambda containers load it at cold start).');
 }
 

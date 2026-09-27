@@ -11,7 +11,8 @@ import { readFileSync } from 'node:fs';
 import { parse } from 'csv-parse/sync';
 import type { ChunkRecord } from '../../src/format';
 import { USER_AGENT, download } from '../lib';
-import { makeChunks, type SourceStep } from './types';
+import { reportChunks } from '../../src/chunking';
+import type { SourceStep } from './types';
 
 const PAGE = 'https://www.asias.faa.gov/apex/f?p=100:189:::NO';
 const CAP = 500;
@@ -53,7 +54,7 @@ export const aidsStep: SourceStep = {
       if (!/tug|tow|push|gate|ramp|catering|ground/i.test(narrative)) continue;
       const id = r['AIDS Report Number'] || r['c5'] || String(out.length + 1);
       out.push(
-        ...makeChunks(
+        ...reportChunks(
           {
             sourceId: `FAA AIDS ${id}`,
             url: 'https://www.asias.faa.gov/',
@@ -62,8 +63,8 @@ export const aidsStep: SourceStep = {
             collection: 'precedent',
             licence: aidsStep.licence,
           },
-          narrative,
-          { idPrefix: `aids-${id}`, maxChunks: 1 },
+          { docId: `aids-${id}`, reportId: `FAA AIDS ${id}`, text: narrative },
+          { maxParts: 1 },
         ),
       );
     }

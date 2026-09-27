@@ -6,7 +6,7 @@ This guide takes a clean AWS account to a working, single-user deployment in abo
 
 | Stack | Region | Contents |
 |---|---|---|
-| `Ica-Data` | your region (default `eu-west-2`) | DynamoDB table (single table, stream, TTL, PITR, `GSI1`), S3 buckets `site`, `knowledge`, `traces` (90-day expiry), Secrets Manager placeholders `ica/llm` and `ica/search` |
+| `Ica-Data` | your region (default `eu-west-2`) | DynamoDB table (single table, stream, TTL, PITR, `GSI1`), S3 buckets `site`, `knowledge`, `traces` (90-day expiry), the Amazon S3 Vectors bucket + index for the knowledge embeddings (1536 dims, cosine), Secrets Manager placeholders `ica/llm` and `ica/search` |
 | `Ica-WebWaf` | `us-east-1` | The CloudFront WAF WebACL (CloudFront-scoped WAF must live in us-east-1). Its ARN reaches `Ica-Web` through a CDK cross-region reference |
 | `Ica-Web` | your region | CloudFront distribution (Origin Access Control, SPA fallback, strict CSP/HSTS headers, WAF), deployment of `apps/web/dist` |
 | `Ica-Api` | your region | Cognito user pool, hosted UI and PKCE app client, HTTP API (JWT authorizer on every route, 20 rps / burst 40), WebSocket API, the Lambdas (`api`, `author`, `run`, `wsConnect`, `wsDisconnect`, `wsDefault`, `fanout`), DynamoDB stream fan-out, AWS Budgets (USD 20/month), CloudWatch alarms, and the SPA's `config.json` |
@@ -65,12 +65,24 @@ The ApiStack sets these on the Run and author Lambdas; `services/run/handler.ts`
 | `KNOWLEDGE_BUCKET` | knowledge bucket; the index is loaded from `s3://$KNOWLEDGE_BUCKET/index` (where `npm run kb:upload` puts it), once per container | knowledge loader |
 | `LLM_SECRET_ARN` | `ica/llm` JSON `{ANTHROPIC_API_KEY, OPENAI_API_KEY}` | LLM adapters (SecretStore) |
 | `SEARCH_SECRET_ARN` | `ica/search` JSON `{TAVILY_API_KEY, BRAVE_API_KEY}` | copied into `process.env` at cold start when `FEATURE_WEB_SEARCH=true` (for `web_search`) |
-| `KB_EMBEDDINGS` | `none` by default in Lambda (see below) | knowledge loader |
+| `KB_EMBEDDINGS`, `KB_VECTOR_STORE`, `KB_VECTOR_BUCKET`, `KB_VECTOR_INDEX`, `KB_EMBED_MODEL`, `KB_EMBED_DIMS`, `KB_EMBED_REGION`, `KB_RERANK`, `KB_RERANK_MODEL`, `KB_RERANK_REGION` | hybrid retrieval backends (see [Knowledge retrieval](#knowledge-retrieval)); `cohere`, `s3vectors`, the DataStack vector bucket/index, `eu.cohere.embed-v4:0`, `1536`, the stack region, `on`, `cohere.rerank-v3-5:0`, `eu-central-1` | knowledge loader |
 
-**Retrieval in Lambda is BM25-only by default.** The local query embedder (transformers.js + `onnxruntime-node`) needs a native binding that cannot be loaded from an esbuild bundle, so `@huggingface/transformers`, `onnxruntime-node`, `onnxruntime-web` and `sharp` are left out of the Run/author bundles and the Lambdas get `KB_EMBEDDINGS=none`. The index built with `KB_EMBEDDINGS=local` still works: its BM25 postings are used and its vectors are ignored. Hybrid retrieval stays available locally (`npm run dev`, evals). Options if you need it in AWS:
+### Knowledge retrieval
 
-- `KB_EMBEDDINGS=openai` (or `bedrock`) for both `kb:build` and the Lambdas: query embeddings go over HTTPS (the OpenAI key is read from `ica/llm` and copied into `process.env`).
-- Experimental: `npx cdk deploy -c runNodeModules=@huggingface/transformers …` installs the package (with its linux-arm64 native binaries) next to the bundle instead; the Lambdas then get `KB_EMBEDDINGS=local` and `KB_MODEL_CACHE=HF_HOME=/tmp/hf`, and the MiniLM model is downloaded from the Hugging Face hub into `/tmp` at cold start. This needs Docker or a matching platform for the install and adds ~100 MB to the package; check the unzipped 250 MB limit.
+The Run and author Lambdas search the knowledge base with a **hybrid pipeline**: BM25 over the chunk files (in memory) **plus** a Cohere Embed v4 query embedding (`search_query`, cached per container) → Amazon S3 Vectors `QueryVectors` (top 50, metadata filter on collection and jurisdiction) → reciprocal rank fusion → collapse of several chunks of one document (`docId`) → **Cohere Rerank 3.5** over the top 30 → *k* hits with verbatim citation quotes. Any Bedrock, S3 Vectors or rerank error or timeout (embed ≈1.5 s, vector query ≈1.5 s, rerank ≈2 s) falls back to the previous stage (fused without rerank → BM25 only); it is logged (`"component":"knowledge","msg":"knowledge search degraded"`) and never fails a run.
+
+| Piece | Where | Notes |
+|---|---|---|
+| Embeddings | Amazon Bedrock, **Cohere Embed v4** via the EU cross-region inference profile `eu.cohere.embed-v4:0`, 1536 dims, float | The bare `cohere.embed-v4:0` rejects on-demand calls. The profile routes **within EU regions only** (eu-north-1, eu-west-3, eu-south-1, eu-west-2, eu-south-2, eu-west-1, eu-central-1) |
+| Vector store | **Amazon S3 Vectors** in the stack region (DataStack, CDK L1 `AWS::S3Vectors::VectorBucket` / `AWS::S3Vectors::Index`) | Key = `chunkId`; filterable metadata `collection`, `jurisdiction` (`ANY` if none), `sourceId`, `docId`, MEL `itemNumber`/`ataChapter`, precedent `phase`/`aircraftType` (≪ the 2 KB filterable limit); non-filterable `hash` (kb:upload idempotency). Text stays in the knowledge bucket |
+| Rerank | Amazon Bedrock **Cohere Rerank 3.5** (`cohere.rerank-v3-5:0`) in **eu-central-1** (Frankfurt) | Not offered in eu-west-2. The query and ≤ 30 candidate chunks are sent to Frankfurt (EU). `-c rerankRegion=…` to change |
+| IAM | Run + author roles | `bedrock:InvokeModel` on the inference-profile ARN and on `cohere.embed-v4:0` in the 7 routed regions, and on `cohere.rerank-v3-5:0` in eu-central-1; `s3vectors:QueryVectors` + `s3vectors:GetVectors` (needed for filtered queries) on the index ARN. No wildcards |
+
+Modes (`-c knowledge=…`): `hybrid` (default), `bm25` (no Bedrock/S3 Vectors calls; `KB_EMBEDDINGS=none`), `local` (MiniLM inside the Lambda, only with `-c runNodeModules=@huggingface/transformers`, which installs the package with its linux-arm64 native binaries next to the bundle; needs Docker or a matching platform and adds ~100 MB).
+
+**The index must be built with Cohere for the default deploy:** `KB_EMBEDDINGS=cohere npm run kb:build` (needs AWS credentials with Bedrock access in eu-west-2; ≈ 9.3M input tokens ≈ **USD 1.1 once**; resumable, cached by chunk-text hash in `data/raw/emb-cache-*.jsonl`, so reruns only pay for changed chunks). It writes the Lambda-loaded files (chunks + BM25, < 50 MB, no vectors) and `data/index/vectors/` for `kb:upload`. The loader **refuses** an index whose embedding model/dimension differs from `KB_EMBED_MODEL`/`KB_EMBED_DIMS` (`KnowledgeIndexMismatchError`), and `kb:upload` refuses a `local`/`openai` index. A BM25-only index (`KB_EMBEDDINGS=none`) is accepted and searched BM25-only.
+
+Local development keeps working without AWS: the default `KB_EMBEDDINGS=local` (MiniLM, free) index is searched in memory (int8), `none` is BM25 only, and the committed fixture index needs no network. A Cohere-built `data/index/` used locally (`npm run dev`) searches its `vectors/` files in memory when no `KB_VECTOR_BUCKET` is set, embedding queries through Bedrock if AWS credentials are present (otherwise BM25 only); rerank is off locally unless `KB_RERANK=on`.
 
 `npm run synth` makes no AWS calls: it unsets the AWS credential variables and only bundles and synthesises.
 
@@ -80,7 +92,7 @@ The brand pack comes from `config/brand.local.json` if present (git-ignored), el
 
 ```bash
 npm install
-npm run kb:build            # downloads open data and builds data/index (~10 min; optional but recommended)
+KB_EMBEDDINGS=cohere npm run kb:build   # open data → data/index (~30 min; one-off ≈ USD 1.1 of Cohere embeddings)
 npm run deploy              # see below
 npm run user:create -- you@example.org
 npm run secrets:set
@@ -92,7 +104,7 @@ npm run secrets:set
 2. Builds the web app (`npm run build -w @ica/web` → `apps/web/dist`). Without a build, a placeholder page is deployed.
 3. `npx cdk bootstrap` for every environment the app uses: your region **and us-east-1** (skip with `-- --skip-bootstrap` once done).
 4. `npx cdk deploy --all --require-approval never` (outputs saved to `.local/cdk-outputs.json`).
-5. `npm run kb:upload` if `data/index/` exists.
+5. `npm run kb:upload` if `data/index/` exists (vectors to S3 Vectors, chunk/BM25 files to the knowledge bucket).
 6. Prints the SiteUrl and the next steps.
 
 The equivalent manual sequence (spec §12) is:
@@ -113,7 +125,7 @@ Then confirm the SNS subscription e-mail ("AWS Notification - Subscription Confi
 |---|---|
 | `npm run user:create -- you@example.org` | `AdminCreateUser` in the deployed pool (from the `Ica-Api` outputs), e-mail verified, invitation suppressed; prints a temporary password |
 | `npm run secrets:set [-- --search]` | Hidden prompts for `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` (and `TAVILY_API_KEY`/`BRAVE_API_KEY` with `--search`); Enter keeps the current value. `PutSecretValue` only; nothing is written to disk or printed |
-| `npm run kb:upload [-- --delete] [--dry-run]` | Syncs `data/index/` to `s3://<KnowledgeBucket>/index/` (and `data/models/` to `models/` if present), skipping unchanged files |
+| `npm run kb:upload [-- --dry-run] [--keep-stale] [--delete]` | Checks the S3 Vectors index dimension, then `PutVectors` (batches of 200, ≤ 500 allowed) for new/changed vectors only (content hash in metadata) and `DeleteVectors` for keys no longer in the build (unless `--keep-stale`); then syncs the Lambda-loaded files of `data/index/` (not `vectors/`) to `s3://<KnowledgeBucket>/index/` (and `data/models/` to `models/`), skipping unchanged files; `--delete` removes stale objects. Prints counts. Refuses a `local`/`openai`-embedded index |
 | `npm run scenarios:push [-- --dry-run]` | Validates `scenarios/private/*.json` and writes them to the table as private scenarios |
 | `npm run synth` | Synthesises all stacks with cdk-nag checks, **without AWS credentials** (runs the CDK app directly, no account lookup) |
 | `npm run dev:aws` | Writes `apps/web/public/config.json` from the `Ica-Api` outputs and starts Vite on :5173 against the deployed API (the Cognito client allows `http://localhost:5173` as callback) |
@@ -125,7 +137,7 @@ Scripts use `AWS_REGION` from `.env` and the standard AWS credential chain. `ICA
 - Code or configuration changes: `npm run deploy -- --skip-bootstrap` (or `cd infra && npx cdk deploy --all`). `.env` values are read at synth time, so changing e.g. `LLM_MODEL` requires a redeploy.
 - Web only: `npm run build -w @ica/web && cd infra && npx cdk deploy Ica-Web`.
 - Provider keys: `npm run secrets:set`. Lambdas cache secrets per container; new containers pick up the change (within minutes, or force it by redeploying).
-- Knowledge index: `npm run kb:build && npm run kb:upload`.
+- Knowledge index: `KB_EMBEDDINGS=cohere npm run kb:build && npm run kb:upload` (only changed chunks are re-embedded and re-put). New Lambda containers load the new chunk files; the vectors are live as soon as they are put.
 
 ## Teardown
 
@@ -171,6 +183,9 @@ Idle (no runs), default deploy, approximate list prices:
 | Opt-in monitoring (`-c monitoring=true`: 5 alarms, SNS, Budgets) | ≈ 0.50 |
 | Opt-in `ica/search` secret (`FEATURE_WEB_SEARCH=true`) | 0.40 |
 | Opt-in regional WebACL (`-c regionalWaf=true`) | ≈ 8 |
+| S3 Vectors storage (~19k × 1536-dim vectors ≈ 0.12 GB) + knowledge bucket (~50 MB) | < 0.01 |
+
+Knowledge: the one-off embedding build is ≈ USD 1.1 (≈ 9.3M tokens × USD 0.12/M, Cohere Embed v4); each knowledge query costs ≈ USD 0.002 (one query embedding ≈ USD 0.000002 + one Cohere Rerank 3.5 query USD 0.002 + S3 Vectors query fractions of a cent); idle costs fractions of a cent.
 
 Per run: Lambda and DynamoDB cost cents; LLM tokens are the real cost (roughly USD 0.6–2 per full run). The product applies **no spend limits** by default (owner decision; only the eval harness is capped), so set a spend limit in your LLM provider's console.
 
@@ -187,6 +202,9 @@ Per run: Lambda and DynamoDB cost cents; LLM tokens are the real cost (roughly U
 | API returns 401 | The token is missing/expired or not issued by this pool/client; sign in again |
 | API returns 429 `daily_run_limit` | You set a non-zero `MAX_RUNS_PER_DAY` and reached it (UTC day). Set it to 0 (no limit) or raise it, and redeploy |
 | Live events do not arrive | Check the fan-out Lambda logs and the `FanoutIteratorAge` alarm; the client should re-fetch `GET /runs/{id}/events?after=` on a seq gap |
-| Knowledge answers are empty | `data/index/` was not uploaded: `npm run kb:build && npm run kb:upload` |
+| Knowledge answers are empty | `data/index/` was not uploaded: `KB_EMBEDDINGS=cohere npm run kb:build && npm run kb:upload` |
+| Run Lambda logs `KnowledgeIndexMismatchError` | The uploaded index was built with another embedding model/dimension than the Lambdas query with. Rebuild with `KB_EMBEDDINGS=cohere` and `kb:upload`, or deploy with `-c knowledge=bm25` |
+| Logs show `knowledge search degraded` (stage `rerank` or `embed`, `ThrottlingException`) | Default Bedrock quotas are tiny: **Cohere Rerank 3.5 = 3 requests/minute** (eu-central-1) and Cohere Embed v4 cross-region = 20 requests / 300k tokens per minute. Request increases in Service Quotas (*On-demand model inference requests per minute for Cohere Rerank 3.5*, *Global cross-region model inference requests per minute for Cohere Embed V4*). Until then searches fall back to fused (no rerank) or BM25 results |
+| Logs show `knowledge search degraded` (stage `embed`/`rerank`, `AccessDeniedException`) | Enable model access for Cohere Embed v4 (EU profile) and Cohere Rerank 3.5 in eu-central-1 in the Bedrock console. Search still works (BM25 / without rerank) |
 | `Export … cannot be deleted as it is in use` when changing stacks | A cross-stack output changed. Deploy the consuming stack first or use `cdk deploy --all` (CDK orders them) |
 | No alarm/budget e-mails | Monitoring is off by default; deploy with `-c monitoring=true`, then confirm the SNS subscription e-mail |

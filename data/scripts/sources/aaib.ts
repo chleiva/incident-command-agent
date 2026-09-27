@@ -4,15 +4,20 @@
  */
 /**
  * UK AAIB reports (Open Government Licence v3.0) through the GOV.UK search and content APIs. Polite: one request
- * per second, a descriptive user agent, and a hard cap of ~150 ground-event reports.
+ * per second, a descriptive user agent, and a hard cap of ~150 ground-event reports. One report = one docId; the
+ * bulletin text (running headers stripped) is split into ~800-token parts with the report header repeated.
  */
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { reportChunks } from '../../src/chunking';
 import type { ChunkRecord } from '../../src/format';
+import { stripRepeatedLines } from '../../src/text';
 import { RAW_DIR, USER_AGENT, download, sleep } from '../lib';
-import { htmlToText, makeChunks, pdfPages, type SourceStep } from './types';
+import { htmlToText, pdfPages, type SourceStep } from './types';
 
 const CAP = Number(process.env.KB_AAIB_CAP ?? 150);
 const DELAY_MS = 1000;
+/** Parts kept per report (~800 tokens each). */
+const MAX_PARTS = 10;
 const QUERIES = [
   'pushback',
   'towbar',
@@ -99,7 +104,7 @@ export const aaibStep: SourceStep = {
       if (att) {
         try {
           const pdfPath = await download(att.url, `aaib/${slug}.pdf`, { minBytes: 1000 });
-          pdfText = (await pdfPages(pdfPath)).join('\n\n');
+          pdfText = stripRepeatedLines(await pdfPages(pdfPath), { minShare: 0.5 }).join('\n\n');
           await sleep(DELAY_MS);
         } catch (err) {
           console.warn(`  ! aaib ${slug}: pdf failed (${String(err)})`);
@@ -109,10 +114,11 @@ export const aaibStep: SourceStep = {
       const text = [r.description && `Summary: ${r.description}`, summary, pdfText]
         .filter(Boolean)
         .join('\n\n');
+      const name = r.title.replace(/^AAIB investigation to /i, '');
       out.push(
-        ...makeChunks(
+        ...reportChunks(
           {
-            sourceId: `AAIB ${r.title.replace(/^AAIB investigation to /i, '')}`.slice(0, 120),
+            sourceId: `AAIB ${name}`.slice(0, 120),
             url,
             title: `${r.title}${r.description ? ` — ${r.description}` : ''}`.slice(0, 200),
             jurisdiction: 'UK',
@@ -124,8 +130,14 @@ export const aaibStep: SourceStep = {
                 'Contains public sector information licensed under the Open Government Licence v3.0.',
             },
           },
-          text,
-          { idPrefix: `aaib-${slug}`, maxChunks: 6 },
+          {
+            docId: `aaib-${slug.replace(/^aaib-investigation-to-/, '')}`,
+            reportId: `AAIB report: ${name}`,
+            synopsis: r.description,
+            aircraftType: name.split(',')[0]?.trim() || undefined,
+            text,
+          },
+          { maxParts: MAX_PARTS },
         ),
       );
     }

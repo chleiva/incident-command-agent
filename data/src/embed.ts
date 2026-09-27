@@ -6,17 +6,35 @@
  * Pluggable embeddings (`KB_EMBEDDINGS`):
  *   local   (default) transformers.js + all-MiniLM-L6-v2, free, no key, runs on CPU.
  *   openai  text-embedding-3-small (OPENAI_API_KEY; paid).
- *   bedrock Amazon Titan Text Embeddings v2 (AWS credentials; paid; needs @aws-sdk/client-bedrock-runtime).
+ *   cohere  Cohere Embed v4 on Amazon Bedrock via the EU cross-region inference profile `eu.cohere.embed-v4:0`
+ *           (1536 dims, float; `search_document` for chunks, `search_query` for queries). AWS credentials; paid
+ *           (≈ USD 0.12 per 1M input tokens). `bedrock` is accepted as an alias.
  *   none    BM25 only.
  * The same provider/model embeds queries at runtime (the manifest records which one built the index).
  */
 import { l2normalise, type EmbeddingProvider } from './format';
+import { cohereEmbedder } from './cohere';
+
+export type EmbedInputType = 'search_document' | 'search_query';
+
+export interface EmbedUsage {
+  /** Provider-reported input tokens (cohere: Bedrock `x-amzn-bedrock-input-token-count`). */
+  inputTokens: number;
+  calls: number;
+  retries: number;
+}
 
 export interface Embedder {
   provider: EmbeddingProvider;
   model: string;
   dim: number;
-  embed(texts: string[]): Promise<Float32Array[]>;
+  /** `inputType` matters for asymmetric models (cohere); others ignore it. Default `search_document`. */
+  embed(
+    texts: string[],
+    opts?: { inputType?: EmbedInputType; signal?: AbortSignal },
+  ): Promise<Float32Array[]>;
+  /** Running usage counters (cohere). */
+  usage?: EmbedUsage;
 }
 
 export const LOCAL_MODEL = 'Xenova/all-MiniLM-L6-v2';
@@ -30,12 +48,17 @@ export interface EmbedderOptions {
   /** Only use model files already present in `cacheDir` (no network). */
   localOnly?: boolean;
   apiKey?: string;
+  /** cohere: output dimension (256, 512, 1024, 1536; default 1536). */
+  dim?: number;
+  /** cohere: region of the Bedrock runtime client (default AWS_REGION or eu-west-2). */
+  region?: string;
 }
 
 export function embeddingProviderFromEnv(env = process.env): EmbeddingProvider {
   const v = (env.KB_EMBEDDINGS ?? 'local').toLowerCase();
-  if (v === 'local' || v === 'openai' || v === 'bedrock' || v === 'none') return v;
-  throw new Error(`KB_EMBEDDINGS must be local|openai|bedrock|none (got "${v}")`);
+  if (v === 'bedrock') return 'cohere';
+  if (v === 'local' || v === 'openai' || v === 'cohere' || v === 'none') return v;
+  throw new Error(`KB_EMBEDDINGS must be local|openai|cohere|none (got "${v}")`);
 }
 
 export async function createEmbedder(opts: EmbedderOptions): Promise<Embedder | null> {
@@ -46,8 +69,9 @@ export async function createEmbedder(opts: EmbedderOptions): Promise<Embedder | 
       return localEmbedder(opts);
     case 'openai':
       return openAiEmbedder(opts);
+    case 'cohere':
     case 'bedrock':
-      return bedrockEmbedder(opts);
+      return cohereEmbedder({ model: opts.model, dim: opts.dim, region: opts.region });
   }
 }
 
@@ -96,35 +120,6 @@ async function openAiEmbedder(opts: EmbedderOptions): Promise<Embedder> {
         if (!res.ok) throw new Error(`OpenAI embeddings failed: HTTP ${res.status}`);
         const body = (await res.json()) as { data: { embedding: number[] }[] };
         for (const d of body.data) out.push(l2normalise(Float32Array.from(d.embedding)));
-      }
-      return out;
-    },
-  };
-}
-
-async function bedrockEmbedder(opts: EmbedderOptions): Promise<Embedder> {
-  const model = opts.model ?? 'amazon.titan-embed-text-v2:0';
-  const modName = '@aws-sdk/client-bedrock-runtime';
-  const sdk = (await import(/* @vite-ignore */ modName).catch(() => {
-    throw new Error('KB_EMBEDDINGS=bedrock needs @aws-sdk/client-bedrock-runtime installed');
-  })) as any;
-  const client = new sdk.BedrockRuntimeClient({});
-  return {
-    provider: 'bedrock',
-    model,
-    dim: 1024,
-    async embed(texts) {
-      const out: Float32Array[] = [];
-      for (const text of texts) {
-        const res = await client.send(
-          new sdk.InvokeModelCommand({
-            modelId: model,
-            contentType: 'application/json',
-            body: JSON.stringify({ inputText: text.slice(0, 8000), dimensions: 1024, normalize: true }),
-          }),
-        );
-        const body = JSON.parse(new TextDecoder().decode(res.body)) as { embedding: number[] };
-        out.push(l2normalise(Float32Array.from(body.embedding)));
       }
       return out;
     },
