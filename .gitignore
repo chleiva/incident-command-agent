@@ -36,3 +36,6 @@ evals/reports/*.local.*
 
 # Agent worktrees
 .claude/worktrees/
+
+# Private notes (owner only)
+tech_explanation.md
