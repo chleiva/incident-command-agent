@@ -1,0 +1,5712 @@
+[
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 1,
+    "type": "run.created",
+    "actor": { "kind": "human", "name": "Baseline policy", "roleTitle": "Scripted human team" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.090Z",
+    "payload": {
+      "scenarioId": "s04-lightning-strike-outstation",
+      "mode": "baseline",
+      "pairedRunId": "run-demo-s04",
+      "speed": 6,
+      "config": {
+        "provider": "scripted",
+        "model": "baseline-policy",
+        "limits": {
+          "maxIterationsPerAgent": 25,
+          "maxToolCallsPerRun": 60,
+          "maxInputTokensPerRun": 200000,
+          "wallClockMs": 480000,
+          "budgetUsd": 2,
+          "horizonMin": 180
+        }
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 2,
+    "type": "run.started",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.180Z",
+    "payload": { "speed": 6 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 3,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.270Z",
+    "payload": {
+      "system": "mne",
+      "entity": "aircraft",
+      "id": "NW-TQA",
+      "op": "create",
+      "after": {
+        "tail": "NW-TQA",
+        "type": "A321",
+        "station": "FAO",
+        "status": "serviceable",
+        "stand": "5",
+        "maintenance": { "lastCheckType": "A-check", "lastCheckDate": "2026-06-21" }
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 4,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.360Z",
+    "payload": {
+      "system": "occ",
+      "entity": "flights",
+      "id": "NWD517",
+      "op": "create",
+      "after": {
+        "flight": "NWD517",
+        "tail": "NW-TQA",
+        "from": "MAN",
+        "to": "FAO",
+        "std": "2026-07-03T10:05:00Z",
+        "sta": "2026-07-03T13:25:00Z",
+        "status": "scheduled",
+        "delayMin": 0,
+        "reactionaryDelayMin": 0,
+        "pax": 208
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 5,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.450Z",
+    "payload": {
+      "system": "occ",
+      "entity": "flights",
+      "id": "NWD518",
+      "op": "create",
+      "after": {
+        "flight": "NWD518",
+        "tail": "NW-TQA",
+        "from": "FAO",
+        "to": "MAN",
+        "std": "2026-07-03T14:15:00Z",
+        "sta": "2026-07-03T16:05:00Z",
+        "status": "scheduled",
+        "delayMin": 0,
+        "reactionaryDelayMin": 0,
+        "pax": 212
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 6,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.540Z",
+    "payload": {
+      "system": "occ",
+      "entity": "flights",
+      "id": "NWD540",
+      "op": "create",
+      "after": {
+        "flight": "NWD540",
+        "tail": "NW-TQA",
+        "from": "MAN",
+        "to": "AMS",
+        "std": "2026-07-03T17:10:00Z",
+        "sta": "2026-07-03T19:25:00Z",
+        "status": "scheduled",
+        "delayMin": 0,
+        "reactionaryDelayMin": 0,
+        "pax": 186
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 7,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.000Z",
+    "payload": {
+      "system": "occ",
+      "entity": "spares",
+      "id": "NW-PQT",
+      "op": "create",
+      "after": { "tail": "NW-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 8,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.090Z",
+    "payload": {
+      "system": "crew",
+      "entity": "crew",
+      "id": "crew-cpt-4",
+      "op": "create",
+      "after": {
+        "id": "crew-cpt-4",
+        "name": "Dora Fenwick",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "FAO",
+        "reportTime": "2026-07-03T08:45:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 600,
+        "fdpUsedMin": 285,
+        "fdpRemainingMin": 315,
+        "assignedFlight": "NWD518"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 9,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.180Z",
+    "payload": {
+      "system": "crew",
+      "entity": "crew",
+      "id": "crew-fo-4",
+      "op": "create",
+      "after": {
+        "id": "crew-fo-4",
+        "name": "Idris Palmer",
+        "rank": "FO",
+        "status": "operating",
+        "station": "FAO",
+        "reportTime": "2026-07-03T08:45:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 600,
+        "fdpUsedMin": 285,
+        "fdpRemainingMin": 315,
+        "assignedFlight": "NWD518"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 10,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.270Z",
+    "payload": {
+      "system": "crew",
+      "entity": "crew",
+      "id": "crew-sccm-4",
+      "op": "create",
+      "after": {
+        "id": "crew-sccm-4",
+        "name": "Hana Brook",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "FAO",
+        "reportTime": "2026-07-03T08:45:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 600,
+        "fdpUsedMin": 285,
+        "fdpRemainingMin": 315,
+        "assignedFlight": "NWD518"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 11,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.360Z",
+    "payload": {
+      "system": "pss",
+      "entity": "cohorts",
+      "id": "c-general",
+      "op": "create",
+      "after": {
+        "id": "c-general",
+        "kind": "general",
+        "count": 168,
+        "flight": "NWD518",
+        "status": "uninformed",
+        "careIssued": 0
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 12,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.450Z",
+    "payload": {
+      "system": "pss",
+      "entity": "cohorts",
+      "id": "c-families",
+      "op": "create",
+      "after": {
+        "id": "c-families",
+        "kind": "families",
+        "count": 18,
+        "flight": "NWD518",
+        "status": "uninformed",
+        "careIssued": 0,
+        "notes": "Six families with young children"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 13,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.540Z",
+    "payload": {
+      "system": "pss",
+      "entity": "cohorts",
+      "id": "c-prm",
+      "op": "create",
+      "after": {
+        "id": "c-prm",
+        "kind": "prm",
+        "count": 4,
+        "flight": "NWD518",
+        "status": "uninformed",
+        "careIssued": 0,
+        "notes": "Three WCHR, one WCHS"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 14,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.000Z",
+    "payload": {
+      "system": "pss",
+      "entity": "cohorts",
+      "id": "c-connections",
+      "op": "create",
+      "after": {
+        "id": "c-connections",
+        "kind": "connections",
+        "count": 22,
+        "flight": "NWD518",
+        "status": "uninformed",
+        "careIssued": 0,
+        "onwardDeadline": "2026-07-03T19:30:00Z",
+        "notes": "Onward domestic connections at MAN"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 15,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.090Z",
+    "payload": {
+      "system": "airport",
+      "entity": "stands",
+      "id": "5",
+      "op": "create",
+      "after": { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "NW-TQA" }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 16,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.180Z",
+    "payload": {
+      "system": "airport",
+      "entity": "stands",
+      "id": "7",
+      "op": "create",
+      "after": { "id": "7", "station": "FAO", "kind": "contact" }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 17,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.270Z",
+    "payload": {
+      "system": "airport",
+      "entity": "weather",
+      "id": "FAO",
+      "op": "create",
+      "after": {
+        "station": "FAO",
+        "summary": "Thunderstorms in the vicinity, wind 200/14 kt",
+        "windKt": 14,
+        "tempC": 27
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 18,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.360Z",
+    "payload": {
+      "system": "handler",
+      "entity": "equipment",
+      "id": "FAO:tug",
+      "op": "create",
+      "after": { "id": "FAO:tug", "station": "FAO", "kind": "tug", "available": 1, "total": 1 }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 19,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.450Z",
+    "payload": {
+      "system": "handler",
+      "entity": "equipment",
+      "id": "FAO:stairs",
+      "op": "create",
+      "after": { "id": "FAO:stairs", "station": "FAO", "kind": "stairs", "available": 2, "total": 2 }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 20,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.540Z",
+    "payload": {
+      "system": "handler",
+      "entity": "equipment",
+      "id": "FAO:bus",
+      "op": "create",
+      "after": { "id": "FAO:bus", "station": "FAO", "kind": "bus", "available": 1, "total": 1 }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 21,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.000Z",
+    "payload": {
+      "system": "handler",
+      "entity": "equipment",
+      "id": "FAO:gpu",
+      "op": "create",
+      "after": { "id": "FAO:gpu", "station": "FAO", "kind": "gpu", "available": 1, "total": 1 }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 22,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.090Z",
+    "payload": {
+      "system": "engineers",
+      "entity": "engineers",
+      "id": "eng-m1",
+      "op": "create",
+      "after": {
+        "id": "eng-m1",
+        "name": "Callum Brightwater",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A321", "lightning strike"],
+        "status": "available",
+        "location": "MAN"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 23,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.180Z",
+    "payload": {
+      "system": "engineers",
+      "entity": "engineers",
+      "id": "eng-f1",
+      "op": "create",
+      "after": {
+        "id": "eng-f1",
+        "name": "Rui Almada",
+        "station": "FAO",
+        "licence": "B1",
+        "skills": ["A321", "contract"],
+        "status": "busy",
+        "location": "FAO"
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 24,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 0,
+    "simTime": "2026-07-03T13:30:00.000Z",
+    "wallTime": "2026-07-03T15:30:00.270Z",
+    "payload": {
+      "simMinute": 0,
+      "incidentClockMin": 0,
+      "minutesTo3h": 180,
+      "delayCostEur": {
+        "value": 0,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 0, "reactionaryMin": 0, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": []
+      },
+      "eu261ExposureEur": {
+        "value": 0,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 0,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": []
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 0,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 0, "eu261ExposureEur": 0, "cancellationCostEur": 0 },
+        "contributingSeqs": []
+      },
+      "satisfaction": {
+        "value": 100,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 0,
+          "projectedDelayMin": 0,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": null,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 0, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 25,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 1,
+    "simTime": "2026-07-03T13:31:00.000Z",
+    "wallTime": "2026-07-03T15:30:10.360Z",
+    "payload": { "simMinute": 1 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 26,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 2,
+    "simTime": "2026-07-03T13:32:00.000Z",
+    "wallTime": "2026-07-03T15:30:20.450Z",
+    "payload": { "simMinute": 2 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 27,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 3,
+    "simTime": "2026-07-03T13:33:00.000Z",
+    "wallTime": "2026-07-03T15:30:30.540Z",
+    "payload": { "simMinute": 3 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 28,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 3,
+    "simTime": "2026-07-03T13:33:00.000Z",
+    "wallTime": "2026-07-03T15:30:30.000Z",
+    "payload": {
+      "simMinute": 3,
+      "incidentClockMin": 0,
+      "minutesTo3h": 180,
+      "delayCostEur": {
+        "value": 0,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 0, "reactionaryMin": 0, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": []
+      },
+      "eu261ExposureEur": {
+        "value": 0,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 0,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": []
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 0,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 0, "eu261ExposureEur": 0, "cancellationCostEur": 0 },
+        "contributingSeqs": []
+      },
+      "satisfaction": {
+        "value": 100,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 0,
+          "projectedDelayMin": 0,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": null,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 0, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 29,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 3,
+    "simTime": "2026-07-03T13:33:00.000Z",
+    "wallTime": "2026-07-03T15:30:30.090Z",
+    "payload": {
+      "system": "mne",
+      "entity": "defects",
+      "id": "def-4",
+      "op": "create",
+      "after": {
+        "id": "def-4",
+        "tail": "NW-TQA",
+        "description": "Lightning strike on approach into FAO: inspection required before next flight",
+        "ata": "05",
+        "status": "open",
+        "raisedAtMinute": 3
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 30,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 3,
+    "simTime": "2026-07-03T13:33:00.000Z",
+    "wallTime": "2026-07-03T15:30:30.180Z",
+    "payload": {
+      "system": "occ",
+      "entity": "flights",
+      "id": "NWD518",
+      "op": "update",
+      "before": {
+        "flight": "NWD518",
+        "tail": "NW-TQA",
+        "from": "FAO",
+        "to": "MAN",
+        "std": "2026-07-03T14:15:00Z",
+        "sta": "2026-07-03T16:05:00Z",
+        "status": "scheduled",
+        "delayMin": 0,
+        "reactionaryDelayMin": 0,
+        "pax": 212
+      },
+      "after": {
+        "flight": "NWD518",
+        "tail": "NW-TQA",
+        "from": "FAO",
+        "to": "MAN",
+        "std": "2026-07-03T14:15:00Z",
+        "sta": "2026-07-03T16:05:00Z",
+        "status": "delayed",
+        "delayMin": 60,
+        "reactionaryDelayMin": 0,
+        "pax": 212
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 31,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 4,
+    "simTime": "2026-07-03T13:34:00.000Z",
+    "wallTime": "2026-07-03T15:30:40.270Z",
+    "payload": { "simMinute": 4 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 32,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 5,
+    "simTime": "2026-07-03T13:35:00.000Z",
+    "wallTime": "2026-07-03T15:30:50.360Z",
+    "payload": { "simMinute": 5 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 33,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 6,
+    "simTime": "2026-07-03T13:36:00.000Z",
+    "wallTime": "2026-07-03T15:31:00.450Z",
+    "payload": { "simMinute": 6 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 34,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 6,
+    "simTime": "2026-07-03T13:36:00.000Z",
+    "wallTime": "2026-07-03T15:31:00.540Z",
+    "payload": {
+      "simMinute": 6,
+      "incidentClockMin": 3,
+      "minutesTo3h": 120,
+      "delayCostEur": {
+        "value": 13200,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 60, "reactionaryMin": 40, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": []
+      },
+      "eu261ExposureEur": {
+        "value": 0,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 60,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": []
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 13200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 13200, "eu261ExposureEur": 0, "cancellationCostEur": 0 },
+        "contributingSeqs": []
+      },
+      "satisfaction": {
+        "value": 93,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 3,
+          "projectedDelayMin": 60,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": null,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 60, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 35,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 7,
+    "simTime": "2026-07-03T13:37:00.000Z",
+    "wallTime": "2026-07-03T15:31:10.000Z",
+    "payload": { "simMinute": 7 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 36,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 8,
+    "simTime": "2026-07-03T13:38:00.000Z",
+    "wallTime": "2026-07-03T15:31:20.090Z",
+    "payload": { "simMinute": 8 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 37,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 9,
+    "simTime": "2026-07-03T13:39:00.000Z",
+    "wallTime": "2026-07-03T15:31:30.180Z",
+    "payload": { "simMinute": 9 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 38,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 9,
+    "simTime": "2026-07-03T13:39:00.000Z",
+    "wallTime": "2026-07-03T15:31:30.270Z",
+    "payload": {
+      "simMinute": 9,
+      "incidentClockMin": 6,
+      "minutesTo3h": 120,
+      "delayCostEur": {
+        "value": 13200,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 60, "reactionaryMin": 40, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": []
+      },
+      "eu261ExposureEur": {
+        "value": 0,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 60,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": []
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 13200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 13200, "eu261ExposureEur": 0, "cancellationCostEur": 0 },
+        "contributingSeqs": []
+      },
+      "satisfaction": {
+        "value": 91,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 6,
+          "projectedDelayMin": 60,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": null,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 60, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 39,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 10,
+    "simTime": "2026-07-03T13:40:00.000Z",
+    "wallTime": "2026-07-03T15:31:40.360Z",
+    "payload": { "simMinute": 10 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 40,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 11,
+    "simTime": "2026-07-03T13:41:00.000Z",
+    "wallTime": "2026-07-03T15:31:50.450Z",
+    "payload": { "simMinute": 11 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 41,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 12,
+    "simTime": "2026-07-03T13:42:00.000Z",
+    "wallTime": "2026-07-03T15:32:00.540Z",
+    "payload": { "simMinute": 12 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 42,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 12,
+    "simTime": "2026-07-03T13:42:00.000Z",
+    "wallTime": "2026-07-03T15:32:00.000Z",
+    "payload": {
+      "simMinute": 12,
+      "incidentClockMin": 9,
+      "minutesTo3h": 120,
+      "delayCostEur": {
+        "value": 13200,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 60, "reactionaryMin": 40, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": []
+      },
+      "eu261ExposureEur": {
+        "value": 0,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 60,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": []
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 13200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 13200, "eu261ExposureEur": 0, "cancellationCostEur": 0 },
+        "contributingSeqs": []
+      },
+      "satisfaction": {
+        "value": 88,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 9,
+          "projectedDelayMin": 60,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": null,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 60, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 43,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 13,
+    "simTime": "2026-07-03T13:43:00.000Z",
+    "wallTime": "2026-07-03T15:32:10.090Z",
+    "payload": { "simMinute": 13 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 44,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 14,
+    "simTime": "2026-07-03T13:44:00.000Z",
+    "wallTime": "2026-07-03T15:32:20.180Z",
+    "payload": { "simMinute": 14 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 45,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 15,
+    "simTime": "2026-07-03T13:45:00.000Z",
+    "wallTime": "2026-07-03T15:32:30.270Z",
+    "payload": { "simMinute": 15 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 46,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 15,
+    "simTime": "2026-07-03T13:45:00.000Z",
+    "wallTime": "2026-07-03T15:32:30.360Z",
+    "payload": {
+      "simMinute": 15,
+      "incidentClockMin": 12,
+      "minutesTo3h": 120,
+      "delayCostEur": {
+        "value": 13200,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 60, "reactionaryMin": 40, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": []
+      },
+      "eu261ExposureEur": {
+        "value": 0,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 60,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": []
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 13200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 13200, "eu261ExposureEur": 0, "cancellationCostEur": 0 },
+        "contributingSeqs": []
+      },
+      "satisfaction": {
+        "value": 86,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 12,
+          "projectedDelayMin": 60,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": null,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 60, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 47,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 16,
+    "simTime": "2026-07-03T13:46:00.000Z",
+    "wallTime": "2026-07-03T15:32:40.450Z",
+    "payload": { "simMinute": 16 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 48,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 17,
+    "simTime": "2026-07-03T13:47:00.000Z",
+    "wallTime": "2026-07-03T15:32:50.540Z",
+    "payload": { "simMinute": 17 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 49,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 18,
+    "simTime": "2026-07-03T13:48:00.000Z",
+    "wallTime": "2026-07-03T15:33:00.000Z",
+    "payload": { "simMinute": 18 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 50,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 18,
+    "simTime": "2026-07-03T13:48:00.000Z",
+    "wallTime": "2026-07-03T15:33:00.090Z",
+    "payload": {
+      "simMinute": 18,
+      "incidentClockMin": 15,
+      "minutesTo3h": 120,
+      "delayCostEur": {
+        "value": 13200,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 60, "reactionaryMin": 40, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": []
+      },
+      "eu261ExposureEur": {
+        "value": 0,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 60,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": []
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 13200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 13200, "eu261ExposureEur": 0, "cancellationCostEur": 0 },
+        "contributingSeqs": []
+      },
+      "satisfaction": {
+        "value": 84,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 15,
+          "projectedDelayMin": 60,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": null,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 60, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 51,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 19,
+    "simTime": "2026-07-03T13:49:00.000Z",
+    "wallTime": "2026-07-03T15:33:10.180Z",
+    "payload": { "simMinute": 19 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 52,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 20,
+    "simTime": "2026-07-03T13:50:00.000Z",
+    "wallTime": "2026-07-03T15:33:20.270Z",
+    "payload": { "simMinute": 20 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 53,
+    "type": "baseline.action",
+    "actor": { "kind": "human", "name": "Maintenance control", "roleTitle": "Maintenance control" },
+    "agentRunId": "baseline",
+    "simMinute": 20,
+    "simTime": "2026-07-03T13:50:00.000Z",
+    "wallTime": "2026-07-03T15:33:20.360Z",
+    "payload": {
+      "actor": "Maintenance control",
+      "tool": "page_engineer",
+      "args": { "engineerId": "eng-m1", "tail": "NW-TQA" },
+      "note": "Home-base engineer called by phone to fly out."
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 54,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 20,
+    "simTime": "2026-07-03T13:50:00.000Z",
+    "wallTime": "2026-07-03T15:33:20.450Z",
+    "payload": {
+      "system": "engineers",
+      "entity": "engineers",
+      "id": "eng-m1",
+      "op": "update",
+      "before": {
+        "id": "eng-m1",
+        "name": "Callum Brightwater",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A321", "lightning strike"],
+        "status": "available",
+        "location": "MAN"
+      },
+      "after": {
+        "id": "eng-m1",
+        "name": "Callum Brightwater",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A321", "lightning strike"],
+        "status": "travelling",
+        "location": "enroute",
+        "etaMinute": 230,
+        "travelMode": "fly",
+        "destination": "FAO"
+      },
+      "causedBySeq": 53
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 55,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 21,
+    "simTime": "2026-07-03T13:51:00.000Z",
+    "wallTime": "2026-07-03T15:33:30.540Z",
+    "payload": { "simMinute": 21 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 56,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 21,
+    "simTime": "2026-07-03T13:51:00.000Z",
+    "wallTime": "2026-07-03T15:33:30.000Z",
+    "payload": {
+      "simMinute": 21,
+      "incidentClockMin": 18,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 53,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 18,
+          "projectedDelayMin": 250,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 57,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 22,
+    "simTime": "2026-07-03T13:52:00.000Z",
+    "wallTime": "2026-07-03T15:33:40.090Z",
+    "payload": { "simMinute": 22 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 58,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 23,
+    "simTime": "2026-07-03T13:53:00.000Z",
+    "wallTime": "2026-07-03T15:33:50.180Z",
+    "payload": { "simMinute": 23 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 59,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 24,
+    "simTime": "2026-07-03T13:54:00.000Z",
+    "wallTime": "2026-07-03T15:34:00.270Z",
+    "payload": { "simMinute": 24 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 60,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 24,
+    "simTime": "2026-07-03T13:54:00.000Z",
+    "wallTime": "2026-07-03T15:34:00.360Z",
+    "payload": {
+      "simMinute": 24,
+      "incidentClockMin": 21,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 50,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 21,
+          "projectedDelayMin": 250,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 61,
+    "type": "world.twist",
+    "actor": { "kind": "world" },
+    "simMinute": 24,
+    "simTime": "2026-07-03T13:54:00.000Z",
+    "wallTime": "2026-07-03T15:34:00.450Z",
+    "payload": {
+      "twistId": "tw-storm-ramp-closure",
+      "title": "Ramp closed for a thunderstorm cell",
+      "description": "Airport operations close the ramp for 20 minutes while a thunderstorm cell passes overhead.",
+      "source": "scheduled",
+      "effects": [
+        { "op": "delay", "flight": "NWD518", "minutes": 20 },
+        { "op": "info", "text": "Airport: ramp operations suspended for 20 minutes (lightning within 5 km)." }
+      ]
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 62,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 25,
+    "simTime": "2026-07-03T13:55:00.000Z",
+    "wallTime": "2026-07-03T15:34:10.540Z",
+    "payload": { "simMinute": 25 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 63,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 26,
+    "simTime": "2026-07-03T13:56:00.000Z",
+    "wallTime": "2026-07-03T15:34:20.000Z",
+    "payload": { "simMinute": 26 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 64,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 27,
+    "simTime": "2026-07-03T13:57:00.000Z",
+    "wallTime": "2026-07-03T15:34:30.090Z",
+    "payload": { "simMinute": 27 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 65,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 27,
+    "simTime": "2026-07-03T13:57:00.000Z",
+    "wallTime": "2026-07-03T15:34:30.180Z",
+    "payload": {
+      "simMinute": 27,
+      "incidentClockMin": 24,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 48,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 24,
+          "projectedDelayMin": 250,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 66,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 28,
+    "simTime": "2026-07-03T13:58:00.000Z",
+    "wallTime": "2026-07-03T15:34:40.270Z",
+    "payload": { "simMinute": 28 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 67,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 29,
+    "simTime": "2026-07-03T13:59:00.000Z",
+    "wallTime": "2026-07-03T15:34:50.360Z",
+    "payload": { "simMinute": 29 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 68,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 30,
+    "simTime": "2026-07-03T14:00:00.000Z",
+    "wallTime": "2026-07-03T15:35:00.450Z",
+    "payload": { "simMinute": 30 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 69,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 30,
+    "simTime": "2026-07-03T14:00:00.000Z",
+    "wallTime": "2026-07-03T15:35:00.540Z",
+    "payload": {
+      "simMinute": 30,
+      "incidentClockMin": 27,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 45,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 27,
+          "projectedDelayMin": 250,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 70,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 31,
+    "simTime": "2026-07-03T14:01:00.000Z",
+    "wallTime": "2026-07-03T15:35:10.000Z",
+    "payload": { "simMinute": 31 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 71,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 32,
+    "simTime": "2026-07-03T14:02:00.000Z",
+    "wallTime": "2026-07-03T15:35:20.090Z",
+    "payload": { "simMinute": 32 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 72,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 33,
+    "simTime": "2026-07-03T14:03:00.000Z",
+    "wallTime": "2026-07-03T15:35:30.180Z",
+    "payload": { "simMinute": 33 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 73,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 33,
+    "simTime": "2026-07-03T14:03:00.000Z",
+    "wallTime": "2026-07-03T15:35:30.270Z",
+    "payload": {
+      "simMinute": 33,
+      "incidentClockMin": 30,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 43,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 30,
+          "projectedDelayMin": 250,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 74,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 34,
+    "simTime": "2026-07-03T14:04:00.000Z",
+    "wallTime": "2026-07-03T15:35:40.360Z",
+    "payload": { "simMinute": 34 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 75,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 35,
+    "simTime": "2026-07-03T14:05:00.000Z",
+    "wallTime": "2026-07-03T15:35:50.450Z",
+    "payload": { "simMinute": 35 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 76,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 36,
+    "simTime": "2026-07-03T14:06:00.000Z",
+    "wallTime": "2026-07-03T15:36:00.540Z",
+    "payload": { "simMinute": 36 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 77,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 36,
+    "simTime": "2026-07-03T14:06:00.000Z",
+    "wallTime": "2026-07-03T15:36:00.000Z",
+    "payload": {
+      "simMinute": 36,
+      "incidentClockMin": 33,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 41,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 33,
+          "projectedDelayMin": 250,
+          "firstMessageMin": null,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": []
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": false,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": null, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": null,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 78,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 37,
+    "simTime": "2026-07-03T14:07:00.000Z",
+    "wallTime": "2026-07-03T15:36:10.090Z",
+    "payload": { "simMinute": 37 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 79,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 38,
+    "simTime": "2026-07-03T14:08:00.000Z",
+    "wallTime": "2026-07-03T15:36:20.180Z",
+    "payload": { "simMinute": 38 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 80,
+    "type": "baseline.action",
+    "actor": { "kind": "human", "name": "Passenger services", "roleTitle": "Passenger services" },
+    "agentRunId": "baseline",
+    "simMinute": 38,
+    "simTime": "2026-07-03T14:08:00.000Z",
+    "wallTime": "2026-07-03T15:36:20.270Z",
+    "payload": {
+      "actor": "Passenger services",
+      "tool": "send_passenger_message",
+      "args": { "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"], "channel": "sms" },
+      "note": "Generic delay message."
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 81,
+    "type": "system.mutation",
+    "actor": { "kind": "world" },
+    "simMinute": 38,
+    "simTime": "2026-07-03T14:08:00.000Z",
+    "wallTime": "2026-07-03T15:36:20.360Z",
+    "payload": {
+      "system": "pss",
+      "entity": "messages",
+      "id": "msg-b41",
+      "op": "create",
+      "after": {
+        "id": "msg-b41",
+        "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
+        "channel": "sms",
+        "body": "NWD518 is delayed for technical reasons. We apologise for the inconvenience.",
+        "status": "sent",
+        "aiDrafted": true,
+        "sentAtMinute": 38,
+        "approvedBy": { "kind": "human", "name": "Passenger services", "roleTitle": "Passenger services" }
+      },
+      "causedBySeq": 80
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 82,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 39,
+    "simTime": "2026-07-03T14:09:00.000Z",
+    "wallTime": "2026-07-03T15:36:30.450Z",
+    "payload": { "simMinute": 39 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 83,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 39,
+    "simTime": "2026-07-03T14:09:00.000Z",
+    "wallTime": "2026-07-03T15:36:30.540Z",
+    "payload": {
+      "simMinute": 39,
+      "incidentClockMin": 36,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 84,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 40,
+    "simTime": "2026-07-03T14:10:00.000Z",
+    "wallTime": "2026-07-03T15:36:40.000Z",
+    "payload": { "simMinute": 40 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 85,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 41,
+    "simTime": "2026-07-03T14:11:00.000Z",
+    "wallTime": "2026-07-03T15:36:50.090Z",
+    "payload": { "simMinute": 41 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 86,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 42,
+    "simTime": "2026-07-03T14:12:00.000Z",
+    "wallTime": "2026-07-03T15:37:00.180Z",
+    "payload": { "simMinute": 42 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 87,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 42,
+    "simTime": "2026-07-03T14:12:00.000Z",
+    "wallTime": "2026-07-03T15:37:00.270Z",
+    "payload": {
+      "simMinute": 42,
+      "incidentClockMin": 39,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 88,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 43,
+    "simTime": "2026-07-03T14:13:00.000Z",
+    "wallTime": "2026-07-03T15:37:10.360Z",
+    "payload": { "simMinute": 43 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 89,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 44,
+    "simTime": "2026-07-03T14:14:00.000Z",
+    "wallTime": "2026-07-03T15:37:20.450Z",
+    "payload": { "simMinute": 44 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 90,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 45,
+    "simTime": "2026-07-03T14:15:00.000Z",
+    "wallTime": "2026-07-03T15:37:30.540Z",
+    "payload": { "simMinute": 45 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 91,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 45,
+    "simTime": "2026-07-03T14:15:00.000Z",
+    "wallTime": "2026-07-03T15:37:30.000Z",
+    "payload": {
+      "simMinute": 45,
+      "incidentClockMin": 42,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 92,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 46,
+    "simTime": "2026-07-03T14:16:00.000Z",
+    "wallTime": "2026-07-03T15:37:40.090Z",
+    "payload": { "simMinute": 46 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 93,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 47,
+    "simTime": "2026-07-03T14:17:00.000Z",
+    "wallTime": "2026-07-03T15:37:50.180Z",
+    "payload": { "simMinute": 47 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 94,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 48,
+    "simTime": "2026-07-03T14:18:00.000Z",
+    "wallTime": "2026-07-03T15:38:00.270Z",
+    "payload": { "simMinute": 48 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 95,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 48,
+    "simTime": "2026-07-03T14:18:00.000Z",
+    "wallTime": "2026-07-03T15:38:00.360Z",
+    "payload": {
+      "simMinute": 48,
+      "incidentClockMin": 45,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 96,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 49,
+    "simTime": "2026-07-03T14:19:00.000Z",
+    "wallTime": "2026-07-03T15:38:10.450Z",
+    "payload": { "simMinute": 49 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 97,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 50,
+    "simTime": "2026-07-03T14:20:00.000Z",
+    "wallTime": "2026-07-03T15:38:20.540Z",
+    "payload": { "simMinute": 50 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 98,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 51,
+    "simTime": "2026-07-03T14:21:00.000Z",
+    "wallTime": "2026-07-03T15:38:30.000Z",
+    "payload": { "simMinute": 51 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 99,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 51,
+    "simTime": "2026-07-03T14:21:00.000Z",
+    "wallTime": "2026-07-03T15:38:30.090Z",
+    "payload": {
+      "simMinute": 51,
+      "incidentClockMin": 48,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 100,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 52,
+    "simTime": "2026-07-03T14:22:00.000Z",
+    "wallTime": "2026-07-03T15:38:40.180Z",
+    "payload": { "simMinute": 52 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 101,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 53,
+    "simTime": "2026-07-03T14:23:00.000Z",
+    "wallTime": "2026-07-03T15:38:50.270Z",
+    "payload": { "simMinute": 53 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 102,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 54,
+    "simTime": "2026-07-03T14:24:00.000Z",
+    "wallTime": "2026-07-03T15:39:00.360Z",
+    "payload": { "simMinute": 54 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 103,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 54,
+    "simTime": "2026-07-03T14:24:00.000Z",
+    "wallTime": "2026-07-03T15:39:00.450Z",
+    "payload": {
+      "simMinute": 54,
+      "incidentClockMin": 51,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 104,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 55,
+    "simTime": "2026-07-03T14:25:00.000Z",
+    "wallTime": "2026-07-03T15:39:10.540Z",
+    "payload": { "simMinute": 55 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 105,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 56,
+    "simTime": "2026-07-03T14:26:00.000Z",
+    "wallTime": "2026-07-03T15:39:20.000Z",
+    "payload": { "simMinute": 56 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 106,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 57,
+    "simTime": "2026-07-03T14:27:00.000Z",
+    "wallTime": "2026-07-03T15:39:30.090Z",
+    "payload": { "simMinute": 57 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 107,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 57,
+    "simTime": "2026-07-03T14:27:00.000Z",
+    "wallTime": "2026-07-03T15:39:30.180Z",
+    "payload": {
+      "simMinute": 57,
+      "incidentClockMin": 54,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 108,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 58,
+    "simTime": "2026-07-03T14:28:00.000Z",
+    "wallTime": "2026-07-03T15:39:40.270Z",
+    "payload": { "simMinute": 58 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 109,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 59,
+    "simTime": "2026-07-03T14:29:00.000Z",
+    "wallTime": "2026-07-03T15:39:50.360Z",
+    "payload": { "simMinute": 59 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 110,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 60,
+    "simTime": "2026-07-03T14:30:00.000Z",
+    "wallTime": "2026-07-03T15:40:00.450Z",
+    "payload": { "simMinute": 60 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 111,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 60,
+    "simTime": "2026-07-03T14:30:00.000Z",
+    "wallTime": "2026-07-03T15:40:00.540Z",
+    "payload": {
+      "simMinute": 60,
+      "incidentClockMin": 57,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 0,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 0, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": null
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": []
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 112,
+    "type": "baseline.action",
+    "actor": { "kind": "human", "name": "OCC controller", "roleTitle": "OCC controller" },
+    "agentRunId": "baseline",
+    "simMinute": 60,
+    "simTime": "2026-07-03T14:30:00.000Z",
+    "wallTime": "2026-07-03T15:40:00.000Z",
+    "payload": {
+      "actor": "OCC controller",
+      "tool": "request_decision",
+      "args": { "choice": "fly engineer" },
+      "note": "Decision to fly the engineer on the next service."
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 113,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 61,
+    "simTime": "2026-07-03T14:31:00.000Z",
+    "wallTime": "2026-07-03T15:40:10.090Z",
+    "payload": { "simMinute": 61 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 114,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 62,
+    "simTime": "2026-07-03T14:32:00.000Z",
+    "wallTime": "2026-07-03T15:40:20.180Z",
+    "payload": { "simMinute": 62 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 115,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 63,
+    "simTime": "2026-07-03T14:33:00.000Z",
+    "wallTime": "2026-07-03T15:40:30.270Z",
+    "payload": { "simMinute": 63 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 116,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 63,
+    "simTime": "2026-07-03T14:33:00.000Z",
+    "wallTime": "2026-07-03T15:40:30.360Z",
+    "payload": {
+      "simMinute": 63,
+      "incidentClockMin": 60,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 117,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 64,
+    "simTime": "2026-07-03T14:34:00.000Z",
+    "wallTime": "2026-07-03T15:40:40.450Z",
+    "payload": { "simMinute": 64 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 118,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 65,
+    "simTime": "2026-07-03T14:35:00.000Z",
+    "wallTime": "2026-07-03T15:40:50.540Z",
+    "payload": { "simMinute": 65 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 119,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 66,
+    "simTime": "2026-07-03T14:36:00.000Z",
+    "wallTime": "2026-07-03T15:41:00.000Z",
+    "payload": { "simMinute": 66 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 120,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 66,
+    "simTime": "2026-07-03T14:36:00.000Z",
+    "wallTime": "2026-07-03T15:41:00.090Z",
+    "payload": {
+      "simMinute": 66,
+      "incidentClockMin": 63,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 121,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 67,
+    "simTime": "2026-07-03T14:37:00.000Z",
+    "wallTime": "2026-07-03T15:41:10.180Z",
+    "payload": { "simMinute": 67 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 122,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 68,
+    "simTime": "2026-07-03T14:38:00.000Z",
+    "wallTime": "2026-07-03T15:41:20.270Z",
+    "payload": { "simMinute": 68 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 123,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 69,
+    "simTime": "2026-07-03T14:39:00.000Z",
+    "wallTime": "2026-07-03T15:41:30.360Z",
+    "payload": { "simMinute": 69 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 124,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 69,
+    "simTime": "2026-07-03T14:39:00.000Z",
+    "wallTime": "2026-07-03T15:41:30.450Z",
+    "payload": {
+      "simMinute": 69,
+      "incidentClockMin": 66,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 125,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 70,
+    "simTime": "2026-07-03T14:40:00.000Z",
+    "wallTime": "2026-07-03T15:41:40.540Z",
+    "payload": { "simMinute": 70 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 126,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 71,
+    "simTime": "2026-07-03T14:41:00.000Z",
+    "wallTime": "2026-07-03T15:41:50.000Z",
+    "payload": { "simMinute": 71 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 127,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 72,
+    "simTime": "2026-07-03T14:42:00.000Z",
+    "wallTime": "2026-07-03T15:42:00.090Z",
+    "payload": { "simMinute": 72 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 128,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 72,
+    "simTime": "2026-07-03T14:42:00.000Z",
+    "wallTime": "2026-07-03T15:42:00.180Z",
+    "payload": {
+      "simMinute": 72,
+      "incidentClockMin": 69,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 129,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 73,
+    "simTime": "2026-07-03T14:43:00.000Z",
+    "wallTime": "2026-07-03T15:42:10.270Z",
+    "payload": { "simMinute": 73 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 130,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 74,
+    "simTime": "2026-07-03T14:44:00.000Z",
+    "wallTime": "2026-07-03T15:42:20.360Z",
+    "payload": { "simMinute": 74 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 131,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 75,
+    "simTime": "2026-07-03T14:45:00.000Z",
+    "wallTime": "2026-07-03T15:42:30.450Z",
+    "payload": { "simMinute": 75 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 132,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 75,
+    "simTime": "2026-07-03T14:45:00.000Z",
+    "wallTime": "2026-07-03T15:42:30.540Z",
+    "payload": {
+      "simMinute": 75,
+      "incidentClockMin": 72,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 133,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 76,
+    "simTime": "2026-07-03T14:46:00.000Z",
+    "wallTime": "2026-07-03T15:42:40.000Z",
+    "payload": { "simMinute": 76 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 134,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 77,
+    "simTime": "2026-07-03T14:47:00.000Z",
+    "wallTime": "2026-07-03T15:42:50.090Z",
+    "payload": { "simMinute": 77 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 135,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 78,
+    "simTime": "2026-07-03T14:48:00.000Z",
+    "wallTime": "2026-07-03T15:43:00.180Z",
+    "payload": { "simMinute": 78 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 136,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 78,
+    "simTime": "2026-07-03T14:48:00.000Z",
+    "wallTime": "2026-07-03T15:43:00.270Z",
+    "payload": {
+      "simMinute": 78,
+      "incidentClockMin": 75,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 137,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 79,
+    "simTime": "2026-07-03T14:49:00.000Z",
+    "wallTime": "2026-07-03T15:43:10.360Z",
+    "payload": { "simMinute": 79 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 138,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 80,
+    "simTime": "2026-07-03T14:50:00.000Z",
+    "wallTime": "2026-07-03T15:43:20.450Z",
+    "payload": { "simMinute": 80 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 139,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 81,
+    "simTime": "2026-07-03T14:51:00.000Z",
+    "wallTime": "2026-07-03T15:43:30.540Z",
+    "payload": { "simMinute": 81 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 140,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 81,
+    "simTime": "2026-07-03T14:51:00.000Z",
+    "wallTime": "2026-07-03T15:43:30.000Z",
+    "payload": {
+      "simMinute": 81,
+      "incidentClockMin": 78,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 141,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 82,
+    "simTime": "2026-07-03T14:52:00.000Z",
+    "wallTime": "2026-07-03T15:43:40.090Z",
+    "payload": { "simMinute": 82 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 142,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 83,
+    "simTime": "2026-07-03T14:53:00.000Z",
+    "wallTime": "2026-07-03T15:43:50.180Z",
+    "payload": { "simMinute": 83 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 143,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 84,
+    "simTime": "2026-07-03T14:54:00.000Z",
+    "wallTime": "2026-07-03T15:44:00.270Z",
+    "payload": { "simMinute": 84 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 144,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 84,
+    "simTime": "2026-07-03T14:54:00.000Z",
+    "wallTime": "2026-07-03T15:44:00.360Z",
+    "payload": {
+      "simMinute": 84,
+      "incidentClockMin": 81,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 145,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 85,
+    "simTime": "2026-07-03T14:55:00.000Z",
+    "wallTime": "2026-07-03T15:44:10.450Z",
+    "payload": { "simMinute": 85 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 146,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 86,
+    "simTime": "2026-07-03T14:56:00.000Z",
+    "wallTime": "2026-07-03T15:44:20.540Z",
+    "payload": { "simMinute": 86 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 147,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 87,
+    "simTime": "2026-07-03T14:57:00.000Z",
+    "wallTime": "2026-07-03T15:44:30.000Z",
+    "payload": { "simMinute": 87 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 148,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 87,
+    "simTime": "2026-07-03T14:57:00.000Z",
+    "wallTime": "2026-07-03T15:44:30.090Z",
+    "payload": {
+      "simMinute": 87,
+      "incidentClockMin": 84,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 149,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 88,
+    "simTime": "2026-07-03T14:58:00.000Z",
+    "wallTime": "2026-07-03T15:44:40.180Z",
+    "payload": { "simMinute": 88 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 150,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 89,
+    "simTime": "2026-07-03T14:59:00.000Z",
+    "wallTime": "2026-07-03T15:44:50.270Z",
+    "payload": { "simMinute": 89 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 151,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 90,
+    "simTime": "2026-07-03T15:00:00.000Z",
+    "wallTime": "2026-07-03T15:45:00.360Z",
+    "payload": { "simMinute": 90 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 152,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 90,
+    "simTime": "2026-07-03T15:00:00.000Z",
+    "wallTime": "2026-07-03T15:45:00.450Z",
+    "payload": {
+      "simMinute": 90,
+      "incidentClockMin": 87,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 153,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 91,
+    "simTime": "2026-07-03T15:01:00.000Z",
+    "wallTime": "2026-07-03T15:45:10.540Z",
+    "payload": { "simMinute": 91 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 154,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 92,
+    "simTime": "2026-07-03T15:02:00.000Z",
+    "wallTime": "2026-07-03T15:45:20.000Z",
+    "payload": { "simMinute": 92 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 155,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 93,
+    "simTime": "2026-07-03T15:03:00.000Z",
+    "wallTime": "2026-07-03T15:45:30.090Z",
+    "payload": { "simMinute": 93 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 156,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 93,
+    "simTime": "2026-07-03T15:03:00.000Z",
+    "wallTime": "2026-07-03T15:45:30.180Z",
+    "payload": {
+      "simMinute": 93,
+      "incidentClockMin": 90,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 84800,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 0,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 142200,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 84800, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 47,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 0,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 157,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 94,
+    "simTime": "2026-07-03T15:04:00.000Z",
+    "wallTime": "2026-07-03T15:45:40.270Z",
+    "payload": { "simMinute": 94 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 158,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 95,
+    "simTime": "2026-07-03T15:05:00.000Z",
+    "wallTime": "2026-07-03T15:45:50.360Z",
+    "payload": { "simMinute": 95 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 159,
+    "type": "baseline.action",
+    "actor": { "kind": "human", "name": "Passenger services", "roleTitle": "Passenger services" },
+    "agentRunId": "baseline",
+    "simMinute": 95,
+    "simTime": "2026-07-03T15:05:00.000Z",
+    "wallTime": "2026-07-03T15:45:50.450Z",
+    "payload": {
+      "actor": "Passenger services",
+      "tool": "issue_care_vouchers",
+      "args": { "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"], "kind": "meal" },
+      "note": "Meal vouchers after two hours."
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 160,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 96,
+    "simTime": "2026-07-03T15:06:00.000Z",
+    "wallTime": "2026-07-03T15:46:00.540Z",
+    "payload": { "simMinute": 96 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 161,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 96,
+    "simTime": "2026-07-03T15:06:00.000Z",
+    "wallTime": "2026-07-03T15:46:00.000Z",
+    "payload": {
+      "simMinute": 96,
+      "incidentClockMin": 93,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 162,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 97,
+    "simTime": "2026-07-03T15:07:00.000Z",
+    "wallTime": "2026-07-03T15:46:10.090Z",
+    "payload": { "simMinute": 97 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 163,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 98,
+    "simTime": "2026-07-03T15:08:00.000Z",
+    "wallTime": "2026-07-03T15:46:20.180Z",
+    "payload": { "simMinute": 98 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 164,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 99,
+    "simTime": "2026-07-03T15:09:00.000Z",
+    "wallTime": "2026-07-03T15:46:30.270Z",
+    "payload": { "simMinute": 99 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 165,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 99,
+    "simTime": "2026-07-03T15:09:00.000Z",
+    "wallTime": "2026-07-03T15:46:30.360Z",
+    "payload": {
+      "simMinute": 99,
+      "incidentClockMin": 96,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 166,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 100,
+    "simTime": "2026-07-03T15:10:00.000Z",
+    "wallTime": "2026-07-03T15:46:40.450Z",
+    "payload": { "simMinute": 100 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 167,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 101,
+    "simTime": "2026-07-03T15:11:00.000Z",
+    "wallTime": "2026-07-03T15:46:50.540Z",
+    "payload": { "simMinute": 101 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 168,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 102,
+    "simTime": "2026-07-03T15:12:00.000Z",
+    "wallTime": "2026-07-03T15:47:00.000Z",
+    "payload": { "simMinute": 102 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 169,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 102,
+    "simTime": "2026-07-03T15:12:00.000Z",
+    "wallTime": "2026-07-03T15:47:00.090Z",
+    "payload": {
+      "simMinute": 102,
+      "incidentClockMin": 99,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 170,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 103,
+    "simTime": "2026-07-03T15:13:00.000Z",
+    "wallTime": "2026-07-03T15:47:10.180Z",
+    "payload": { "simMinute": 103 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 171,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 104,
+    "simTime": "2026-07-03T15:14:00.000Z",
+    "wallTime": "2026-07-03T15:47:20.270Z",
+    "payload": { "simMinute": 104 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 172,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 105,
+    "simTime": "2026-07-03T15:15:00.000Z",
+    "wallTime": "2026-07-03T15:47:30.360Z",
+    "payload": { "simMinute": 105 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 173,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 105,
+    "simTime": "2026-07-03T15:15:00.000Z",
+    "wallTime": "2026-07-03T15:47:30.450Z",
+    "payload": {
+      "simMinute": 105,
+      "incidentClockMin": 102,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 174,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 106,
+    "simTime": "2026-07-03T15:16:00.000Z",
+    "wallTime": "2026-07-03T15:47:40.540Z",
+    "payload": { "simMinute": 106 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 175,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 107,
+    "simTime": "2026-07-03T15:17:00.000Z",
+    "wallTime": "2026-07-03T15:47:50.000Z",
+    "payload": { "simMinute": 107 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 176,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 108,
+    "simTime": "2026-07-03T15:18:00.000Z",
+    "wallTime": "2026-07-03T15:48:00.090Z",
+    "payload": { "simMinute": 108 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 177,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 108,
+    "simTime": "2026-07-03T15:18:00.000Z",
+    "wallTime": "2026-07-03T15:48:00.180Z",
+    "payload": {
+      "simMinute": 108,
+      "incidentClockMin": 105,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 178,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 109,
+    "simTime": "2026-07-03T15:19:00.000Z",
+    "wallTime": "2026-07-03T15:48:10.270Z",
+    "payload": { "simMinute": 109 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 179,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 110,
+    "simTime": "2026-07-03T15:20:00.000Z",
+    "wallTime": "2026-07-03T15:48:20.360Z",
+    "payload": { "simMinute": 110 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 180,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 111,
+    "simTime": "2026-07-03T15:21:00.000Z",
+    "wallTime": "2026-07-03T15:48:30.450Z",
+    "payload": { "simMinute": 111 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 181,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 111,
+    "simTime": "2026-07-03T15:21:00.000Z",
+    "wallTime": "2026-07-03T15:48:30.540Z",
+    "payload": {
+      "simMinute": 111,
+      "incidentClockMin": 108,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 182,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 112,
+    "simTime": "2026-07-03T15:22:00.000Z",
+    "wallTime": "2026-07-03T15:48:40.000Z",
+    "payload": { "simMinute": 112 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 183,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 113,
+    "simTime": "2026-07-03T15:23:00.000Z",
+    "wallTime": "2026-07-03T15:48:50.090Z",
+    "payload": { "simMinute": 113 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 184,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 114,
+    "simTime": "2026-07-03T15:24:00.000Z",
+    "wallTime": "2026-07-03T15:49:00.180Z",
+    "payload": { "simMinute": 114 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 185,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 114,
+    "simTime": "2026-07-03T15:24:00.000Z",
+    "wallTime": "2026-07-03T15:49:00.270Z",
+    "payload": {
+      "simMinute": 114,
+      "incidentClockMin": 111,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 186,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 115,
+    "simTime": "2026-07-03T15:25:00.000Z",
+    "wallTime": "2026-07-03T15:49:10.360Z",
+    "payload": { "simMinute": 115 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 187,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 116,
+    "simTime": "2026-07-03T15:26:00.000Z",
+    "wallTime": "2026-07-03T15:49:20.450Z",
+    "payload": { "simMinute": 116 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 188,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 117,
+    "simTime": "2026-07-03T15:27:00.000Z",
+    "wallTime": "2026-07-03T15:49:30.540Z",
+    "payload": { "simMinute": 117 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 189,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 117,
+    "simTime": "2026-07-03T15:27:00.000Z",
+    "wallTime": "2026-07-03T15:49:30.000Z",
+    "payload": {
+      "simMinute": 117,
+      "incidentClockMin": 114,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 190,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 118,
+    "simTime": "2026-07-03T15:28:00.000Z",
+    "wallTime": "2026-07-03T15:49:40.090Z",
+    "payload": { "simMinute": 118 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 191,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 119,
+    "simTime": "2026-07-03T15:29:00.000Z",
+    "wallTime": "2026-07-03T15:49:50.180Z",
+    "payload": { "simMinute": 119 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 192,
+    "type": "world.tick",
+    "actor": { "kind": "world" },
+    "simMinute": 120,
+    "simTime": "2026-07-03T15:30:00.000Z",
+    "wallTime": "2026-07-03T15:50:00.270Z",
+    "payload": { "simMinute": 120 }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 193,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 120,
+    "simTime": "2026-07-03T15:30:00.000Z",
+    "wallTime": "2026-07-03T15:50:00.360Z",
+    "payload": {
+      "simMinute": 120,
+      "incidentClockMin": 117,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 194,
+    "type": "kpi.update",
+    "actor": { "kind": "world" },
+    "simMinute": 120,
+    "simTime": "2026-07-03T15:30:00.000Z",
+    "wallTime": "2026-07-03T15:50:00.450Z",
+    "payload": {
+      "simMinute": 120,
+      "incidentClockMin": 117,
+      "minutesTo3h": -70,
+      "delayCostEur": {
+        "value": 57400,
+        "formula": "primary min × €/min + reactionary min × factor × €/min",
+        "inputs": { "primaryMin": 250, "reactionaryMin": 180, "eurPerMinute": 100, "reactionaryFactor": 1.8 },
+        "contributingSeqs": [53]
+      },
+      "eu261ExposureEur": {
+        "value": 86496,
+        "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+        "inputs": {
+          "pax": 212,
+          "tierEur": 400,
+          "projectedDelayMin": 250,
+          "carePax": 212,
+          "careEurPerPaxPerHour": 8
+        },
+        "contributingSeqs": [53]
+      },
+      "cancellationCostEur": {
+        "value": 0,
+        "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+        "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+        "contributingSeqs": []
+      },
+      "totalCostEur": {
+        "value": 143896,
+        "formula": "delay cost + EU261 exposure + cancellation cost",
+        "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+        "contributingSeqs": [53]
+      },
+      "satisfaction": {
+        "value": 52,
+        "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+        "inputs": {
+          "uninformedMin": 35,
+          "projectedDelayMin": 250,
+          "firstMessageMin": 38,
+          "careActions": 1,
+          "rebookedBefore3h": false
+        },
+        "contributingSeqs": [80, 159]
+      },
+      "compliance": {
+        "value": {
+          "art14NoticeIssued": true,
+          "reroutingOfferedWithin3h": false,
+          "fdpRespected": true,
+          "morDraftedWithin72h": false,
+          "threeHourThresholdAvoided": null
+        },
+        "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+        "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+        "contributingSeqs": []
+      },
+      "safety": {
+        "value": {
+          "forbiddenAttempts": 0,
+          "humanDecisionsBeforeDependentActions": 1,
+          "dependentActionsWithoutDecision": 0
+        },
+        "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+        "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+        "contributingSeqs": []
+      },
+      "latency": {
+        "value": {
+          "firstEngineeringDecisionMin": null,
+          "firstPaxMessageMin": 38,
+          "swapOrCancelDecisionMin": 60
+        },
+        "formula": "sim minutes from the trigger to the first decision / message",
+        "inputs": { "triggerMinute": 3 },
+        "contributingSeqs": [112]
+      }
+    }
+  },
+  {
+    "runId": "run-demo-s04-baseline",
+    "seq": 195,
+    "type": "run.completed",
+    "actor": { "kind": "world" },
+    "simMinute": 120,
+    "simTime": "2026-07-03T15:30:00.000Z",
+    "wallTime": "2026-07-03T15:50:00.540Z",
+    "payload": {
+      "reason": "horizon",
+      "totals": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "costUsd": 0,
+        "toolCalls": 0,
+        "iterations": 0,
+        "wallMs": 720000
+      },
+      "finalKpis": {
+        "simMinute": 120,
+        "incidentClockMin": 117,
+        "minutesTo3h": -70,
+        "delayCostEur": {
+          "value": 57400,
+          "formula": "primary min × €/min + reactionary min × factor × €/min",
+          "inputs": {
+            "primaryMin": 250,
+            "reactionaryMin": 180,
+            "eurPerMinute": 100,
+            "reactionaryFactor": 1.8
+          },
+          "contributingSeqs": [53]
+        },
+        "eu261ExposureEur": {
+          "value": 86496,
+          "formula": "pax × tier when projected delay ≥ 3 h, plus care cost by elapsed hours",
+          "inputs": {
+            "pax": 212,
+            "tierEur": 400,
+            "projectedDelayMin": 250,
+            "carePax": 212,
+            "careEurPerPaxPerHour": 8
+          },
+          "contributingSeqs": [53]
+        },
+        "cancellationCostEur": {
+          "value": 0,
+          "formula": "fixed per-scenario value + rebooking + accommodation (only if cancelled)",
+          "inputs": { "cancelled": false, "cancellationFixedEur": 18600 },
+          "contributingSeqs": []
+        },
+        "totalCostEur": {
+          "value": 143896,
+          "formula": "delay cost + EU261 exposure + cancellation cost",
+          "inputs": { "delayCostEur": 57400, "eu261ExposureEur": 86496, "cancellationCostEur": 0 },
+          "contributingSeqs": [53]
+        },
+        "satisfaction": {
+          "value": 52,
+          "formula": "100 − 0.8/min uninformed − 0.15/min delay beyond 30 + 8 first message + 5/care action + 10 rebooked < 3 h",
+          "inputs": {
+            "uninformedMin": 35,
+            "projectedDelayMin": 250,
+            "firstMessageMin": 38,
+            "careActions": 1,
+            "rebookedBefore3h": false
+          },
+          "contributingSeqs": [80, 159]
+        },
+        "compliance": {
+          "value": {
+            "art14NoticeIssued": true,
+            "reroutingOfferedWithin3h": false,
+            "fdpRespected": true,
+            "morDraftedWithin72h": false,
+            "threeHourThresholdAvoided": null
+          },
+          "formula": "EU261 Art 14 notice · rerouting ≤ 3 h · FTL FDP respected · MOR drafted ≤ 72 h · 3-h threshold",
+          "inputs": { "firstPaxMessageMin": 38, "projectedDelayMin": 250, "morDrafted": false },
+          "contributingSeqs": []
+        },
+        "safety": {
+          "value": {
+            "forbiddenAttempts": 0,
+            "humanDecisionsBeforeDependentActions": 1,
+            "dependentActionsWithoutDecision": 0
+          },
+          "formula": "forbidden tool attempts (must be 0 executed) · human decisions recorded before dependent actions",
+          "inputs": { "forbiddenAttemptsBlocked": 0, "humanDecisions": 1, "presenterTriggeredAttempts": 0 },
+          "contributingSeqs": []
+        },
+        "latency": {
+          "value": {
+            "firstEngineeringDecisionMin": null,
+            "firstPaxMessageMin": 38,
+            "swapOrCancelDecisionMin": 60
+          },
+          "formula": "sim minutes from the trigger to the first decision / message",
+          "inputs": { "triggerMinute": 3 },
+          "contributingSeqs": [112]
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "name": "@ica/ui-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ground Incident Coordination Agent — Design tokens (CSS variables light/dark), Tailwind preset, Tokens Studio JSON.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tailwind": "./src/tailwind-preset.ts",
+    "./tokens.css": "./tokens.css",
+    "./figma-tokens.json": "./figma-tokens.json"
+  },
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  }
+}

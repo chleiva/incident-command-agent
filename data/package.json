@@ -1,0 +1,28 @@
+{
+  "name": "@ica/kb",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ground Incident Coordination Agent — Knowledge-base build pipeline (kb:build), airports data (airports:build), SOURCES.md, fixtures. Owned by task 03.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./stations.json": "./airports/stations.json",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "scripts": {
+    "kb:build": "tsx scripts/kb-build.ts",
+    "kb:fixtures": "tsx scripts/fixtures-build.ts",
+    "airports:build": "tsx scripts/airports-build.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.0",
+    "@ica/schema": "*",
+    "cheerio": "^1.2.0",
+    "csv-parse": "^7.0.3",
+    "hyparquet": "^1.31.1",
+    "unpdf": "^1.8.1"
+  }
+}

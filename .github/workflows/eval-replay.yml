@@ -1,0 +1,28 @@
+name: eval-replay
+
+# FREE evaluation only: replays recorded traces and judge verdicts (evals/fixtures) with the `replay` provider.
+# No API key is configured and none is needed. The harness fails the job if the hard-assertion pass rate
+# regresses (or the judge mean drops by more than 0.3) versus the previous report.
+#
+# There is deliberately NO live-eval workflow. Live evaluation spends real money against a LIFETIME cap of £10
+# tracked in the committed, append-only evals/ledger.json (reserve-then-settle). CI cannot reliably commit that
+# ledger, so live evals run locally only, with `--live`, confirmation and the owner's go-ahead. See
+# docs/adr/0006-eval-budget-guard.md.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run eval -- --tier replay

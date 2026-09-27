@@ -1,0 +1,8 @@
+{
+  "productName": "Ground Incident Coordination Agent",
+  "carrierName": "Northwind Air",
+  "carrierCode": "NWD",
+  "colours": { "primary": "#1F3A5F", "accent": "#4F8FBF" },
+  "stations": ["MAN", "PMI", "EDI", "FAO", "AGP", "DUB", "ALC", "TFS", "LGW", "AMS", "CDG", "BCN"],
+  "disclaimer": "Simulated systems · fictional carrier"
+}

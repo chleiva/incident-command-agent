@@ -1,0 +1,27 @@
+{
+  "name": "@ica/infra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ground Incident Coordination Agent — AWS CDK v2 app: DataStack, ApiStack, WebStack and the us-east-1 WebWafStack. Owned by task 04.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "synth": "env -u AWS_PROFILE -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN -u CDK_DEFAULT_ACCOUNT tsx bin/app.ts",
+    "cdk": "cdk",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ica/schema": "*",
+    "aws-cdk-lib": "^2.271.0",
+    "cdk-nag": "^3.0.2",
+    "constructs": "^10.8.1"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.1143.0",
+    "esbuild": "^0.28.2"
+  }
+}

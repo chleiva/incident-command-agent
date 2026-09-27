@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "id": "s09-fuel-spill-at-stand",
+  "title": "Fuel spill during refuelling, fire service attends",
+  "narrative": "Alicante, early evening. During refuelling of NW-ALF (A321) for NWD631 to Manchester at 17:45 with 220 passengers, fuel overflows from the left wing vent and about 200 litres spill onto the stand. The airport fire service attends and closes the stand; boarding had not started. The aircraft must be inspected before flight. The contracted engineer in Alicante is available; there is no spare in Alicante.",
+  "visibility": "public",
+  "inspiredBy": [
+    {
+      "sourceId": "ASRS ACN 1671518",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Large fuel spill while refuelling led to a fume event during preflight."
+    },
+    {
+      "sourceId": "ASRS ACN 1351094",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Fuel spill on the ramp and concerns about the fire department and airport response."
+    }
+  ],
+  "startSimTime": "2026-08-20T17:02:00Z",
+  "aircraft": {
+    "tail": "NW-ALF",
+    "type": "A321",
+    "station": "ALC",
+    "stand": "9",
+    "nextSectors": [
+      {
+        "flight": "NWD631",
+        "from": "ALC",
+        "to": "MAN",
+        "std": "2026-08-20T17:45:00Z",
+        "pax": 220,
+        "distanceKm": 1681
+      }
+    ]
+  },
+  "trigger": {
+    "type": "fuel-spill",
+    "atMinute": 3,
+    "description": "Fuel overflow from the left wing surge tank vent during refuelling; about 200 litres on the stand.",
+    "evidence": [
+      {
+        "kind": "report",
+        "text": "Fueller: fuel came out of the left wing vent near the end of the uplift; pump stopped, about 200 litres on the ground."
+      },
+      {
+        "kind": "photo-description",
+        "text": "Fuel pool under the left wing extending towards the stand drain; fire service applying absorbent."
+      }
+    ]
+  },
+  "world": {
+    "spares": [
+      { "tail": "NW-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
+    ],
+    "engineers": [
+      {
+        "id": "eng-alc-b1",
+        "name": "Priya Orrinsby",
+        "station": "ALC",
+        "licence": "B1",
+        "skills": ["A320 family", "fuel systems"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-alc-b2",
+        "name": "Bram Dunmere",
+        "station": "ALC",
+        "licence": "B2",
+        "skills": ["A320 family", "avionics"],
+        "availableFromMinute": 30
+      },
+      {
+        "id": "eng-man-b1k",
+        "name": "Kit Penhallow",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320 family", "fuel systems"],
+        "availableFromMinute": 0
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-631-cpt",
+        "name": "Fern Marshwood",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-08-20T12:30:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-631-fo",
+        "name": "Zoe Elderby",
+        "rank": "FO",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-08-20T12:30:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-631-sccm",
+        "name": "Sian Kilnsey",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-08-20T12:30:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-631-cc1",
+        "name": "Juno Emberlin",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-08-20T12:30:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-631-cc2",
+        "name": "Gil Thornbury-Hale",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-08-20T12:30:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-631-cc3",
+        "name": "Cara Inglestone",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-08-20T12:30:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-631-cc4",
+        "name": "Rafe Kilnsey",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-08-20T12:30:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      }
+    ],
+    "cohorts": [
+      { "id": "c631-general", "kind": "general", "count": 168, "flight": "NWD631" },
+      {
+        "id": "c631-families",
+        "kind": "families",
+        "count": 38,
+        "flight": "NWD631",
+        "notes": "Many families returning from holiday"
+      },
+      { "id": "c631-prm", "kind": "prm", "count": 4, "flight": "NWD631", "notes": "3 WCHR, 1 WCHC" },
+      { "id": "c631-um", "kind": "unaccompanied_minors", "count": 2, "flight": "NWD631" },
+      {
+        "id": "c631-connections",
+        "kind": "connections",
+        "count": 8,
+        "flight": "NWD631",
+        "onwardDeadline": "2026-08-20T22:30:00Z"
+      }
+    ],
+    "stands": [
+      { "id": "9", "station": "ALC", "kind": "contact", "occupiedByTail": "NW-ALF" },
+      {
+        "id": "11",
+        "station": "ALC",
+        "kind": "contact",
+        "occupiedByTail": "NW-XAL",
+        "occupiedUntilMinute": 50
+      },
+      { "id": "R15", "station": "ALC", "kind": "remote" }
+    ],
+    "handler": {
+      "station": "ALC",
+      "name": "Pellowe Ground Services",
+      "staffOnShift": 12,
+      "equipment": [
+        { "kind": "tug", "count": 1 },
+        { "kind": "towbar", "count": 1 },
+        { "kind": "stairs", "count": 2 },
+        { "kind": "bus", "count": 2 },
+        { "kind": "gpu", "count": 1 }
+      ],
+      "ackMinutes": 6
+    },
+    "weather": {
+      "station": "ALC",
+      "summary": "Hot and dry, 29 °C, light easterly",
+      "windKt": 8,
+      "tempC": 29,
+      "metar": "LEAL 201700Z 09008KT CAVOK 29/19 Q1014"
+    },
+    "curfews": [],
+    "rotation": [
+      {
+        "flight": "NWD630",
+        "tail": "NW-ALF",
+        "from": "MAN",
+        "to": "ALC",
+        "std": "2026-08-20T13:20:00Z",
+        "sta": "2026-08-20T15:55:00Z",
+        "pax": 215
+      },
+      {
+        "flight": "NWD631",
+        "tail": "NW-ALF",
+        "from": "ALC",
+        "to": "MAN",
+        "std": "2026-08-20T17:45:00Z",
+        "sta": "2026-08-20T20:10:00Z",
+        "pax": 220
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-fire-service",
+      "title": "Fire service on scene",
+      "atMinute": 4,
+      "description": "The airport fire service arrives and takes control of the stand.",
+      "effects": [
+        {
+          "op": "create",
+          "system": "airport",
+          "entity": "resourceRequests",
+          "record": {
+            "id": "RR-FIRE-1",
+            "kind": "fire_service",
+            "station": "ALC",
+            "status": "on_site",
+            "etaMinute": 4,
+            "releaseAtMinute": 60,
+            "tail": "NW-ALF"
+          }
+        },
+        {
+          "op": "info",
+          "text": "Fire service: stand 9 closed; no engines, no GPU, no vehicles until the spill is cleared."
+        }
+      ]
+    },
+    {
+      "id": "tw-stand-closure-extended",
+      "title": "Stand closure extended",
+      "atMinute": 35,
+      "description": "The airport extends the stand 9 closure until foam and absorbent clean-up is complete.",
+      "effects": [
+        {
+          "op": "patch",
+          "system": "airport",
+          "entity": "resourceRequests",
+          "id": "RR-FIRE-1",
+          "patch": { "releaseAtMinute": 105 }
+        },
+        { "op": "info", "text": "Airport: stand 9 closure extended by about 45 minutes for clean-up." }
+      ]
+    },
+    {
+      "id": "tw-boarded-passengers",
+      "title": "Early-boarded PRM passengers",
+      "description": "Two PRM passengers were boarded early and must be disembarked.",
+      "effects": [
+        {
+          "op": "info",
+          "text": "Gate: two PRM passengers were pre-boarded before the spill and are still on the aircraft."
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 10,
+      "actor": "Station manager",
+      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "NW-ALF" } },
+      "note": "Boarding held by the gate."
+    },
+    {
+      "atMinute": 18,
+      "actor": "Ground coordinator",
+      "action": { "tool": "notify_handler", "args": { "kind": "fuel_spill_cleanup", "tail": "NW-ALF" } },
+      "note": "Handler asked to support the fire service with clean-up."
+    },
+    {
+      "atMinute": 30,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-alc-b1", "station": "ALC" } },
+      "note": "Engineer asked to inspect the vent system."
+    },
+    {
+      "atMinute": 38,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": {
+          "cohortIds": ["c631-general", "c631-families", "c631-prm", "c631-um", "c631-connections"],
+          "channel": "sms",
+          "body": "NWD631 to Manchester is delayed while a fuel spill on the stand is cleaned up and the aircraft is checked. Please stay in the gate area; next update by 19:00 local time."
+        },
+        "decision": "approve"
+      },
+      "note": "Message after the station manager briefs the gate."
+    },
+    {
+      "atMinute": 120,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "issue_care_vouchers",
+        "args": {
+          "cohortIds": ["c631-general", "c631-families", "c631-prm", "c631-um", "c631-connections"],
+          "kind": "meal",
+          "valuePerPaxEur": 12
+        },
+        "decision": "approve"
+      },
+      "note": "Meal vouchers as the evening wears on."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "firstPaxMessageBeforeMin": 15,
+    "engineerPagedBeforeMin": 15,
+    "requiredTools": ["notify_handler", "page_engineer", "send_passenger_message", "search_procedure"],
+    "orderedPairs": [["notify_handler", "page_engineer"]],
+    "referenceSummary": "Safety first: keep passengers away, support the fire service with a clean-up task, get the pre-boarded PRM passengers off safely, and cite the refuelling/fuel-spill guidance. Page the Alicante B1 to inspect the vent and surge tank; inform passengers early and offer care as the stand closure extends; flight ops watches crew duty and the evening arrival at Manchester. Occurrence report drafted for a human reporter."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 120
+  }
+}

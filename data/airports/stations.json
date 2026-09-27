@@ -1,0 +1,5067 @@
+{
+  "source": "https://ourairports.com/data/airports.csv",
+  "licence": "Public domain (The Unlicense), OurAirports",
+  "retrievedAt": "2026-09-26",
+  "stations": [
+    {
+      "iata": "AAL",
+      "icao": "EKYT",
+      "name": "Aalborg Airport",
+      "lat": 57.09476,
+      "lon": 9.84993,
+      "country": "DK",
+      "region": "DK-81",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AAR",
+      "icao": "EKAH",
+      "name": "Aarhus Airport",
+      "lat": 56.30333,
+      "lon": 10.61829,
+      "country": "DK",
+      "region": "DK-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ABZ",
+      "icao": "EGPD",
+      "name": "Aberdeen International Airport",
+      "lat": 57.2019,
+      "lon": -2.19778,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "ACH",
+      "icao": "LSZR",
+      "name": "Sankt Gallen Altenrhein Airport",
+      "lat": 47.485,
+      "lon": 9.56077,
+      "country": "CH",
+      "region": "CH-SG",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ACI",
+      "icao": "EGJA",
+      "name": "Alderney Airport",
+      "lat": 49.7061,
+      "lon": -2.21472,
+      "country": "GG",
+      "region": "GG-A",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "AER",
+      "icao": "URSS",
+      "name": "Sochi International Airport",
+      "lat": 43.4499,
+      "lon": 39.9566,
+      "country": "RU",
+      "region": "RU-KDA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "AES",
+      "icao": "ENAL",
+      "name": "Ålesund Airport",
+      "lat": 62.56044,
+      "lon": 6.11085,
+      "country": "NO",
+      "region": "NO-15",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AEY",
+      "icao": "BIAR",
+      "name": "Akureyri International Airport",
+      "lat": 65.65657,
+      "lon": -18.07202,
+      "country": "IS",
+      "region": "IS-6",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "AGH",
+      "icao": "ESTA",
+      "name": "Ängelholm-Helsingborg Airport",
+      "lat": 56.2961,
+      "lon": 12.8471,
+      "country": "SE",
+      "region": "SE-M",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AGP",
+      "icao": "LEMG",
+      "name": "Málaga-Costa del Sol Airport",
+      "lat": 36.6749,
+      "lon": -4.49911,
+      "country": "ES",
+      "region": "ES-AN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AHO",
+      "icao": "LIEA",
+      "name": "Alghero-Fertilia Airport",
+      "lat": 40.6321,
+      "lon": 8.29077,
+      "country": "IT",
+      "region": "IT-88",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AJA",
+      "icao": "LFKJ",
+      "name": "Ajaccio Napoléon Bonaparte airport",
+      "lat": 41.9236,
+      "lon": 8.80292,
+      "country": "FR",
+      "region": "FR-COR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AJR",
+      "icao": "ESNX",
+      "name": "Arvidsjaur Airport",
+      "lat": 65.5903,
+      "lon": 19.2819,
+      "country": "SE",
+      "region": "SE-BD",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ALC",
+      "icao": "LEAL",
+      "name": "Alicante-Elche Miguel Hernández Airport",
+      "lat": 38.2822,
+      "lon": -0.55816,
+      "country": "ES",
+      "region": "ES-VC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ALF",
+      "icao": "ENAT",
+      "name": "Alta Airport",
+      "lat": 69.9761,
+      "lon": 23.3717,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AMS",
+      "icao": "EHAM",
+      "name": "Amsterdam Airport Schiphol",
+      "lat": 52.3086,
+      "lon": 4.76389,
+      "country": "NL",
+      "region": "NL-NH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AMV",
+      "icao": "ULDD",
+      "name": "Amderma Airport",
+      "lat": 69.76371,
+      "lon": 61.55671,
+      "country": "RU",
+      "region": "RU-NEN",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "ANR",
+      "icao": "EBAW",
+      "name": "Antwerp International Airport (Deurne)",
+      "lat": 51.19067,
+      "lon": 4.46315,
+      "country": "BE",
+      "region": "BE-VAN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ANX",
+      "icao": "ENAN",
+      "name": "Andøya Airport, Andenes",
+      "lat": 69.29519,
+      "lon": 16.13938,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AOI",
+      "icao": "LIPY",
+      "name": "Marche Airport",
+      "lat": 43.6163,
+      "lon": 13.3623,
+      "country": "IT",
+      "region": "IT-57",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AOK",
+      "icao": "LGKP",
+      "name": "Karpathos Airport",
+      "lat": 35.4214,
+      "lon": 27.146,
+      "country": "GR",
+      "region": "GR-L",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "ARH",
+      "icao": "ULAA",
+      "name": "Talagi Airport",
+      "lat": 64.6003,
+      "lon": 40.7167,
+      "country": "RU",
+      "region": "RU-ARK",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "ARN",
+      "icao": "ESSA",
+      "name": "Stockholm-Arlanda Airport",
+      "lat": 59.64849,
+      "lon": 17.92883,
+      "country": "SE",
+      "region": "SE-AB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ARW",
+      "icao": "LRAR",
+      "name": "Arad International Airport",
+      "lat": 46.17614,
+      "lon": 21.26432,
+      "country": "RO",
+      "region": "RO-AR",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "ATH",
+      "icao": "LGAV",
+      "name": "Athens Eleftherios Venizelos International Airport",
+      "lat": 37.9364,
+      "lon": 23.9445,
+      "country": "GR",
+      "region": "GR-I",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "AUR",
+      "icao": "LFLW",
+      "name": "Aurillac airport",
+      "lat": 44.8914,
+      "lon": 2.42194,
+      "country": "FR",
+      "region": "FR-ARA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AVN",
+      "icao": "LFMV",
+      "name": "Avignon Caumont airport",
+      "lat": 43.9073,
+      "lon": 4.90183,
+      "country": "FR",
+      "region": "FR-PAC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "AXD",
+      "icao": "LGAL",
+      "name": "Alexandroupoli Democritus Airport",
+      "lat": 40.8559,
+      "lon": 25.9563,
+      "country": "GR",
+      "region": "GR-A",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "BAY",
+      "icao": "LRBM",
+      "name": "Maramureș International Airport",
+      "lat": 47.65844,
+      "lon": 23.46445,
+      "country": "RO",
+      "region": "RO-MM",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "BBU",
+      "icao": "LRBS",
+      "name": "Bucharest Băneasa Aurel Vlaicu International Airport",
+      "lat": 44.50313,
+      "lon": 26.10294,
+      "country": "RO",
+      "region": "RO-B",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "BCM",
+      "icao": "LRBC",
+      "name": "Bacău George Enescu International  Airport",
+      "lat": 46.5219,
+      "lon": 26.9103,
+      "country": "RO",
+      "region": "RO-BC",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "BCN",
+      "icao": "LEBL",
+      "name": "Josep Tarradellas Barcelona-El Prat Airport",
+      "lat": 41.2971,
+      "lon": 2.07846,
+      "country": "ES",
+      "region": "ES-CT",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BDS",
+      "icao": "LIBR",
+      "name": "Brindisi Airport",
+      "lat": 40.6576,
+      "lon": 17.947,
+      "country": "IT",
+      "region": "IT-75",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BDU",
+      "icao": "ENDU",
+      "name": "Bardufoss Airport",
+      "lat": 69.0558,
+      "lon": 18.5404,
+      "country": "NO",
+      "region": "NO-55",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BEB",
+      "icao": "EGPL",
+      "name": "Benbecula Airport",
+      "lat": 57.4811,
+      "lon": -7.36278,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BEG",
+      "icao": "LYBE",
+      "name": "Belgrade Nikola Tesla Airport",
+      "lat": 44.8184,
+      "lon": 20.3091,
+      "country": "RS",
+      "region": "RS-00",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BER",
+      "icao": "EDDB",
+      "name": "Berlin Brandenburg Airport",
+      "lat": 52.36174,
+      "lon": 13.50234,
+      "country": "DE",
+      "region": "DE-BR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BES",
+      "icao": "LFRB",
+      "name": "Brest Bretagne airport",
+      "lat": 48.4479,
+      "lon": -4.41854,
+      "country": "FR",
+      "region": "FR-BRE",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BFS",
+      "icao": "EGAA",
+      "name": "Belfast International Airport",
+      "lat": 54.6575,
+      "lon": -6.21583,
+      "country": "GB",
+      "region": "GB-NIR",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BGC",
+      "icao": "LPBG",
+      "name": "Bragança Airport",
+      "lat": 41.8578,
+      "lon": -6.70713,
+      "country": "PT",
+      "region": "PT-04",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BGO",
+      "icao": "ENBR",
+      "name": "Bergen Airport, Flesland",
+      "lat": 60.2934,
+      "lon": 5.21814,
+      "country": "NO",
+      "region": "NO-46",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BGY",
+      "icao": "LIME",
+      "name": "Il Caravaggio International Airport",
+      "lat": 45.66936,
+      "lon": 9.70885,
+      "country": "IT",
+      "region": "IT-25",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BHD",
+      "icao": "EGAC",
+      "name": "George Best Belfast City Airport",
+      "lat": 54.6181,
+      "lon": -5.8725,
+      "country": "GB",
+      "region": "GB-NIR",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BHX",
+      "icao": "EGBB",
+      "name": "Birmingham Airport",
+      "lat": 52.4539,
+      "lon": -1.74803,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BIA",
+      "icao": "LFKB",
+      "name": "Bastia-Poretta International airport",
+      "lat": 42.5527,
+      "lon": 9.48373,
+      "country": "FR",
+      "region": "FR-COR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BIO",
+      "icao": "LEBB",
+      "name": "Bilbao Airport",
+      "lat": 43.3011,
+      "lon": -2.91061,
+      "country": "ES",
+      "region": "ES-PV",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BIQ",
+      "icao": "LFBZ",
+      "name": "Biarritz Pays Basque airport",
+      "lat": 43.46837,
+      "lon": -1.52322,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BJF",
+      "icao": "ENBS",
+      "name": "Båtsfjord Airport",
+      "lat": 70.60025,
+      "lon": 29.69261,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BJZ",
+      "icao": "LEBZ",
+      "name": "Badajoz Airport",
+      "lat": 38.8913,
+      "lon": -6.82133,
+      "country": "ES",
+      "region": "ES-EX",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BLE",
+      "icao": "ESSD",
+      "name": "Dala Airport",
+      "lat": 60.422,
+      "lon": 15.5152,
+      "country": "SE",
+      "region": "SE-W",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BLL",
+      "icao": "EKBI",
+      "name": "Billund Airport",
+      "lat": 55.74034,
+      "lon": 9.15702,
+      "country": "DK",
+      "region": "DK-83",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BLQ",
+      "icao": "LIPE",
+      "name": "Bologna Guglielmo Marconi Airport",
+      "lat": 44.5354,
+      "lon": 11.2887,
+      "country": "IT",
+      "region": "IT-45",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BMA",
+      "icao": "ESSB",
+      "name": "Stockholm-Bromma Airport",
+      "lat": 59.3544,
+      "lon": 17.9417,
+      "country": "SE",
+      "region": "SE-AB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BNN",
+      "icao": "ENBN",
+      "name": "Brønnøysund Airport, Brønnøy",
+      "lat": 65.4611,
+      "lon": 12.2175,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BNX",
+      "icao": "LQBK",
+      "name": "Banja Luka International Airport",
+      "lat": 44.9414,
+      "lon": 17.2975,
+      "country": "BA",
+      "region": "BA-SRP",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BOD",
+      "icao": "LFBD",
+      "name": "Bordeaux–Mérignac Airport",
+      "lat": 44.82865,
+      "lon": -0.71536,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BOH",
+      "icao": "EGHH",
+      "name": "Bournemouth Airport",
+      "lat": 50.78048,
+      "lon": -1.83958,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BOJ",
+      "icao": "LBBG",
+      "name": "Burgas Airport",
+      "lat": 42.56992,
+      "lon": 27.51517,
+      "country": "BG",
+      "region": "BG-02",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "BOO",
+      "icao": "ENBO",
+      "name": "Bodø Airport",
+      "lat": 67.2692,
+      "lon": 14.3653,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BQT",
+      "icao": "UMBB",
+      "name": "Brest International Airport",
+      "lat": 52.10814,
+      "lon": 23.89676,
+      "country": "BY",
+      "region": "BY-BR",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "BRE",
+      "icao": "EDDW",
+      "name": "Bremen Airport",
+      "lat": 53.04679,
+      "lon": 8.78932,
+      "country": "DE",
+      "region": "DE-HB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BRI",
+      "icao": "LIBD",
+      "name": "Bari Karol Wojtyła International Airport",
+      "lat": 41.1389,
+      "lon": 16.7606,
+      "country": "IT",
+      "region": "IT-75",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BRN",
+      "icao": "LSZB",
+      "name": "Bern Airport",
+      "lat": 46.91274,
+      "lon": 7.49882,
+      "country": "CH",
+      "region": "CH-BE",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BRQ",
+      "icao": "LKTB",
+      "name": "Brno-Tuřany Airport",
+      "lat": 49.15128,
+      "lon": 16.69397,
+      "country": "CZ",
+      "region": "CZ-JM",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BRR",
+      "icao": "EGPR",
+      "name": "Barra Airport",
+      "lat": 57.0228,
+      "lon": -7.44306,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BRS",
+      "icao": "EGGD",
+      "name": "Bristol Airport",
+      "lat": 51.38233,
+      "lon": -2.71645,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "BRU",
+      "icao": "EBBR",
+      "name": "Brussels Airport",
+      "lat": 50.9014,
+      "lon": 4.48444,
+      "country": "BE",
+      "region": "BE-VBR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BSL",
+      "icao": "LFSB",
+      "name": "EuroAirport Basel–Mulhouse–Freiburg",
+      "lat": 47.60068,
+      "lon": 7.52112,
+      "country": "FR",
+      "region": "FR-GES",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BTS",
+      "icao": "LZIB",
+      "name": "M. R. Štefánik Airport",
+      "lat": 48.1702,
+      "lon": 17.2127,
+      "country": "SK",
+      "region": "SK-BL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BUD",
+      "icao": "LHBP",
+      "name": "Budapest Liszt Ferenc International Airport",
+      "lat": 47.43018,
+      "lon": 19.26239,
+      "country": "HU",
+      "region": "HU-BU",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BVA",
+      "icao": "LFOB",
+      "name": "Beauvais-Tillé airport",
+      "lat": 49.4544,
+      "lon": 2.11278,
+      "country": "FR",
+      "region": "FR-HDF",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BVE",
+      "icao": "LFSL",
+      "name": "Brive Souillac airport",
+      "lat": 45.03972,
+      "lon": 1.48556,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BVG",
+      "icao": "ENBV",
+      "name": "Berlevåg Airport",
+      "lat": 70.87152,
+      "lon": 29.0341,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BWK",
+      "icao": "LDSB",
+      "name": "Brač Airport",
+      "lat": 43.28445,
+      "lon": 16.67836,
+      "country": "HR",
+      "region": "HR-17",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BZG",
+      "icao": "EPBY",
+      "name": "Ignacy Jan Paderewski Bydgoszcz Airport",
+      "lat": 53.0968,
+      "lon": 17.9777,
+      "country": "PL",
+      "region": "PL-KP",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BZO",
+      "icao": "LIPB",
+      "name": "Bolzano Airport",
+      "lat": 46.45925,
+      "lon": 11.32613,
+      "country": "IT",
+      "region": "IT-32",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "BZR",
+      "icao": "LFMU",
+      "name": "Béziers Vias airport",
+      "lat": 43.3235,
+      "lon": 3.3539,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CAG",
+      "icao": "LIEE",
+      "name": "Cagliari Elmas Airport",
+      "lat": 39.2515,
+      "lon": 9.05428,
+      "country": "IT",
+      "region": "IT-88",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CAL",
+      "icao": "EGEC",
+      "name": "Campbeltown Airport",
+      "lat": 55.4372,
+      "lon": -5.68639,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "CAT",
+      "icao": "LPCS",
+      "name": "Cascais Airport",
+      "lat": 38.725,
+      "lon": -9.35523,
+      "country": "PT",
+      "region": "PT-11",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "CCF",
+      "icao": "LFMK",
+      "name": "Carcassonne Salvaza Airport",
+      "lat": 43.216,
+      "lon": 2.30632,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CDG",
+      "icao": "LFPG",
+      "name": "Charles de Gaulle International Airport",
+      "lat": 49.00896,
+      "lon": 2.55412,
+      "country": "FR",
+      "region": "FR-IDF",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CDT",
+      "icao": "LECH",
+      "name": "Castellón-Costa Azahar Airport",
+      "lat": 40.21389,
+      "lon": 0.07333,
+      "country": "ES",
+      "region": "ES-VC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CEE",
+      "icao": "ULWC",
+      "name": "Cherepovets Airport",
+      "lat": 59.2736,
+      "lon": 38.0158,
+      "country": "RU",
+      "region": "RU-VLG",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "CFE",
+      "icao": "LFLC",
+      "name": "Clermont-Ferrand Auvergne airport",
+      "lat": 45.7867,
+      "lon": 3.16917,
+      "country": "FR",
+      "region": "FR-ARA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CFN",
+      "icao": "EIDL",
+      "name": "Donegal Airport",
+      "lat": 55.0442,
+      "lon": -8.341,
+      "country": "IE",
+      "region": "IE-DL",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "CFR",
+      "icao": "LFRK",
+      "name": "Caen Carpiquet airport",
+      "lat": 49.17678,
+      "lon": -0.45488,
+      "country": "FR",
+      "region": "FR-NOR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CFU",
+      "icao": "LGKR",
+      "name": "Corfu Ioannis Kapodistrias International Airport",
+      "lat": 39.60145,
+      "lon": 19.91218,
+      "country": "GR",
+      "region": "GR-F",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "CGN",
+      "icao": "EDDK",
+      "name": "Cologne Bonn Airport",
+      "lat": 50.8659,
+      "lon": 7.14274,
+      "country": "DE",
+      "region": "DE-NW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CHQ",
+      "icao": "LGSA",
+      "name": "Chania International Airport",
+      "lat": 35.53121,
+      "lon": 24.15067,
+      "country": "GR",
+      "region": "GR-M",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "CIA",
+      "icao": "LIRA",
+      "name": "Ciampino–G. B. Pastine International Airport",
+      "lat": 41.79877,
+      "lon": 12.59533,
+      "country": "IT",
+      "region": "IT-62",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CIY",
+      "icao": "LICB",
+      "name": "Comiso Airport",
+      "lat": 36.99583,
+      "lon": 14.60889,
+      "country": "IT",
+      "region": "IT-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CLJ",
+      "icao": "LRCL",
+      "name": "Avram Iancu Cluj International Airport",
+      "lat": 46.78604,
+      "lon": 23.68573,
+      "country": "RO",
+      "region": "RO-CJ",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "CLY",
+      "icao": "LFKC",
+      "name": "Calvi Sainte Catherine Airport",
+      "lat": 42.53042,
+      "lon": 8.79298,
+      "country": "FR",
+      "region": "FR-COR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CMF",
+      "icao": "LFLB",
+      "name": "Chambéry Aix les Bains airport",
+      "lat": 45.6381,
+      "lon": 5.88023,
+      "country": "FR",
+      "region": "FR-ARA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CND",
+      "icao": "LRCK",
+      "name": "Mihail Kogălniceanu International Airport",
+      "lat": 44.3622,
+      "lon": 28.4883,
+      "country": "RO",
+      "region": "RO-CT",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "CPH",
+      "icao": "EKCH",
+      "name": "Copenhagen Kastrup Airport",
+      "lat": 55.6179,
+      "lon": 12.656,
+      "country": "DK",
+      "region": "DK-84",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CRA",
+      "icao": "LRCV",
+      "name": "Craiova International Airport",
+      "lat": 44.3181,
+      "lon": 23.8886,
+      "country": "RO",
+      "region": "RO-DJ",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "CRL",
+      "icao": "EBCI",
+      "name": "Brussels South Charleroi Airport",
+      "lat": 50.46196,
+      "lon": 4.45956,
+      "country": "BE",
+      "region": "BE-WHT",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CRV",
+      "icao": "LIBC",
+      "name": "Crotone Sant'Anna Pythagoras Airport",
+      "lat": 38.9972,
+      "lon": 17.0802,
+      "country": "IT",
+      "region": "IT-78",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CTA",
+      "icao": "LICC",
+      "name": "Catania-Fontanarossa Airport",
+      "lat": 37.4668,
+      "lon": 15.0664,
+      "country": "IT",
+      "region": "IT-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CUF",
+      "icao": "LIMZ",
+      "name": "Cuneo International Airport",
+      "lat": 44.54746,
+      "lon": 7.62305,
+      "country": "IT",
+      "region": "IT-21",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "CWL",
+      "icao": "EGFF",
+      "name": "Cardiff International Airport",
+      "lat": 51.3967,
+      "lon": -3.34333,
+      "country": "GB",
+      "region": "GB-WLS",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "DBV",
+      "icao": "LDDU",
+      "name": "Dubrovnik Ruđer Bošković Airport",
+      "lat": 42.56225,
+      "lon": 18.26554,
+      "country": "HR",
+      "region": "HR-19",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "DCM",
+      "icao": "LFCK",
+      "name": "Castres Mazamet Airport",
+      "lat": 43.5563,
+      "lon": 2.28918,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "DEB",
+      "icao": "LHDC",
+      "name": "Debrecen International Airport",
+      "lat": 47.48947,
+      "lon": 21.61628,
+      "country": "HU",
+      "region": "HU-HB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "DLE",
+      "icao": "LFGJ",
+      "name": "Dole Tavaux Airport",
+      "lat": 47.03896,
+      "lon": 5.42759,
+      "country": "FR",
+      "region": "FR-BFC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "DME",
+      "icao": "UUDD",
+      "name": "Domodedovo International Airport",
+      "lat": 55.4088,
+      "lon": 37.9063,
+      "country": "RU",
+      "region": "RU-MOS",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "DND",
+      "icao": "EGPN",
+      "name": "Dundee Airport",
+      "lat": 56.4525,
+      "lon": -3.02583,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "DOL",
+      "icao": "LFRG",
+      "name": "Deauville Normandie airport",
+      "lat": 49.36524,
+      "lon": 0.15448,
+      "country": "FR",
+      "region": "FR-NOR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "DRS",
+      "icao": "EDDC",
+      "name": "Dresden Airport",
+      "lat": 51.13412,
+      "lon": 13.76783,
+      "country": "DE",
+      "region": "DE-SN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "DTM",
+      "icao": "EDLW",
+      "name": "Dortmund Airport",
+      "lat": 51.5183,
+      "lon": 7.61224,
+      "country": "DE",
+      "region": "DE-NW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "DUB",
+      "icao": "EIDW",
+      "name": "Dublin Airport",
+      "lat": 53.42871,
+      "lon": -6.26212,
+      "country": "IE",
+      "region": "IE-D",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "DUS",
+      "icao": "EDDL",
+      "name": "Düsseldorf Airport",
+      "lat": 51.2895,
+      "lon": 6.76678,
+      "country": "DE",
+      "region": "DE-NW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EAS",
+      "icao": "LESO",
+      "name": "San Sebastián Airport",
+      "lat": 43.3565,
+      "lon": -1.79061,
+      "country": "ES",
+      "region": "ES-PV",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EBA",
+      "icao": "LIRJ",
+      "name": "Marina di Campo Airport",
+      "lat": 42.76087,
+      "lon": 10.23981,
+      "country": "IT",
+      "region": "IT-52",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EBJ",
+      "icao": "EKEB",
+      "name": "Esbjerg Airport",
+      "lat": 55.5259,
+      "lon": 8.5534,
+      "country": "DK",
+      "region": "DK-83",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EDI",
+      "icao": "EGPH",
+      "name": "Edinburgh Airport",
+      "lat": 55.95015,
+      "lon": -3.37229,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "EFL",
+      "icao": "LGKF",
+      "name": "Kefallinia Airport",
+      "lat": 38.1201,
+      "lon": 20.5005,
+      "country": "GR",
+      "region": "GR-F",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "EGC",
+      "icao": "LFBE",
+      "name": "Bergerac Dordogne-Périgord airport",
+      "lat": 44.8253,
+      "lon": 0.51861,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EGS",
+      "icao": "BIEG",
+      "name": "Egilsstaðir Airport",
+      "lat": 65.2833,
+      "lon": -14.4014,
+      "country": "IS",
+      "region": "IS-7",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "EIN",
+      "icao": "EHEH",
+      "name": "Eindhoven Airport",
+      "lat": 51.4501,
+      "lon": 5.37453,
+      "country": "NL",
+      "region": "NL-NB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EMA",
+      "icao": "EGNX",
+      "name": "East Midlands Airport",
+      "lat": 52.8311,
+      "lon": -1.32806,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "ENF",
+      "icao": "EFET",
+      "name": "Enontekio Airport",
+      "lat": 68.3626,
+      "lon": 23.4243,
+      "country": "FI",
+      "region": "FI-10",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "EOI",
+      "icao": "EGED",
+      "name": "Eday Airport",
+      "lat": 59.1906,
+      "lon": -2.77222,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "EPU",
+      "icao": "EEPU",
+      "name": "Pärnu Airport",
+      "lat": 58.419,
+      "lon": 24.4728,
+      "country": "EE",
+      "region": "EE-67",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "ERF",
+      "icao": "EDDE",
+      "name": "Erfurt-Weimar Airport",
+      "lat": 50.97828,
+      "lon": 10.96071,
+      "country": "DE",
+      "region": "DE-TH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ESL",
+      "icao": "URWI",
+      "name": "Elista Airport",
+      "lat": 46.3739,
+      "lon": 44.3309,
+      "country": "RU",
+      "region": "RU-KL",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "ETZ",
+      "icao": "LFJL",
+      "name": "Metz-Nancy-Lorraine Airport",
+      "lat": 48.9821,
+      "lon": 6.25132,
+      "country": "FR",
+      "region": "FR-GES",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EVE",
+      "icao": "ENEV",
+      "name": "Harstad/Narvik Airport",
+      "lat": 68.4913,
+      "lon": 16.6781,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "EXT",
+      "icao": "EGTE",
+      "name": "Exeter International Airport",
+      "lat": 50.73426,
+      "lon": -3.41398,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "EYK",
+      "icao": "USHQ",
+      "name": "Beloyarskiy Airport",
+      "lat": 63.6869,
+      "lon": 66.6986,
+      "country": "RU",
+      "region": "RU-KHM",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "FAE",
+      "icao": "EKVG",
+      "name": "Vágar Airport",
+      "lat": 62.06326,
+      "lon": -7.27578,
+      "country": "FO",
+      "region": "FO-U-A",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "FAO",
+      "icao": "LPFR",
+      "name": "Faro - Gago Coutinho International Airport",
+      "lat": 37.01591,
+      "lon": -7.97094,
+      "country": "PT",
+      "region": "PT-08",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "FCN",
+      "icao": "ETMN",
+      "name": "Sea-Airport Cuxhaven/Nordholz / Nordholz Naval Airbase",
+      "lat": 53.76769,
+      "lon": 8.6592,
+      "country": "DE",
+      "region": "DE-NI",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FCO",
+      "icao": "LIRF",
+      "name": "Rome–Fiumicino Leonardo da Vinci International Airport",
+      "lat": 41.80453,
+      "lon": 12.252,
+      "country": "IT",
+      "region": "IT-62",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FDH",
+      "icao": "EDNY",
+      "name": "Bodensee Airport Friedrichshafen",
+      "lat": 47.6713,
+      "lon": 9.51149,
+      "country": "DE",
+      "region": "DE-BW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FKB",
+      "icao": "EDSB",
+      "name": "Karlsruhe Baden-Baden Airport",
+      "lat": 48.7794,
+      "lon": 8.0805,
+      "country": "DE",
+      "region": "DE-BW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FLR",
+      "icao": "LIRQ",
+      "name": "Florence Airport, Peretola",
+      "lat": 43.80856,
+      "lon": 11.20282,
+      "country": "IT",
+      "region": "IT-52",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FLW",
+      "icao": "LPFL",
+      "name": "Flores Airport",
+      "lat": 39.4553,
+      "lon": -31.1314,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "FMM",
+      "icao": "EDJA",
+      "name": "Memmingen Allgau Airport",
+      "lat": 47.98809,
+      "lon": 10.23825,
+      "country": "DE",
+      "region": "DE-BY",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FMO",
+      "icao": "EDDG",
+      "name": "Münster Osnabrück Airport",
+      "lat": 52.13382,
+      "lon": 7.68848,
+      "country": "DE",
+      "region": "DE-NW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FNC",
+      "icao": "LPMA",
+      "name": "Cristiano Ronaldo International Airport",
+      "lat": 32.69781,
+      "lon": -16.77461,
+      "country": "PT",
+      "region": "PT-30",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "FNI",
+      "icao": "LFTW",
+      "name": "Nîmes-Arles-Camargue Airport",
+      "lat": 43.7574,
+      "lon": 4.41635,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FOG",
+      "icao": "LIBF",
+      "name": "Foggia Gino Lisa Airport",
+      "lat": 41.4336,
+      "lon": 15.53457,
+      "country": "IT",
+      "region": "IT-75",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FRA",
+      "icao": "EDDF",
+      "name": "Frankfurt Main Airport",
+      "lat": 50.02671,
+      "lon": 8.55835,
+      "country": "DE",
+      "region": "DE-HE",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FRL",
+      "icao": "LIPK",
+      "name": "Forlì-Luigi Ridolfi International Airport",
+      "lat": 44.1948,
+      "lon": 12.0701,
+      "country": "IT",
+      "region": "IT-45",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FRO",
+      "icao": "ENFL",
+      "name": "Florø Airport",
+      "lat": 61.5836,
+      "lon": 5.02472,
+      "country": "NO",
+      "region": "NO-46",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "FSC",
+      "icao": "LFKF",
+      "name": "Figari Sud-Corse Airport",
+      "lat": 41.50185,
+      "lon": 9.09709,
+      "country": "FR",
+      "region": "FR-COR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GCI",
+      "icao": "EGJB",
+      "name": "Guernsey Airport",
+      "lat": 49.435,
+      "lon": -2.60197,
+      "country": "GG",
+      "region": "GG-G",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "GDN",
+      "icao": "EPGD",
+      "name": "Gdańsk Lech Wałęsa Airport",
+      "lat": 54.3776,
+      "lon": 18.4662,
+      "country": "PL",
+      "region": "PL-PM",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GDZ",
+      "icao": "URKG",
+      "name": "Gelendzhik Airport",
+      "lat": 44.58209,
+      "lon": 38.01248,
+      "country": "RU",
+      "region": "RU-KDA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "GEV",
+      "icao": "ESNG",
+      "name": "Gällivare Airport",
+      "lat": 67.1324,
+      "lon": 20.8146,
+      "country": "SE",
+      "region": "SE-BD",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GHV",
+      "icao": "LRBV",
+      "name": "Brașov-Ghimbav International Airport",
+      "lat": 45.70558,
+      "lon": 25.52287,
+      "country": "RO",
+      "region": "RO-BV",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "GIB",
+      "icao": "LXGB",
+      "name": "Gibraltar Airport",
+      "lat": 36.15168,
+      "lon": -5.34978,
+      "country": "GI",
+      "region": "GI-U-A",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GLA",
+      "icao": "EGPF",
+      "name": "Glasgow Airport",
+      "lat": 55.8719,
+      "lon": -4.43306,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "GME",
+      "icao": "UMGG",
+      "name": "Gomel Airport",
+      "lat": 52.527,
+      "lon": 31.0167,
+      "country": "BY",
+      "region": "BY-HO",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "GNB",
+      "icao": "LFLS",
+      "name": "Grenoble Alpes Isère Airport",
+      "lat": 45.3629,
+      "lon": 5.32937,
+      "country": "FR",
+      "region": "FR-ARA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GOA",
+      "icao": "LIMJ",
+      "name": "Genoa Cristoforo Colombo Airport",
+      "lat": 44.41204,
+      "lon": 8.84073,
+      "country": "IT",
+      "region": "IT-42",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GOJ",
+      "icao": "UWGG",
+      "name": "Nizhny Novgorod / Strigino International Airport",
+      "lat": 56.22735,
+      "lon": 43.78515,
+      "country": "RU",
+      "region": "RU-NIZ",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "GOT",
+      "icao": "ESGG",
+      "name": "Göteborg Landvetter Airport",
+      "lat": 57.6628,
+      "lon": 12.2798,
+      "country": "SE",
+      "region": "SE-Q",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GPA",
+      "icao": "LGRX",
+      "name": "Patras Araxos Agamemnon Airport",
+      "lat": 38.1511,
+      "lon": 21.4256,
+      "country": "GR",
+      "region": "GR-G",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "GRO",
+      "icao": "LEGE",
+      "name": "Girona-Costa Brava Airport",
+      "lat": 41.90464,
+      "lon": 2.76177,
+      "country": "ES",
+      "region": "ES-CT",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GRQ",
+      "icao": "EHGG",
+      "name": "Groningen Airport Eelde",
+      "lat": 53.11911,
+      "lon": 6.57765,
+      "country": "NL",
+      "region": "NL-DR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GRW",
+      "icao": "LPGR",
+      "name": "Graciosa Airport",
+      "lat": 39.0922,
+      "lon": -28.0298,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "GRX",
+      "icao": "LEGR",
+      "name": "F.G.L. Airport Granada-Jaén Airport",
+      "lat": 37.1887,
+      "lon": -3.77736,
+      "country": "ES",
+      "region": "ES-AN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GRY",
+      "icao": "BIGR",
+      "name": "Grímsey Airport",
+      "lat": 66.5458,
+      "lon": -18.0173,
+      "country": "IS",
+      "region": "IS-6",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "GRZ",
+      "icao": "LOWG",
+      "name": "Graz Airport",
+      "lat": 46.9911,
+      "lon": 15.4396,
+      "country": "AT",
+      "region": "AT-6",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GVA",
+      "icao": "LSGG",
+      "name": "Geneva International Airport",
+      "lat": 46.2381,
+      "lon": 6.10895,
+      "country": "CH",
+      "region": "CH-GE",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "GWT",
+      "icao": "EDXW",
+      "name": "Westerland Sylt Airport",
+      "lat": 54.9132,
+      "lon": 8.34047,
+      "country": "DE",
+      "region": "DE-SH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HAD",
+      "icao": "ESMT",
+      "name": "Halmstad Airport",
+      "lat": 56.6911,
+      "lon": 12.8202,
+      "country": "SE",
+      "region": "SE-N",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HAJ",
+      "icao": "EDDV",
+      "name": "Hannover Airport",
+      "lat": 52.4611,
+      "lon": 9.68508,
+      "country": "DE",
+      "region": "DE-NI",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HAM",
+      "icao": "EDDH",
+      "name": "Hamburg Helmut Schmidt Airport",
+      "lat": 53.6304,
+      "lon": 9.98823,
+      "country": "DE",
+      "region": "DE-HH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HAU",
+      "icao": "ENHD",
+      "name": "Haugesund Airport, Karmøy",
+      "lat": 59.3453,
+      "lon": 5.20836,
+      "country": "NO",
+      "region": "NO-11",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HDF",
+      "icao": "EDAH",
+      "name": "Heringsdorf Airport",
+      "lat": 53.8787,
+      "lon": 14.1523,
+      "country": "DE",
+      "region": "DE-MV",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HEL",
+      "icao": "EFHK",
+      "name": "Helsinki Vantaa Airport",
+      "lat": 60.31836,
+      "lon": 24.96334,
+      "country": "FI",
+      "region": "FI-18",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "HER",
+      "icao": "LGIR",
+      "name": "Heraklion International Nikos Kazantzakis Airport",
+      "lat": 35.3397,
+      "lon": 25.1803,
+      "country": "GR",
+      "region": "GR-M",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "HFN",
+      "icao": "BIHN",
+      "name": "Hornafjörður Airport",
+      "lat": 64.2956,
+      "lon": -15.2272,
+      "country": "IS",
+      "region": "IS-8",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "HFT",
+      "icao": "ENHF",
+      "name": "Hammerfest Airport",
+      "lat": 70.6797,
+      "lon": 23.6686,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HHN",
+      "icao": "EDFH",
+      "name": "Frankfurt-Hahn Airport",
+      "lat": 49.94635,
+      "lon": 7.26173,
+      "country": "DE",
+      "region": "DE-RP",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HOR",
+      "icao": "LPHR",
+      "name": "Horta Airport",
+      "lat": 38.5199,
+      "lon": -28.7159,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "HOV",
+      "icao": "ENOV",
+      "name": "Ørsta-Volda Airport, Hovden",
+      "lat": 62.18,
+      "lon": 6.0741,
+      "country": "NO",
+      "region": "NO-15",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "HUY",
+      "icao": "EGNJ",
+      "name": "Humberside Airport",
+      "lat": 53.57615,
+      "lon": -0.34954,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "HVG",
+      "icao": "ENHV",
+      "name": "Honningsvåg Airport, Valan",
+      "lat": 71.0097,
+      "lon": 25.9836,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "IAR",
+      "icao": "UUDL",
+      "name": "Golden Ring Yaroslavl International Airport",
+      "lat": 57.5607,
+      "lon": 40.1574,
+      "country": "RU",
+      "region": "RU-YAR",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "IAS",
+      "icao": "LRIA",
+      "name": "Iaşi International Airport",
+      "lat": 47.17963,
+      "lon": 27.62143,
+      "country": "RO",
+      "region": "RO-IS",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "IBZ",
+      "icao": "LEIB",
+      "name": "Ibiza Airport",
+      "lat": 38.8729,
+      "lon": 1.37312,
+      "country": "ES",
+      "region": "ES-IB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "IEG",
+      "icao": "EPZG",
+      "name": "Zielona Góra-Babimost Airport",
+      "lat": 52.1385,
+      "lon": 15.7986,
+      "country": "PL",
+      "region": "PL-LB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "IFJ",
+      "icao": "BIIS",
+      "name": "Ísafjörður Airport",
+      "lat": 66.0581,
+      "lon": -23.1353,
+      "country": "IS",
+      "region": "IS-4",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "ILD",
+      "icao": "LEDA",
+      "name": "Lleida-Alguaire Airport",
+      "lat": 41.72819,
+      "lon": 0.53502,
+      "country": "ES",
+      "region": "ES-CT",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ILY",
+      "icao": "EGPI",
+      "name": "Islay Airport",
+      "lat": 55.68271,
+      "lon": -6.25752,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "INI",
+      "icao": "LYNI",
+      "name": "Niš Constantine the Great Airport",
+      "lat": 43.33654,
+      "lon": 21.85624,
+      "country": "RS",
+      "region": "RS-20",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "INN",
+      "icao": "LOWI",
+      "name": "Innsbruck Airport",
+      "lat": 47.2602,
+      "lon": 11.344,
+      "country": "AT",
+      "region": "AT-7",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "INV",
+      "icao": "EGPE",
+      "name": "Inverness Airport",
+      "lat": 57.5425,
+      "lon": -4.0475,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "IOA",
+      "icao": "LGIO",
+      "name": "Ioannina King Pyrrhus National Airport",
+      "lat": 39.6964,
+      "lon": 20.8225,
+      "country": "GR",
+      "region": "GR-D",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "IOM",
+      "icao": "EGNS",
+      "name": "Isle of Man Airport",
+      "lat": 54.08308,
+      "lon": -4.62387,
+      "country": "IM",
+      "region": "IM-U-A",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "IST",
+      "icao": "LTFM",
+      "name": "İstanbul Airport",
+      "lat": 41.27487,
+      "lon": 28.73214,
+      "country": "TR",
+      "region": "TR-34",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "IVL",
+      "icao": "EFIV",
+      "name": "Ivalo Airport",
+      "lat": 68.6073,
+      "lon": 27.4053,
+      "country": "FI",
+      "region": "FI-10",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "IWA",
+      "icao": "UUBI",
+      "name": "Ivanovo South Airport",
+      "lat": 56.9394,
+      "lon": 40.9408,
+      "country": "RU",
+      "region": "RU-IVA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "JCL",
+      "icao": "LKCS",
+      "name": "České Budějovice South Bohemian Airport",
+      "lat": 48.94817,
+      "lon": 14.42832,
+      "country": "CZ",
+      "region": "CZ-JC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "JER",
+      "icao": "EGJJ",
+      "name": "Jersey Airport",
+      "lat": 49.2079,
+      "lon": -2.19551,
+      "country": "JE",
+      "region": "JE-U-A",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "JKG",
+      "icao": "ESGJ",
+      "name": "Jönköping Airport",
+      "lat": 57.7576,
+      "lon": 14.0687,
+      "country": "SE",
+      "region": "SE-F",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "JKH",
+      "icao": "LGHI",
+      "name": "Chios Island National Airport",
+      "lat": 38.3432,
+      "lon": 26.1406,
+      "country": "GR",
+      "region": "GR-K",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "JMK",
+      "icao": "LGMK",
+      "name": "Mykonos Island National Airport",
+      "lat": 37.4351,
+      "lon": 25.3481,
+      "country": "GR",
+      "region": "GR-L",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "JOE",
+      "icao": "EFJO",
+      "name": "Joensuu Airport",
+      "lat": 62.65882,
+      "lon": 29.6194,
+      "country": "FI",
+      "region": "FI-13",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "JSH",
+      "icao": "LGST",
+      "name": "Sitia Airport",
+      "lat": 35.2161,
+      "lon": 26.1013,
+      "country": "GR",
+      "region": "GR-M",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "JSI",
+      "icao": "LGSK",
+      "name": "Skiathos Island National Airport",
+      "lat": 39.1771,
+      "lon": 23.5037,
+      "country": "GR",
+      "region": "GR-E",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "JTR",
+      "icao": "LGSR",
+      "name": "Santorini International Airport",
+      "lat": 36.40005,
+      "lon": 25.47864,
+      "country": "GR",
+      "region": "GR-L",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "JYV",
+      "icao": "EFJY",
+      "name": "Jyväskylä Airport",
+      "lat": 62.3995,
+      "lon": 25.6783,
+      "country": "FI",
+      "region": "FI-08",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KAJ",
+      "icao": "EFKI",
+      "name": "Kajaani Airport",
+      "lat": 64.2855,
+      "lon": 27.6924,
+      "country": "FI",
+      "region": "FI-05",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KAO",
+      "icao": "EFKS",
+      "name": "Kuusamo Airport",
+      "lat": 65.9876,
+      "lon": 29.2394,
+      "country": "FI",
+      "region": "FI-14",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KDL",
+      "icao": "EEKA",
+      "name": "Kärdla Airport",
+      "lat": 58.9908,
+      "lon": 22.8307,
+      "country": "EE",
+      "region": "EE-39",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KEF",
+      "icao": "BIKF",
+      "name": "Keflavik International Airport",
+      "lat": 63.985,
+      "lon": -22.6056,
+      "country": "IS",
+      "region": "IS-2",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "KEM",
+      "icao": "EFKE",
+      "name": "Kemi-Tornio Airport",
+      "lat": 65.7787,
+      "lon": 24.5821,
+      "country": "FI",
+      "region": "FI-10",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KGD",
+      "icao": "UMKK",
+      "name": "Khrabrovo Airport",
+      "lat": 54.89161,
+      "lon": 20.59856,
+      "country": "RU",
+      "region": "RU-KGD",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "KIR",
+      "icao": "EIKY",
+      "name": "Kerry Airport",
+      "lat": 52.1809,
+      "lon": -9.52378,
+      "country": "IE",
+      "region": "IE-KY",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "KKN",
+      "icao": "ENKR",
+      "name": "Kirkenes Airport, Høybuktmoen",
+      "lat": 69.7258,
+      "lon": 29.8913,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KLR",
+      "icao": "ESMQ",
+      "name": "Kalmar Airport",
+      "lat": 56.6855,
+      "lon": 16.2876,
+      "country": "SE",
+      "region": "SE-H",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KLU",
+      "icao": "LOWK",
+      "name": "Klagenfurt Airport",
+      "lat": 46.6425,
+      "lon": 14.3377,
+      "country": "AT",
+      "region": "AT-2",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KLV",
+      "icao": "LKKV",
+      "name": "Karlovy Vary Airport",
+      "lat": 50.203,
+      "lon": 12.915,
+      "country": "CZ",
+      "region": "CZ-KA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KLX",
+      "icao": "LGKL",
+      "name": "Kalamata Airport",
+      "lat": 37.0683,
+      "lon": 22.0255,
+      "country": "GR",
+      "region": "GR-J",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KMW",
+      "icao": "UUBA",
+      "name": "Kostroma Sokerkino Airport",
+      "lat": 57.7969,
+      "lon": 41.0194,
+      "country": "RU",
+      "region": "RU-KOS",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "KOI",
+      "icao": "EGPA",
+      "name": "Kirkwall Airport",
+      "lat": 58.9579,
+      "lon": -2.90508,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "KOK",
+      "icao": "EFKK",
+      "name": "Kokkola-Pietarsaari Airport",
+      "lat": 63.7212,
+      "lon": 23.1431,
+      "country": "FI",
+      "region": "FI-07",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KRF",
+      "icao": "ESNK",
+      "name": "Kramfors-Sollefteå Höga Kusten Airport",
+      "lat": 63.0486,
+      "lon": 17.7689,
+      "country": "SE",
+      "region": "SE-Y",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KRK",
+      "icao": "EPKK",
+      "name": "Kraków John Paul II International Airport",
+      "lat": 50.0777,
+      "lon": 19.7848,
+      "country": "PL",
+      "region": "PL-MA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KRN",
+      "icao": "ESNQ",
+      "name": "Kiruna Airport",
+      "lat": 67.822,
+      "lon": 20.3368,
+      "country": "SE",
+      "region": "SE-BD",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KRP",
+      "icao": "EKKA",
+      "name": "Midtjyllands Airport / Air Base Karup",
+      "lat": 56.29714,
+      "lon": 9.10431,
+      "country": "DK",
+      "region": "DK-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KRR",
+      "icao": "URKK",
+      "name": "Krasnodar Pashkovsky International Airport",
+      "lat": 45.03447,
+      "lon": 39.17421,
+      "country": "RU",
+      "region": "RU-KDA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "KRS",
+      "icao": "ENCN",
+      "name": "Kristiansand Airport",
+      "lat": 58.2042,
+      "lon": 8.08537,
+      "country": "NO",
+      "region": "NO-42",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KSC",
+      "icao": "LZKZ",
+      "name": "Košice International Airport",
+      "lat": 48.6631,
+      "lon": 21.2411,
+      "country": "SK",
+      "region": "SK-KI",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KSD",
+      "icao": "ESOK",
+      "name": "Karlstad Airport",
+      "lat": 59.4447,
+      "lon": 13.3374,
+      "country": "SE",
+      "region": "SE-S",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KSF",
+      "icao": "EDVK",
+      "name": "Kassel Airport",
+      "lat": 51.4184,
+      "lon": 9.39164,
+      "country": "DE",
+      "region": "DE-HE",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KSU",
+      "icao": "ENKB",
+      "name": "Kristiansund Airport, Kvernberget",
+      "lat": 63.1118,
+      "lon": 7.82452,
+      "country": "NO",
+      "region": "NO-15",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KSZ",
+      "icao": "ULKK",
+      "name": "Kotlas Airport",
+      "lat": 61.2358,
+      "lon": 46.6975,
+      "country": "RU",
+      "region": "RU-ARK",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "KTT",
+      "icao": "EFKT",
+      "name": "Kittilä International Airport",
+      "lat": 67.701,
+      "lon": 24.8468,
+      "country": "FI",
+      "region": "FI-10",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KTW",
+      "icao": "EPKT",
+      "name": "Katowice Wojciech Korfanty International Airport",
+      "lat": 50.47602,
+      "lon": 19.0807,
+      "country": "PL",
+      "region": "PL-SL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KUF",
+      "icao": "UWWW",
+      "name": "Kurumoch International Airport",
+      "lat": 53.5049,
+      "lon": 50.1643,
+      "country": "RU",
+      "region": "RU-SAM",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "KUN",
+      "icao": "EYKA",
+      "name": "Kaunas International Airport",
+      "lat": 54.96397,
+      "lon": 24.08582,
+      "country": "LT",
+      "region": "LT-KU",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KUO",
+      "icao": "EFKU",
+      "name": "Kuopio Airport",
+      "lat": 63.0071,
+      "lon": 27.7978,
+      "country": "FI",
+      "region": "FI-15",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KVA",
+      "icao": "LGKV",
+      "name": "Kavala Alexander the Great International Airport",
+      "lat": 40.9133,
+      "lon": 24.6192,
+      "country": "GR",
+      "region": "GR-A",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "KVO",
+      "icao": "LYKV",
+      "name": "Morava Airport",
+      "lat": 43.81752,
+      "lon": 20.58666,
+      "country": "RS",
+      "region": "RS-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "KVX",
+      "icao": "USKK",
+      "name": "Pobedilovo Airport",
+      "lat": 58.50388,
+      "lon": 49.34783,
+      "country": "RU",
+      "region": "RU-KIR",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "KZI",
+      "icao": "LGKZ",
+      "name": "Kozani National Airport Filippos",
+      "lat": 40.2861,
+      "lon": 21.8408,
+      "country": "GR",
+      "region": "GR-C",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "LBA",
+      "icao": "EGNM",
+      "name": "Leeds Bradford Airport",
+      "lat": 53.8659,
+      "lon": -1.66057,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LBC",
+      "icao": "EDHL",
+      "name": "Lübeck Blankensee Airport",
+      "lat": 53.8054,
+      "lon": 10.7192,
+      "country": "DE",
+      "region": "DE-SH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LCG",
+      "icao": "LECO",
+      "name": "A Coruña Airport",
+      "lat": 43.3021,
+      "lon": -8.37726,
+      "country": "ES",
+      "region": "ES-GA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LCJ",
+      "icao": "EPLL",
+      "name": "Łódź Władysław Reymont Airport",
+      "lat": 51.7219,
+      "lon": 19.3981,
+      "country": "PL",
+      "region": "PL-LD",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LCY",
+      "icao": "EGLC",
+      "name": "London City Airport",
+      "lat": 51.5053,
+      "lon": 0.05528,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LDE",
+      "icao": "LFBT",
+      "name": "Tarbes-Lourdes-Pyrénées Airport",
+      "lat": 43.1787,
+      "lon": -0.00644,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LDY",
+      "icao": "EGAE",
+      "name": "City of Derry Airport",
+      "lat": 55.0428,
+      "lon": -7.16111,
+      "country": "GB",
+      "region": "GB-NIR",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LED",
+      "icao": "ULLI",
+      "name": "Pulkovo Airport",
+      "lat": 59.8003,
+      "lon": 30.2625,
+      "country": "RU",
+      "region": "RU-SPE",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "LEI",
+      "icao": "LEAM",
+      "name": "Almería Airport",
+      "lat": 36.8439,
+      "lon": -2.3701,
+      "country": "ES",
+      "region": "ES-AN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LEJ",
+      "icao": "EDDP",
+      "name": "Leipzig/Halle Airport",
+      "lat": 51.42066,
+      "lon": 12.23271,
+      "country": "DE",
+      "region": "DE-SN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LEN",
+      "icao": "LELN",
+      "name": "León Airport",
+      "lat": 42.59071,
+      "lon": -5.65341,
+      "country": "ES",
+      "region": "ES-CL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LEU",
+      "icao": "LESU",
+      "name": "Pirineus - la Seu d'Urgel Airport",
+      "lat": 42.3386,
+      "lon": 1.40917,
+      "country": "ES",
+      "region": "ES-CT",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LGG",
+      "icao": "EBLG",
+      "name": "Liège Airport",
+      "lat": 50.63857,
+      "lon": 5.4439,
+      "country": "BE",
+      "region": "BE-WLG",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LGW",
+      "icao": "EGKK",
+      "name": "London Gatwick Airport",
+      "lat": 51.14874,
+      "lon": -0.18574,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LHR",
+      "icao": "EGLL",
+      "name": "London Heathrow Airport",
+      "lat": 51.47075,
+      "lon": -0.45991,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LIG",
+      "icao": "LFBL",
+      "name": "Limoges Airport",
+      "lat": 45.8628,
+      "lon": 1.17944,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LIL",
+      "icao": "LFQQ",
+      "name": "Lille Airport",
+      "lat": 50.56656,
+      "lon": 3.10243,
+      "country": "FR",
+      "region": "FR-HDF",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LIN",
+      "icao": "LIML",
+      "name": "Milano Linate Airport",
+      "lat": 45.4451,
+      "lon": 9.27674,
+      "country": "IT",
+      "region": "IT-25",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LIS",
+      "icao": "LPPT",
+      "name": "Lisbon Humberto Delgado Airport",
+      "lat": 38.7813,
+      "lon": -9.13592,
+      "country": "PT",
+      "region": "PT-11",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LJU",
+      "icao": "LJLJ",
+      "name": "Ljubljana Jože Pučnik Airport",
+      "lat": 46.2237,
+      "lon": 14.4576,
+      "country": "SI",
+      "region": "SI-012",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LKL",
+      "icao": "ENNA",
+      "name": "Lakselv Airport, Banak",
+      "lat": 70.0688,
+      "lon": 24.9735,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LKN",
+      "icao": "ENLK",
+      "name": "Leknes Airport",
+      "lat": 68.1525,
+      "lon": 13.6094,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LLA",
+      "icao": "ESPA",
+      "name": "Luleå Airport",
+      "lat": 65.5438,
+      "lon": 22.122,
+      "country": "SE",
+      "region": "SE-BD",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LMP",
+      "icao": "LICD",
+      "name": "Lampedusa Airport",
+      "lat": 35.4979,
+      "lon": 12.6181,
+      "country": "IT",
+      "region": "IT-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LNZ",
+      "icao": "LOWL",
+      "name": "Linz-Hörsching Airport",
+      "lat": 48.23536,
+      "lon": 14.18813,
+      "country": "AT",
+      "region": "AT-4",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LPA",
+      "icao": "GCLP",
+      "name": "Gran Canaria Airport",
+      "lat": 27.9319,
+      "lon": -15.3866,
+      "country": "ES",
+      "region": "ES-CN",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LPI",
+      "icao": "ESSL",
+      "name": "Linköping City Airport",
+      "lat": 58.40491,
+      "lon": 15.6845,
+      "country": "SE",
+      "region": "SE-E",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LPL",
+      "icao": "EGGP",
+      "name": "Liverpool John Lennon Airport",
+      "lat": 53.33486,
+      "lon": -2.84964,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LPP",
+      "icao": "EFLP",
+      "name": "Lappeenranta Airport",
+      "lat": 61.0446,
+      "lon": 28.14474,
+      "country": "FI",
+      "region": "FI-02",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "LRH",
+      "icao": "LFBH",
+      "name": "La Rochelle Île de Ré Airport",
+      "lat": 46.1792,
+      "lon": -1.19528,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LSI",
+      "icao": "EGPB",
+      "name": "Sumburgh Airport",
+      "lat": 59.8789,
+      "lon": -1.29556,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LTN",
+      "icao": "EGGW",
+      "name": "London Luton Airport",
+      "lat": 51.8747,
+      "lon": -0.36833,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "LUG",
+      "icao": "LSZA",
+      "name": "Lugano Airport",
+      "lat": 46.0043,
+      "lon": 8.91058,
+      "country": "CH",
+      "region": "CH-TI",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LUX",
+      "icao": "ELLX",
+      "name": "Luxembourg-Findel International Airport",
+      "lat": 49.62685,
+      "lon": 6.21213,
+      "country": "LU",
+      "region": "LU-L",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LUZ",
+      "icao": "EPLB",
+      "name": "Lublin Airport",
+      "lat": 51.24016,
+      "lon": 22.71346,
+      "country": "PL",
+      "region": "PL-LU",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LYC",
+      "icao": "ESNL",
+      "name": "Lycksele Airport",
+      "lat": 64.5483,
+      "lon": 18.7162,
+      "country": "SE",
+      "region": "SE-AC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LYR",
+      "icao": "ENSB",
+      "name": "Svalbard Airport, Longyear",
+      "lat": 78.2461,
+      "lon": 15.4656,
+      "country": "NO",
+      "region": "NO-21",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "LYS",
+      "icao": "LFLL",
+      "name": "Lyon Saint-Exupéry Airport",
+      "lat": 45.726,
+      "lon": 5.09014,
+      "country": "FR",
+      "region": "FR-ARA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MAD",
+      "icao": "LEMD",
+      "name": "Adolfo Suárez Madrid–Barajas Airport",
+      "lat": 40.49341,
+      "lon": -3.57225,
+      "country": "ES",
+      "region": "ES-MD",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MAH",
+      "icao": "LEMH",
+      "name": "Menorca Airport",
+      "lat": 39.8626,
+      "lon": 4.21865,
+      "country": "ES",
+      "region": "ES-IB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MAN",
+      "icao": "EGCC",
+      "name": "Manchester Airport",
+      "lat": 53.34938,
+      "lon": -2.27952,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "MBX",
+      "icao": "LJMB",
+      "name": "Maribor Edvard Rusjan Airport",
+      "lat": 46.4799,
+      "lon": 15.6861,
+      "country": "SI",
+      "region": "SI-160",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MEH",
+      "icao": "ENMH",
+      "name": "Mehamn Airport",
+      "lat": 71.0297,
+      "lon": 27.8267,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MHG",
+      "icao": "EDFM",
+      "name": "Mannheim-City Airport",
+      "lat": 49.47306,
+      "lon": 8.51417,
+      "country": "DE",
+      "region": "DE-BW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MHQ",
+      "icao": "EFMA",
+      "name": "Mariehamn Airport",
+      "lat": 60.1222,
+      "lon": 19.8982,
+      "country": "FI",
+      "region": "FI-01",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "MJF",
+      "icao": "ENMS",
+      "name": "Mosjøen Airport, Kjærstad",
+      "lat": 65.784,
+      "lon": 13.2149,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MJT",
+      "icao": "LGMT",
+      "name": "Mytilene International Airport",
+      "lat": 39.05741,
+      "lon": 26.59863,
+      "country": "GR",
+      "region": "GR-K",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "MLA",
+      "icao": "LMML",
+      "name": "Malta International Airport",
+      "lat": 35.84593,
+      "lon": 14.49155,
+      "country": "MT",
+      "region": "MT-25",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MME",
+      "icao": "EGNV",
+      "name": "Teesside International Airport",
+      "lat": 54.5092,
+      "lon": -1.42941,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "MMK",
+      "icao": "ULMM",
+      "name": "Emperor Nicholas II Murmansk Airport",
+      "lat": 68.7817,
+      "lon": 32.7508,
+      "country": "RU",
+      "region": "RU-MUR",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "MMX",
+      "icao": "ESMS",
+      "name": "Malmö Sturup Airport",
+      "lat": 55.53556,
+      "lon": 13.37633,
+      "country": "SE",
+      "region": "SE-M",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MOL",
+      "icao": "ENML",
+      "name": "Molde Airport, Årø",
+      "lat": 62.7447,
+      "lon": 7.2625,
+      "country": "NO",
+      "region": "NO-15",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MPL",
+      "icao": "LFMT",
+      "name": "Montpellier-Méditerranée Airport",
+      "lat": 43.5762,
+      "lon": 3.96301,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MQN",
+      "icao": "ENRA",
+      "name": "Mo i Rana Airport, Røssvoll",
+      "lat": 66.3639,
+      "lon": 14.3014,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MRS",
+      "icao": "LFML",
+      "name": "Marseille Provence Airport",
+      "lat": 43.43809,
+      "lon": 5.2125,
+      "country": "FR",
+      "region": "FR-PAC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MRV",
+      "icao": "URMM",
+      "name": "Mineralnye Vody Airport",
+      "lat": 44.2251,
+      "lon": 43.0819,
+      "country": "RU",
+      "region": "RU-STA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "MSQ",
+      "icao": "UMMS",
+      "name": "Minsk National Airport",
+      "lat": 53.88807,
+      "lon": 28.03996,
+      "country": "BY",
+      "region": "BY-MI",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "MST",
+      "icao": "EHBK",
+      "name": "Maastricht Aachen Airport",
+      "lat": 50.91109,
+      "lon": 5.7694,
+      "country": "NL",
+      "region": "NL-LI",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MUC",
+      "icao": "EDDM",
+      "name": "Munich Airport",
+      "lat": 48.3538,
+      "lon": 11.7861,
+      "country": "DE",
+      "region": "DE-BY",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MVQ",
+      "icao": "UMOO",
+      "name": "Mogilev Airport",
+      "lat": 53.9549,
+      "lon": 30.0951,
+      "country": "BY",
+      "region": "BY-MA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "MXP",
+      "icao": "LIMC",
+      "name": "Milan Malpensa International Airport",
+      "lat": 45.6306,
+      "lon": 8.72811,
+      "country": "IT",
+      "region": "IT-25",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "MXX",
+      "icao": "ESKM",
+      "name": "Mora Airport",
+      "lat": 60.9579,
+      "lon": 14.5114,
+      "country": "SE",
+      "region": "SE-W",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NAL",
+      "icao": "URMN",
+      "name": "Nalchik Airport",
+      "lat": 43.5129,
+      "lon": 43.6366,
+      "country": "RU",
+      "region": "RU-KB",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "NAP",
+      "icao": "LIRN",
+      "name": "Naples International Airport",
+      "lat": 40.886,
+      "lon": 14.2908,
+      "country": "IT",
+      "region": "IT-72",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NCE",
+      "icao": "LFMN",
+      "name": "Nice-Côte d'Azur Airport",
+      "lat": 43.6584,
+      "lon": 7.21587,
+      "country": "FR",
+      "region": "FR-PAC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NCL",
+      "icao": "EGNT",
+      "name": "Newcastle International Airport",
+      "lat": 55.03796,
+      "lon": -1.68958,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "NCY",
+      "icao": "LFLP",
+      "name": "Annecy Meythet airport",
+      "lat": 45.92895,
+      "lon": 6.0987,
+      "country": "FR",
+      "region": "FR-ARA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NNM",
+      "icao": "ULAM",
+      "name": "Naryan Mar Airport",
+      "lat": 67.64,
+      "lon": 53.1219,
+      "country": "RU",
+      "region": "RU-NEN",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "NOC",
+      "icao": "EIKN",
+      "name": "Ireland West Airport Knock",
+      "lat": 53.91044,
+      "lon": -8.817,
+      "country": "IE",
+      "region": "IE-MO",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "NQY",
+      "icao": "EGHQ",
+      "name": "Cornwall Airport Newquay",
+      "lat": 50.4406,
+      "lon": -4.99541,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "NRK",
+      "icao": "ESSP",
+      "name": "Norrköping Airport",
+      "lat": 58.5863,
+      "lon": 16.2506,
+      "country": "SE",
+      "region": "SE-E",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NRN",
+      "icao": "EDLV",
+      "name": "Weeze (Niederrhein) Airport",
+      "lat": 51.60136,
+      "lon": 6.14123,
+      "country": "DE",
+      "region": "DE-NW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NTE",
+      "icao": "LFRS",
+      "name": "Nantes Atlantique Airport",
+      "lat": 47.1532,
+      "lon": -1.61073,
+      "country": "FR",
+      "region": "FR-PDL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NUE",
+      "icao": "EDDN",
+      "name": "Nuremberg Airport",
+      "lat": 49.4987,
+      "lon": 11.07806,
+      "country": "DE",
+      "region": "DE-BY",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "NWI",
+      "icao": "EGSH",
+      "name": "Norwich Airport",
+      "lat": 52.6758,
+      "lon": 1.28278,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "NYA",
+      "icao": "USHN",
+      "name": "Nyagan Airport",
+      "lat": 62.11,
+      "lon": 65.615,
+      "country": "RU",
+      "region": "RU-KHM",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "NYO",
+      "icao": "ESKN",
+      "name": "Stockholm Skavsta Airport",
+      "lat": 58.78966,
+      "lon": 16.91148,
+      "country": "SE",
+      "region": "SE-D",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ODB",
+      "icao": "LEBA",
+      "name": "Córdoba Airport",
+      "lat": 37.842,
+      "lon": -4.84888,
+      "country": "ES",
+      "region": "ES-AN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ODE",
+      "icao": "EKOD",
+      "name": "Odense Hans Christian Andersen Airport",
+      "lat": 55.47531,
+      "lon": 10.32721,
+      "country": "DK",
+      "region": "DK-83",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OER",
+      "icao": "ESNO",
+      "name": "Örnsköldsvik Airport",
+      "lat": 63.4083,
+      "lon": 18.99,
+      "country": "SE",
+      "region": "SE-Y",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OGZ",
+      "icao": "URMO",
+      "name": "Vladikavkaz Beslan International Airport",
+      "lat": 43.2051,
+      "lon": 44.6066,
+      "country": "RU",
+      "region": "RU-SE",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "OHD",
+      "icao": "LWOH",
+      "name": "Ohrid St. Paul the Apostle Airport",
+      "lat": 41.18,
+      "lon": 20.7423,
+      "country": "MK",
+      "region": "MK-003",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OLA",
+      "icao": "ENOL",
+      "name": "Ørland Airport",
+      "lat": 63.6989,
+      "lon": 9.604,
+      "country": "NO",
+      "region": "NO-50",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OLB",
+      "icao": "LIEO",
+      "name": "Olbia Costa Smeralda Airport",
+      "lat": 40.89895,
+      "lon": 9.51846,
+      "country": "IT",
+      "region": "IT-88",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OMO",
+      "icao": "LQMO",
+      "name": "Mostar International Airport",
+      "lat": 43.28249,
+      "lon": 17.8461,
+      "country": "BA",
+      "region": "BA-BIH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OMR",
+      "icao": "LROD",
+      "name": "Oradea International Airport",
+      "lat": 47.0253,
+      "lon": 21.9025,
+      "country": "RO",
+      "region": "RO-BH",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "OPO",
+      "icao": "LPPR",
+      "name": "Francisco de Sá Carneiro Airport",
+      "lat": 41.2481,
+      "lon": -8.68139,
+      "country": "PT",
+      "region": "PT-13",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "ORB",
+      "icao": "ESOE",
+      "name": "Örebro Airport",
+      "lat": 59.2237,
+      "lon": 15.038,
+      "country": "SE",
+      "region": "SE-T",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ORK",
+      "icao": "EICK",
+      "name": "Cork International Airport",
+      "lat": 51.8413,
+      "lon": -8.49111,
+      "country": "IE",
+      "region": "IE-CO",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "ORY",
+      "icao": "LFPO",
+      "name": "Paris-Orly Airport",
+      "lat": 48.7295,
+      "lon": 2.35896,
+      "country": "FR",
+      "region": "FR-IDF",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OSD",
+      "icao": "ESNZ",
+      "name": "Åre Östersund Airport",
+      "lat": 63.19355,
+      "lon": 14.50417,
+      "country": "SE",
+      "region": "SE-Z",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OSI",
+      "icao": "LDOS",
+      "name": "Osijek Airport",
+      "lat": 45.46236,
+      "lon": 18.81128,
+      "country": "HR",
+      "region": "HR-14",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OSL",
+      "icao": "ENGM",
+      "name": "Oslo-Gardermoen International Airport",
+      "lat": 60.1939,
+      "lon": 11.1004,
+      "country": "NO",
+      "region": "NO-32",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OSR",
+      "icao": "LKMT",
+      "name": "Leoš Janáček Airport Ostrava",
+      "lat": 49.6963,
+      "lon": 18.1111,
+      "country": "CZ",
+      "region": "CZ-MO",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OST",
+      "icao": "EBOS",
+      "name": "Ostend-Bruges International Airport",
+      "lat": 51.1998,
+      "lon": 2.87467,
+      "country": "BE",
+      "region": "BE-VWV",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "OTP",
+      "icao": "LROP",
+      "name": "Bucharest Henri Coandă International Airport",
+      "lat": 44.57179,
+      "lon": 26.10329,
+      "country": "RO",
+      "region": "RO-IF",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "OUL",
+      "icao": "EFOU",
+      "name": "Oulu Airport",
+      "lat": 64.9301,
+      "lon": 25.3546,
+      "country": "FI",
+      "region": "FI-14",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "OVB",
+      "icao": "UNNT",
+      "name": "Novosibirsk Tolmachevo Airport",
+      "lat": 55.01976,
+      "lon": 82.61868,
+      "country": "RU",
+      "region": "RU-NVS",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "OVD",
+      "icao": "LEAS",
+      "name": "Asturias Airport",
+      "lat": 43.5636,
+      "lon": -6.03462,
+      "country": "ES",
+      "region": "ES-AS",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PAD",
+      "icao": "EDLP",
+      "name": "Paderborn Lippstadt Airport",
+      "lat": 51.61253,
+      "lon": 8.61746,
+      "country": "DE",
+      "region": "DE-NW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PDL",
+      "icao": "LPPD",
+      "name": "João Paulo II Airport",
+      "lat": 37.7412,
+      "lon": -25.6979,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "PDV",
+      "icao": "LBPD",
+      "name": "Plovdiv International Airport",
+      "lat": 42.0678,
+      "lon": 24.8508,
+      "country": "BG",
+      "region": "BG-16",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "PED",
+      "icao": "LKPD",
+      "name": "Pardubice Airport",
+      "lat": 50.01505,
+      "lon": 15.73981,
+      "country": "CZ",
+      "region": "CZ-PA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PEG",
+      "icao": "LIRZ",
+      "name": "Perugia San Francesco d'Assisi – Umbria International Airport",
+      "lat": 43.0959,
+      "lon": 12.5132,
+      "country": "IT",
+      "region": "IT-55",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PES",
+      "icao": "ULPB",
+      "name": "Petrozavodsk Airport",
+      "lat": 61.8852,
+      "lon": 34.1547,
+      "country": "RU",
+      "region": "RU-KR",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "PEV",
+      "icao": "LHPP",
+      "name": "Pécs-Pogány International Airport",
+      "lat": 45.98889,
+      "lon": 18.24204,
+      "country": "HU",
+      "region": "HU-BA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PEX",
+      "icao": "UUYP",
+      "name": "Pechora Airport",
+      "lat": 65.1211,
+      "lon": 57.1308,
+      "country": "RU",
+      "region": "RU-KO",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "PGF",
+      "icao": "LFMP",
+      "name": "Perpignan-Rivesaltes (Llabanère) Airport",
+      "lat": 42.7404,
+      "lon": 2.87067,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PIK",
+      "icao": "EGPK",
+      "name": "Glasgow Prestwick Airport",
+      "lat": 55.5015,
+      "lon": -4.57718,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "PIS",
+      "icao": "LFBI",
+      "name": "Poitiers-Biard Airport",
+      "lat": 46.5877,
+      "lon": 0.30667,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PIX",
+      "icao": "LPPI",
+      "name": "Pico Airport",
+      "lat": 38.5543,
+      "lon": -28.4413,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "PKV",
+      "icao": "ULOO",
+      "name": "Princess Olga Pskov International Airport",
+      "lat": 57.78132,
+      "lon": 28.39384,
+      "country": "RU",
+      "region": "RU-PSK",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "PLQ",
+      "icao": "EYPA",
+      "name": "Palanga International Airport",
+      "lat": 55.9732,
+      "lon": 21.0939,
+      "country": "LT",
+      "region": "LT-KL",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "PMF",
+      "icao": "LIMP",
+      "name": "Parma Airport",
+      "lat": 44.82635,
+      "lon": 10.29705,
+      "country": "IT",
+      "region": "IT-45",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PMI",
+      "icao": "LEPA",
+      "name": "Palma de Mallorca Airport",
+      "lat": 39.5517,
+      "lon": 2.73881,
+      "country": "ES",
+      "region": "ES-IB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PMO",
+      "icao": "LICJ",
+      "name": "Falcone–Borsellino Airport",
+      "lat": 38.176,
+      "lon": 13.091,
+      "country": "IT",
+      "region": "IT-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PNA",
+      "icao": "LEPP",
+      "name": "Pamplona Airport",
+      "lat": 42.77,
+      "lon": -1.64633,
+      "country": "ES",
+      "region": "ES-NC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PNL",
+      "icao": "LICG",
+      "name": "Pantelleria Airport",
+      "lat": 36.8165,
+      "lon": 11.9689,
+      "country": "IT",
+      "region": "IT-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "POR",
+      "icao": "EFPO",
+      "name": "Pori Airport",
+      "lat": 61.4617,
+      "lon": 21.8,
+      "country": "FI",
+      "region": "FI-17",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "POZ",
+      "icao": "EPPO",
+      "name": "Poznań-Ławica Airport",
+      "lat": 52.4216,
+      "lon": 16.82336,
+      "country": "PL",
+      "region": "PL-WP",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PRG",
+      "icao": "LKPR",
+      "name": "Václav Havel Airport Prague",
+      "lat": 50.10087,
+      "lon": 14.25991,
+      "country": "CZ",
+      "region": "CZ-PR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PRM",
+      "icao": "LPPM",
+      "name": "Portimão Airport",
+      "lat": 37.1493,
+      "lon": -8.58396,
+      "country": "PT",
+      "region": "PT-08",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "PRN",
+      "icao": "BKPR",
+      "name": "Priština Adem Jashari International Airport",
+      "lat": 42.5728,
+      "lon": 21.0358,
+      "country": "XK",
+      "region": "XK-01",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PSA",
+      "icao": "LIRP",
+      "name": "Pisa International Airport",
+      "lat": 43.6839,
+      "lon": 10.3927,
+      "country": "IT",
+      "region": "IT-52",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PSR",
+      "icao": "LIBP",
+      "name": "Abruzzo Airport",
+      "lat": 42.43108,
+      "lon": 14.18298,
+      "country": "IT",
+      "region": "IT-65",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PUF",
+      "icao": "LFBP",
+      "name": "Pau Pyrénées Airport",
+      "lat": 43.38,
+      "lon": -0.41861,
+      "country": "FR",
+      "region": "FR-NAQ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PUY",
+      "icao": "LDPL",
+      "name": "Pula Airport",
+      "lat": 44.8935,
+      "lon": 13.9222,
+      "country": "HR",
+      "region": "HR-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "PVK",
+      "icao": "LGPZ",
+      "name": "Aktion National Airport",
+      "lat": 38.9255,
+      "lon": 20.7653,
+      "country": "GR",
+      "region": "GR-D",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "PXO",
+      "icao": "LPPS",
+      "name": "Porto Santo Airport",
+      "lat": 33.0734,
+      "lon": -16.35,
+      "country": "PT",
+      "region": "PT-30",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "QSR",
+      "icao": "LIRI",
+      "name": "Salerno Costa d'Amalfi Airport",
+      "lat": 40.6204,
+      "lon": 14.9113,
+      "country": "IT",
+      "region": "IT-72",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RDO",
+      "icao": "EPRA",
+      "name": "Warsaw Radom Airport",
+      "lat": 51.38937,
+      "lon": 21.21474,
+      "country": "PL",
+      "region": "PL-MZ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RDZ",
+      "icao": "LFCR",
+      "name": "Rodez–Aveyron Airport",
+      "lat": 44.4079,
+      "lon": 2.48267,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "REG",
+      "icao": "LICR",
+      "name": "Reggio Calabria Airport",
+      "lat": 38.0712,
+      "lon": 15.6516,
+      "country": "IT",
+      "region": "IT-78",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "REU",
+      "icao": "LERS",
+      "name": "Reus Airport",
+      "lat": 41.14751,
+      "lon": 1.16835,
+      "country": "ES",
+      "region": "ES-CT",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RIX",
+      "icao": "EVRA",
+      "name": "Riga International Airport",
+      "lat": 56.92075,
+      "lon": 23.97071,
+      "country": "LV",
+      "region": "LV-062",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "RJK",
+      "icao": "LDRI",
+      "name": "Rijeka Airport",
+      "lat": 45.21638,
+      "lon": 14.57085,
+      "country": "HR",
+      "region": "HR-08",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RJL",
+      "icao": "LERJ",
+      "name": "Logroño-Agoncillo Airport",
+      "lat": 42.46095,
+      "lon": -2.32223,
+      "country": "ES",
+      "region": "ES-RI",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RKE",
+      "icao": "EKRK",
+      "name": "Copenhagen Roskilde Airport",
+      "lat": 55.5856,
+      "lon": 12.1314,
+      "country": "DK",
+      "region": "DK-85",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RKV",
+      "icao": "BIRK",
+      "name": "Reykjavík Domestic Airport",
+      "lat": 64.12873,
+      "lon": -21.93759,
+      "country": "IS",
+      "region": "IS-1",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "RLG",
+      "icao": "ETNL",
+      "name": "Rostock-Laage Airport",
+      "lat": 53.9182,
+      "lon": 12.2783,
+      "country": "DE",
+      "region": "DE-MV",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RMI",
+      "icao": "LIPR",
+      "name": "Federico Fellini International Airport",
+      "lat": 44.02002,
+      "lon": 12.6122,
+      "country": "IT",
+      "region": "IT-45",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RMO",
+      "icao": "LUKK",
+      "name": "Chişinău International Airport",
+      "lat": 46.92774,
+      "lon": 28.9317,
+      "country": "MD",
+      "region": "MD-CU",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "RMU",
+      "icao": "LEMI",
+      "name": "Region of Murcia International Airport",
+      "lat": 37.80285,
+      "lon": -1.12488,
+      "country": "ES",
+      "region": "ES-MC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RNB",
+      "icao": "ESDF",
+      "name": "Ronneby Airport",
+      "lat": 56.2667,
+      "lon": 15.265,
+      "country": "SE",
+      "region": "SE-K",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RNN",
+      "icao": "EKRN",
+      "name": "Bornholm Airport",
+      "lat": 55.0633,
+      "lon": 14.7596,
+      "country": "DK",
+      "region": "DK-84",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RNS",
+      "icao": "LFRN",
+      "name": "Rennes-Saint-Jacques Airport",
+      "lat": 48.0695,
+      "lon": -1.73479,
+      "country": "FR",
+      "region": "FR-BRE",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RRS",
+      "icao": "ENRO",
+      "name": "Røros Airport",
+      "lat": 62.5784,
+      "lon": 11.3423,
+      "country": "NO",
+      "region": "NO-50",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RTM",
+      "icao": "EHRD",
+      "name": "Rotterdam The Hague Airport",
+      "lat": 51.9569,
+      "lon": 4.43722,
+      "country": "NL",
+      "region": "NL-ZH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RVK",
+      "icao": "ENRM",
+      "name": "Rørvik Airport, Ryum",
+      "lat": 64.8383,
+      "lon": 11.1461,
+      "country": "NO",
+      "region": "NO-50",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "RVN",
+      "icao": "EFRO",
+      "name": "Rovaniemi Airport",
+      "lat": 66.56333,
+      "lon": 25.82975,
+      "country": "FI",
+      "region": "FI-10",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "RZE",
+      "icao": "EPRZ",
+      "name": "Rzeszów-Jasionka Airport",
+      "lat": 50.10979,
+      "lon": 22.02416,
+      "country": "PL",
+      "region": "PL-PK",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SBZ",
+      "icao": "LRSB",
+      "name": "Sibiu International Airport",
+      "lat": 45.78584,
+      "lon": 24.08667,
+      "country": "RO",
+      "region": "RO-SB",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "SCN",
+      "icao": "EDDR",
+      "name": "Saarbrücken Airport",
+      "lat": 49.21455,
+      "lon": 7.10974,
+      "country": "DE",
+      "region": "DE-SL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SCQ",
+      "icao": "LEST",
+      "name": "Santiago-Rosalía de Castro Airport",
+      "lat": 42.8963,
+      "lon": -8.41514,
+      "country": "ES",
+      "region": "ES-GA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SCR",
+      "icao": "ESKS",
+      "name": "Scandinavian Mountains Airport",
+      "lat": 61.16508,
+      "lon": 12.83352,
+      "country": "SE",
+      "region": "SE-W",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SCV",
+      "icao": "LRSV",
+      "name": "Suceava Ștefan cel Mare International Airport",
+      "lat": 47.6875,
+      "lon": 26.3541,
+      "country": "RO",
+      "region": "RO-SV",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "SCW",
+      "icao": "UUYY",
+      "name": "Syktyvkar Airport",
+      "lat": 61.647,
+      "lon": 50.8451,
+      "country": "RU",
+      "region": "RU-KO",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "SDL",
+      "icao": "ESNN",
+      "name": "Sundsvall-Härnösand Airport",
+      "lat": 62.5281,
+      "lon": 17.4439,
+      "country": "SE",
+      "region": "SE-Y",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SDR",
+      "icao": "LEXJ",
+      "name": "Seve Ballesteros-Santander Airport",
+      "lat": 43.4271,
+      "lon": -3.82001,
+      "country": "ES",
+      "region": "ES-CB",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SEN",
+      "icao": "EGMC",
+      "name": "London Southend Airport",
+      "lat": 51.57056,
+      "lon": 0.69363,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "SFT",
+      "icao": "ESNS",
+      "name": "Skellefteå Airport",
+      "lat": 64.6248,
+      "lon": 21.0769,
+      "country": "SE",
+      "region": "SE-AC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SGD",
+      "icao": "EKSB",
+      "name": "Sønderborg Airport",
+      "lat": 54.9644,
+      "lon": 9.79173,
+      "country": "DK",
+      "region": "DK-83",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SJJ",
+      "icao": "LQSA",
+      "name": "Sarajevo International Airport",
+      "lat": 43.8246,
+      "lon": 18.3315,
+      "country": "BA",
+      "region": "BA-BIH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SJZ",
+      "icao": "LPSJ",
+      "name": "São Jorge Airport",
+      "lat": 38.6655,
+      "lon": -28.1758,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "SKG",
+      "icao": "LGTS",
+      "name": "Thessaloniki Macedonia International Airport",
+      "lat": 40.51928,
+      "lon": 22.97001,
+      "country": "GR",
+      "region": "GR-B",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "SKN",
+      "icao": "ENSK",
+      "name": "Stokmarknes Airport, Skagen",
+      "lat": 68.57883,
+      "lon": 15.03342,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SKP",
+      "icao": "LWSK",
+      "name": "Skopje International Airport",
+      "lat": 41.95809,
+      "lon": 21.62258,
+      "country": "MK",
+      "region": "MK-008",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SKX",
+      "icao": "UWPS",
+      "name": "Saransk International Airport",
+      "lat": 54.12513,
+      "lon": 45.21226,
+      "country": "RU",
+      "region": "RU-MO",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "SLD",
+      "icao": "LZSL",
+      "name": "Sliač Airport",
+      "lat": 48.6378,
+      "lon": 19.1341,
+      "country": "SK",
+      "region": "SK-BC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SLM",
+      "icao": "LESA",
+      "name": "Salamanca Airport",
+      "lat": 40.9521,
+      "lon": -5.50199,
+      "country": "ES",
+      "region": "ES-CL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SMA",
+      "icao": "LPAZ",
+      "name": "Santa Maria Airport",
+      "lat": 36.9714,
+      "lon": -25.1706,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "SMI",
+      "icao": "LGSM",
+      "name": "Samos Airport",
+      "lat": 37.69,
+      "lon": 26.9117,
+      "country": "GR",
+      "region": "GR-K",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "SNN",
+      "icao": "EINN",
+      "name": "Shannon Airport",
+      "lat": 52.702,
+      "lon": -8.92482,
+      "country": "IE",
+      "region": "IE-CE",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "SOB",
+      "icao": "LHSM",
+      "name": "Hévíz–Balaton Airport",
+      "lat": 46.68639,
+      "lon": 17.15908,
+      "country": "HU",
+      "region": "HU-ZA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SOF",
+      "icao": "LBSF",
+      "name": "Sofia Airport",
+      "lat": 42.69636,
+      "lon": 23.41767,
+      "country": "BG",
+      "region": "BG-22",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "SOJ",
+      "icao": "ENSR",
+      "name": "Sørkjosen Airport",
+      "lat": 69.7868,
+      "lon": 20.9594,
+      "country": "NO",
+      "region": "NO-55",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SOU",
+      "icao": "EGHI",
+      "name": "Southampton Airport",
+      "lat": 50.9503,
+      "lon": -1.3568,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "SPU",
+      "icao": "LDSP",
+      "name": "Split Saint Jerome Airport",
+      "lat": 43.5389,
+      "lon": 16.298,
+      "country": "HR",
+      "region": "HR-17",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SRP",
+      "icao": "ENSO",
+      "name": "Stord Airport, Sørstokken",
+      "lat": 59.7919,
+      "lon": 5.34085,
+      "country": "NO",
+      "region": "NO-46",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SSJ",
+      "icao": "ENST",
+      "name": "Sandnessjøen Airport, Stokka",
+      "lat": 65.9568,
+      "lon": 12.4689,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "STN",
+      "icao": "EGSS",
+      "name": "London Stansted Airport",
+      "lat": 51.885,
+      "lon": 0.235,
+      "country": "GB",
+      "region": "GB-ENG",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "STR",
+      "icao": "EDDS",
+      "name": "Stuttgart Airport",
+      "lat": 48.6899,
+      "lon": 9.22196,
+      "country": "DE",
+      "region": "DE-BW",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "STW",
+      "icao": "URMT",
+      "name": "Stavropol Shpakovskoye Airport",
+      "lat": 45.1092,
+      "lon": 42.1128,
+      "country": "RU",
+      "region": "RU-STA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "SUF",
+      "icao": "LICA",
+      "name": "Lamezia Terme Sant'Eufemia International Airport",
+      "lat": 38.90621,
+      "lon": 16.24601,
+      "country": "IT",
+      "region": "IT-78",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SUJ",
+      "icao": "LRSM",
+      "name": "Satu Mare International Airport",
+      "lat": 47.7033,
+      "lon": 22.8857,
+      "country": "RO",
+      "region": "RO-SM",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "SVG",
+      "icao": "ENZV",
+      "name": "Stavanger Airport, Sola",
+      "lat": 58.8767,
+      "lon": 5.63778,
+      "country": "NO",
+      "region": "NO-11",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SVJ",
+      "icao": "ENSH",
+      "name": "Svolvær Airport, Helle",
+      "lat": 68.2433,
+      "lon": 14.6692,
+      "country": "NO",
+      "region": "NO-18",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SVL",
+      "icao": "EFSA",
+      "name": "Savonlinna Airport",
+      "lat": 61.9431,
+      "lon": 28.9451,
+      "country": "FI",
+      "region": "FI-04",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "SVO",
+      "icao": "UUEE",
+      "name": "Sheremetyevo International Airport",
+      "lat": 55.97686,
+      "lon": 37.41121,
+      "country": "RU",
+      "region": "RU-MOS",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "SVQ",
+      "icao": "LEZL",
+      "name": "Seville Airport",
+      "lat": 37.418,
+      "lon": -5.89311,
+      "country": "ES",
+      "region": "ES-AN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SXB",
+      "icao": "LFST",
+      "name": "Strasbourg Airport",
+      "lat": 48.5383,
+      "lon": 7.62823,
+      "country": "FR",
+      "region": "FR-GES",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SYY",
+      "icao": "EGPO",
+      "name": "Stornoway Airport",
+      "lat": 58.2156,
+      "lon": -6.33111,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "SZG",
+      "icao": "LOWS",
+      "name": "Salzburg Airport",
+      "lat": 47.7933,
+      "lon": 13.0043,
+      "country": "AT",
+      "region": "AT-5",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SZY",
+      "icao": "EPSY",
+      "name": "Olsztyn-Mazury Airport",
+      "lat": 53.4819,
+      "lon": 20.9377,
+      "country": "PL",
+      "region": "PL-WN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "SZZ",
+      "icao": "EPSC",
+      "name": "Solidarity Szczecin–Goleniów Airport",
+      "lat": 53.5847,
+      "lon": 14.9022,
+      "country": "PL",
+      "region": "PL-ZP",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TAT",
+      "icao": "LZTT",
+      "name": "Poprad-Tatry Airport",
+      "lat": 49.07099,
+      "lon": 20.24139,
+      "country": "SK",
+      "region": "SK-PV",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TAY",
+      "icao": "EETU",
+      "name": "Tartu Airport",
+      "lat": 58.30744,
+      "lon": 26.68647,
+      "country": "EE",
+      "region": "EE-7B",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "TEQ",
+      "icao": "LTBU",
+      "name": "Tekirdağ Çorlu Airport",
+      "lat": 41.1382,
+      "lon": 27.9191,
+      "country": "TR",
+      "region": "TR-59",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "TER",
+      "icao": "LPLA",
+      "name": "Lajes Airport",
+      "lat": 38.7618,
+      "lon": -27.0908,
+      "country": "PT",
+      "region": "PT-20",
+      "utcStdOffsetMin": -60
+    },
+    {
+      "iata": "TFS",
+      "icao": "GCTS",
+      "name": "Tenerife Sur Airport",
+      "lat": 28.0445,
+      "lon": -16.5725,
+      "country": "ES",
+      "region": "ES-CN",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "TGD",
+      "icao": "LYPG",
+      "name": "Podgorica Airport / Podgorica Golubovci Airbase",
+      "lat": 42.3594,
+      "lon": 19.2519,
+      "country": "ME",
+      "region": "ME-16",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TGM",
+      "icao": "LRTM",
+      "name": "Târgu Mureş Transilvania International Airport",
+      "lat": 46.4677,
+      "lon": 24.4125,
+      "country": "RO",
+      "region": "RO-MS",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "THN",
+      "icao": "ESGT",
+      "name": "Trollhättan-Vänersborg Airport",
+      "lat": 58.3181,
+      "lon": 12.345,
+      "country": "SE",
+      "region": "SE-Q",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TIA",
+      "icao": "LATI",
+      "name": "Tirana International Airport Mother Teresa",
+      "lat": 41.4147,
+      "lon": 19.7206,
+      "country": "AL",
+      "region": "AL-02",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TIV",
+      "icao": "LYTV",
+      "name": "Tivat Airport",
+      "lat": 42.4047,
+      "lon": 18.7233,
+      "country": "ME",
+      "region": "ME-19",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TKU",
+      "icao": "EFTU",
+      "name": "Turku Airport",
+      "lat": 60.5141,
+      "lon": 22.2628,
+      "country": "FI",
+      "region": "FI-19",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "TLL",
+      "icao": "EETN",
+      "name": "Lennart Meri Tallinn Airport",
+      "lat": 59.41325,
+      "lon": 24.83264,
+      "country": "EE",
+      "region": "EE-37",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "TLN",
+      "icao": "LFTH",
+      "name": "Toulon-Hyères Airport",
+      "lat": 43.0973,
+      "lon": 6.14603,
+      "country": "FR",
+      "region": "FR-PAC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TLS",
+      "icao": "LFBO",
+      "name": "Toulouse-Blagnac Airport",
+      "lat": 43.6291,
+      "lon": 1.36382,
+      "country": "FR",
+      "region": "FR-OCC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TMP",
+      "icao": "EFTP",
+      "name": "Tampere-Pirkkala Airport",
+      "lat": 61.4141,
+      "lon": 23.6044,
+      "country": "FI",
+      "region": "FI-11",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "TOS",
+      "icao": "ENTC",
+      "name": "Tromsø Airport",
+      "lat": 69.6833,
+      "lon": 18.9189,
+      "country": "NO",
+      "region": "NO-55",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TPS",
+      "icao": "LICT",
+      "name": "Vincenzo Florio Airport Trapani-Birgi",
+      "lat": 37.9114,
+      "lon": 12.488,
+      "country": "IT",
+      "region": "IT-82",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TRD",
+      "icao": "ENVA",
+      "name": "Trondheim Airport, Værnes",
+      "lat": 63.4578,
+      "lon": 10.924,
+      "country": "NO",
+      "region": "NO-50",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TRE",
+      "icao": "EGPU",
+      "name": "Tiree Airport",
+      "lat": 56.4992,
+      "lon": -6.86917,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "TRF",
+      "icao": "ENTO",
+      "name": "Sandefjord Airport, Torp",
+      "lat": 59.1867,
+      "lon": 10.2586,
+      "country": "NO",
+      "region": "NO-39",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TRN",
+      "icao": "LIMF",
+      "name": "Turin Airport",
+      "lat": 45.2008,
+      "lon": 7.64963,
+      "country": "IT",
+      "region": "IT-21",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TRS",
+      "icao": "LIPQ",
+      "name": "Trieste Airport",
+      "lat": 45.82786,
+      "lon": 13.46667,
+      "country": "IT",
+      "region": "IT-36",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TSF",
+      "icao": "LIPH",
+      "name": "Treviso Airport",
+      "lat": 45.6484,
+      "lon": 12.1944,
+      "country": "IT",
+      "region": "IT-34",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TSR",
+      "icao": "LRTR",
+      "name": "Timișoara Traian Vuia International Airport",
+      "lat": 45.8099,
+      "lon": 21.3379,
+      "country": "RO",
+      "region": "RO-TM",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "TUF",
+      "icao": "LFOT",
+      "name": "Tours Val de Loire Airport",
+      "lat": 47.4322,
+      "lon": 0.72761,
+      "country": "FR",
+      "region": "FR-CVL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TYF",
+      "icao": "ESST",
+      "name": "Torsby Airport",
+      "lat": 60.1576,
+      "lon": 12.9913,
+      "country": "SE",
+      "region": "SE-S",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "TZL",
+      "icao": "LQTZ",
+      "name": "Tuzla International Airport",
+      "lat": 44.45986,
+      "lon": 18.72363,
+      "country": "BA",
+      "region": "BA-BIH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "UFA",
+      "icao": "UWUU",
+      "name": "Ufa International Airport",
+      "lat": 54.5575,
+      "lon": 55.8744,
+      "country": "RU",
+      "region": "RU-BA",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "ULV",
+      "icao": "UWLL",
+      "name": "Ulyanovsk Baratayevka Airport",
+      "lat": 54.27016,
+      "lon": 48.22557,
+      "country": "RU",
+      "region": "RU-ULY",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "UME",
+      "icao": "ESNU",
+      "name": "Umeå Airport",
+      "lat": 63.7918,
+      "lon": 20.2828,
+      "country": "SE",
+      "region": "SE-AC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "URE",
+      "icao": "EEKE",
+      "name": "Kuressaare Airport",
+      "lat": 58.2299,
+      "lon": 22.5095,
+      "country": "EE",
+      "region": "EE-74",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "VAA",
+      "icao": "EFVA",
+      "name": "Vaasa Airport",
+      "lat": 63.05023,
+      "lon": 21.76254,
+      "country": "FI",
+      "region": "FI-12",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "VAR",
+      "icao": "LBWN",
+      "name": "Varna Airport",
+      "lat": 43.2321,
+      "lon": 27.8251,
+      "country": "BG",
+      "region": "BG-03",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "VAW",
+      "icao": "ENSS",
+      "name": "Vardø Airport, Svartnes",
+      "lat": 70.3554,
+      "lon": 31.0449,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VBS",
+      "icao": "LIPO",
+      "name": "Brescia Gabriele d'Annunzio Airport",
+      "lat": 45.4289,
+      "lon": 10.3306,
+      "country": "IT",
+      "region": "IT-25",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VBY",
+      "icao": "ESSV",
+      "name": "Visby Airport",
+      "lat": 57.6628,
+      "lon": 18.3462,
+      "country": "SE",
+      "region": "SE-I",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VCE",
+      "icao": "LIPZ",
+      "name": "Venice Marco Polo Airport",
+      "lat": 45.5053,
+      "lon": 12.3519,
+      "country": "IT",
+      "region": "IT-34",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VDS",
+      "icao": "ENVD",
+      "name": "Vadsø Airport",
+      "lat": 70.0653,
+      "lon": 29.8447,
+      "country": "NO",
+      "region": "NO-56",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VGO",
+      "icao": "LEVX",
+      "name": "Vigo Airport",
+      "lat": 42.2318,
+      "lon": -8.62677,
+      "country": "ES",
+      "region": "ES-GA",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VHM",
+      "icao": "ESNV",
+      "name": "Vilhelmina South Lapland Airport",
+      "lat": 64.5791,
+      "lon": 16.8336,
+      "country": "SE",
+      "region": "SE-AC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VIE",
+      "icao": "LOWW",
+      "name": "Vienna International Airport",
+      "lat": 48.1103,
+      "lon": 16.5697,
+      "country": "AT",
+      "region": "AT-9",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VIT",
+      "icao": "LEVT",
+      "name": "Vitoria Airport",
+      "lat": 42.8828,
+      "lon": -2.72447,
+      "country": "ES",
+      "region": "ES-PV",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VKO",
+      "icao": "UUWW",
+      "name": "Vnukovo International Airport",
+      "lat": 55.5915,
+      "lon": 37.2615,
+      "country": "RU",
+      "region": "RU-MOW",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "VLC",
+      "icao": "LEVC",
+      "name": "Valencia Airport",
+      "lat": 39.48916,
+      "lon": -0.48096,
+      "country": "ES",
+      "region": "ES-VC",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VLL",
+      "icao": "LEVD",
+      "name": "Valladolid Airport",
+      "lat": 41.7061,
+      "lon": -4.85194,
+      "country": "ES",
+      "region": "ES-CL",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VNO",
+      "icao": "EYVI",
+      "name": "Vilnius International Airport",
+      "lat": 54.6341,
+      "lon": 25.2858,
+      "country": "LT",
+      "region": "LT-VL",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "VOG",
+      "icao": "URWW",
+      "name": "Volgograd International Airport",
+      "lat": 48.78134,
+      "lon": 44.33919,
+      "country": "RU",
+      "region": "RU-VGG",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "VOL",
+      "icao": "LGBL",
+      "name": "Nea Anchialos National Airport",
+      "lat": 39.2196,
+      "lon": 22.7943,
+      "country": "GR",
+      "region": "GR-E",
+      "utcStdOffsetMin": 120
+    },
+    {
+      "iata": "VOZ",
+      "icao": "UUOO",
+      "name": "Voronezh International Airport",
+      "lat": 51.81432,
+      "lon": 39.23095,
+      "country": "RU",
+      "region": "RU-VOR",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "VPN",
+      "icao": "BIVO",
+      "name": "Vopnafjörður Airport",
+      "lat": 65.7206,
+      "lon": -14.8506,
+      "country": "IS",
+      "region": "IS-7",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "VRL",
+      "icao": "LPVR",
+      "name": "Vila Real Airport",
+      "lat": 41.2743,
+      "lon": -7.72047,
+      "country": "PT",
+      "region": "PT-17",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "VRN",
+      "icao": "LIPX",
+      "name": "Verona Villafranca Valerio Catullo Airport",
+      "lat": 45.39496,
+      "lon": 10.8873,
+      "country": "IT",
+      "region": "IT-34",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VSE",
+      "icao": "LPVZ",
+      "name": "Aerodromo Goncalves Lobato (Viseu Airport)",
+      "lat": 40.7255,
+      "lon": -7.88899,
+      "country": "PT",
+      "region": "PT-18",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "VST",
+      "icao": "ESOW",
+      "name": "Stockholm Västerås Airport",
+      "lat": 59.5894,
+      "lon": 16.6336,
+      "country": "SE",
+      "region": "SE-U",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "VXO",
+      "icao": "ESMX",
+      "name": "Växjö Kronoberg Airport",
+      "lat": 56.9291,
+      "lon": 14.728,
+      "country": "SE",
+      "region": "SE-G",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "WAW",
+      "icao": "EPWA",
+      "name": "Warsaw Chopin Airport",
+      "lat": 52.1657,
+      "lon": 20.9671,
+      "country": "PL",
+      "region": "PL-MZ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "WIC",
+      "icao": "EGPC",
+      "name": "Wick John O'Groats Airport",
+      "lat": 58.4589,
+      "lon": -3.09306,
+      "country": "GB",
+      "region": "GB-SCT",
+      "utcStdOffsetMin": 0
+    },
+    {
+      "iata": "WMI",
+      "icao": "EPMO",
+      "name": "Warsaw Modlin Airport",
+      "lat": 52.4511,
+      "lon": 20.6518,
+      "country": "PL",
+      "region": "PL-MZ",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "WRO",
+      "icao": "EPWR",
+      "name": "Copernicus Wrocław Airport",
+      "lat": 51.10372,
+      "lon": 16.8821,
+      "country": "PL",
+      "region": "PL-DS",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "XCR",
+      "icao": "LFOK",
+      "name": "Chalons Vatry airport",
+      "lat": 48.77333,
+      "lon": 4.20611,
+      "country": "FR",
+      "region": "FR-GES",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "XRY",
+      "icao": "LEJR",
+      "name": "Jerez Airport",
+      "lat": 36.7446,
+      "lon": -6.06011,
+      "country": "ES",
+      "region": "ES-AN",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ZAD",
+      "icao": "LDZD",
+      "name": "Zadar Airport",
+      "lat": 44.09699,
+      "lon": 15.35357,
+      "country": "HR",
+      "region": "HR-13",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ZAG",
+      "icao": "LDZA",
+      "name": "Zagreb Franjo Tuđman International Airport",
+      "lat": 45.7429,
+      "lon": 16.0688,
+      "country": "HR",
+      "region": "HR-01",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ZAZ",
+      "icao": "LEZG",
+      "name": "Zaragoza Airport",
+      "lat": 41.6662,
+      "lon": -1.04155,
+      "country": "ES",
+      "region": "ES-AR",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ZIA",
+      "icao": "UUBW",
+      "name": "Zhukovsky International Airport",
+      "lat": 55.5533,
+      "lon": 38.15,
+      "country": "RU",
+      "region": "RU-MOS",
+      "utcStdOffsetMin": 180
+    },
+    {
+      "iata": "ZRH",
+      "icao": "LSZH",
+      "name": "Zürich Airport",
+      "lat": 47.45806,
+      "lon": 8.54806,
+      "country": "CH",
+      "region": "CH-ZH",
+      "utcStdOffsetMin": 60
+    },
+    {
+      "iata": "ZTH",
+      "icao": "LGZA",
+      "name": "Zakynthos International Airport Dionysios Solomos",
+      "lat": 37.7509,
+      "lon": 20.8843,
+      "country": "GR",
+      "region": "GR-F",
+      "utcStdOffsetMin": 120
+    }
+  ]
+}

@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "id": "s10-brake-overheat-fdp-squeeze",
+  "title": "Brake overheat on turnaround; crew FDP margin collapsing",
+  "narrative": "Tenerife South, late afternoon. NW-TFB, an A321, arrives from Manchester after a heavy landing and a long taxi; brake temperatures reach 450 °C and one brake shows a hot-brake indication. The return NWD741 to Manchester is due at 17:35 with 215 passengers. The brakes must cool and be inspected. The crew reported in Manchester at 11:15, so every hour of delay eats their duty margin, and Manchester has a night curfew. There is no standby crew and no spare in Tenerife.",
+  "visibility": "public",
+  "inspiredBy": [
+    {
+      "sourceId": "ASRS ACN 1628949",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Brake overheat after a long slow taxi to the gate following landing."
+    },
+    {
+      "sourceId": "ASRS ACN 1021824",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Brake temperature warning after parking; ground crew later used a fire extinguisher on the brake."
+    }
+  ],
+  "startSimTime": "2026-09-04T16:45:00Z",
+  "aircraft": {
+    "tail": "NW-TFB",
+    "type": "A321",
+    "station": "TFS",
+    "stand": "18",
+    "nextSectors": [
+      {
+        "flight": "NWD741",
+        "from": "TFS",
+        "to": "MAN",
+        "std": "2026-09-04T17:35:00Z",
+        "pax": 215,
+        "distanceKm": 3048
+      }
+    ]
+  },
+  "trigger": {
+    "type": "brake-overheat",
+    "atMinute": 3,
+    "description": "Brake overheat after landing: brake 3 at 450 °C with a HOT BRAKE indication; cooling and inspection required.",
+    "evidence": [
+      {
+        "kind": "sensor",
+        "text": "Brake temperatures after parking: 1: 310 °C, 2: 330 °C, 3: 450 °C (HOT), 4: 300 °C."
+      },
+      {
+        "kind": "techlog",
+        "text": "Heavy landing feel reported, long taxi to stand 18 with frequent braking. Brake fans not fitted."
+      }
+    ]
+  },
+  "world": {
+    "spares": [
+      { "tail": "NW-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
+    ],
+    "engineers": [
+      {
+        "id": "eng-tfs-b1",
+        "name": "Vera Ashwell-Pryce",
+        "station": "TFS",
+        "licence": "B1",
+        "skills": ["A320 family", "landing gear", "brakes"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-lpa-b1",
+        "name": "Vic Yarrowby",
+        "station": "LPA",
+        "licence": "B1",
+        "skills": ["A320 family", "landing gear"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-man-b1l",
+        "name": "Kai Birchmere",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320 family", "landing gear", "heavy landing"],
+        "availableFromMinute": 0
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-741-cpt",
+        "name": "Uma Wexcombe",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-09-04T11:15:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-741-fo",
+        "name": "Arlo Pellowe",
+        "rank": "FO",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-09-04T11:15:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-741-sccm",
+        "name": "Otto Lowmoor",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-09-04T11:15:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-741-cc1",
+        "name": "Bea Underhill",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-09-04T11:15:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-741-cc2",
+        "name": "Vera Juniperwell",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-09-04T11:15:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-741-cc3",
+        "name": "Kai Glenmarrow",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-09-04T11:15:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-741-cc4",
+        "name": "Juno Foxhollow",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-09-04T11:15:00Z",
+        "sectorsPlanned": 1,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-sby-cpt",
+        "name": "Ada Ashcombe",
+        "rank": "CPT",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-09-04T14:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-sby-fo",
+        "name": "Elin Larkstead",
+        "rank": "FO",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-09-04T14:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      }
+    ],
+    "cohorts": [
+      { "id": "c741-general", "kind": "general", "count": 158, "flight": "NWD741" },
+      {
+        "id": "c741-families",
+        "kind": "families",
+        "count": 40,
+        "flight": "NWD741",
+        "notes": "School starts Monday; many families"
+      },
+      { "id": "c741-prm", "kind": "prm", "count": 6, "flight": "NWD741", "notes": "4 WCHR, 2 WCHC" },
+      { "id": "c741-um", "kind": "unaccompanied_minors", "count": 3, "flight": "NWD741" },
+      {
+        "id": "c741-connections",
+        "kind": "connections",
+        "count": 8,
+        "flight": "NWD741",
+        "onwardDeadline": "2026-09-04T23:00:00Z"
+      }
+    ],
+    "stands": [
+      { "id": "18", "station": "TFS", "kind": "contact", "occupiedByTail": "NW-TFB" },
+      { "id": "19", "station": "TFS", "kind": "contact" },
+      { "id": "R30", "station": "TFS", "kind": "remote" }
+    ],
+    "handler": {
+      "station": "TFS",
+      "name": "Morrowgate Handling",
+      "staffOnShift": 12,
+      "equipment": [
+        { "kind": "tug", "count": 1 },
+        { "kind": "towbar", "count": 1 },
+        { "kind": "stairs", "count": 2 },
+        { "kind": "bus", "count": 2 },
+        { "kind": "gpu", "count": 1 }
+      ],
+      "ackMinutes": 6
+    },
+    "weather": {
+      "station": "TFS",
+      "summary": "Sunny, 27 °C, fresh north-easterly",
+      "windKt": 16,
+      "tempC": 27,
+      "metar": "GCTS 041640Z 04016KT CAVOK 27/17 Q1016"
+    },
+    "curfews": [{ "station": "MAN", "fromLocal": "23:30", "toLocal": "06:00" }],
+    "rotation": [
+      {
+        "flight": "NWD740",
+        "tail": "NW-TFB",
+        "from": "MAN",
+        "to": "TFS",
+        "std": "2026-09-04T12:15:00Z",
+        "sta": "2026-09-04T16:40:00Z",
+        "pax": 219
+      },
+      {
+        "flight": "NWD741",
+        "tail": "NW-TFB",
+        "from": "TFS",
+        "to": "MAN",
+        "std": "2026-09-04T17:35:00Z",
+        "sta": "2026-09-04T21:50:00Z",
+        "pax": 215
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-home-curfew",
+      "title": "Home-base curfew approaching",
+      "atMinute": 25,
+      "description": "Manchester confirms no dispensation for arrivals after 23:30 local tonight.",
+      "effects": [
+        {
+          "op": "info",
+          "text": "Manchester airport: no night dispensation tonight; arrivals after 23:30 local will not be accepted."
+        }
+      ]
+    },
+    {
+      "id": "tw-tyre-deflated",
+      "title": "Fuse plug melted",
+      "description": "A wheel fuse plug has melted and the tyre on wheel 3 is deflating.",
+      "effects": [
+        {
+          "op": "create",
+          "system": "mne",
+          "entity": "defects",
+          "record": {
+            "id": "DEF-002",
+            "tail": "NW-TFB",
+            "description": "Wheel 3 fuse plug melted, tyre deflating; wheel and brake change required",
+            "ata": "32",
+            "status": "open",
+            "raisedAtMinute": 40
+          }
+        },
+        {
+          "op": "info",
+          "text": "Engineer: wheel 3 fuse plug melted, tyre going down; wheel and brake change needed."
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 12,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-tfs-b1", "station": "TFS" } },
+      "note": "Local engineer called by the crew via the handler."
+    },
+    {
+      "atMinute": 35,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": {
+          "cohortIds": ["c741-general", "c741-families", "c741-prm", "c741-um", "c741-connections"],
+          "channel": "sms",
+          "body": "NWD741 to Manchester is delayed while the aircraft brakes cool and are inspected. Please stay near the gate; next update by 18:30 local time."
+        },
+        "decision": "approve"
+      },
+      "note": "First message after the gate asks OCC."
+    },
+    {
+      "atMinute": 50,
+      "actor": "Maintenance control",
+      "action": {
+        "tool": "create_work_order",
+        "args": {
+          "tail": "NW-TFB",
+          "defectId": "DEF-001",
+          "task": "brake_cooling_and_inspection",
+          "estimatedDurationMin": 75,
+          "engineerId": "eng-tfs-b1"
+        }
+      },
+      "note": "Inspection raised once brakes have cooled enough to approach."
+    },
+    {
+      "atMinute": 130,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "issue_care_vouchers",
+        "args": {
+          "cohortIds": ["c741-general", "c741-families", "c741-prm", "c741-um", "c741-connections"],
+          "kind": "meal",
+          "valuePerPaxEur": 12
+        },
+        "decision": "approve"
+      },
+      "note": "Meal vouchers late in the evening."
+    },
+    {
+      "atMinute": 150,
+      "actor": "OCC duty manager",
+      "action": { "tool": "propose_cancel", "args": { "flight": "NWD741" }, "decision": "approve" },
+      "note": "Cancelled when crew duty and curfew close the window; hotels arranged."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "firstPaxMessageBeforeMin": 15,
+    "engineerPagedBeforeMin": 10,
+    "decisionBeforeMin": 60,
+    "requiredTools": ["get_crew_fdp", "get_rotation", "page_engineer", "send_passenger_message"],
+    "orderedPairs": [
+      ["get_crew_fdp", "propose_cancel"],
+      ["get_rotation", "propose_cancel"]
+    ],
+    "referenceSummary": "Brake cooling and inspection by the local B1 come first; do not rush them. Compute the latest departure that satisfies both the crew FDP (reported 11:15, 13 h maximum) and the Manchester curfew, and decide early with a human whether to wait or cancel and night-stop (hotels, care, rebooking), rather than drifting into a late cancellation. Never extend crew duty in software; a commander's discretion report is only drafted for the commander if asked. Keep passengers informed with a clear next-update time."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 110
+  }
+}

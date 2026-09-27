@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "id": "s02-catering-truck-door-strike",
+  "title": "Catering truck strikes forward service door",
+  "narrative": "Palma, late morning. While catering NW-PMC, an A321 due out as NWD341 to Manchester at 11:30 with 212 passengers, the high-loader platform of the catering truck contacts the lower frame of forward service door 1R. The door will not close flush. Palma is an outstation: the contracted local engineer holds a B2 licence only, and the nearest B1 engineers are in Manchester and Malaga. The aircraft is planned to fly two more sectors after Manchester. A spare A321 is available in Manchester, not in Palma.",
+  "visibility": "public",
+  "inspiredBy": [
+    {
+      "sourceId": "ASRS ACN 1795954",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Gate return after a possible collision with a catering truck during pushback."
+    },
+    {
+      "sourceId": "ASRS ACN 1806251",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Aircraft flown after being struck by a catering vehicle before flight; unairworthy."
+    }
+  ],
+  "startSimTime": "2026-07-11T10:35:00Z",
+  "aircraft": {
+    "tail": "NW-PMC",
+    "type": "A321",
+    "station": "PMI",
+    "stand": "14",
+    "nextSectors": [
+      {
+        "flight": "NWD341",
+        "from": "PMI",
+        "to": "MAN",
+        "std": "2026-07-11T11:30:00Z",
+        "pax": 212,
+        "distanceKm": 1581
+      },
+      {
+        "flight": "NWD342",
+        "from": "MAN",
+        "to": "ALC",
+        "std": "2026-07-11T15:00:00Z",
+        "pax": 205,
+        "distanceKm": 1681
+      },
+      {
+        "flight": "NWD343",
+        "from": "ALC",
+        "to": "MAN",
+        "std": "2026-07-11T18:10:00Z",
+        "pax": 199,
+        "distanceKm": 1681
+      }
+    ]
+  },
+  "trigger": {
+    "type": "ground-damage",
+    "atMinute": 5,
+    "description": "Catering high-loader contacted the lower frame of door 1R; the door will not close flush.",
+    "evidence": [
+      {
+        "kind": "report",
+        "text": "Handler supervisor: the truck platform rose while the driver was repositioning and hit the bottom of door 1R."
+      },
+      {
+        "kind": "photo-description",
+        "text": "Dent about 8 cm long below the 1R door sill, paint scuffed, one door-stop fitting looks displaced."
+      },
+      { "kind": "report", "text": "Cabin crew: 1R door handle stiff, gap visible at the bottom when closed." }
+    ]
+  },
+  "world": {
+    "spares": [
+      { "tail": "NW-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
+    ],
+    "engineers": [
+      {
+        "id": "eng-pmi-b2",
+        "name": "Sol Larkstead",
+        "station": "PMI",
+        "licence": "B2",
+        "skills": ["A320 family", "avionics"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-man-b1c",
+        "name": "Tamsin Pennick",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320 family", "doors", "structures"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-agp-b1",
+        "name": "Fern Marshwood",
+        "station": "AGP",
+        "licence": "B1",
+        "skills": ["A320 family", "structures"],
+        "availableFromMinute": 90
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-341-cpt",
+        "name": "Hana Ivesley",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-11T07:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-341-fo",
+        "name": "Tamsin Fenwright",
+        "rank": "FO",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-11T07:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-341-sccm",
+        "name": "Bram Kilnsey",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-11T07:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-341-cc1",
+        "name": "Bea Fenwright",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-11T07:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-341-cc2",
+        "name": "Vic Pellowe",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-11T07:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-341-cc3",
+        "name": "Zed Wrenfield",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-11T07:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-341-cc4",
+        "name": "Kai Harrowgate",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-11T07:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-sby-cpt",
+        "name": "Lior Marshwood",
+        "rank": "CPT",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-07-11T10:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-sby-fo",
+        "name": "Teo Tollbridge",
+        "rank": "FO",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-07-11T10:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      }
+    ],
+    "cohorts": [
+      { "id": "c341-general", "kind": "general", "count": 166, "flight": "NWD341" },
+      {
+        "id": "c341-families",
+        "kind": "families",
+        "count": 28,
+        "flight": "NWD341",
+        "notes": "School-holiday families, 11 infants"
+      },
+      { "id": "c341-prm", "kind": "prm", "count": 3, "flight": "NWD341", "notes": "2 WCHR, 1 WCHC" },
+      {
+        "id": "c341-connections",
+        "kind": "connections",
+        "count": 15,
+        "flight": "NWD341",
+        "onwardDeadline": "2026-07-11T16:00:00Z",
+        "notes": "Onward flights from Manchester"
+      }
+    ],
+    "stands": [
+      { "id": "14", "station": "PMI", "kind": "contact", "occupiedByTail": "NW-PMC" },
+      {
+        "id": "15",
+        "station": "PMI",
+        "kind": "contact",
+        "occupiedByTail": "NW-XPB",
+        "occupiedUntilMinute": 60
+      },
+      { "id": "R22", "station": "PMI", "kind": "remote" }
+    ],
+    "handler": {
+      "station": "PMI",
+      "name": "Tessaly Apron Services",
+      "staffOnShift": 14,
+      "equipment": [
+        { "kind": "tug", "count": 1 },
+        { "kind": "towbar", "count": 1 },
+        { "kind": "stairs", "count": 2 },
+        { "kind": "bus", "count": 2 },
+        { "kind": "gpu", "count": 1 },
+        { "kind": "catering", "count": 2 }
+      ],
+      "ackMinutes": 6
+    },
+    "weather": {
+      "station": "PMI",
+      "summary": "Sunny and hot, 31 °C, light sea breeze",
+      "windKt": 9,
+      "tempC": 31,
+      "metar": "LEPA 111030Z 20009KT CAVOK 31/18 Q1016"
+    },
+    "curfews": [],
+    "rotation": [
+      {
+        "flight": "NWD341",
+        "tail": "NW-PMC",
+        "from": "PMI",
+        "to": "MAN",
+        "std": "2026-07-11T11:30:00Z",
+        "sta": "2026-07-11T13:55:00Z",
+        "pax": 212
+      },
+      {
+        "flight": "NWD342",
+        "tail": "NW-PMC",
+        "from": "MAN",
+        "to": "ALC",
+        "std": "2026-07-11T15:00:00Z",
+        "sta": "2026-07-11T17:25:00Z",
+        "pax": 205
+      },
+      {
+        "flight": "NWD343",
+        "tail": "NW-PMC",
+        "from": "ALC",
+        "to": "MAN",
+        "std": "2026-07-11T18:10:00Z",
+        "sta": "2026-07-11T20:30:00Z",
+        "pax": 199
+      },
+      {
+        "flight": "NWD345",
+        "tail": "NW-MAX",
+        "from": "MAN",
+        "to": "PMI",
+        "std": "2026-07-11T12:00:00Z",
+        "sta": "2026-07-11T14:25:00Z",
+        "pax": 189
+      },
+      {
+        "flight": "NWD346",
+        "tail": "NW-MAX",
+        "from": "PMI",
+        "to": "MAN",
+        "std": "2026-07-11T15:10:00Z",
+        "sta": "2026-07-11T17:35:00Z",
+        "pax": 176
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-engineer-flight-delayed",
+      "title": "Engineer flight delayed",
+      "atMinute": 60,
+      "description": "The positioning flight NWD345 from Manchester is delayed by 50 minutes (air traffic flow restriction).",
+      "effects": [
+        { "op": "delay", "flight": "NWD345", "minutes": 50 },
+        {
+          "op": "info",
+          "text": "OCC: NWD345 MAN-PMI now delayed 50 minutes; any engineer on board arrives later."
+        }
+      ]
+    },
+    {
+      "id": "tw-door-seal",
+      "title": "Door seal torn",
+      "description": "Closer inspection shows the 1R door seal is torn as well.",
+      "effects": [
+        {
+          "op": "info",
+          "text": "Local B2 engineer: 1R door seal torn along 20 cm; structural assessment still needed by a B1."
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 12,
+      "actor": "Station manager",
+      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "NW-PMC" } },
+      "note": "Boarding held once the dispatcher reports the door."
+    },
+    {
+      "atMinute": 25,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-man-b1c", "station": "PMI" } },
+      "note": "Maintenance control phones Manchester line maintenance after the local B2 confirms it is structural."
+    },
+    {
+      "atMinute": 38,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": {
+          "cohortIds": ["c341-general", "c341-families", "c341-prm", "c341-connections"],
+          "channel": "sms",
+          "body": "NWD341 to Manchester is delayed while a door is inspected after damage by ground equipment. Please remain near gate 14; next update by 12:30 local time."
+        },
+        "decision": "approve"
+      },
+      "note": "First message after the gate team asks for words."
+    },
+    {
+      "atMinute": 70,
+      "actor": "OCC duty manager",
+      "action": {
+        "tool": "propose_swap",
+        "args": { "fromTail": "NW-PMC", "toTail": "NW-MAT", "flights": ["NWD342", "NWD343"] },
+        "decision": "approve"
+      },
+      "note": "Later rotation protected with the Manchester spare."
+    },
+    {
+      "atMinute": 95,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "issue_care_vouchers",
+        "args": {
+          "cohortIds": ["c341-general", "c341-families", "c341-prm", "c341-connections"],
+          "kind": "meal",
+          "valuePerPaxEur": 12
+        },
+        "decision": "approve"
+      },
+      "note": "Meal vouchers after the delay passes two hours."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "firstPaxMessageBeforeMin": 15,
+    "engineerPagedBeforeMin": 20,
+    "decisionBeforeMin": 75,
+    "requiredTools": ["page_engineer", "send_passenger_message", "find_spare_aircraft"],
+    "orderedPairs": [
+      ["get_aircraft_status", "page_engineer"],
+      ["find_spare_aircraft", "propose_swap"]
+    ],
+    "referenceSummary": "Recognise that door-frame damage needs a B1 structural assessment the local B2 cannot give; page the Manchester B1 early and position them on the first flight, knowing that the ETA is hours away and may slip. Protect the rest of the rotation by swapping NWD342/NWD343 onto the Manchester spare rather than waiting; keep NWD341 passengers informed early and give care; prioritise connections and PRM passengers. No software deferral of the door."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 120
+  }
+}

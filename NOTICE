@@ -1,0 +1,30 @@
+Ground Incident Coordination Agent
+Copyright 2026 Incident Command Agent contributors
+
+Source code is licensed under the Apache License, Version 2.0 (see LICENSE).
+Scenario files and documentation are licensed under CC BY 4.0 (see LICENSE-content).
+
+All airline identities, tails, flights and people in this repository are fictional
+("Northwind Air"). Airline systems are simulated. Nothing here is operational guidance.
+
+This product includes or is derived from the following third-party open data.
+Each source keeps its own licence; per-file details (URL, retrieval date, licence,
+attribution, whether verbatim reuse is allowed) are recorded in data/SOURCES.md.
+
+- NASA Aviation Safety Reporting System (ASRS) and CALLBACK — US Government work,
+  public domain. ASRS reports are voluntarily submitted and not verified by NASA;
+  NASA's disclaimer is retained with every derived record.
+- UK Air Accidents Investigation Branch (AAIB) reports — contains public sector
+  information licensed under the Open Government Licence v3.0.
+- US Federal Aviation Administration (FAA): Accident and Incident Data System,
+  A320 Master Minimum Equipment List, Advisory Circular 150/5210-20A — public domain.
+- European Union Aviation Safety Agency (EASA): Easy Access Rules for Air Operations —
+  © EASA, reproduced with attribution.
+- UK Civil Aviation Authority (CAA): CAP 642 and passenger-rights guidance —
+  © UK CAA, reproduced with attribution.
+- EUROCONTROL Standard Inputs for Cost-Benefit Analyses (cost of delay) —
+  © EUROCONTROL, cited with attribution.
+- Airbus "Safety First" magazine articles — reproduced with acknowledgement to Airbus.
+- EU Regulation (EC) No 261/2004 (EUR-Lex) — © European Union, reuse under
+  Commission Decision 2011/833/EU.
+- OurAirports airport data — public domain (The Unlicense).

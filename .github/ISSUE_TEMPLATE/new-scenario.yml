@@ -1,0 +1,52 @@
+name: New scenario
+description: Propose a new ground or pre-departure incident scenario
+title: 'scenario: '
+labels: [scenario]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Scenarios use the fictional carrier **Northwind Air** only (NWD flights, NW-XXX tails, real IATA airports). No real airline, client or personal names. Do not paste proprietary manual text.
+  - type: input
+    id: title
+    attributes:
+      label: Working title
+    validations:
+      required: true
+  - type: input
+    id: station
+    attributes:
+      label: Station (IATA) and base/outstation
+      placeholder: 'FAO, outstation'
+    validations:
+      required: true
+  - type: textarea
+    id: narrative
+    attributes:
+      label: What happens
+      description: Trigger, evidence, and what each specialist (maintenance, ground, flight ops, passenger, record) would have to do.
+    validations:
+      required: true
+  - type: textarea
+    id: twists
+    attributes:
+      label: Twists (at least one scheduled and one manual)
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected constraints
+      description: e.g. no software deferral, first passenger message before minute 15, engineer paged before swap.
+  - type: textarea
+    id: sources
+    attributes:
+      label: Inspired by (verified references only)
+      description: ASRS ACNs or AAIB report URLs you actually checked. Leave empty rather than guess.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: Fictional carrier data only; no real names or personal data
+          required: true
+        - label: No proprietary manual text
+          required: true

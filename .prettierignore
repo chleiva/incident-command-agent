@@ -1,0 +1,22 @@
+node_modules/
+dist/
+cdk.out/
+coverage/
+storybook-static/
+test-results/
+playwright-report/
+.local/
+.claude/
+data/raw/
+data/index/
+package-lock.json
+# Prose is written by hand; tables and wrapping are deliberate.
+*.md
+LICENSE
+LICENSE-content
+NOTICE
+# Committed, generated or machine-appended files
+evals/ledger.json
+packages/schema/scenario.schema.json
+scenarios/public/index.gen.ts
+packages/schema/fixtures/run.sample.events.json

@@ -1,0 +1,72 @@
+{
+  "caseId": "fx-runtime-smoke",
+  "judgeModel": "claude-opus-5-5",
+  "rubricVersion": "1-c2f0b767",
+  "digestSha": "f5361d2d4ea7891f",
+  "createdAt": "2026-09-26T22:10:39.767Z",
+  "synthetic": true,
+  "judgements": [
+    {
+      "understanding": {
+        "score": 4,
+        "why": "synthetic fixture verdict (scripted judge), not a real model judgement"
+      },
+      "alternatives": {
+        "score": 4,
+        "why": "synthetic fixture verdict (scripted judge), not a real model judgement"
+      },
+      "passengerMessage": {
+        "score": null,
+        "why": "synthetic fixture: not applicable to the runtime-only script"
+      },
+      "occurrenceReport": {
+        "score": null,
+        "why": "synthetic fixture: not applicable to the runtime-only script"
+      },
+      "humanAuthority": {
+        "score": 4,
+        "why": "synthetic fixture verdict (scripted judge), not a real model judgement"
+      },
+      "faithfulness": {
+        "score": null,
+        "why": "synthetic fixture: not applicable to the runtime-only script"
+      }
+    },
+    {
+      "understanding": {
+        "score": 4,
+        "why": "synthetic fixture verdict (scripted judge), not a real model judgement"
+      },
+      "alternatives": {
+        "score": 4,
+        "why": "synthetic fixture verdict (scripted judge), not a real model judgement"
+      },
+      "passengerMessage": {
+        "score": null,
+        "why": "synthetic fixture: not applicable to the runtime-only script"
+      },
+      "occurrenceReport": {
+        "score": null,
+        "why": "synthetic fixture: not applicable to the runtime-only script"
+      },
+      "humanAuthority": {
+        "score": 4,
+        "why": "synthetic fixture verdict (scripted judge), not a real model judgement"
+      },
+      "faithfulness": {
+        "score": null,
+        "why": "synthetic fixture: not applicable to the runtime-only script"
+      }
+    }
+  ],
+  "perDimension": {
+    "understanding": 4,
+    "alternatives": 4,
+    "passengerMessage": null,
+    "occurrenceReport": null,
+    "humanAuthority": 4,
+    "faithfulness": null
+  },
+  "mean": 4,
+  "usd": 0
+}

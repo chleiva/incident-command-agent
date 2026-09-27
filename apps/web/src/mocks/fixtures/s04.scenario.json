@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "id": "s04-lightning-strike-outstation",
+  "title": "Lightning strike at outstation, no licensed engineer on site",
+  "narrative": "Northwind Air NW-TQA reports a lightning strike on approach into Faro. The aircraft is on stand 5 with 212 passengers booked on the return NWD518 to Manchester. Northwind has no licensed engineer at Faro; a lightning-strike inspection is required before the next flight.",
+  "visibility": "public",
+  "inspiredBy": [],
+  "startSimTime": "2026-07-03T13:30:00Z",
+  "aircraft": {
+    "tail": "NW-TQA",
+    "type": "A321",
+    "station": "FAO",
+    "stand": "5",
+    "nextSectors": [
+      {
+        "flight": "NWD518",
+        "from": "FAO",
+        "to": "MAN",
+        "std": "2026-07-03T14:15:00Z",
+        "pax": 212,
+        "distanceKm": 1900
+      }
+    ],
+    "maintenance": { "lastCheckType": "A-check", "lastCheckDate": "2026-06-21" }
+  },
+  "trigger": {
+    "type": "lightning",
+    "atMinute": 3,
+    "description": "Flight crew report a lightning strike on approach; techlog entry made; no licensed engineer at FAO.",
+    "evidence": [
+      { "kind": "techlog", "text": "Lightning strike on approach, flash and bang, no abnormal indications." },
+      {
+        "kind": "report",
+        "text": "Handler: no Northwind engineer on station today; a contract engineer may be available."
+      }
+    ]
+  },
+  "world": {
+    "spares": [{ "tail": "NW-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }],
+    "engineers": [
+      {
+        "id": "eng-m1",
+        "name": "Callum Brightwater",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A321", "lightning strike"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-f1",
+        "name": "Rui Almada",
+        "station": "FAO",
+        "licence": "B1",
+        "skills": ["A321", "contract"],
+        "availableFromMinute": 20
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-cpt-4",
+        "name": "Dora Fenwick",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "FAO",
+        "reportTime": "2026-07-03T08:45:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 600
+      },
+      {
+        "id": "crew-fo-4",
+        "name": "Idris Palmer",
+        "rank": "FO",
+        "status": "operating",
+        "station": "FAO",
+        "reportTime": "2026-07-03T08:45:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 600
+      },
+      {
+        "id": "crew-sccm-4",
+        "name": "Hana Brook",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "FAO",
+        "reportTime": "2026-07-03T08:45:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 600
+      }
+    ],
+    "cohorts": [
+      { "id": "c-general", "kind": "general", "count": 168, "flight": "NWD518" },
+      {
+        "id": "c-families",
+        "kind": "families",
+        "count": 18,
+        "flight": "NWD518",
+        "notes": "Six families with young children"
+      },
+      { "id": "c-prm", "kind": "prm", "count": 4, "flight": "NWD518", "notes": "Three WCHR, one WCHS" },
+      {
+        "id": "c-connections",
+        "kind": "connections",
+        "count": 22,
+        "flight": "NWD518",
+        "onwardDeadline": "2026-07-03T19:30:00Z",
+        "notes": "Onward domestic connections at MAN"
+      }
+    ],
+    "stands": [
+      { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "NW-TQA" },
+      { "id": "7", "station": "FAO", "kind": "contact" }
+    ],
+    "handler": {
+      "station": "FAO",
+      "name": "Atlantico Handling",
+      "staffOnShift": 9,
+      "equipment": [
+        { "kind": "tug", "count": 1 },
+        { "kind": "stairs", "count": 2 },
+        { "kind": "bus", "count": 1 },
+        { "kind": "gpu", "count": 1 }
+      ],
+      "ackMinutes": 5
+    },
+    "weather": {
+      "station": "FAO",
+      "summary": "Thunderstorms in the vicinity, wind 200/14 kt",
+      "windKt": 14,
+      "tempC": 27
+    },
+    "curfews": [],
+    "rotation": [
+      {
+        "flight": "NWD517",
+        "tail": "NW-TQA",
+        "from": "MAN",
+        "to": "FAO",
+        "std": "2026-07-03T10:05:00Z",
+        "sta": "2026-07-03T13:25:00Z",
+        "pax": 208
+      },
+      {
+        "flight": "NWD518",
+        "tail": "NW-TQA",
+        "from": "FAO",
+        "to": "MAN",
+        "std": "2026-07-03T14:15:00Z",
+        "sta": "2026-07-03T16:05:00Z",
+        "pax": 212
+      },
+      {
+        "flight": "NWD540",
+        "tail": "NW-TQA",
+        "from": "MAN",
+        "to": "AMS",
+        "std": "2026-07-03T17:10:00Z",
+        "sta": "2026-07-03T19:25:00Z",
+        "pax": 186
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-storm-ramp-closure",
+      "title": "Ramp closed for a thunderstorm cell",
+      "atMinute": 24,
+      "description": "Airport operations close the ramp for 20 minutes while a thunderstorm cell passes overhead.",
+      "effects": [
+        { "op": "delay", "flight": "NWD518", "minutes": 20 },
+        { "op": "info", "text": "Airport: ramp operations suspended for 20 minutes (lightning within 5 km)." }
+      ]
+    },
+    {
+      "id": "tw-contract-authorisation",
+      "title": "Contract engineer authorisation delayed",
+      "description": "The contract engineer’s A321 authorisation needs a quality sign-off from Manchester.",
+      "effects": [{ "op": "info", "text": "Quality: authorisation sign-off expected in 15 minutes." }]
+    },
+    {
+      "id": "tw-engineer-eta",
+      "title": "Engineer delayed: ETA +40 min",
+      "afterFirstApproval": true,
+      "atMinute": 25,
+      "description": "The engineer on the way to the aircraft is held up: their arrival slips by 40 minutes. Any approved decision that relied on the old ETA needs revisiting.",
+      "effects": [
+        {
+          "op": "shift",
+          "system": "engineers",
+          "entity": "engineers",
+          "id": "eng-f1",
+          "field": "etaMinute",
+          "minutes": 40
+        },
+        {
+          "op": "info",
+          "text": "Maintenance control: the engineer's ETA is now 40 minutes later than planned."
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 20,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-m1", "tail": "NW-TQA" } },
+      "note": "Home-base engineer called by phone to fly out."
+    },
+    {
+      "atMinute": 38,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": { "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"], "channel": "sms" },
+        "decision": "approve"
+      },
+      "note": "Generic delay message."
+    },
+    {
+      "atMinute": 60,
+      "actor": "OCC controller",
+      "action": { "tool": "request_decision", "args": { "choice": "fly engineer" }, "decision": "approve" },
+      "note": "Decision to fly the engineer on the next service."
+    },
+    {
+      "atMinute": 95,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "issue_care_vouchers",
+        "args": { "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"], "kind": "meal" },
+        "decision": "approve"
+      },
+      "note": "Meal vouchers after two hours."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "firstPaxMessageBeforeMin": 15,
+    "decisionBeforeMin": 30,
+    "requiredTools": ["search_mel", "send_passenger_message", "request_decision"],
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "orderedPairs": [["request_decision", "page_engineer"]],
+    "referenceSummary": "Put ranked options to the Duty Manager early (contract engineer, fly an engineer, ferry a spare, cancel), inform passengers within 15 minutes, never extend FDP, and let a certifying engineer decide the release."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "eu261TierEur": 400,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 120
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "kind": "llm",
+  "runId": "eval-fx-runtime-smoke",
+  "agentRunId": "ar-orchestrator-1",
+  "agentPath": "orchestrator",
+  "role": "orchestrator",
+  "iteration": 4,
+  "provider": "scripted",
+  "model": "claude-sonnet-5",
+  "latencyMs": 4000,
+  "request": {
+    "model": "claude-sonnet-5",
+    "messageCount": 9,
+    "toolCount": 5
+  },
+  "response": {
+    "text": "The decision is recorded; I report.",
+    "toolCalls": [
+      {
+        "id": "tu_report",
+        "name": "report",
+        "input": {
+          "summary": "Incident coordinated; the duty manager chose the option on record.",
+          "actionsTaken": ["opened incident", "delegated maintenance and passenger", "requested a decision"],
+          "openIssues": ["certifying engineer to confirm rectification"],
+          "recommendations": [],
+          "citations": []
+        }
+      }
+    ],
+    "usage": {
+      "inputTokens": 1000,
+      "outputTokens": 100,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "stopReason": "tool_use",
+    "model": "claude-sonnet-5"
+  }
+}

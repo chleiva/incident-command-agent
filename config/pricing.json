@@ -1,0 +1,62 @@
+{
+  "$comment": "USD per million tokens. Read by services/run/llm/pricing.ts (task 02) for costUsd and by the eval budget guard. cacheWrite = 5-minute TTL write price (1.25x input); cacheRead = cache hit price.",
+  "currency": "USD",
+  "unit": "per_million_tokens",
+  "verifiedOn": "2026-09-26",
+  "gbpUsdRate": 1.2,
+  "gbpUsdRateNote": "Conservative (low) GBP→USD rate: gbp = usd / gbpUsdRate over-counts pounds spent. Used by the lifetime £10 eval ledger.",
+  "models": {
+    "claude-sonnet-5": {
+      "provider": "anthropic",
+      "input": 2.0,
+      "output": 10.0,
+      "cacheRead": 0.2,
+      "cacheWrite": 2.5,
+      "source": "Anthropic model pricing via the claude-api skill (model table cached 2026-06-24), checked 2026-09-26",
+      "status": "verified"
+    },
+    "claude-opus-5-5": {
+      "provider": "anthropic",
+      "input": 4.0,
+      "output": 20.0,
+      "cacheRead": 0.2,
+      "cacheWrite": 5.0,
+      "source": "Anthropic model pricing via the claude-api skill (cache reads $0.20 = 0.05x input), checked 2026-09-26",
+      "status": "verified"
+    },
+    "claude-haiku-4-5": {
+      "provider": "anthropic",
+      "input": 1.0,
+      "output": 5.0,
+      "cacheRead": 0.1,
+      "cacheWrite": 1.25,
+      "source": "Anthropic model pricing via the claude-api skill, checked 2026-09-26",
+      "status": "verified"
+    },
+    "gpt-5": {
+      "provider": "openai",
+      "input": 1.25,
+      "output": 10.0,
+      "cacheRead": 0.125,
+      "cacheWrite": 1.25,
+      "source": "Best knowledge; not checked against the provider's pricing page",
+      "status": "verify"
+    },
+    "anthropic.claude-sonnet-5": {
+      "provider": "bedrock",
+      "input": 2.0,
+      "output": 10.0,
+      "cacheRead": 0.2,
+      "cacheWrite": 2.5,
+      "source": "Assumed equal to Anthropic first-party list price; Bedrock pricing is set separately by AWS and varies by region",
+      "status": "verify"
+    }
+  },
+  "defaults": {
+    "anthropic": "claude-sonnet-5",
+    "openai": "gpt-5",
+    "bedrock": "anthropic.claude-sonnet-5",
+    "judge": "claude-opus-5-5",
+    "dev": "claude-haiku-4-5"
+  }
+}

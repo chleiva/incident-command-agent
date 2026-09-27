@@ -1,0 +1,348 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:incident-command-agent:schema:eval-case:1",
+  "title": "Ground Incident Coordination Agent eval case",
+  "additionalProperties": false,
+  "type": "object",
+  "required": ["id", "scenarioId", "title", "tier", "priority", "policy", "expected"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "pattern": "^[a-z0-9-]{3,80}$",
+      "type": "string"
+    },
+    "scenarioId": {
+      "pattern": "^[a-z0-9-]{3,64}$",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "kind": {
+      "anyOf": [
+        {
+          "const": "agent",
+          "type": "string"
+        },
+        {
+          "const": "author",
+          "type": "string"
+        }
+      ]
+    },
+    "tier": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "const": "smoke",
+            "type": "string"
+          },
+          {
+            "const": "core",
+            "type": "string"
+          },
+          {
+            "const": "full",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "priority": {
+      "minimum": 1,
+      "maximum": 100,
+      "type": "integer"
+    },
+    "adversarial": {
+      "type": "boolean"
+    },
+    "authorText": {
+      "maxLength": 8000,
+      "type": "string"
+    },
+    "overrides": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "scenarioPatch": {
+          "type": "object",
+          "patternProperties": {
+            "^(.*)$": {}
+          }
+        },
+        "mockData": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": ["system", "entity"],
+            "properties": {
+              "system": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "entity": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "patch": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {}
+                }
+              },
+              "record": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {}
+                }
+              }
+            }
+          }
+        },
+        "knowledgeInjection": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": ["collection", "sourceId", "title", "url", "text"],
+            "properties": {
+              "collection": {
+                "anyOf": [
+                  {
+                    "const": "mel",
+                    "type": "string"
+                  },
+                  {
+                    "const": "procedure",
+                    "type": "string"
+                  },
+                  {
+                    "const": "passenger_rights",
+                    "type": "string"
+                  },
+                  {
+                    "const": "precedent",
+                    "type": "string"
+                  },
+                  {
+                    "const": "rules",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sourceId": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "text": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "transforms": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "twistShiftMin": {
+              "type": "number"
+            },
+            "crewFdpMarginDeltaMin": {
+              "type": "number"
+            },
+            "engineerDelayMin": {
+              "type": "number"
+            },
+            "spareDelayMin": {
+              "type": "number"
+            },
+            "noSpares": {
+              "type": "boolean"
+            },
+            "narrativeAppend": {
+              "maxLength": 2000,
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "policy": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "rejectTools": {
+          "type": "array",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expected": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "hardConstraints",
+        "requiredTools",
+        "forbiddenTools",
+        "orderedPairs",
+        "latencyTargets",
+        "referenceSummary"
+      ],
+      "properties": {
+        "inheritScenarioExpected": {
+          "type": "boolean"
+        },
+        "hardConstraints": {
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "noSoftwareDeferral",
+            "noFdpExtension",
+            "noForbiddenExecuted",
+            "allProposalsDecided",
+            "noLegalClaimsSent"
+          ],
+          "properties": {
+            "noSoftwareDeferral": {
+              "type": "boolean"
+            },
+            "noFdpExtension": {
+              "type": "boolean"
+            },
+            "noForbiddenExecuted": {
+              "type": "boolean"
+            },
+            "allProposalsDecided": {
+              "type": "boolean"
+            },
+            "noLegalClaimsSent": {
+              "type": "boolean"
+            }
+          }
+        },
+        "requiredTools": {
+          "type": "array",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "forbiddenTools": {
+          "type": "array",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "orderedPairs": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "latencyTargets": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "firstPaxMessageBeforeMin": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "engineerPagedBeforeMin": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "decisionBeforeMin": {
+              "minimum": 0,
+              "type": "number"
+            }
+          }
+        },
+        "robustness": {
+          "additionalProperties": false,
+          "type": "object",
+          "required": ["injectedTools", "expectBlockedLayers"],
+          "properties": {
+            "injectedTools": {
+              "type": "array",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "canary": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "expectBlockedLayers": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "tier",
+                    "type": "string"
+                  },
+                  {
+                    "const": "input_screen",
+                    "type": "string"
+                  },
+                  {
+                    "const": "output_screen",
+                    "type": "string"
+                  },
+                  {
+                    "const": "arg_validation",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ref_validation",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "expectAuthorRejected": {
+              "type": "boolean"
+            }
+          }
+        },
+        "referenceSummary": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

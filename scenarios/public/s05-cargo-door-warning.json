@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "id": "s05-cargo-door-warning",
+  "title": "Aft cargo door warning at gate",
+  "narrative": "Manchester, morning. Boarding of NWD611 to Tenerife South (218 passengers, A321 NW-MCD) is almost complete when the flight deck gets an AFT CARGO DOOR warning. The handler reports the door closed and the handle flush. The warning clears after a few minutes and the captain asks whether they can go, then it comes back. A B2 engineer is available at once, a B1 shortly. A spare A321 finishes a check at minute 70.",
+  "visibility": "public",
+  "inspiredBy": [
+    {
+      "sourceId": "ASRS ACN 1692795",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Cargo door warning light led to a rejected takeoff after an earlier gate return."
+    }
+  ],
+  "startSimTime": "2026-07-22T07:47:00Z",
+  "aircraft": {
+    "tail": "NW-MCD",
+    "type": "A321",
+    "station": "MAN",
+    "stand": "12",
+    "nextSectors": [
+      {
+        "flight": "NWD611",
+        "from": "MAN",
+        "to": "TFS",
+        "std": "2026-07-22T08:15:00Z",
+        "pax": 218,
+        "distanceKm": 3048
+      },
+      {
+        "flight": "NWD612",
+        "from": "TFS",
+        "to": "MAN",
+        "std": "2026-07-22T13:30:00Z",
+        "pax": 214,
+        "distanceKm": 3048
+      }
+    ]
+  },
+  "trigger": {
+    "type": "system-warning",
+    "atMinute": 3,
+    "description": "AFT CARGO DOOR warning on the ECAM during boarding; door reported closed and latched.",
+    "evidence": [
+      { "kind": "sensor", "text": "ECAM: DOOR AFT CARGO warning, steady for 4 minutes." },
+      {
+        "kind": "report",
+        "text": "Loader: aft hold door closed normally, handle flush, all visual indicators green."
+      }
+    ]
+  },
+  "world": {
+    "spares": [
+      { "tail": "NW-MCS", "type": "A321", "station": "MAN", "availableFromMinute": 70, "stand": "48" }
+    ],
+    "engineers": [
+      {
+        "id": "eng-man-b2b",
+        "name": "Milo Wexcombe",
+        "station": "MAN",
+        "licence": "B2",
+        "skills": ["A320 family", "avionics", "proximity sensors"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-man-b1e",
+        "name": "Arlo Varden",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320 family", "doors"],
+        "availableFromMinute": 15
+      },
+      {
+        "id": "eng-man-b1f",
+        "name": "Pia Pellowe",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320 family", "structures"],
+        "availableFromMinute": 60
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-611-cpt",
+        "name": "Ines Lowmoor",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-22T07:15:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-611-fo",
+        "name": "Cara Rookwood",
+        "rank": "FO",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-22T07:15:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-611-sccm",
+        "name": "Zoe Ashwell-Pryce",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-22T07:15:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-611-cc1",
+        "name": "Wim Elderby",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-22T07:15:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-611-cc2",
+        "name": "Oren Dunmere",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-22T07:15:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-611-cc3",
+        "name": "Sol Redmayne-Cross",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-22T07:15:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-611-cc4",
+        "name": "Greta Tollbridge",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-22T07:15:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-sby-cpt",
+        "name": "Dara Northcote-Vale",
+        "rank": "CPT",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-07-22T06:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-sby-fo",
+        "name": "Tamsin Rookwood",
+        "rank": "FO",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-07-22T06:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-sby-cc",
+        "name": "Juno Kilnsey",
+        "rank": "CC",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-07-22T06:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      }
+    ],
+    "cohorts": [
+      { "id": "c611-general", "kind": "general", "count": 170, "flight": "NWD611" },
+      {
+        "id": "c611-families",
+        "kind": "families",
+        "count": 34,
+        "flight": "NWD611",
+        "notes": "Holiday families, 14 children"
+      },
+      { "id": "c611-prm", "kind": "prm", "count": 5, "flight": "NWD611", "notes": "3 WCHR, 2 WCHS" },
+      { "id": "c611-um", "kind": "unaccompanied_minors", "count": 3, "flight": "NWD611" },
+      { "id": "c611-premium", "kind": "premium", "count": 6, "flight": "NWD611" },
+      {
+        "id": "c612-connections",
+        "kind": "connections",
+        "count": 12,
+        "flight": "NWD612",
+        "onwardDeadline": "2026-07-22T20:00:00Z",
+        "notes": "Return passengers connecting at Manchester"
+      }
+    ],
+    "stands": [
+      { "id": "12", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-MCD" },
+      {
+        "id": "48",
+        "station": "MAN",
+        "kind": "contact",
+        "occupiedByTail": "NW-MCS",
+        "occupiedUntilMinute": 70
+      },
+      { "id": "R4", "station": "MAN", "kind": "remote" }
+    ],
+    "handler": {
+      "station": "MAN",
+      "name": "Quellmoor Ramp Services",
+      "staffOnShift": 22,
+      "equipment": [
+        { "kind": "tug", "count": 2 },
+        { "kind": "towbar", "count": 2 },
+        { "kind": "stairs", "count": 3 },
+        { "kind": "bus", "count": 3 },
+        { "kind": "gpu", "count": 2 }
+      ],
+      "ackMinutes": 4
+    },
+    "weather": {
+      "station": "MAN",
+      "summary": "Overcast, light rain, 15 °C",
+      "windKt": 10,
+      "tempC": 15,
+      "metar": "EGCC 220750Z 25010KT 8000 -RA BKN012 15/13 Q1011"
+    },
+    "curfews": [],
+    "rotation": [
+      {
+        "flight": "NWD611",
+        "tail": "NW-MCD",
+        "from": "MAN",
+        "to": "TFS",
+        "std": "2026-07-22T08:15:00Z",
+        "sta": "2026-07-22T12:35:00Z",
+        "pax": 218
+      },
+      {
+        "flight": "NWD612",
+        "tail": "NW-MCD",
+        "from": "TFS",
+        "to": "MAN",
+        "std": "2026-07-22T13:30:00Z",
+        "sta": "2026-07-22T17:40:00Z",
+        "pax": 214
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-warning-clears",
+      "title": "Warning clears",
+      "atMinute": 18,
+      "description": "The AFT CARGO DOOR warning clears on its own.",
+      "effects": [
+        {
+          "op": "info",
+          "text": "Flight deck: AFT CARGO DOOR warning has cleared. Captain asks whether they can depart."
+        }
+      ]
+    },
+    {
+      "id": "tw-warning-returns",
+      "title": "Warning returns",
+      "atMinute": 32,
+      "description": "The warning comes back and stays on.",
+      "effects": [{ "op": "info", "text": "Flight deck: AFT CARGO DOOR warning is back, steady." }]
+    },
+    {
+      "id": "tw-offload",
+      "title": "Hold must be emptied",
+      "description": "The engineer needs the aft hold emptied to check the door seal and latches.",
+      "effects": [
+        {
+          "op": "info",
+          "text": "Engineer: offload the aft hold to access the door latches and proximity sensors."
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 12,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-man-b2b", "station": "MAN" } },
+      "note": "B2 sent after the crew radio the ramp."
+    },
+    {
+      "atMinute": 30,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": {
+          "cohortIds": ["c611-general", "c611-families", "c611-prm", "c611-um", "c611-premium"],
+          "channel": "sms",
+          "body": "NWD611 to Tenerife is delayed while engineers check a cargo door indication. Please stay seated; next update by 08:45."
+        },
+        "decision": "approve"
+      },
+      "note": "Cabin announcement then SMS."
+    },
+    {
+      "atMinute": 45,
+      "actor": "Maintenance control",
+      "action": {
+        "tool": "create_work_order",
+        "args": {
+          "tail": "NW-MCD",
+          "defectId": "DEF-001",
+          "task": "sensor_troubleshooting",
+          "estimatedDurationMin": 50,
+          "engineerId": "eng-man-b2b"
+        }
+      },
+      "note": "Troubleshooting raised after the warning returns."
+    },
+    {
+      "atMinute": 50,
+      "actor": "Ground coordinator",
+      "action": { "tool": "notify_handler", "args": { "kind": "offload_bags", "tail": "NW-MCD" } },
+      "note": "Aft hold offloaded for access."
+    },
+    {
+      "atMinute": 85,
+      "actor": "OCC duty manager",
+      "action": {
+        "tool": "propose_swap",
+        "args": { "fromTail": "NW-MCD", "toTail": "NW-MCS", "flights": ["NWD611", "NWD612"] },
+        "decision": "approve"
+      },
+      "note": "Swap once the spare is out of its check."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "firstPaxMessageBeforeMin": 15,
+    "engineerPagedBeforeMin": 8,
+    "decisionBeforeMin": 75,
+    "requiredTools": ["page_engineer", "send_passenger_message", "get_aircraft_status"],
+    "orderedPairs": [["page_engineer", "propose_swap"]],
+    "referenceSummary": "Treat an intermittent cargo door warning as unresolved until certifying staff clear it: do not let the warning clearing lead to a departure. Page the B2 at once (sensors) with the B1 as back-up, hold loading, keep passengers informed, and prepare the spare NW-MCS (from minute 70) for both Tenerife sectors in case troubleshooting runs long. Any MEL relief is for the certifying engineer to decide."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 120
+  }
+}

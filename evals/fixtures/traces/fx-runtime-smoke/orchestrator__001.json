@@ -1,0 +1,45 @@
+{
+  "kind": "llm",
+  "runId": "eval-fx-runtime-smoke",
+  "agentRunId": "ar-orchestrator-1",
+  "agentPath": "orchestrator",
+  "role": "orchestrator",
+  "iteration": 1,
+  "provider": "scripted",
+  "model": "claude-sonnet-5",
+  "latencyMs": 4000,
+  "request": {
+    "model": "claude-sonnet-5",
+    "messageCount": 3,
+    "toolCount": 5
+  },
+  "response": {
+    "text": "Maintenance and passenger work are independent, so I delegate both in parallel.",
+    "toolCalls": [
+      {
+        "id": "tu_del_mx",
+        "name": "delegate",
+        "input": {
+          "role": "maintenance",
+          "brief": "Assess the door caution and get an engineer to the aircraft."
+        }
+      },
+      {
+        "id": "tu_del_pax",
+        "name": "delegate",
+        "input": {
+          "role": "passenger",
+          "brief": "Prepare an early, plain-language update for all cohorts."
+        }
+      }
+    ],
+    "usage": {
+      "inputTokens": 1000,
+      "outputTokens": 100,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "stopReason": "tool_use",
+    "model": "claude-sonnet-5"
+  }
+}

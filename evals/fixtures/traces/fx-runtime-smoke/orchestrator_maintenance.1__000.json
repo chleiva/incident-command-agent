@@ -1,0 +1,40 @@
+{
+  "kind": "llm",
+  "runId": "eval-fx-runtime-smoke",
+  "agentRunId": "ar-maintenance-1",
+  "agentPath": "orchestrator/maintenance.1",
+  "role": "maintenance",
+  "iteration": 0,
+  "provider": "scripted",
+  "model": "claude-sonnet-5",
+  "latencyMs": 4000,
+  "request": {
+    "model": "claude-sonnet-5",
+    "messageCount": 1,
+    "toolCount": 1
+  },
+  "response": {
+    "text": "I will report what I found.",
+    "toolCalls": [
+      {
+        "id": "tu_mx_report",
+        "name": "report",
+        "input": {
+          "summary": "Engineer requested; certifying staff decide.",
+          "actionsTaken": [],
+          "openIssues": [],
+          "recommendations": [],
+          "citations": []
+        }
+      }
+    ],
+    "usage": {
+      "inputTokens": 1000,
+      "outputTokens": 100,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "stopReason": "tool_use",
+    "model": "claude-sonnet-5"
+  }
+}

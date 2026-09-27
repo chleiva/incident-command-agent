@@ -1,0 +1,10 @@
+{
+  "productName": "Ground Incident Coordination Agent",
+  "carrierName": "Example Carrier",
+  "carrierCode": "EXC",
+  "logoSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"10\"/></svg>",
+  "colours": { "primary": "#223344", "accent": "#55AA88" },
+  "consultancyName": "Example Consultancy",
+  "stations": ["MAN", "DUB", "AMS"],
+  "disclaimer": "Simulated systems · demonstration only"
+}

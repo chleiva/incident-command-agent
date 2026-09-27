@@ -1,0 +1,87 @@
+{
+  "MEL": {
+    "definition": "the list of items an aircraft may fly with unserviceable, and under what conditions",
+    "inline": "list of allowed faults",
+    "aliases": ["MEL", "MMEL", "minimum equipment list"]
+  },
+  "Deferral": {
+    "definition": "recording a defect as acceptable to fly with for a limited time, under the MEL",
+    "inline": "fly with the defect for a limited time",
+    "aliases": ["deferral", "deferrals", "defer the defect", "deferring"]
+  },
+  "AOG": {
+    "definition": "aircraft on ground: not flyable until fixed",
+    "inline": "grounded until fixed",
+    "aliases": ["AOG", "aircraft on ground"]
+  },
+  "Tow-bar / pushback": {
+    "definition": "the bar connecting the tug to the nose wheel when the aircraft is pushed back from the stand",
+    "inline": "tug bar used to push the aircraft back",
+    "aliases": ["towbar", "tow-bar", "tow bar", "pushback", "push-back"]
+  },
+  "Stand / gate": {
+    "definition": "the parking position; a gate has a bridge or door to the terminal",
+    "inline": "parking position",
+    "aliases": ["stand", "stands", "gate"]
+  },
+  "Rotation": {
+    "definition": "the sequence of flights one aircraft is scheduled to fly today",
+    "inline": "the aircraft's flights today",
+    "aliases": ["rotation"]
+  },
+  "Sector": {
+    "definition": "one flight from departure to arrival",
+    "inline": "flight",
+    "aliases": ["sector", "sectors"]
+  },
+  "Reactionary / knock-on delay": {
+    "definition": "delay to later flights caused by this one",
+    "inline": "delay passed on to later flights",
+    "aliases": ["reactionary delay", "knock-on delay", "reactionary", "knock-on"]
+  },
+  "FDP / duty margin": {
+    "definition": "the legal working hours remaining for the crew",
+    "inline": "crew working hours left",
+    "aliases": ["FDP", "flight duty period", "duty margin"]
+  },
+  "Commander's discretion": {
+    "definition": "the captain's limited power to extend crew hours in specific circumstances",
+    "inline": "captain's power to extend crew hours",
+    "aliases": ["commander's discretion", "commander’s discretion"]
+  },
+  "OCC / ICC": {
+    "definition": "the airline's operations control centre",
+    "inline": "operations control",
+    "aliases": ["OCC", "ICC", "operations control centre", "operations control"]
+  },
+  "MCC": {
+    "definition": "maintenance control, the engineers who decide technical questions",
+    "inline": "maintenance control",
+    "aliases": ["MCC", "maintenance control"]
+  },
+  "Certifying staff": {
+    "definition": "licensed engineers who may release an aircraft to fly",
+    "inline": "licensed engineers who sign the aircraft off",
+    "aliases": ["certifying staff", "certifying engineer", "certifying engineers"]
+  },
+  "Occurrence report (MOR)": {
+    "definition": "the mandatory safety report filed after an incident",
+    "inline": "mandatory safety report",
+    "aliases": ["MOR", "mandatory occurrence report", "occurrence report"]
+  },
+  "EU261 / UK261": {
+    "definition": "the passenger-compensation rules for delays and cancellations",
+    "inline": "passenger compensation rules",
+    "aliases": ["EU261", "UK261", "EU 261", "UK 261"]
+  },
+  "PRM": {
+    "definition": "passengers needing assistance",
+    "inline": "passengers needing assistance",
+    "aliases": ["PRM", "PRMs"]
+  },
+  "Ground handler": {
+    "definition": "the contractor providing stairs, buses, loading and pushback",
+    "inline": "ground services contractor",
+    "aliases": ["ground handler", "handler"]
+  }
+}

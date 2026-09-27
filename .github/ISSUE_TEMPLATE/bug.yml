@@ -1,0 +1,29 @@
+name: Bug report
+description: Something is broken
+title: 'bug: '
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Scenario id, mode, model/provider, run id, commands.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or event excerpts
+      description: Redact keys and anything that is not fictional data.
+      render: text
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: 'local (npm run dev) / AWS, Node version, browser'

@@ -1,0 +1,26 @@
+{
+  "name": "@ica/evals",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ground Incident Coordination Agent — Evaluation harness, cases, rubrics, recorded fixtures, reports and the lifetime-budget ledger. Owned by task 02.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "gen": "tsx scripts/gen-cases.ts",
+    "eval": "tsx src/cli.ts",
+    "eval:budget": "tsx src/cli.ts budget",
+    "record:fixture": "tsx scripts/record-fixture.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ica/run": "*",
+    "@ica/scenarios": "*",
+    "@ica/schema": "*",
+    "@ica/store": "*",
+    "@sinclair/typebox": "^0.34.52"
+  }
+}

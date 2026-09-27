@@ -1,0 +1,45 @@
+name: New tool
+description: Propose a new agent tool over a mocked system
+title: 'tool: '
+labels: [tool]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Tool name (snake_case)
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options: [mne, occ, crew, pss, airport, handler, engineers, record, knowledge, comms]
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Autonomy tier
+      description: Deferral, release, FDP extension and departure decisions are human-only (forbidden for software). Decisions affecting passengers are propose.
+      options: [execute, propose, forbidden]
+    validations:
+      required: true
+  - type: input
+    id: roles
+    attributes:
+      label: Roles that may call it
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Behaviour, input schema and mutations
+    validations:
+      required: true
+  - type: textarea
+    id: rules
+    attributes:
+      label: Rules the mocked system must enforce
+  - type: textarea
+    id: evals
+    attributes:
+      label: Eval impact
+      description: Which cases or assertions change?

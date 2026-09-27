@@ -1,0 +1,24 @@
+{
+  "name": "@ica/schema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ground Incident Coordination Agent — Shared contracts: TypeBox schemas, TS types, validators, event reducer and fixtures.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./browser": "./src/browser.ts",
+    "./scenario.schema.json": "./scenario.schema.json",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "scripts": {
+    "gen": "tsx scripts/gen-schema.ts && tsx scripts/build-sample-events.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.52",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@ica/run",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ground Incident Coordination Agent — Run Lambda: world engine, ReAct runtime, guardrails, baseline (task 02) and mocked systems, tools, roles, knowledge (task 03).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./handler": "./handler.ts",
+    "./tools": "./tools/index.ts",
+    "./systems": "./systems/index.ts",
+    "./agents": "./agents/index.ts",
+    "./knowledge": "./knowledge/index.ts"
+  },
+  "scripts": {
+    "build": "esbuild handler.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/handler.mjs --sourcemap --external:@aws-sdk/* --external:@huggingface/transformers --external:onnxruntime-node --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
+    "run:local": "tsx cli.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1141.0",
+    "@aws-sdk/client-s3": "^3.1141.0",
+    "@ica/kb": "*",
+    "@ica/scenarios": "*",
+    "@ica/schema": "*",
+    "@ica/store": "*",
+    "@sinclair/typebox": "^0.34.52"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

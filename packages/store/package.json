@@ -1,0 +1,23 @@
+{
+  "name": "@ica/store",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ground Incident Coordination Agent — Persistence contract (Store, EventBus, TraceStore, SecretStore) with in-memory, DynamoDB, S3 and Secrets Manager implementations.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./conformance": "./src/store.conformance.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1141.0",
+    "@aws-sdk/client-s3": "^3.1141.0",
+    "@aws-sdk/client-secrets-manager": "^3.1141.0",
+    "@aws-sdk/lib-dynamodb": "^3.1141.0",
+    "@ica/schema": "*"
+  }
+}

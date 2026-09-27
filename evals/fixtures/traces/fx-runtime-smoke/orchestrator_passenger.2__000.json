@@ -1,0 +1,40 @@
+{
+  "kind": "llm",
+  "runId": "eval-fx-runtime-smoke",
+  "agentRunId": "ar-passenger-1",
+  "agentPath": "orchestrator/passenger.2",
+  "role": "passenger",
+  "iteration": 0,
+  "provider": "scripted",
+  "model": "claude-sonnet-5",
+  "latencyMs": 4000,
+  "request": {
+    "model": "claude-sonnet-5",
+    "messageCount": 1,
+    "toolCount": 1
+  },
+  "response": {
+    "text": "Passengers informed plan ready.",
+    "toolCalls": [
+      {
+        "id": "tu_pax_report",
+        "name": "report",
+        "input": {
+          "summary": "First update drafted for all cohorts.",
+          "actionsTaken": [],
+          "openIssues": [],
+          "recommendations": [],
+          "citations": []
+        }
+      }
+    ],
+    "usage": {
+      "inputTokens": 1000,
+      "outputTokens": 100,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "stopReason": "tool_use",
+    "model": "claude-sonnet-5"
+  }
+}

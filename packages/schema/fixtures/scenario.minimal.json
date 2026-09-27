@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "id": "fx-minimal-cargo-door-sensor",
+  "title": "Fixture: forward cargo door sensor fault before departure",
+  "narrative": "During boarding of Northwind Air NWD101 from Manchester to Dublin, the flight deck reports an intermittent FWD CARGO DOOR indication on NW-FXA. The door is visually closed and latched. The handler asks whether bags can continue loading. This is a small test fixture, not one of the shipped scenarios.",
+  "visibility": "public",
+  "inspiredBy": [],
+  "startSimTime": "2026-06-12T05:30:00Z",
+  "aircraft": {
+    "tail": "NW-FXA",
+    "type": "A320",
+    "station": "MAN",
+    "stand": "22",
+    "nextSectors": [
+      {
+        "flight": "NWD101",
+        "from": "MAN",
+        "to": "DUB",
+        "std": "2026-06-12T06:10:00Z",
+        "pax": 162,
+        "distanceKm": 265
+      },
+      {
+        "flight": "NWD102",
+        "from": "DUB",
+        "to": "MAN",
+        "std": "2026-06-12T07:45:00Z",
+        "pax": 151,
+        "distanceKm": 265
+      }
+    ]
+  },
+  "trigger": {
+    "type": "system-warning",
+    "atMinute": 2,
+    "description": "Intermittent FWD CARGO DOOR caution on the ECAM during boarding; door visually closed.",
+    "evidence": [
+      {
+        "kind": "sensor",
+        "text": "FWD CARGO DOOR caution displayed 3 times in 4 minutes, each lasting under 10 seconds."
+      },
+      { "kind": "report", "text": "Dispatcher: door handle flush, all latch indicators green." }
+    ]
+  },
+  "world": {
+    "spares": [
+      { "tail": "NW-FXB", "type": "A320", "station": "MAN", "availableFromMinute": 45, "stand": "24" }
+    ],
+    "engineers": [
+      {
+        "id": "eng-1",
+        "name": "Ada Pennick",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320", "doors"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-2",
+        "name": "Tomas Wrenfield",
+        "station": "MAN",
+        "licence": "B2",
+        "skills": ["A320", "avionics"],
+        "availableFromMinute": 20
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-cpt-1",
+        "name": "Mira Hollow",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-06-12T05:10:00Z",
+        "sectorsPlanned": 4,
+        "maxFdpMin": 660
+      },
+      {
+        "id": "crew-fo-1",
+        "name": "Jon Esterby",
+        "rank": "FO",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-06-12T05:10:00Z",
+        "sectorsPlanned": 4,
+        "maxFdpMin": 660
+      },
+      {
+        "id": "crew-cpt-sby",
+        "name": "Lena Marsh",
+        "rank": "CPT",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-06-12T06:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      }
+    ],
+    "cohorts": [
+      { "id": "c-general", "kind": "general", "count": 140, "flight": "NWD101" },
+      {
+        "id": "c-connections",
+        "kind": "connections",
+        "count": 18,
+        "flight": "NWD101",
+        "onwardDeadline": "2026-06-12T08:30:00Z",
+        "notes": "Onward long-haul connections at DUB"
+      },
+      { "id": "c-prm", "kind": "prm", "count": 4, "flight": "NWD101", "notes": "Two WCHC" }
+    ],
+    "stands": [
+      { "id": "22", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-FXA" },
+      {
+        "id": "24",
+        "station": "MAN",
+        "kind": "contact",
+        "occupiedByTail": "NW-FXB",
+        "occupiedUntilMinute": 45
+      },
+      { "id": "R5", "station": "MAN", "kind": "remote" }
+    ],
+    "handler": {
+      "station": "MAN",
+      "name": "Fixture Ground Services",
+      "staffOnShift": 12,
+      "equipment": [
+        { "kind": "tug", "count": 2 },
+        { "kind": "stairs", "count": 3 },
+        { "kind": "bus", "count": 2 }
+      ],
+      "ackMinutes": 4
+    },
+    "weather": { "station": "MAN", "summary": "Light rain, wind 230/12 kt", "windKt": 12, "tempC": 11 },
+    "curfews": [],
+    "rotation": [
+      {
+        "flight": "NWD101",
+        "tail": "NW-FXA",
+        "from": "MAN",
+        "to": "DUB",
+        "std": "2026-06-12T06:10:00Z",
+        "sta": "2026-06-12T07:10:00Z",
+        "pax": 162
+      },
+      {
+        "flight": "NWD102",
+        "tail": "NW-FXA",
+        "from": "DUB",
+        "to": "MAN",
+        "std": "2026-06-12T07:45:00Z",
+        "sta": "2026-06-12T08:50:00Z",
+        "pax": 151
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-engineer-delayed",
+      "title": "Second engineer delayed",
+      "atMinute": 12,
+      "description": "The B2 engineer is held up at another aircraft for 15 more minutes.",
+      "effects": [
+        {
+          "op": "patch",
+          "system": "engineers",
+          "entity": "engineers",
+          "id": "eng-2",
+          "patch": { "status": "busy" }
+        }
+      ]
+    },
+    {
+      "id": "tw-caution-returns",
+      "title": "Caution returns",
+      "description": "The FWD CARGO DOOR caution returns and stays on.",
+      "effects": [{ "op": "info", "text": "Flight deck: FWD CARGO DOOR caution now steady." }]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 10,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-1", "station": "MAN" } },
+      "note": "Engineer called by phone."
+    },
+    {
+      "atMinute": 30,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": {
+          "cohortIds": ["c-general", "c-connections", "c-prm"],
+          "channel": "sms",
+          "body": "Your flight NWD101 is delayed while engineers check a door sensor. Next update by 06:30."
+        },
+        "decision": "approve"
+      },
+      "note": "First message after the gate announcement."
+    },
+    {
+      "atMinute": 40,
+      "actor": "OCC controller",
+      "action": {
+        "tool": "propose_swap",
+        "args": { "fromTail": "NW-FXA", "toTail": "NW-FXB", "flights": ["NWD101", "NWD102"] },
+        "decision": "approve"
+      },
+      "note": "Swap once the spare is free."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "firstPaxMessageBeforeMin": 15,
+    "engineerPagedBeforeMin": 8,
+    "decisionBeforeMin": 45,
+    "requiredTools": ["page_engineer", "send_passenger_message"],
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "orderedPairs": [["page_engineer", "propose_swap"]],
+    "referenceSummary": "Page a B1 engineer at once, inform passengers early (PRM and connections first), keep the spare NW-FXB ready and let the certifying engineer decide rectify versus swap."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 120
+  }
+}

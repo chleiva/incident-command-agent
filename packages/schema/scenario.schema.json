@@ -1,0 +1,1248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "$id": "urn:incident-command-agent:schema:scenario:1",
+  "title": "Ground Incident Coordination Agent scenario",
+  "description": "A ground or pre-departure incident scenario for the fictional carrier Northwind Air (schemaVersion 1).",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "id",
+    "title",
+    "narrative",
+    "visibility",
+    "inspiredBy",
+    "startSimTime",
+    "aircraft",
+    "trigger",
+    "world",
+    "twists",
+    "baseline",
+    "expected",
+    "kpiParams"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "type": "number"
+    },
+    "id": {
+      "pattern": "^[a-z0-9-]{3,64}$",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "narrative": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "visibility": {
+      "anyOf": [
+        {
+          "const": "public",
+          "type": "string"
+        },
+        {
+          "const": "private",
+          "type": "string"
+        }
+      ]
+    },
+    "inspiredBy": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sourceId",
+          "url",
+          "note"
+        ],
+        "properties": {
+          "sourceId": {
+            "minLength": 1,
+            "description": "Verified report id, e.g. an ASRS ACN. Never invent one.",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "startSimTime": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "aircraft": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "tail",
+        "type",
+        "station",
+        "nextSectors"
+      ],
+      "properties": {
+        "tail": {
+          "pattern": "^NW-[A-Z]{3}$",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "A319",
+              "type": "string"
+            },
+            {
+              "const": "A320",
+              "type": "string"
+            },
+            {
+              "const": "A321",
+              "type": "string"
+            },
+            {
+              "const": "B737",
+              "type": "string"
+            },
+            {
+              "const": "B738",
+              "type": "string"
+            },
+            {
+              "const": "E190",
+              "type": "string"
+            }
+          ]
+        },
+        "station": {
+          "pattern": "^[A-Z]{3}$",
+          "type": "string"
+        },
+        "stand": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "nextSectors": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "flight",
+              "from",
+              "to",
+              "std",
+              "pax",
+              "distanceKm"
+            ],
+            "properties": {
+              "flight": {
+                "pattern": "^NWD[1-9][0-9]{2}$",
+                "type": "string"
+              },
+              "from": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "to": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "std": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "pax": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "distanceKm": {
+                "minimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        },
+        "maintenance": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "lastCheckType": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "lastCheckDate": {
+              "format": "date",
+              "type": "string"
+            },
+            "defectHistory": {
+              "type": "array",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "trigger": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type",
+        "atMinute",
+        "description",
+        "evidence"
+      ],
+      "properties": {
+        "type": {
+          "minLength": 1,
+          "description": "e.g. 'ground-damage', 'bird-strike', 'lightning', 'system-warning', 'fuel-spill', 'brake-overheat'",
+          "type": "string"
+        },
+        "atMinute": {
+          "minimum": 0,
+          "description": "Sim minutes since scenario start",
+          "type": "number"
+        },
+        "description": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "kind",
+              "text"
+            ],
+            "properties": {
+              "kind": {
+                "anyOf": [
+                  {
+                    "const": "photo-description",
+                    "type": "string"
+                  },
+                  {
+                    "const": "techlog",
+                    "type": "string"
+                  },
+                  {
+                    "const": "report",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sensor",
+                    "type": "string"
+                  }
+                ]
+              },
+              "text": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "world": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "spares",
+        "engineers",
+        "crew",
+        "cohorts",
+        "stands",
+        "handler",
+        "weather",
+        "curfews",
+        "rotation"
+      ],
+      "properties": {
+        "spares": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "tail",
+              "type",
+              "station",
+              "availableFromMinute"
+            ],
+            "properties": {
+              "tail": {
+                "pattern": "^NW-[A-Z]{3}$",
+                "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "A319",
+                    "type": "string"
+                  },
+                  {
+                    "const": "A320",
+                    "type": "string"
+                  },
+                  {
+                    "const": "A321",
+                    "type": "string"
+                  },
+                  {
+                    "const": "B737",
+                    "type": "string"
+                  },
+                  {
+                    "const": "B738",
+                    "type": "string"
+                  },
+                  {
+                    "const": "E190",
+                    "type": "string"
+                  }
+                ]
+              },
+              "station": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "availableFromMinute": {
+                "minimum": 0,
+                "description": "Sim minutes since scenario start",
+                "type": "number"
+              },
+              "stand": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "maintenance": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "lastCheckType": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "lastCheckDate": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "defectHistory": {
+                    "type": "array",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "engineers": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "station",
+              "licence",
+              "skills",
+              "availableFromMinute"
+            ],
+            "properties": {
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "name": {
+                "minLength": 1,
+                "description": "Fictional name",
+                "type": "string"
+              },
+              "station": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "licence": {
+                "anyOf": [
+                  {
+                    "const": "B1",
+                    "type": "string"
+                  },
+                  {
+                    "const": "B2",
+                    "type": "string"
+                  },
+                  {
+                    "const": "A",
+                    "type": "string"
+                  },
+                  {
+                    "const": "B1+B2",
+                    "type": "string"
+                  }
+                ]
+              },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "availableFromMinute": {
+                "minimum": 0,
+                "description": "Sim minutes since scenario start",
+                "type": "number"
+              }
+            }
+          }
+        },
+        "crew": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "rank",
+              "status",
+              "station",
+              "reportTime",
+              "sectorsPlanned",
+              "maxFdpMin"
+            ],
+            "properties": {
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "name": {
+                "minLength": 1,
+                "description": "Fictional name",
+                "type": "string"
+              },
+              "rank": {
+                "anyOf": [
+                  {
+                    "const": "CPT",
+                    "type": "string"
+                  },
+                  {
+                    "const": "FO",
+                    "type": "string"
+                  },
+                  {
+                    "const": "SCCM",
+                    "type": "string"
+                  },
+                  {
+                    "const": "CC",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "operating",
+                    "type": "string"
+                  },
+                  {
+                    "const": "standby",
+                    "type": "string"
+                  }
+                ]
+              },
+              "station": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "reportTime": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "sectorsPlanned": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxFdpMin": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "cohorts": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "count",
+              "flight"
+            ],
+            "properties": {
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "kind": {
+                "anyOf": [
+                  {
+                    "const": "connections",
+                    "type": "string"
+                  },
+                  {
+                    "const": "prm",
+                    "type": "string"
+                  },
+                  {
+                    "const": "families",
+                    "type": "string"
+                  },
+                  {
+                    "const": "unaccompanied_minors",
+                    "type": "string"
+                  },
+                  {
+                    "const": "general",
+                    "type": "string"
+                  },
+                  {
+                    "const": "premium",
+                    "type": "string"
+                  }
+                ]
+              },
+              "count": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "flight": {
+                "pattern": "^NWD[1-9][0-9]{2}$",
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              },
+              "onwardDeadline": {
+                "format": "date-time",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "stands": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "id",
+              "station",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "station": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "kind": {
+                "anyOf": [
+                  {
+                    "const": "contact",
+                    "type": "string"
+                  },
+                  {
+                    "const": "remote",
+                    "type": "string"
+                  }
+                ]
+              },
+              "occupiedByTail": {
+                "pattern": "^NW-[A-Z]{3}$",
+                "type": "string"
+              },
+              "occupiedUntilMinute": {
+                "minimum": 0,
+                "description": "Sim minutes since scenario start",
+                "type": "number"
+              }
+            }
+          }
+        },
+        "handler": {
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "station",
+            "name",
+            "staffOnShift",
+            "equipment",
+            "ackMinutes"
+          ],
+          "properties": {
+            "station": {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            "name": {
+              "minLength": 1,
+              "description": "Fictional handling company name",
+              "type": "string"
+            },
+            "staffOnShift": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "equipment": {
+              "type": "array",
+              "items": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "kind",
+                  "count"
+                ],
+                "properties": {
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "const": "tug",
+                        "type": "string"
+                      },
+                      {
+                        "const": "towbar",
+                        "type": "string"
+                      },
+                      {
+                        "const": "stairs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "bus",
+                        "type": "string"
+                      },
+                      {
+                        "const": "gpu",
+                        "type": "string"
+                      },
+                      {
+                        "const": "acu",
+                        "type": "string"
+                      },
+                      {
+                        "const": "catering",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "count": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            "ackMinutes": {
+              "minimum": 0,
+              "type": "number"
+            }
+          }
+        },
+        "weather": {
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "station",
+            "summary"
+          ],
+          "properties": {
+            "station": {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            "summary": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "windKt": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "tempC": {
+              "type": "number"
+            },
+            "metar": {
+              "type": "string"
+            }
+          }
+        },
+        "curfews": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "station",
+              "fromLocal",
+              "toLocal"
+            ],
+            "properties": {
+              "station": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "fromLocal": {
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+                "type": "string"
+              },
+              "toLocal": {
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "rotation": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "flight",
+              "tail",
+              "from",
+              "to",
+              "std",
+              "sta",
+              "pax"
+            ],
+            "properties": {
+              "flight": {
+                "pattern": "^NWD[1-9][0-9]{2}$",
+                "type": "string"
+              },
+              "tail": {
+                "pattern": "^NW-[A-Z]{3}$",
+                "type": "string"
+              },
+              "from": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "to": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "std": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "sta": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "pax": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "distanceTableKm": {
+          "type": "object",
+          "patternProperties": {
+            "^[A-Z]{3}$": {
+              "type": "object",
+              "patternProperties": {
+                "^[A-Z]{3}$": {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "twists": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "effects"
+        ],
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "atMinute": {
+            "minimum": 0,
+            "description": "Sim minutes since scenario start",
+            "type": "number"
+          },
+          "afterFirstApproval": {
+            "type": "boolean"
+          },
+          "description": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "required": [
+                    "op",
+                    "system",
+                    "entity",
+                    "id",
+                    "patch"
+                  ],
+                  "properties": {
+                    "op": {
+                      "const": "patch",
+                      "type": "string"
+                    },
+                    "system": {
+                      "anyOf": [
+                        {
+                          "const": "mne",
+                          "type": "string"
+                        },
+                        {
+                          "const": "occ",
+                          "type": "string"
+                        },
+                        {
+                          "const": "crew",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pss",
+                          "type": "string"
+                        },
+                        {
+                          "const": "airport",
+                          "type": "string"
+                        },
+                        {
+                          "const": "handler",
+                          "type": "string"
+                        },
+                        {
+                          "const": "engineers",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "entity": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "id": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "patch": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {}
+                      }
+                    }
+                  }
+                },
+                {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "required": [
+                    "op",
+                    "system",
+                    "entity",
+                    "record"
+                  ],
+                  "properties": {
+                    "op": {
+                      "const": "create",
+                      "type": "string"
+                    },
+                    "system": {
+                      "anyOf": [
+                        {
+                          "const": "mne",
+                          "type": "string"
+                        },
+                        {
+                          "const": "occ",
+                          "type": "string"
+                        },
+                        {
+                          "const": "crew",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pss",
+                          "type": "string"
+                        },
+                        {
+                          "const": "airport",
+                          "type": "string"
+                        },
+                        {
+                          "const": "handler",
+                          "type": "string"
+                        },
+                        {
+                          "const": "engineers",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "entity": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "record": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {}
+                      }
+                    }
+                  }
+                },
+                {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "required": [
+                    "op",
+                    "flight",
+                    "minutes"
+                  ],
+                  "properties": {
+                    "op": {
+                      "const": "delay",
+                      "type": "string"
+                    },
+                    "flight": {
+                      "pattern": "^NWD[1-9][0-9]{2}$",
+                      "type": "string"
+                    },
+                    "minutes": {
+                      "type": "number"
+                    }
+                  }
+                },
+                {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "required": [
+                    "op",
+                    "system",
+                    "entity",
+                    "id",
+                    "field",
+                    "minutes"
+                  ],
+                  "properties": {
+                    "op": {
+                      "const": "shift",
+                      "type": "string"
+                    },
+                    "system": {
+                      "anyOf": [
+                        {
+                          "const": "mne",
+                          "type": "string"
+                        },
+                        {
+                          "const": "occ",
+                          "type": "string"
+                        },
+                        {
+                          "const": "crew",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pss",
+                          "type": "string"
+                        },
+                        {
+                          "const": "airport",
+                          "type": "string"
+                        },
+                        {
+                          "const": "handler",
+                          "type": "string"
+                        },
+                        {
+                          "const": "engineers",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "entity": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "id": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "field": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "minutes": {
+                      "type": "number"
+                    }
+                  }
+                },
+                {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "required": [
+                    "op",
+                    "text"
+                  ],
+                  "properties": {
+                    "op": {
+                      "const": "info",
+                      "type": "string"
+                    },
+                    "text": {
+                      "minLength": 1,
+                      "description": "Untrusted; shown to agents as data",
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "baseline": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "atMinute",
+          "actor",
+          "action",
+          "note"
+        ],
+        "properties": {
+          "atMinute": {
+            "minimum": 0,
+            "description": "Sim minutes since scenario start",
+            "type": "number"
+          },
+          "actor": {
+            "minLength": 1,
+            "description": "e.g. 'OCC controller'",
+            "type": "string"
+          },
+          "action": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "tool",
+              "args"
+            ],
+            "properties": {
+              "tool": {
+                "minLength": 1,
+                "description": "Same tool names as the agents",
+                "type": "string"
+              },
+              "args": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {}
+                }
+              },
+              "decision": {
+                "anyOf": [
+                  {
+                    "const": "approve",
+                    "type": "string"
+                  },
+                  {
+                    "const": "reject",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expected": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "noSoftwareDeferral",
+        "noFdpExtension",
+        "requiredTools",
+        "forbiddenTools",
+        "orderedPairs",
+        "referenceSummary"
+      ],
+      "properties": {
+        "noSoftwareDeferral": {
+          "type": "boolean"
+        },
+        "noFdpExtension": {
+          "type": "boolean"
+        },
+        "firstPaxMessageBeforeMin": {
+          "minimum": 0,
+          "description": "Sim minutes since scenario start",
+          "type": "number"
+        },
+        "engineerPagedBeforeMin": {
+          "minimum": 0,
+          "description": "Sim minutes since scenario start",
+          "type": "number"
+        },
+        "decisionBeforeMin": {
+          "minimum": 0,
+          "description": "Sim minutes since scenario start",
+          "type": "number"
+        },
+        "requiredTools": {
+          "type": "array",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "forbiddenTools": {
+          "type": "array",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "orderedPairs": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "referenceSummary": {
+          "type": "string"
+        }
+      }
+    },
+    "kpiParams": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "eurPerMinute",
+        "reactionaryFactor",
+        "cancellationFixedEur",
+        "careEurPerPaxPerHour",
+        "accommodationEurPerPax"
+      ],
+      "properties": {
+        "eurPerMinute": {
+          "minimum": 0,
+          "default": 100,
+          "type": "number"
+        },
+        "reactionaryFactor": {
+          "minimum": 0,
+          "default": 1.8,
+          "type": "number"
+        },
+        "eu261TierEur": {
+          "anyOf": [
+            {
+              "const": 250,
+              "type": "number"
+            },
+            {
+              "const": 400,
+              "type": "number"
+            },
+            {
+              "const": 600,
+              "type": "number"
+            }
+          ]
+        },
+        "cancellationFixedEur": {
+          "minimum": 0,
+          "default": 18600,
+          "type": "number"
+        },
+        "careEurPerPaxPerHour": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "accommodationEurPerPax": {
+          "minimum": 0,
+          "type": "number"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "kind": "llm",
+  "runId": "eval-fx-runtime-smoke",
+  "agentRunId": "ar-orchestrator-1",
+  "agentPath": "orchestrator",
+  "role": "orchestrator",
+  "iteration": 0,
+  "provider": "scripted",
+  "model": "claude-sonnet-5",
+  "latencyMs": 4000,
+  "request": {
+    "model": "claude-sonnet-5",
+    "messageCount": 1,
+    "toolCount": 5
+  },
+  "response": {
+    "text": "A door-sensor caution is reported before departure. I will open the incident and set the objective.",
+    "toolCalls": [
+      {
+        "id": "tu_open",
+        "name": "open_incident",
+        "input": {
+          "title": "Cargo door caution before departure",
+          "summary": "Intermittent door caution; aircraft on stand; passengers boarding.",
+          "severity": "medium"
+        }
+      },
+      {
+        "id": "tu_obj",
+        "name": "set_objective",
+        "input": {
+          "objective": "Establish airworthiness and keep passengers informed",
+          "targetMinute": 45
+        }
+      }
+    ],
+    "usage": {
+      "inputTokens": 1000,
+      "outputTokens": 100,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "stopReason": "tool_use",
+    "model": "claude-sonnet-5"
+  }
+}

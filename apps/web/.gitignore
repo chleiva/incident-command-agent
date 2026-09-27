@@ -1,0 +1,6 @@
+# Written by the local dev server (task 04) or dev:aws; never committed.
+public/config.json
+dist-mock/
+test-results/
+playwright-report/
+storybook-static/

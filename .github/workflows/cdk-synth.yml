@@ -1,0 +1,28 @@
+name: cdk-synth
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'infra/**'
+      - 'services/**'
+      - 'packages/**'
+      - 'package-lock.json'
+      - '.github/workflows/cdk-synth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  synth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Synth must work without AWS credentials (dummy env and context).
+      - run: npm run synth

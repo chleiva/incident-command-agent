@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "id": "s08-hydraulic-leak-on-stand",
+  "title": "Hydraulic leak spotted on walkround",
+  "narrative": "Manchester, midday. On the pre-departure walkround of NW-MHY (A320, NWD911 to Faro at 12:10, 175 passengers) the first officer finds hydraulic fluid dripping in the left main gear bay. Engineers are on the airport. A spare A320 finishes its turnaround at minute 40. Stand 22 is needed for an inbound flight, so the aircraft may have to be towed to a remote stand while the leak is investigated.",
+  "visibility": "public",
+  "inspiredBy": [
+    {
+      "sourceId": "ASRS ACN 1703630",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Hydraulic fluid found leaking during the pre-flight walkaround."
+    },
+    {
+      "sourceId": "ASRS ACN 1329768",
+      "url": "https://huggingface.co/datasets/elihoole/asrs-aviation-reports",
+      "note": "Hydraulic leak found on preflight; repairs failed and flights were cancelled."
+    }
+  ],
+  "startSimTime": "2026-07-30T11:28:00Z",
+  "aircraft": {
+    "tail": "NW-MHY",
+    "type": "A320",
+    "station": "MAN",
+    "stand": "22",
+    "nextSectors": [
+      {
+        "flight": "NWD911",
+        "from": "MAN",
+        "to": "FAO",
+        "std": "2026-07-30T12:10:00Z",
+        "pax": 175,
+        "distanceKm": 1869
+      },
+      {
+        "flight": "NWD912",
+        "from": "FAO",
+        "to": "MAN",
+        "std": "2026-07-30T15:50:00Z",
+        "pax": 170,
+        "distanceKm": 1869
+      }
+    ]
+  },
+  "trigger": {
+    "type": "hydraulic-leak",
+    "atMinute": 2,
+    "description": "Hydraulic fluid leak found in the left main landing gear bay on walkround.",
+    "evidence": [
+      {
+        "kind": "report",
+        "text": "First officer: steady drip of red fluid from the left MLG bay, small pool forming under the gear."
+      },
+      { "kind": "sensor", "text": "Green hydraulic reservoir quantity at the low end of normal." }
+    ]
+  },
+  "world": {
+    "spares": [
+      { "tail": "NW-MHS", "type": "A320", "station": "MAN", "availableFromMinute": 40, "stand": "26" }
+    ],
+    "engineers": [
+      {
+        "id": "eng-man-b1i",
+        "name": "Bea Dovecote",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320", "hydraulics", "landing gear"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-man-b2c",
+        "name": "Otto Birchmere",
+        "station": "MAN",
+        "licence": "B2",
+        "skills": ["A320", "avionics"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-man-b1j",
+        "name": "Wren Inglestone",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320", "hydraulics"],
+        "availableFromMinute": 45
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-911-cpt",
+        "name": "Oren Brackwell",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-30T11:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-911-fo",
+        "name": "Maren Cobbleford",
+        "rank": "FO",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-30T11:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-911-sccm",
+        "name": "Greta Yarrowby",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-30T11:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-911-cc1",
+        "name": "Kai Yarrowby",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-30T11:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-911-cc2",
+        "name": "Oren Dunmere",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-30T11:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-911-cc3",
+        "name": "Xavi Kestlemoor",
+        "rank": "CC",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-07-30T11:10:00Z",
+        "sectorsPlanned": 2,
+        "maxFdpMin": 780
+      },
+      {
+        "id": "crew-sby-cpt",
+        "name": "Lior Stavenley",
+        "rank": "CPT",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-07-30T10:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      },
+      {
+        "id": "crew-sby-fo",
+        "name": "Dara Quarrendon",
+        "rank": "FO",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-07-30T10:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      }
+    ],
+    "cohorts": [
+      { "id": "c911-general", "kind": "general", "count": 140, "flight": "NWD911" },
+      { "id": "c911-families", "kind": "families", "count": 27, "flight": "NWD911" },
+      {
+        "id": "c911-prm",
+        "kind": "prm",
+        "count": 3,
+        "flight": "NWD911",
+        "notes": "2 WCHR, 1 hearing impaired"
+      },
+      { "id": "c911-premium", "kind": "premium", "count": 5, "flight": "NWD911" },
+      {
+        "id": "c912-connections",
+        "kind": "connections",
+        "count": 10,
+        "flight": "NWD912",
+        "onwardDeadline": "2026-07-30T20:30:00Z",
+        "notes": "Return passengers connecting at Manchester"
+      }
+    ],
+    "stands": [
+      { "id": "22", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-MHY" },
+      {
+        "id": "26",
+        "station": "MAN",
+        "kind": "contact",
+        "occupiedByTail": "NW-MHS",
+        "occupiedUntilMinute": 40
+      },
+      { "id": "R7", "station": "MAN", "kind": "remote" },
+      { "id": "R8", "station": "MAN", "kind": "remote", "occupiedByTail": "NW-XMR" }
+    ],
+    "handler": {
+      "station": "MAN",
+      "name": "Quellmoor Ramp Services",
+      "staffOnShift": 22,
+      "equipment": [
+        { "kind": "tug", "count": 2 },
+        { "kind": "towbar", "count": 2 },
+        { "kind": "stairs", "count": 3 },
+        { "kind": "bus", "count": 3 },
+        { "kind": "gpu", "count": 2 }
+      ],
+      "ackMinutes": 4
+    },
+    "weather": {
+      "station": "MAN",
+      "summary": "Bright spells, 19 °C",
+      "windKt": 8,
+      "tempC": 19,
+      "metar": "EGCC 301120Z 27008KT 9999 SCT035 19/10 Q1021"
+    },
+    "curfews": [],
+    "rotation": [
+      {
+        "flight": "NWD911",
+        "tail": "NW-MHY",
+        "from": "MAN",
+        "to": "FAO",
+        "std": "2026-07-30T12:10:00Z",
+        "sta": "2026-07-30T15:05:00Z",
+        "pax": 175
+      },
+      {
+        "flight": "NWD912",
+        "tail": "NW-MHY",
+        "from": "FAO",
+        "to": "MAN",
+        "std": "2026-07-30T15:50:00Z",
+        "sta": "2026-07-30T18:40:00Z",
+        "pax": 170
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-stand-needed",
+      "title": "Stand needed for inbound flight",
+      "atMinute": 15,
+      "description": "Stand 22 is required for an inbound flight on blocks at about minute 55.",
+      "effects": [
+        {
+          "op": "info",
+          "text": "Airport operations: stand 22 needed for inbound NW-XMB on blocks around 12:25; move NW-MHY to a remote stand."
+        }
+      ]
+    },
+    {
+      "id": "tw-leak-worse",
+      "title": "Leak worsens",
+      "description": "The leak rate increases and fluid reaches the apron drain.",
+      "effects": [
+        {
+          "op": "info",
+          "text": "Ramp: hydraulic fluid now spreading on the apron towards the drain; clean-up needed."
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 9,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-man-b1i", "station": "MAN" } },
+      "note": "Engineer called by the dispatcher."
+    },
+    {
+      "atMinute": 25,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": {
+          "cohortIds": ["c911-general", "c911-families", "c911-prm", "c911-premium"],
+          "channel": "sms",
+          "body": "NWD911 to Faro is delayed while engineers fix a technical fault found during pre-flight checks. Please stay near gate 22; next update by 12:30."
+        },
+        "decision": "approve"
+      },
+      "note": "First SMS after the gate announcement."
+    },
+    {
+      "atMinute": 30,
+      "actor": "Ground coordinator",
+      "action": { "tool": "request_tow", "args": { "tail": "NW-MHY", "toStandId": "R7" } },
+      "note": "Tow to a remote stand agreed with the airport."
+    },
+    {
+      "atMinute": 35,
+      "actor": "Maintenance control",
+      "action": {
+        "tool": "create_work_order",
+        "args": {
+          "tail": "NW-MHY",
+          "defectId": "DEF-001",
+          "task": "hydraulic_leak_check",
+          "estimatedDurationMin": 90,
+          "engineerId": "eng-man-b1i"
+        }
+      },
+      "note": "Leak check raised."
+    },
+    {
+      "atMinute": 55,
+      "actor": "OCC duty manager",
+      "action": {
+        "tool": "propose_swap",
+        "args": { "fromTail": "NW-MHY", "toTail": "NW-MHS", "flights": ["NWD911", "NWD912"] },
+        "decision": "approve"
+      },
+      "note": "Swap to the spare after its turnaround."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "firstPaxMessageBeforeMin": 15,
+    "engineerPagedBeforeMin": 8,
+    "decisionBeforeMin": 50,
+    "requiredTools": ["page_engineer", "request_stand", "send_passenger_message"],
+    "orderedPairs": [
+      ["request_stand", "request_tow"],
+      ["page_engineer", "propose_swap"]
+    ],
+    "referenceSummary": "Page the on-airport hydraulics-qualified B1 at once, contain the spill (handler clean-up), move the aircraft to a free remote stand (R7) with a tow before the inbound needs stand 22, and prepare the spare NW-MHS (from minute 40) for both Faro sectors. Inform passengers early; release only by certifying staff after the leak check."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 120
+  }
+}

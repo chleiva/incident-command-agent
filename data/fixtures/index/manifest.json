@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "chunkCount": 32,
+  "bm25": { "k1": 1.2, "b": 0.75 },
+  "builtAt": "2026-09-26T00:00:00.000Z",
+  "embeddings": {
+    "provider": "local",
+    "model": "Xenova/all-MiniLM-L6-v2",
+    "dim": 384,
+    "quantisation": "int8"
+  },
+  "sources": [
+    {
+      "sourceId": "FAA MMEL A-320 49-10-01",
+      "collection": "mel",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, FAA MMEL); quoted verbatim"
+    },
+    {
+      "sourceId": "FAA MMEL A-320 52-30-02",
+      "collection": "mel",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, FAA MMEL); quoted verbatim"
+    },
+    {
+      "sourceId": "FAA MMEL A-320 52-30-04",
+      "collection": "mel",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, FAA MMEL); quoted verbatim"
+    },
+    {
+      "sourceId": "FAA MMEL A-320 25-60-03",
+      "collection": "mel",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, FAA MMEL); quoted verbatim"
+    },
+    {
+      "sourceId": "FAA MMEL A-320 32-47-01",
+      "collection": "mel",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, FAA MMEL); quoted verbatim"
+    },
+    {
+      "sourceId": "EASA ORO.MLR.105",
+      "collection": "rules",
+      "chunks": 1,
+      "licence": "© European Union, 1998-2026 (EASA Easy Access Rules; re-use with attribution per EUR-Lex notice)"
+    },
+    {
+      "sourceId": "EASA ORO.FTL.205",
+      "collection": "rules",
+      "chunks": 2,
+      "licence": "© European Union, 1998-2026 (EASA Easy Access Rules; re-use with attribution per EUR-Lex notice)"
+    },
+    {
+      "sourceId": "EASA ORO.FTL.225",
+      "collection": "rules",
+      "chunks": 1,
+      "licence": "© European Union, 1998-2026 (EASA Easy Access Rules; re-use with attribution per EUR-Lex notice)"
+    },
+    {
+      "sourceId": "EASA CAT.GEN.MPA.105",
+      "collection": "rules",
+      "chunks": 1,
+      "licence": "© European Union, 1998-2026 (EASA Easy Access Rules; re-use with attribution per EUR-Lex notice)"
+    },
+    {
+      "sourceId": "EU Reg 261/2004 Art 5",
+      "collection": "passenger_rights",
+      "chunks": 1,
+      "licence": "© European Union, EUR-Lex; re-use authorised under Commission Decision 2011/833/EU"
+    },
+    {
+      "sourceId": "EU Reg 261/2004 Art 6",
+      "collection": "passenger_rights",
+      "chunks": 1,
+      "licence": "© European Union, EUR-Lex; re-use authorised under Commission Decision 2011/833/EU"
+    },
+    {
+      "sourceId": "EU Reg 261/2004 Art 7",
+      "collection": "passenger_rights",
+      "chunks": 1,
+      "licence": "© European Union, EUR-Lex; re-use authorised under Commission Decision 2011/833/EU"
+    },
+    {
+      "sourceId": "EU Reg 261/2004 Art 9",
+      "collection": "passenger_rights",
+      "chunks": 1,
+      "licence": "© European Union, EUR-Lex; re-use authorised under Commission Decision 2011/833/EU"
+    },
+    {
+      "sourceId": "EU Reg 261/2004 Art 14",
+      "collection": "passenger_rights",
+      "chunks": 1,
+      "licence": "© European Union, EUR-Lex; re-use authorised under Commission Decision 2011/833/EU"
+    },
+    {
+      "sourceId": "UK CAA passenger rights: Delays",
+      "collection": "passenger_rights",
+      "chunks": 2,
+      "licence": "© UK Civil Aviation Authority; quoted with attribution"
+    },
+    {
+      "sourceId": "UK CAA passenger rights: Cancellations",
+      "collection": "passenger_rights",
+      "chunks": 1,
+      "licence": "© UK Civil Aviation Authority; quoted with attribution"
+    },
+    {
+      "sourceId": "UK CAA CAP 642",
+      "collection": "procedure",
+      "chunks": 2,
+      "licence": "© UK Civil Aviation Authority; quoted with attribution (CAP 642 Airside Safety Management)"
+    },
+    {
+      "sourceId": "FAA AC 150/5210-20A",
+      "collection": "procedure",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, FAA Advisory Circular)"
+    },
+    {
+      "sourceId": "Airbus Safety First: Lightning Strikes",
+      "collection": "procedure",
+      "chunks": 1,
+      "licence": "Airbus Safety First: articles may be reprinted without permission with acknowledgement to Airbus"
+    },
+    {
+      "sourceId": "Airbus Safety First: Preventing Inadvertent Slide Deployments",
+      "collection": "procedure",
+      "chunks": 1,
+      "licence": "Airbus Safety First: articles may be reprinted without permission with acknowledgement to Airbus"
+    },
+    {
+      "sourceId": "Airbus Safety First: Avoiding Fuel Spills on A320 Family Aircraft",
+      "collection": "procedure",
+      "chunks": 1,
+      "licence": "Airbus Safety First: articles may be reprinted without permission with acknowledgement to Airbus"
+    },
+    {
+      "sourceId": "ASRS ACN 1577181",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    },
+    {
+      "sourceId": "ASRS ACN 1326952",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    },
+    {
+      "sourceId": "ASRS ACN 1795954",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    },
+    {
+      "sourceId": "ASRS ACN 1827568",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    },
+    {
+      "sourceId": "ASRS ACN 1438905",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    },
+    {
+      "sourceId": "ASRS ACN 1750803",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    },
+    {
+      "sourceId": "ASRS ACN 1615772",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    },
+    {
+      "sourceId": "ASRS ACN 1671518",
+      "collection": "precedent",
+      "chunks": 1,
+      "licence": "Public domain (US Government work, NASA ASRS); reports unverified, NASA disclaimer applies"
+    }
+  ],
+  "notes": [
+    "Fixture mini-corpus for tests and CI (no network). Rebuild with `npm run kb:fixtures -w @ica/kb`."
+  ]
+}

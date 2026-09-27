@@ -1,0 +1,63 @@
+{
+  "kind": "llm",
+  "runId": "eval-fx-runtime-smoke",
+  "agentRunId": "ar-orchestrator-1",
+  "agentPath": "orchestrator",
+  "role": "orchestrator",
+  "iteration": 3,
+  "provider": "scripted",
+  "model": "claude-sonnet-5",
+  "latencyMs": 4000,
+  "request": {
+    "model": "claude-sonnet-5",
+    "messageCount": 7,
+    "toolCount": 5
+  },
+  "response": {
+    "text": "There are real alternatives, so the duty manager decides.",
+    "toolCalls": [
+      {
+        "id": "tu_decide",
+        "name": "request_decision",
+        "input": {
+          "question": "Rectify on stand or swap to the spare aircraft?",
+          "recommendedOptionId": "rectify",
+          "options": [
+            {
+              "id": "rectify",
+              "label": "Rectify on stand",
+              "metrics": {
+                "timeToDepartureMin": 50,
+                "costEur": 5000,
+                "customerImpact": 30,
+                "compliant": true,
+                "constraints": []
+              },
+              "recommended": true
+            },
+            {
+              "id": "swap",
+              "label": "Swap to spare",
+              "metrics": {
+                "timeToDepartureMin": 70,
+                "costEur": 9000,
+                "customerImpact": 45,
+                "compliant": true,
+                "constraints": ["spare free at minute 45"]
+              },
+              "recommended": false
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "inputTokens": 1000,
+      "outputTokens": 100,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "stopReason": "tool_use",
+    "model": "claude-sonnet-5"
+  }
+}

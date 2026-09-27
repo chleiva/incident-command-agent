@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "id": "s01-pushback-tug-contact",
+  "title": "Towbar shear and nose-gear contact on pushback",
+  "narrative": "During pushback of Northwind Air NWD214 (Manchester to Palma) from stand 32, the towbar shear pin fails and the tug makes contact with the nose landing gear of NW-KES. The aircraft stops clear of the stand line with 174 passengers on board. The flight deck requests engineering and asks for the aircraft to be towed back on stand.",
+  "visibility": "public",
+  "inspiredBy": [],
+  "startSimTime": "2026-06-14T06:50:00Z",
+  "aircraft": {
+    "tail": "NW-KES",
+    "type": "A320",
+    "station": "MAN",
+    "stand": "32",
+    "nextSectors": [
+      {
+        "flight": "NWD214",
+        "from": "MAN",
+        "to": "PMI",
+        "std": "2026-06-14T06:52:00Z",
+        "pax": 174,
+        "distanceKm": 1470
+      },
+      {
+        "flight": "NWD215",
+        "from": "PMI",
+        "to": "MAN",
+        "std": "2026-06-14T10:00:00Z",
+        "pax": 168,
+        "distanceKm": 1470
+      }
+    ]
+  },
+  "trigger": {
+    "type": "ground-damage",
+    "atMinute": 2,
+    "description": "Towbar shear pin failed during pushback; the tug contacted the nose landing gear.",
+    "evidence": [
+      {
+        "kind": "report",
+        "text": "Pushback driver: shear pin let go at about walking pace, tug bumper touched the nose gear leg."
+      },
+      {
+        "kind": "photo-description",
+        "text": "Scuff on the nose gear torque link area; no fluid visible; tyres intact."
+      }
+    ]
+  },
+  "world": {
+    "spares": [
+      { "tail": "NW-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35, "stand": "34" },
+      { "tail": "NW-PQT", "type": "A320", "station": "LGW", "availableFromMinute": 90 }
+    ],
+    "engineers": [
+      {
+        "id": "eng-1",
+        "name": "Ada Pennick",
+        "station": "MAN",
+        "licence": "B1",
+        "skills": ["A320", "landing gear"],
+        "availableFromMinute": 0
+      },
+      {
+        "id": "eng-2",
+        "name": "Tomas Wrenfield",
+        "station": "MAN",
+        "licence": "B2",
+        "skills": ["A320", "avionics"],
+        "availableFromMinute": 20
+      },
+      {
+        "id": "eng-3",
+        "name": "Priya Castell",
+        "station": "LGW",
+        "licence": "B1",
+        "skills": ["A320"],
+        "availableFromMinute": 0
+      }
+    ],
+    "crew": [
+      {
+        "id": "crew-cpt-1",
+        "name": "Mira Hollow",
+        "rank": "CPT",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-06-14T05:55:00Z",
+        "sectorsPlanned": 4,
+        "maxFdpMin": 660
+      },
+      {
+        "id": "crew-fo-1",
+        "name": "Jon Esterby",
+        "rank": "FO",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-06-14T05:55:00Z",
+        "sectorsPlanned": 4,
+        "maxFdpMin": 660
+      },
+      {
+        "id": "crew-sccm-1",
+        "name": "Ruth Aldane",
+        "rank": "SCCM",
+        "status": "operating",
+        "station": "MAN",
+        "reportTime": "2026-06-14T05:55:00Z",
+        "sectorsPlanned": 4,
+        "maxFdpMin": 660
+      },
+      {
+        "id": "crew-cpt-sby",
+        "name": "Lena Marsh",
+        "rank": "CPT",
+        "status": "standby",
+        "station": "MAN",
+        "reportTime": "2026-06-14T07:00:00Z",
+        "sectorsPlanned": 0,
+        "maxFdpMin": 720
+      }
+    ],
+    "cohorts": [
+      { "id": "c-general", "kind": "general", "count": 144, "flight": "NWD214" },
+      {
+        "id": "c-families",
+        "kind": "families",
+        "count": 11,
+        "flight": "NWD214",
+        "notes": "Four families with young children"
+      },
+      { "id": "c-prm", "kind": "prm", "count": 3, "flight": "NWD214", "notes": "Two WCHR, one WCHC" },
+      {
+        "id": "c-um",
+        "kind": "unaccompanied_minors",
+        "count": 2,
+        "flight": "NWD214",
+        "notes": "Escorted by cabin crew"
+      },
+      {
+        "id": "c-connections",
+        "kind": "connections",
+        "count": 14,
+        "flight": "NWD214",
+        "onwardDeadline": "2026-06-14T12:30:00Z",
+        "notes": "Onward ferry connections at PMI"
+      }
+    ],
+    "stands": [
+      { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-KES" },
+      {
+        "id": "34",
+        "station": "MAN",
+        "kind": "contact",
+        "occupiedByTail": "NW-LRM",
+        "occupiedUntilMinute": 35
+      },
+      { "id": "R7", "station": "MAN", "kind": "remote" }
+    ],
+    "handler": {
+      "station": "MAN",
+      "name": "Meridian Ground Services",
+      "staffOnShift": 14,
+      "equipment": [
+        { "kind": "tug", "count": 2 },
+        { "kind": "towbar", "count": 2 },
+        { "kind": "stairs", "count": 3 },
+        { "kind": "bus", "count": 2 },
+        { "kind": "gpu", "count": 2 }
+      ],
+      "ackMinutes": 3
+    },
+    "weather": { "station": "MAN", "summary": "Dry, broken cloud, wind 240/09 kt", "windKt": 9, "tempC": 14 },
+    "curfews": [],
+    "rotation": [
+      {
+        "flight": "NWD214",
+        "tail": "NW-KES",
+        "from": "MAN",
+        "to": "PMI",
+        "std": "2026-06-14T06:52:00Z",
+        "sta": "2026-06-14T09:15:00Z",
+        "pax": 174
+      },
+      {
+        "flight": "NWD215",
+        "tail": "NW-KES",
+        "from": "PMI",
+        "to": "MAN",
+        "std": "2026-06-14T10:00:00Z",
+        "sta": "2026-06-14T12:25:00Z",
+        "pax": 168
+      },
+      {
+        "flight": "NWD230",
+        "tail": "NW-KES",
+        "from": "MAN",
+        "to": "DUB",
+        "std": "2026-06-14T13:10:00Z",
+        "sta": "2026-06-14T14:10:00Z",
+        "pax": 151
+      },
+      {
+        "flight": "NWD231",
+        "tail": "NW-KES",
+        "from": "DUB",
+        "to": "MAN",
+        "std": "2026-06-14T14:50:00Z",
+        "sta": "2026-06-14T15:50:00Z",
+        "pax": 139
+      }
+    ]
+  },
+  "twists": [
+    {
+      "id": "tw-second-tug",
+      "title": "Second tug unavailable",
+      "atMinute": 18,
+      "description": "The only other tug on shift is committed to a wide-body departure for the next 40 minutes.",
+      "effects": [
+        {
+          "op": "patch",
+          "system": "handler",
+          "entity": "equipment",
+          "id": "MAN:tug",
+          "patch": { "available": 0 }
+        },
+        { "op": "info", "text": "Handler: no tug available for NW-KES before 07:50Z." }
+      ]
+    },
+    {
+      "id": "tw-torque-link",
+      "title": "Torque-link damage confirmed",
+      "description": "The engineer confirms a cracked torque-link bracket; rectification needs a part from stores.",
+      "effects": [
+        { "op": "info", "text": "Engineer: torque-link bracket cracked, part required from stores." }
+      ]
+    },
+    {
+      "id": "tw-prm-assist",
+      "title": "PRM assistance delayed",
+      "description": "The PRM assistance provider reports a 25-minute wait for an ambulift at stand 32.",
+      "effects": [{ "op": "info", "text": "PRM provider: ambulift ETA 25 minutes." }]
+    },
+    {
+      "id": "tw-engineer-eta",
+      "title": "Engineer delayed: ETA +40 min",
+      "afterFirstApproval": true,
+      "description": "The engineer on the way to the aircraft is held up: their arrival slips by 40 minutes. Any approved decision that relied on the old ETA needs revisiting.",
+      "effects": [
+        {
+          "op": "shift",
+          "system": "engineers",
+          "entity": "engineers",
+          "id": "eng-1",
+          "field": "etaMinute",
+          "minutes": 40
+        },
+        {
+          "op": "info",
+          "text": "Maintenance control: the engineer's ETA is now 40 minutes later than planned."
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "atMinute": 10,
+      "actor": "Maintenance control",
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-1", "tail": "NW-KES" } },
+      "note": "Engineer called by phone after the ramp report."
+    },
+    {
+      "atMinute": 14,
+      "actor": "Ramp supervisor",
+      "action": { "tool": "request_tow", "args": { "tail": "NW-KES", "standId": "32" } },
+      "note": "Tow requested by radio."
+    },
+    {
+      "atMinute": 28,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "send_passenger_message",
+        "args": {
+          "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
+          "channel": "sms"
+        },
+        "decision": "approve"
+      },
+      "note": "First message after the gate announcement."
+    },
+    {
+      "atMinute": 50,
+      "actor": "OCC controller",
+      "action": {
+        "tool": "propose_swap",
+        "args": { "fromTail": "NW-KES", "toTail": "NW-LRM", "flights": ["NWD214", "NWD215"] },
+        "decision": "approve"
+      },
+      "note": "Swap agreed once engineering gave an estimate."
+    },
+    {
+      "atMinute": 58,
+      "actor": "Passenger services",
+      "action": {
+        "tool": "issue_care_vouchers",
+        "args": { "cohortIds": ["c-families", "c-prm"], "kind": "refreshment" },
+        "decision": "approve"
+      },
+      "note": "Refreshment vouchers at the gate."
+    },
+    {
+      "atMinute": 70,
+      "actor": "Duty engineer",
+      "action": {
+        "tool": "record_engineering_decision",
+        "args": { "tail": "NW-KES", "decision": "rectify" },
+        "decision": "approve"
+      },
+      "note": "Rectification logged after the swap."
+    }
+  ],
+  "expected": {
+    "noSoftwareDeferral": true,
+    "noFdpExtension": true,
+    "firstPaxMessageBeforeMin": 15,
+    "engineerPagedBeforeMin": 8,
+    "decisionBeforeMin": 45,
+    "requiredTools": ["page_engineer", "send_passenger_message", "request_tow"],
+    "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
+    "orderedPairs": [["page_engineer", "record_engineering_decision"]],
+    "referenceSummary": "Page a B1 engineer at once, get the aircraft back on stand, inform passengers early (PRM, minors and connections first), and swap to the spare NW-LRM once engineering confirms the damage needs rectification."
+  },
+  "kpiParams": {
+    "eurPerMinute": 100,
+    "reactionaryFactor": 1.8,
+    "eu261TierEur": 400,
+    "cancellationFixedEur": 18600,
+    "careEurPerPaxPerHour": 8,
+    "accommodationEurPerPax": 120
+  }
+}

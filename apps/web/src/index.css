@@ -1,0 +1,99 @@
+@import '@ica/ui-tokens/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-line);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  /* Visible focus ring everywhere, keyboard only. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background: rgb(var(--c-ai) / 0.35);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--c-border-control) / 0.6) transparent;
+  }
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+  /* All figures: tabular numerals. */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+  .caps {
+    font-size: var(--text-micro-size);
+    line-height: var(--text-micro-line);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .zone-scroll {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .hairline {
+    border-color: rgb(var(--c-border));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@keyframes ica-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes ica-flash {
+  from {
+    background: rgb(var(--c-ai) / 0.22);
+  }
+  to {
+    background: transparent;
+  }
+}
+.animate-soft-pulse {
+  animation: ica-pulse 1.6s var(--ease-standard) infinite;
+}
+.animate-flash {
+  animation: ica-flash 1.6s var(--ease-standard) 1;
+}

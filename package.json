@@ -1,0 +1,77 @@
+{
+  "name": "incident-command-agent",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Ground Incident Coordination Agent — agentic airline incident-coordination MVP: ReAct agents, stateful mocked airline systems, event-sourced serverless back end.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "packages/schema",
+    "packages/store",
+    "packages/ui-tokens",
+    "services/run",
+    "services/api",
+    "apps/web",
+    "infra",
+    "evals",
+    "data",
+    "scenarios",
+    "scripts"
+  ],
+  "scripts": {
+    "prepare": "simple-git-hooks || true",
+    "dev": "tsx scripts/dev/write-web-config.ts local && concurrently --kill-others-on-fail -n api,web -c blue,magenta \"npm run dev -w @ica/api\" \"npm run dev -w @ica/web\"",
+    "dev:aws": "tsx scripts/dev/write-web-config.ts aws && npm run dev -w @ica/web",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings=0 && prettier --check . --log-level warn",
+    "lint:headers": "node scripts/hygiene/check-headers.mjs",
+    "format": "prettier --write . --log-level warn && node scripts/hygiene/check-headers.mjs --fix",
+    "test": "npm run test --workspaces --if-present",
+    "eval": "npm run eval -w @ica/evals --",
+    "eval:budget": "npm run eval:budget -w @ica/evals --",
+    "kb:build": "npm run kb:build -w @ica/kb --",
+    "kb:upload": "tsx scripts/ops/kb-upload.ts",
+    "airports:build": "npm run airports:build -w @ica/kb --",
+    "scenarios:validate": "npm run validate -w @ica/scenarios --",
+    "scenarios:push": "tsx scripts/ops/scenarios-push.ts",
+    "user:create": "tsx scripts/ops/user-create.ts",
+    "secrets:set": "tsx scripts/ops/secrets-set.ts",
+    "deploy": "tsx scripts/ops/deploy.ts",
+    "synth": "npm run synth -w @ica/infra --",
+    "storybook": "npm run storybook -w @ica/web --",
+    "hygiene": "node scripts/hygiene/hygiene.mjs",
+    "run:local": "npm run run:local -w @ica/run --"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged && node scripts/hygiene/pre-commit.mjs"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mjs,js}": [
+      "node scripts/hygiene/check-headers.mjs --files",
+      "eslint --max-warnings=0 --no-warn-ignored",
+      "prettier --check"
+    ],
+    "*.{json,yml,yaml}": [
+      "prettier --check"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^22.20.4",
+    "concurrently": "^10.0.5",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
+    "lint-staged": "^16.2.0",
+    "prettier": "^3.9.9",
+    "simple-git-hooks": "^2.14.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^3.2.4"
+  }
+}
