@@ -487,14 +487,29 @@ export class RunContext {
     }
   }
 
-  /** Count one tool call against the per-run limit. */
-  countToolCall(): void {
-    if (this.totals.toolCalls >= this.limits.maxToolCallsPerRun) {
+  /** Tool calls made so far by each agent run (per-agent loop-safety cap). */
+  private readonly agentToolCalls = new Map<string, number>();
+
+  /**
+   * Count one tool call against the loop-safety limits: the per-agent cap (`maxToolCallsPerAgent`, stops only that
+   * agent) and the optional run-level cap (`maxToolCallsPerRun`, 0 = none; stops every agent). 0/absent = no cap.
+   */
+  countToolCall(agentRunId?: string): void {
+    const l = this.limits;
+    if (l.maxToolCallsPerRun > 0 && this.totals.toolCalls >= l.maxToolCallsPerRun) {
       throw new AgentAbort(
         'tool_calls',
-        `tool calls ${this.totals.toolCalls} ≥ ${this.limits.maxToolCallsPerRun}`,
+        `tool calls ${this.totals.toolCalls} ≥ ${l.maxToolCallsPerRun} per run`,
         true,
       );
+    }
+    if (agentRunId !== undefined) {
+      const used = this.agentToolCalls.get(agentRunId) ?? 0;
+      const cap = l.maxToolCallsPerAgent ?? 0;
+      if (cap > 0 && used >= cap) {
+        throw new AgentAbort('tool_calls', `tool calls ${used} ≥ ${cap} for this agent`);
+      }
+      this.agentToolCalls.set(agentRunId, used + 1);
     }
     this.totals.toolCalls++;
   }

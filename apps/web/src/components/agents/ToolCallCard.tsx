@@ -15,15 +15,8 @@ import { Icon } from '../ui/Icon';
 import { AiDraftedBadge, Badge, TierBadge, cx } from '../ui/primitives';
 import { ProvenancePanel } from '../decisions/Provenance';
 import { AgentMark } from './AgentMark';
+import { ArgsList, compactArgs } from './ArgValue';
 import { BlockedActionCard, InvalidationNotice, ProvisionalReadingBlock } from './PolicyCards';
-
-function compactArgs(args: Record<string, unknown>): string {
-  return Object.entries(args)
-    .filter(([k]) => k !== 'body' && k !== 'brief')
-    .slice(0, 3)
-    .map(([k, v]) => `${k}=${Array.isArray(v) ? v.join('+') : typeof v === 'object' ? '{…}' : String(v)}`)
-    .join(' ');
-}
 
 function Citations({ citations }: { citations: Citation[] }) {
   return (
@@ -181,7 +174,11 @@ export function ToolCallCard({ item, defaultOpen = false }: { item: ToolFeedItem
           )}
           <section>
             <h4 className="caps mb-1 text-fg-subtle">Arguments</h4>
-            <Json value={item.call.args} />
+            <ArgsList args={item.call.args} />
+            <details className="mt-1">
+              <summary className="cursor-pointer text-micro text-fg-subtle">Raw JSON</summary>
+              <Json value={item.call.args} />
+            </details>
           </section>
           {item.result && (
             <section>
@@ -270,6 +267,18 @@ export function FeedLine({ item }: { item: Exclude<FeedItem, ToolFeedItem> }) {
             </span>
           </span>
         </button>
+        {item.report.screeningFlags && item.report.screeningFlags.length > 0 && (
+          <p data-screening-flag className="mt-2 flex gap-2 text-caption text-fg">
+            <Icon name="shield" size={14} className="mt-0.5 shrink-0 text-warning" />
+            <span>
+              Flagged by output screening (not blocked): the report states a status (
+              {[...new Set(item.report.screeningFlags.map((f) => f.pattern.replace(/^status:/, '')))].join(
+                ', ',
+              )}
+              ). A model reading is provisional; certifying staff decide.
+            </span>
+          </p>
+        )}
         {item.report.provisionalReading && (
           <div className="mt-2">
             <ProvisionalReadingBlock reading={item.report.provisionalReading} />

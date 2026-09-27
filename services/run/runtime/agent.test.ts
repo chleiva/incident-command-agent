@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, expect, it } from 'vitest';
-import { foldEvents, validateEvent, type RunEvent, type Scenario } from '@ica/schema';
+import { DEFAULT_RUN_LIMITS, foldEvents, validateEvent, type RunEvent, type Scenario } from '@ica/schema';
 import type { MemoryEventBus } from '@ica/store';
 import { LlmHttpError } from '../llm/errors';
 import { createReplayProvider, type LlmTrace } from '../llm/replay';
@@ -350,12 +350,29 @@ describe('runAgent: hard limits', () => {
     );
   });
 
-  it('tool calls per run', async () => {
+  it('tool calls per run (optional knob; default 0 = no run-level cap)', async () => {
+    expect(DEFAULT_RUN_LIMITS.maxToolCallsPerRun).toBe(0);
     const r = await expectAbort(
-      await makeHarness({ script: noReport, limits: { maxToolCallsPerRun: 2 } }),
+      await makeHarness({ script: noReport, limits: { maxToolCallsPerRun: 2, maxToolCallsPerAgent: 0 } }),
       'tool_calls',
     );
     expect(r.status).toBe('aborted');
+  });
+
+  it('tool calls per agent (default 60): stops only that agent, with a per-agent detail', async () => {
+    expect(DEFAULT_RUN_LIMITS.maxToolCallsPerAgent).toBe(60);
+    const h = await makeHarness({
+      script: noReport,
+      limits: { maxToolCallsPerRun: 0, maxToolCallsPerAgent: 3 },
+    });
+    await h.run();
+    const events = await h.events();
+    const aborted = ofType(events, 'agent.aborted');
+    expect(aborted).toHaveLength(1);
+    expect(aborted[0].payload.reason).toBe('tool_calls');
+    expect(aborted[0].payload.detail).toMatch(/3 ≥ 3 for this agent/);
+    expect(ofType(events, 'agent.tool_call')).toHaveLength(3);
+    for (const e of events) expect(validateEvent(e).ok).toBe(true);
   });
 
   it('input tokens per run', async () => {

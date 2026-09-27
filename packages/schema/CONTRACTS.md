@@ -139,7 +139,7 @@ payload, envelope)` builds one type-safely. `eventSortKey(seq)` → `EVT#0000004
 | `system.mutation` | `{system: StateSystemName, entity, id, op: create\|update\|delete, before?, after?, causedBySeq?}` |
 | `agent.started` | `{role, brief, parentAgentRunId?}` |
 | `agent.thought` | `{text, summary ≤120}` |
-| `agent.tool_call` | `{toolCallId, tool, system: ToolSystem, tier, args, presenterTriggered?}` |
+| `agent.tool_call` | `{toolCallId, tool, system: ToolSystem, tier, args, presenterTriggered?, normalisedFrom?, argsRepaired?, argsTruncated?}` |
 | `agent.tool_result` | `{toolCallId, tool, ok, resultPreview ≤500, result?, citations?, deduplicatedFrom?}` |
 | `agent.proposal` | `{approvalId, toolCallId, tool, args, summary, reasoning, options?: DecisionOption[], expiresAtMinute?, tier?, unresolvedChecks?, approvalScope?, citations?, dataAsOfMinute?, assumptions?, supersedesApprovalId?}` |
 | `approval.decision` | `{approvalId, decision: approve\|edit\|reject, editedArgs?, selectedOptionId?, reason?, decidedBy: Actor}` |
@@ -147,6 +147,7 @@ payload, envelope)` builds one type-safely. `eventSortKey(seq)` → `EVT#0000004
 | `agent.report` | `{role, report: AgentReport}` |
 | `agent.aborted` | `{role, reason: iterations\|tool_calls\|tokens\|wall_clock\|budget\|error\|stopped, detail}` |
 | `guardrail.blocked` | `{layer: tier\|input_screen\|output_screen\|arg_validation\|ref_validation, tool?, reason, excerpt?, toolCallId?, rule?, authority?, presenterTriggered?}` |
+| `guardrail.flagged` | `{layer, tool?, reason, excerpt?, toolCallId?, findings?[{pattern, excerpt}]}`: a NON-blocking screening finding (addition, live run 2); not counted as a block |
 | `twist.requested` | `{twistId?, text?}` — written by the API, drained by the Run Lambda |
 | `control.requested` | `{action: pause\|resume\|stop\|set_speed\|demo_forbidden, speed?, tool?}` — written by the API |
 | `baseline.action` | `{actor, tool, args, note}` |
@@ -168,8 +169,9 @@ Supporting types (`src/common.ts`): `Citation{sourceId,url,title,quote ≤300,ch
 `DecisionOption{id,label,metrics:{timeToDepartureMin,costEur,customerImpact 0–100,compliant,constraints[]},recommended}`,
 `AgentReport{summary,actionsTaken[],openIssues[],recommendations[],citations[]}`,
 `RunTotals{inputTokens,outputTokens,costUsd,toolCalls,iterations,wallMs}` (`ZERO_TOTALS`), `Usage`,
-`RunLimits{maxIterationsPerAgent,maxToolCallsPerRun,maxInputTokensPerRun,wallClockMs,budgetUsd,horizonMin}`
-(`DEFAULT_RUN_LIMITS` = 25 / 60 / 200k / 8 min / $2.00 / 180; `EVAL_RUN_LIMITS` = 12 / 40 / 80k / 8 min / $2.00 / 60),
+`RunLimits{maxIterationsPerAgent,maxToolCallsPerRun,maxToolCallsPerAgent?,maxInputTokensPerRun,wallClockMs,budgetUsd,horizonMin}`
+(`DEFAULT_RUN_LIMITS` = 25 / 0 (no run cap) / 60 per agent / 0 / 14 min / 0 / 180; `EVAL_RUN_LIMITS` = 12 / 40 / 40 / 80k / 8 min / $2.00 / 60;
+0 = no limit for the tool-call, token and budget caps),
 `ProviderModel`, `ScreeningResult{verdict: clean|neutralised|rejected, findings[{pattern,excerpt}], neutralisedText?}`.
 
 ### Approvals
@@ -361,3 +363,7 @@ Additions beyond the task-01 brief (all optional or new, none breaking):
 | scenario (task 07) | `Scenario.airborne?` (`ScenarioAirborneSchema`: flight, from, plannedDestination, position, altitude, heading, etaMinute, fuelEnduranceMin, squawk, pax); `aircraft.station` is the arrival station | airborne scenarios; the regenerated `scenario.schema.json` |
 | kpi (task 07) | `ComplianceValue.commanderAuthorityRespected?` (airborne only); `KpiSnapshot.diversionCostEur?` (estimate, included in `totalCostEur`) | the commander's authority as a compliance item; diversion and care-surge cost |
 | api/events/runtime/store (async authoring fix, 2026-09-27) | **`POST /runs` with a flight context never waits for an LLM**: regex-only screening (`screenInputFast`), deterministic template scenario (stored private; a fresh id suffix when text is given; `other` uses the first startable family for the flight), `RunMeta.preparing?` + `scenario.authoring{started}`, async Run Lambda invoke `{runId, authoring: {text, label?}}` (`ExecuteRunInput.authoring?`, `AuthoringRequest`). `CreateRunRequest.withBaseline?` (flight context only) creates the paired baseline on the server; `CreateRunResponse.{pairedRunId?, preparing?}`. New event `scenario.authoring {status: started\|patched\|fallback, detail, errors?, costUsd?}` (`SCENARIO_AUTHORING_STATUSES`); reducer `meta.authoring? {status, detail, seq}`. `ScenarioPatchSchema` / `ScenarioPatch` / `applyScenarioPatch` / `SCENARIO_PATCH_LIMITS` / `PATCH_TWIST_PREFIX` (`src/scenario-patch.ts`, browser-safe). **`POST /scenarios/author` is async**: 202 `{draftId, status, screening}` (`AuthorScenarioResponse.{draftId?, status?}`), new route `getAuthorDraft` `GET /scenarios/drafts/{id}` → `AuthorDraft` (`AUTHOR_DRAFT_STATUSES`, `AUTHOR_DRAFT_STALE_MS` = 6 min: an older pending draft is reported failed). `Store.putAuthorDraft/getAuthorDraft` (MemoryStore + snapshot `drafts?`; DynamoStore `DRAFT#{id}/META`, TTL 1 day) + conformance tests | live 2026-09-27: `POST /runs` with free text hit API Gateway's 29 s limit (sync author Lambda invoke, whole-scenario generation ≥ 60 s). The Author now patches the template in the Run Lambda (≤ 4 iterations, ≤ 2 proposals, ≤ 2,048 output tokens, 45 s hard cap, fallback = template); a paired run waits for `preparing` to clear so both runs use the identical scenario |
+| common (live run 2) | `RunLimits.maxToolCallsPerRun` minimum relaxed 1 → 0 (0 = no run-level cap); new optional `RunLimits.maxToolCallsPerAgent` (0/absent = none). `DEFAULT_RUN_LIMITS`: run cap 0, 60 per agent, wall clock 14 min (was 60/run, 8 min). `EVAL_RUN_LIMITS` unchanged (+ 40 per agent) | the shared 60-per-run cap stopped concurrent agents doing real work (`tool calls 60 ≥ 60`); owner decision: only loop-safety limits stop the product |
+| events/common (live run 2) | New event `guardrail.flagged` (non-blocking screening finding); `AgentReportEvent.screeningFlags?: {pattern, excerpt}[]` | a maintenance report that quoted system state was rejected as a status claim; the screen now separates attributed state from the agent's own assertion, and a remaining claim in a report (agent → orchestrator) is flagged, not rejected. Tech-log drafts and passenger text stay blocking |
+| events/runtime (live run 2) | `agent.tool_call.argsTruncated?: string[]` (JSON pointers truncated at their `maxLength`, suffix ` …[truncated]`); `ToolDefinition.splitOverlong?: string[]` (fields the tool splits itself, e.g. `append_timeline` `/text` → sequential entries) | a 560-char timeline entry was rejected at a 400-char cap; length-only failures on free-text fields are now accepted (truncated or split) instead of wasting a tool call. Free-text caps raised: timeline 2,000, techlog 2,000, rationale 2,000, incident summary 2,000, objective/question 1,000, brief 4,000, passenger message 1,000, stand plan 1,000 |
+| runtime (live run 2) | `repairLeakedParameters(input, schema?)` / `repairCall(…, schemaOf?)`: leaked markup repaired for any tool using its argument names (`</k>`, `<k2>…</k2>`, `</parameter><parameter name="k2">`), JSON-parsed per schema type, never overwriting a validly provided key (`argsRepaired`) | a report's `openIssues` arrived inside `summary` as `…</summary> <openIssues>[…]` |

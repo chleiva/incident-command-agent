@@ -206,21 +206,18 @@ describe('live run 1, bug 2: robust report', () => {
     const leakCall = ofType(events, 'agent.tool_call').find((e) => e.payload.toolCallId === LEAK_1.id)!;
     expect(leakCall.payload.argsRepaired).toEqual(['actionsTaken']);
     expect(Array.isArray(leakCall.payload.args.actionsTaken)).toBe(true);
-    // With actionsTaken recovered, the recorded report gets past the schema; its "AOG" wording is then caught by
-    // the (unchanged) status-claim screen and redrafted.
-    const third = provider.calls.find((c) => c.info.role === 'maintenance' && c.info.iteration === 3)!;
-    const screened = toolResults(third.req.messages.at(-1))[0]!;
-    expect(screened.content).toMatch(/output screening/);
-    expect(screened.content).not.toMatch(/actionsTaken/);
-
+    // With actionsTaken recovered, the recorded report gets past the schema. Its only status word ("…whether this
+    // is rectify, defer … or AOG") is a deferral to the certifying engineer, so the status screen (live run 2)
+    // accepts it: no redraft needed.
+    expect(ofType(events, 'guardrail.flagged')).toHaveLength(0);
     const report = ofType(events, 'agent.report').find((e) => e.payload.role === 'maintenance')!;
     expect(report.payload.report.composedByRuntime).toBeUndefined();
     expect(report.payload.report.summary).toMatch(/^AX-PMC/);
     expect(report.payload.report.summary).not.toMatch(/parameter/);
-    expect(report.payload.report.actionsTaken[0]).toBe('Checked aircraft status and open defects');
+    expect(report.payload.report.actionsTaken[0]).toMatch(/^Retrieved aircraft status and open defects/);
     expect(report.payload.report.extras).toBeUndefined();
     // No maintenance call after the accepted report.
-    expect(provider.calls.filter((c) => c.info.role === 'maintenance')).toHaveLength(4);
+    expect(provider.calls.filter((c) => c.info.role === 'maintenance')).toHaveLength(3);
   });
 
   it('keeps unknown keys under extras and fills actionsTaken from executed tool calls', async () => {

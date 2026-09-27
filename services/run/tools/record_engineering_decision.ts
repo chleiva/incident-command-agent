@@ -20,7 +20,7 @@ export const record_engineering_decision: ToolDefinition<{
     {
       tail: S.tail,
       decision: { type: 'string', enum: ['rectify', 'defer_mel', 'aog', 'release'] },
-      rationale: { type: 'string', minLength: 10, maxLength: 800 },
+      rationale: { type: 'string', minLength: 10, maxLength: 2000 },
       defectId: S.id,
       melItem: S.melItem,
     },

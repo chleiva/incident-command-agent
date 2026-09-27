@@ -161,6 +161,11 @@ export const EventPayloadSchemas = {
      * tool-call markup (`</parameter><parameter name="k">…`).
      */
     argsRepaired: Opt(Type.Array(Str)),
+    /**
+     * Addition (live run 2): JSON pointers of free-text string arguments whose only validation error was
+     * `maxLength`; the runtime accepted the call with the value truncated at the cap (and told the model).
+     */
+    argsTruncated: Opt(Type.Array(Str)),
   }),
   'agent.tool_result': Type.Object({
     toolCallId: Str,
@@ -235,6 +240,19 @@ export const EventPayloadSchemas = {
     authority: Opt(Str),
     /** The attempt was pushed by the presenter's "Demonstrate blocked action" control (counted the same). */
     presenterTriggered: Opt(Type.Boolean()),
+  }),
+  /**
+   * Addition (live run 2): a NON-blocking screening finding. The output was accepted and annotated (e.g. a
+   * maintenance report to the orchestrator with a status-like claim is flagged, not rejected). Not counted as a
+   * block by KPIs or evals.
+   */
+  'guardrail.flagged': Type.Object({
+    layer: literalUnion(GUARDRAIL_LAYERS),
+    tool: Opt(Str),
+    reason: Str,
+    excerpt: Opt(Str),
+    toolCallId: Opt(Str),
+    findings: Opt(Type.Array(Type.Object({ pattern: Str, excerpt: Str }))),
   }),
   /** Written by the API; drained by the Run Lambda on its next iteration. */
   'twist.requested': Type.Object({ twistId: Opt(Str), text: Opt(Str) }),

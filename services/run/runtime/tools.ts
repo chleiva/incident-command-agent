@@ -67,7 +67,7 @@ export const openIncidentTool: RuntimeToolDefinition = {
     required: ['title', 'summary'],
     properties: {
       title: { type: 'string', minLength: 1, maxLength: 160 },
-      summary: { type: 'string', minLength: 1, maxLength: 1000 },
+      summary: { type: 'string', minLength: 1, maxLength: 2000 },
       severity: { type: 'string', enum: ['low', 'medium', 'high'] },
     },
   },
@@ -96,7 +96,7 @@ export const setObjectiveTool: RuntimeToolDefinition = {
     additionalProperties: false,
     required: ['objective'],
     properties: {
-      objective: { type: 'string', minLength: 1, maxLength: 500 },
+      objective: { type: 'string', minLength: 1, maxLength: 1000 },
       targetMinute: { type: 'number', minimum: 0, maximum: 1440 },
     },
   },
@@ -123,7 +123,7 @@ export const delegateTool: RuntimeToolDefinition = {
     required: ['role', 'brief'],
     properties: {
       role: { type: 'string', enum: [...SPECIALIST_ROLES] },
-      brief: { type: 'string', minLength: 1, maxLength: 2000 },
+      brief: { type: 'string', minLength: 1, maxLength: 4000 },
     },
   },
   tier: 'execute',
@@ -147,7 +147,7 @@ export const requestDecisionTool: RuntimeToolDefinition = {
     additionalProperties: false,
     required: ['question', 'options', 'recommendedOptionId'],
     properties: {
-      question: { type: 'string', minLength: 1, maxLength: 500 },
+      question: { type: 'string', minLength: 1, maxLength: 1000 },
       unresolvedChecks: {
         type: 'array',
         maxItems: 12,

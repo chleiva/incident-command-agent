@@ -14,6 +14,7 @@ import { InvalidationNotice } from '../agents/PolicyCards';
 import { ROLE_LABEL, actorLabel, formatDuration, humaniseTool } from '../../lib/format';
 import type { OptimisticDecision } from '../../store/ui';
 import { AgentMark } from '../agents/AgentMark';
+import { ArgsList } from '../agents/ArgValue';
 import { Icon } from '../ui/Icon';
 import { AiDraftedBadge, ApproverLine, Badge, Button, Kbd, TierBadge, cx, type Tone } from '../ui/primitives';
 import { DiffEditor } from './DiffEditor';
@@ -46,20 +47,7 @@ export function urgency(a: ProjectedApproval, nowMinute: number): { text: string
 }
 
 function ArgsPreview({ args }: { args: Record<string, unknown> }) {
-  const entries = Object.entries(args).filter(([k]) => k !== 'body');
-  if (!entries.length) return null;
-  return (
-    <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-caption">
-      {entries.slice(0, 5).map(([k, v]) => (
-        <div key={k} className="contents">
-          <dt className="text-fg-subtle">{k}</dt>
-          <dd className="truncate font-mono text-fg-muted">
-            {Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : String(v)}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
+  return <ArgsList args={args} omit={['body']} limit={5} />;
 }
 
 export function DecisionCard({

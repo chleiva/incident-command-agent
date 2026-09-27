@@ -42,7 +42,7 @@ export const ground: RoleDefinition = {
     'instruct_flight_crew',
   ],
   reportSchema: reportSchema({
-    standPlan: Opt(Type.String({ maxLength: 300 })),
+    standPlan: Opt(Type.String({ maxLength: 1000 })),
     pendingRequests: Opt(Type.Array(Type.String())),
   }),
   stop: 'report_tool',

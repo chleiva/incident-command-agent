@@ -140,6 +140,12 @@ export interface ToolDefinition<I = any, O = any> {
    * a key that already succeeded returns the original result with no new mutation (and no new proposal).
    */
   idempotencyKey?: string;
+  /**
+   * Addition (live run 2): JSON pointers of free-text fields the tool itself splits when they exceed the schema's
+   * `maxLength` (e.g. `append_timeline` `/text` → sequential entries). The runtime passes such a value through
+   * uncut instead of truncating it; every other validation still applies.
+   */
+  splitOverlong?: string[];
   handler(input: I, ctx: ToolContext): Promise<ToolOutcome<O>>;
 }
 

@@ -23,7 +23,7 @@ import type {
   ToolOutcome,
 } from '@ica/schema';
 import { getPointer, screenOutput, textAtPointers } from '../guardrails/screen-output';
-import { validateRefs, validateToolArgs } from '../guardrails/validate';
+import { lenientArgs, validateRefs, validateToolArgs } from '../guardrails/validate';
 import { wrapToolResult } from '../guardrails/wrap';
 import { applyPolicyDecision, policyDecision, type ApprovalPolicy } from './approvals';
 import { AgentAbort, type Decision, type RunContext } from './context';
@@ -62,6 +62,10 @@ export interface ToolCallInput {
   normalisedFrom?: string;
   /** Argument keys recovered from leaked tool-call markup (see call-repair.ts). */
   argsRepaired?: string[];
+  /** Free-text fields truncated at their schema cap (length leniency, live run 2). */
+  argsTruncated?: string[];
+  /** Over-cap free-text fields passed through uncut because the tool splits them (`splitOverlong`). */
+  argsSplit?: string[];
 }
 
 export interface ToolCallResult {
@@ -132,7 +136,19 @@ async function checkCall(
   call: ToolCallInput,
   args: Record<string, unknown>,
 ): Promise<ToolCallResult | null> {
-  const v = validateToolArgs(tool, args);
+  // Fields the tool splits itself are validated at their cap (everything else about them still applies).
+  let checked = args;
+  if (call.argsSplit?.length) {
+    checked = deepClone(args);
+    for (const p of call.argsSplit) {
+      const key = p.replace(/^\//, '');
+      const cap = (tool.inputSchema as { properties?: Record<string, { maxLength?: number }> }).properties?.[
+        key
+      ]?.maxLength;
+      if (typeof checked[key] === 'string' && cap) checked[key] = (checked[key] as string).slice(0, cap);
+    }
+  }
+  const v = validateToolArgs(tool, checked);
   if (!v.ok) {
     return block(
       site,
@@ -373,15 +389,51 @@ function proposalSummary(tool: string, args: Record<string, unknown>): string {
   return `${tool} ${preview(args, 240)}`;
 }
 
-/** The full pipeline for one tool call. `tool` is undefined for unknown tool names. */
+/**
+ * The full pipeline for one tool call. `tool` is undefined for unknown tool names.
+ *
+ * Length leniency (live run 2): when the only validation errors are `maxLength` on free-text fields, the call is
+ * accepted with those values truncated at the cap (recorded as `argsTruncated` on `agent.tool_call`, and the model
+ * is told in the tool result) instead of wasting a tool call on a retry. Fields the tool splits itself
+ * (`splitOverlong`, e.g. `append_timeline` `/text`) pass through uncut. Every other validation still rejects.
+ */
 export async function executeToolCall(
   site: CallSite,
   tool: ToolDefinition | undefined,
   call: ToolCallInput,
   opts: { availableToRole: boolean },
 ): Promise<ToolCallResult> {
+  if (!tool) return executeToolCallCore(site, tool, call, opts);
+  const input = (call.input ?? {}) as Record<string, unknown>;
+  const lifts = tool.tier === 'propose' && tool.name !== 'request_decision' && 'unresolvedChecks' in input;
+  const { unresolvedChecks, ...rest } = input;
+  const len = lenientArgs(tool, lifts ? rest : input);
+  if (!len || (!len.truncated.length && !len.split.length))
+    return executeToolCallCore(site, tool, call, opts);
+  const res = await executeToolCallCore(
+    site,
+    tool,
+    {
+      ...call,
+      input: lifts ? { ...len.args, unresolvedChecks } : len.args,
+      ...(len.truncated.length ? { argsTruncated: len.truncated } : {}),
+      ...(len.split.length ? { argsSplit: len.split } : {}),
+    },
+    opts,
+  );
+  if (!len.truncated.length) return res;
+  const note = `Accepted with ${len.truncated.join(', ')} truncated at the length cap (marked "…[truncated]"). Keep these fields shorter next time.`;
+  return { ...res, content: `${res.content}\n${wrapToolResult('runtime:args', JSON.stringify({ note }))}` };
+}
+
+async function executeToolCallCore(
+  site: CallSite,
+  tool: ToolDefinition | undefined,
+  call: ToolCallInput,
+  opts: { availableToRole: boolean },
+): Promise<ToolCallResult> {
   const { ctx } = site;
-  ctx.countToolCall();
+  ctx.countToolCall(site.agentRunId);
   if (!tool) {
     await ctx.append([
       ctx.draft(
@@ -428,6 +480,7 @@ export async function executeToolCall(
         ...(site.presenterTriggered ? { presenterTriggered: true } : {}),
         ...(call.normalisedFrom ? { normalisedFrom: call.normalisedFrom } : {}),
         ...(call.argsRepaired?.length ? { argsRepaired: call.argsRepaired } : {}),
+        ...(call.argsTruncated?.length ? { argsTruncated: call.argsTruncated } : {}),
       },
       site.actor,
       envExtra(site),

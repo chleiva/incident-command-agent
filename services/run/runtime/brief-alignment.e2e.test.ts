@@ -267,7 +267,7 @@ describe('task 06: brief alignment (runtime)', () => {
     expect(results.find((e) => e.payload.toolCallId === 'tu_wo2')!.payload.deduplicatedFrom).toBe('tu_wo1');
   });
 
-  it('a maintenance report stating a status is blocked, then accepted with a provisional reading', async () => {
+  it('a maintenance report stating a status is accepted but FLAGGED (non-blocking, live run 2)', async () => {
     const h = await makeHarness({
       scenario: S01,
       registry: defaultRegistry(),
@@ -282,13 +282,6 @@ describe('task 06: brief alignment (runtime)', () => {
             call('report', {
               ...REPORT,
               summary: 'The nose-gear damage is non-deferrable; the aircraft is AOG.',
-            }),
-          ),
-          step(
-            'Report again.',
-            call('report', {
-              ...REPORT,
-              summary: 'Nose-gear contact; inspection by certifying staff pending.',
               recommendations: ['Keep the spare on standby until the inspection result'],
               provisionalReading: {
                 text: 'Possible torque-link damage; needs inspection.',
@@ -303,12 +296,16 @@ describe('task 06: brief alignment (runtime)', () => {
     await h.run();
     const events = await h.events();
     allValid(events);
-    const blocked = ofType(events, 'guardrail.blocked').find(
-      (e) => e.payload.layer === 'output_screen' && e.payload.tool === 'report',
-    );
-    expect(blocked?.payload.reason).toMatch(/status:deferrable/);
+    // Not a block: no guardrail.blocked for the report, one guardrail.flagged instead.
+    expect(ofType(events, 'guardrail.blocked').filter((e) => e.payload.tool === 'report')).toHaveLength(0);
+    const flagged = ofType(events, 'guardrail.flagged').find((e) => e.payload.tool === 'report');
+    expect(flagged?.payload.layer).toBe('output_screen');
+    expect(flagged?.payload.reason).toMatch(/status:deferrable/);
     const report = ofType(events, 'agent.report').find((e) => e.payload.role === 'maintenance')!;
-    expect(report.payload.report.summary).not.toMatch(/deferrable|AOG/i);
+    expect(report.payload.report.summary).toMatch(/non-deferrable/);
+    expect(report.payload.report.screeningFlags?.map((f) => f.pattern)).toEqual(
+      expect.arrayContaining(['status:deferrable', 'status:aog']),
+    );
     expect(report.payload.report.provisionalReading).toMatchObject({ unconfirmed: true });
     // Every recommendation carries provenance (runtime defaults: as-of time, a scope that authorises nothing).
     expect(report.payload.report.recommendationDetails?.[0]).toMatchObject({
@@ -319,8 +316,15 @@ describe('task 06: brief alignment (runtime)', () => {
     expect(PROVISIONAL_READING_LABEL).toBe('Provisional reading — unconfirmed');
   });
 
-  it('after the retries, remaining status claims are redacted, never shown', async () => {
-    const bad = { ...REPORT, summary: 'Airworthy after a quick look; deferrable under the MEL.' };
+  it('a report that QUOTES system state and defers to certifying staff is neither blocked nor flagged', async () => {
+    const quoted = {
+      ...REPORT,
+      summary:
+        "Aircraft status flag in M&E currently shows \"unserviceable\" pending review; the tail's status in the rotation feed is flagged 'unserviceable'.",
+      openIssues: [
+        "AX-LRM cannot be assumed airworthy … without certifying staff inspecting and releasing it — that determination is outside this agent's authority.",
+      ],
+    };
     const h = await makeHarness({
       scenario: S01,
       registry: defaultRegistry(),
@@ -329,16 +333,16 @@ describe('task 06: brief alignment (runtime)', () => {
           step('Maintenance.', call('delegate', { role: 'maintenance', brief: 'Assess.' })),
           step('Done.', call('report', REPORT)),
         ],
-        maintenance: [
-          step('1', call('report', bad)),
-          step('2', call('report', bad)),
-          step('3', call('report', bad)),
-        ],
+        maintenance: [step('1', call('report', quoted))],
       }),
     });
     await h.run();
-    const report = ofType(await h.events(), 'agent.report').find((e) => e.payload.role === 'maintenance')!;
-    expect(report.payload.report.summary).not.toMatch(/airworthy|deferrable/i);
-    expect(report.payload.report.summary).toMatch(/status for certifying staff to decide/);
+    const events = await h.events();
+    allValid(events);
+    expect(ofType(events, 'guardrail.blocked')).toHaveLength(0);
+    expect(ofType(events, 'guardrail.flagged')).toHaveLength(0);
+    const report = ofType(events, 'agent.report').find((e) => e.payload.role === 'maintenance')!;
+    expect(report.payload.report.openIssues[0]).toMatch(/cannot be assumed airworthy/);
+    expect(report.payload.report.screeningFlags).toBeUndefined();
   });
 });

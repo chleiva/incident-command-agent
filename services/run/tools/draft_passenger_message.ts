@@ -9,7 +9,8 @@ import { S, arrayOf, fromResult, obj } from './_shared';
 export const MESSAGE_BODY = {
   type: 'string',
   minLength: 20,
-  maxLength: 700,
+  // Channel-appropriate cap (an SMS may be sent in parts); at least 1,000 since live run 2.
+  maxLength: 1000,
   description:
     'Plain-language message: what happened (no blame), what we are doing, the specific next step for the passenger, and when the next update will come. No legal conclusions.',
 } as const;

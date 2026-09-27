@@ -11,7 +11,7 @@ export const draft_techlog_entry: ToolDefinition<{ tail: string; text: string; d
   description:
     'Propose a tech-log entry (defect description and actions so far) for a human to approve. Factual, no dispatch decision, no MEL deferral wording. The entry is stored as AI-drafted once approved.',
   inputSchema: obj(
-    { tail: S.tail, text: { type: 'string', minLength: 10, maxLength: 1200 }, defectId: S.id },
+    { tail: S.tail, text: { type: 'string', minLength: 10, maxLength: 2000 }, defectId: S.id },
     ['tail', 'text'],
   ),
   tier: 'propose',

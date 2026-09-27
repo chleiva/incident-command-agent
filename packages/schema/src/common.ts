@@ -122,6 +122,11 @@ export const AgentReportEventSchema = Type.Object({
   ...AgentReportSchema.properties,
   extras: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   composedByRuntime: Type.Optional(Type.Boolean()),
+  /**
+   * Addition (live run 2): non-blocking output-screen findings (e.g. a status-like claim in a maintenance report).
+   * The report was accepted; the orchestrator and the UI see the flag.
+   */
+  screeningFlags: Type.Optional(Type.Array(Type.Object({ pattern: Type.String(), excerpt: Type.String() }))),
 });
 export type AgentReportEvent = Static<typeof AgentReportEventSchema>;
 
@@ -159,10 +164,14 @@ export type Usage = Static<typeof UsageSchema>;
 /**
  * Hard limits for a run (spec §6). Cost limits (`maxInputTokensPerRun`, `budgetUsd`) use 0 = no limit: the product
  * never stops a run on spend; only the eval harness sets them (owner decision, CLAUDE.md).
+ * `maxToolCallsPerRun` also uses 0 = no run-level cap (live-run-2): the product relies on loop-safety limits per
+ * agent (`maxIterationsPerAgent`, `maxToolCallsPerAgent`) and the wall clock instead.
  */
 export const RunLimitsSchema = Type.Object({
   maxIterationsPerAgent: Type.Integer({ minimum: 1 }),
-  maxToolCallsPerRun: Type.Integer({ minimum: 1 }),
+  maxToolCallsPerRun: Type.Integer({ minimum: 0 }),
+  /** Addition (live-run-2): tool calls one agent run may make (runaway protection). Absent or 0 = no cap. */
+  maxToolCallsPerAgent: Type.Optional(Type.Integer({ minimum: 0 })),
   maxInputTokensPerRun: Type.Integer({ minimum: 0 }),
   wallClockMs: Type.Integer({ minimum: 1 }),
   budgetUsd: Type.Number({ minimum: 0 }),
@@ -172,9 +181,12 @@ export type RunLimits = Static<typeof RunLimitsSchema>;
 
 export const DEFAULT_RUN_LIMITS: RunLimits = {
   maxIterationsPerAgent: 25,
-  maxToolCallsPerRun: 60,
+  // live-run-2: the spec's 60 calls per run was shared by all concurrent agents and stopped real work.
+  maxToolCallsPerRun: 0,
+  maxToolCallsPerAgent: 60,
   maxInputTokensPerRun: 0,
-  wallClockMs: 8 * 60_000,
+  // Lambda max is 15 min; the handler's graceful stop (< 60 s remaining) still fires first.
+  wallClockMs: 14 * 60_000,
   budgetUsd: 0,
   horizonMin: 180,
 };
@@ -183,6 +195,7 @@ export const DEFAULT_RUN_LIMITS: RunLimits = {
 export const EVAL_RUN_LIMITS: RunLimits = {
   maxIterationsPerAgent: 12,
   maxToolCallsPerRun: 40,
+  maxToolCallsPerAgent: 40,
   maxInputTokensPerRun: 80_000,
   wallClockMs: 8 * 60_000,
   budgetUsd: 2.0,

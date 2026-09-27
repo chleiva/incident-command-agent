@@ -27,7 +27,7 @@ import { composeSystemPrompt, wrapScenarioData, wrapToolResult, wrapTwistData } 
 import { putTrace, traceLabel } from './trace';
 import type { ApprovalPolicy } from './approvals';
 import { AgentAbort, type RunContext } from './context';
-import { repairCall } from './call-repair';
+import { repairCall, type ArgsSchemaView } from './call-repair';
 import { executeToolCall, type CallSite, type ToolCallInput, type ToolCallResult } from './execute';
 import {
   MAX_REPORT_ATTEMPTS,
@@ -434,7 +434,12 @@ export async function runAgent(
       // tool-call markup split back into its keys. Ids are unchanged, so every tool_result answers the ORIGINAL
       // tool_use id and the provider conversation stays valid.
       const calls: ToolCallInput[] = response.toolCalls.map((c) =>
-        repairCall(c, delegable, (n) => byName.has(n)),
+        repairCall(
+          c,
+          delegable,
+          (n) => byName.has(n),
+          (n) => (byName.get(n) ?? registryByName.get(n))?.inputSchema as ArgsSchemaView | undefined,
+        ),
       );
 
       // Delegates start concurrently (Promise.all); other calls run in order; results keep the call order.
@@ -539,39 +544,32 @@ export async function runAgent(
         }
         const { known, extras } = splitExtras(input, report.inputSchema);
         let normalised = normaliseReport(known);
-        // Status-like defect claims (deferrable, airworthy, AOG…) are blocked: the model's interpretation is a
-        // provisional reading only. The agent redrafts; after the retries the claims are redacted. Only the model's
-        // own text is screened: the runtime's executed-action lines are appended afterwards.
+        // Status-like defect claims (deferrable, airworthy, AOG…): the model's interpretation is a provisional
+        // reading only. State quoted from a system or deferred to certifying staff is not a claim (the screen skips
+        // it). A report goes to the orchestrator, not to a record or a passenger, so a remaining claim is FLAGGED
+        // (non-blocking `guardrail.flagged` + `screeningFlags` on the report) rather than rejected (live run 2).
+        // Tech-log drafts and passenger-facing text stay blocking in the tool pipeline. Only the model's own text
+        // is screened: the runtime's executed-action lines are appended afterwards.
         if (STATUS_SCREENED_ROLES.has(role)) {
           const findings: OutputFinding[] = reportTexts(normalised).flatMap(screenStatusClaims);
           if (findings.length) {
+            const flags = findings
+              .slice(0, 10)
+              .map((f) => ({ pattern: f.pattern, excerpt: f.excerpt.slice(0, 200) }));
             await ctx.emit(
-              'guardrail.blocked',
+              'guardrail.flagged',
               {
                 layer: 'output_screen',
                 tool: 'report',
-                reason: `status-like claim in the ${role} report (${[...new Set(findings.map((f) => f.pattern))].join(', ')}): a model reading is provisional; certifying staff decide`,
-                excerpt: findings[0]!.excerpt.slice(0, 200),
+                reason: `status-like claim in the ${role} report (${[...new Set(findings.map((f) => f.pattern))].join(', ')}): a model reading is provisional; certifying staff decide. Report accepted and flagged`,
+                excerpt: flags[0]!.excerpt,
                 toolCallId: c.id,
+                findings: flags,
               },
               actor,
               envelope(iteration),
             );
-            if (reportFailures < maxReportRetries) {
-              reportFailures++;
-              return {
-                content: wrapToolResult(
-                  'runtime:report',
-                  JSON.stringify({
-                    error:
-                      'report rejected by output screening: do not state a status (deferrable, non-deferrable, airworthy, AOG, fit to fly). Put your interpretation in provisionalReading {text, confidence, unconfirmed: true} and say that certifying staff decide. Call report again.',
-                    findings: findings.map((f) => f.excerpt).slice(0, 5),
-                  }),
-                ),
-                isError: true,
-              };
-            }
-            normalised = redactReport(normalised);
+            normalised = { ...normalised, screeningFlags: flags };
           }
         }
         normalised = {

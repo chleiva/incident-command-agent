@@ -77,12 +77,92 @@ export const STATUS_CLAIM_RES: [string, RegExp][] = [
   ['status:no_go', /\bno[- ]go\s+item\b/i],
 ];
 
-/** Status-like claims in a text (empty when clean). */
+/**
+ * Context that makes a status word NOT the agent's own claim (live run 2): state attributed to a system ("M&E shows",
+ * "status flag", "recorded as", "in the rotation feed") or an explicit deferral to certifying staff ("cannot be
+ * assumed airworthy", "requires certifying staff", "outside this agent's authority", "not yet declared").
+ * Checked in the same clause, BEFORE the status word.
+ */
+const ATTRIBUTION_BEFORE_RES: RegExp[] = [
+  // a system or record as the grammatical source of the state
+  /\b(M&E|MNE|OCC|tech[- ]?log|rotation feed|feed|system|records?|status flag|flag|status field|entry)\b[\s\S]{0,60}\b(shows?|showing|shown|records?|recorded|flags?|flagged|lists?|listed|marks?|marked|displays?|displayed|reads?|states?|carries|carrying|holds?)\b/i,
+  /\b(status flag|status field|recorded as|shows? as|shown as|listed as|marked as|flagged as|flagged|logged as|displayed as)\b/i,
+  /\b(in|on|per|according to|from) (the )?(M&E|MNE|rotation feed|tech[- ]?log|OCC|system|record)\b/i,
+  // deferral to certifying staff / explicit non-assertion
+  /\b(cannot|can't|can ?not|must not|should not|may not)\s+be\s+(assumed|considered|declared|treated|regarded|presumed|taken)\b/i,
+  /\b(not|never|nobody|no one|without)\b[\s\S]{0,30}\b(assum(e|ed|ing)|declar(e|ed|ing)|confirm(ed|ing)?|determin(e|ed|ing)|establish(ed|ing)?|assess(ed|ing)?|decid(e|ed|ing)|certif(y|ied|ying))\b/i,
+  /\b(whether|if)\b/i,
+  /\b(pending|awaiting|until|requires?|needs?)\b[\s\S]{0,40}\bcertifying (staff|engineer)/i,
+];
+/** Deferral context AFTER the status word (same clause), unless the clause directly asserts it. */
+const ATTRIBUTION_AFTER_RES: RegExp[] = [
+  /^[\s\S]{0,40}\b(in|on|per|according to) (the )?(M&E|MNE|rotation feed|tech[- ]?log|OCC|system|record)\b/i,
+  /^[\s\S]{0,60}\b(for|by|until|pending|requires?|needs?) (the )?certifying (staff|engineer)/i,
+  /^[\s\S]{0,80}\boutside (this|the|my) agent'?s authority\b/i,
+];
+/**
+ * Sentence-level deferral: the sentence hands the determination to certifying staff ("certifying B1 engineer to
+ * determine … whether this is rectify, defer … or AOG"). Used only when the clause does not directly assert.
+ */
+const DEFERRAL_SENTENCE_RES: RegExp[] = [
+  /\bcertifying\s+(staff|engineers?|B1|B2|technicians?)\b[\s\S]{0,40}\b(to\s+)?(determine|decide|assess|confirm|release|record|make)\b/i,
+  /\b(for|by)\s+certifying\s+(staff|engineers?)\s+to\s+(determine|decide)\b/i,
+  /\boutside\s+(this|the|my)\s+agent'?s\s+authority\b/i,
+];
+
+/** The clause directly asserts the state: "<subject> is/remains/declared <status>". */
+const ASSERTION_BEFORE_RE =
+  /\b(is|are|remains?|was|were|be|becomes?|deemed|declared?|now|currently|treated as|considered)\s+(now\s+|currently\s+|still\s+|therefore\s+|an?\s+)*["'“‘]?$/i;
+
+/** The clause around an index: split on sentence punctuation and on clause joiners. */
+function clauseAround(
+  text: string,
+  idx: number,
+  len: number,
+): { before: string; after: string; sentence: string; sentenceBefore: string } {
+  const sentenceStart = Math.max(
+    ...['.', '!', '?', ';', '\n', '—', ' - '].map((d) => {
+      const i = text.lastIndexOf(d, idx - 1);
+      return i < 0 ? 0 : i + d.length;
+    }),
+  );
+  let before = text.slice(sentenceStart, idx);
+  const sentenceBefore = before;
+  const joiner = /(,|\band\b|\bbut\b|\bso\b|\bwhich\b|\bwhile\b|\bthough\b|\bhowever\b)/gi;
+  let last = -1;
+  for (const m of before.matchAll(joiner)) last = m.index + m[0].length;
+  if (last >= 0) before = before.slice(last);
+  const rest = text.slice(idx + len);
+  const end = rest.search(/[.!?;\n]|,\s*(and|but|so)\b/);
+  const after = end < 0 ? rest : rest.slice(0, end);
+  const sentenceEnd = rest.search(/[.!?;\n]/);
+  const sentence =
+    sentenceBefore + text.slice(idx, idx + len) + (sentenceEnd < 0 ? rest : rest.slice(0, sentenceEnd));
+  return { before, after, sentence, sentenceBefore };
+}
+
+/** True when a status word at `idx` is attributed to a system or deferred to certifying staff. */
+export function isAttributedStatus(text: string, idx: number, len: number): boolean {
+  const { before, after, sentence, sentenceBefore } = clauseAround(text, idx, len);
+  if (ATTRIBUTION_BEFORE_RES.some((re) => re.test(before))) return true;
+  if (ASSERTION_BEFORE_RE.test(before)) return false;
+  if (/\bwhether\b/i.test(sentenceBefore)) return true;
+  if (DEFERRAL_SENTENCE_RES.some((re) => re.test(sentence))) return true;
+  return ATTRIBUTION_AFTER_RES.some((re) => re.test(after));
+}
+
+/**
+ * Status-like claims in a text (empty when clean). Only the agent's own assertions count: a state quoted from a
+ * system ("M&E shows AOG") or explicitly deferred to certifying staff ("cannot be assumed airworthy") passes.
+ */
 export function screenStatusClaims(text: string): OutputFinding[] {
   const findings: OutputFinding[] = [];
   for (const [name, re] of STATUS_CLAIM_RES) {
-    const m = re.exec(text);
-    if (m) findings.push({ pattern: name, excerpt: excerpt(text, m.index, m[0].length) });
+    for (const m of text.matchAll(new RegExp(re.source, 'gi'))) {
+      if (isAttributedStatus(text, m.index, m[0].length)) continue;
+      findings.push({ pattern: name, excerpt: excerpt(text, m.index, m[0].length) });
+      break;
+    }
   }
   return findings;
 }
@@ -90,8 +170,18 @@ export function screenStatusClaims(text: string): OutputFinding[] {
 /** Replace status-like claims with a neutral marker (last resort after the agent failed to redraft). */
 export function redactStatusClaims(text: string): string {
   let out = text;
-  for (const [, re] of STATUS_CLAIM_RES)
-    out = out.replace(new RegExp(re.source, 'gi'), '[status for certifying staff to decide]');
+  for (const [, re] of STATUS_CLAIM_RES) {
+    const src = out;
+    let next = '';
+    let at = 0;
+    for (const m of src.matchAll(new RegExp(re.source, 'gi'))) {
+      // quoted system state and deferrals to certifying staff are kept (see isAttributedStatus)
+      if (isAttributedStatus(src, m.index, m[0].length)) continue;
+      next += src.slice(at, m.index) + '[status for certifying staff to decide]';
+      at = m.index + m[0].length;
+    }
+    out = next + src.slice(at);
+  }
   return out;
 }
 

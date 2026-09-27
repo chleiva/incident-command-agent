@@ -84,8 +84,7 @@ export function describeArgErrors(errors: readonly RawError[], args: unknown): s
   return out;
 }
 
-/** Validate tool arguments against the tool's input schema, with concise errors (see `describeArgErrors`). */
-export function validateToolArgs(tool: Pick<ToolDefinition, 'inputSchema'>, args: unknown): ArgCheck {
+function rawValidator(tool: Pick<ToolDefinition, 'inputSchema'>): RawValidate | string {
   const schema = tool.inputSchema as object;
   let fn = rawValidators.get(schema);
   if (!fn) {
@@ -96,8 +95,106 @@ export function validateToolArgs(tool: Pick<ToolDefinition, 'inputSchema'>, args
     }
     rawValidators.set(schema, fn);
   }
+  return fn;
+}
+
+/** Validate tool arguments against the tool's input schema, with concise errors (see `describeArgErrors`). */
+export function validateToolArgs(tool: Pick<ToolDefinition, 'inputSchema'>, args: unknown): ArgCheck {
+  const fn = rawValidator(tool);
   if (typeof fn === 'string') return { ok: false, errors: [fn] };
   return fn(args) ? { ok: true } : { ok: false, errors: describeArgErrors(fn.errors ?? [], args) };
+}
+
+// ---------------------------------------------------------------- length leniency (live run 2)
+
+/** Appended to a free-text value the runtime truncated at its schema cap. */
+export const TRUNCATION_SUFFIX = ' …[truncated]';
+/** Below this cap a string is treated as structured (ids, codes, titles), never truncated. */
+export const FREE_TEXT_MIN_CAP = 100;
+
+export interface LenientArgs {
+  args: Record<string, unknown>;
+  /** JSON pointers truncated at their cap. */
+  truncated: string[];
+  /** JSON pointers passed through uncut because the tool splits them (`ToolDefinition.splitOverlong`). */
+  split: string[];
+}
+
+function schemaAt(schema: unknown, schemaPath: string): Record<string, unknown> | undefined {
+  // "#/properties/text/maxLength" → the node holding maxLength
+  const parts = schemaPath.replace(/^#\/?/, '').split('/').slice(0, -1);
+  let cur: unknown = schema;
+  for (const raw of parts) {
+    const key = raw.replace(/~1/g, '/').replace(/~0/g, '~');
+    if (!cur || typeof cur !== 'object') return undefined;
+    cur = (cur as Record<string, unknown>)[key];
+  }
+  return cur && typeof cur === 'object' ? (cur as Record<string, unknown>) : undefined;
+}
+
+function isFreeText(node: Record<string, unknown> | undefined): boolean {
+  return (
+    !!node &&
+    node.type === 'string' &&
+    typeof node.maxLength === 'number' &&
+    node.maxLength >= FREE_TEXT_MIN_CAP &&
+    node.pattern === undefined &&
+    node.enum === undefined &&
+    node.const === undefined &&
+    node.format === undefined
+  );
+}
+
+function setPointer(obj: unknown, pointer: string, value: unknown): void {
+  const keys = pointer
+    .replace(/^\//, '')
+    .split('/')
+    .map((k) => k.replace(/~1/g, '/').replace(/~0/g, '~'));
+  let cur = obj as Record<string, unknown>;
+  for (const k of keys.slice(0, -1)) cur = cur[k] as Record<string, unknown>;
+  cur[keys.at(-1)!] = value;
+}
+
+/** Cut `text` so that it plus the suffix fits in `cap`. */
+export function truncateAtCap(text: string, cap: number): string {
+  return `${text.slice(0, Math.max(0, cap - TRUNCATION_SUFFIX.length)).trimEnd()}${TRUNCATION_SUFFIX}`;
+}
+
+/**
+ * Length leniency: when the ONLY validation errors are `maxLength` on free-text string fields (type string, cap ≥
+ * 100, no pattern/enum/format), return the args with those values truncated at the cap (or, for the tool's
+ * `splitOverlong` fields, passed through uncut) instead of rejecting the call. Returns null when the args are valid
+ * or when any other error remains (the call is then rejected as before).
+ */
+export function lenientArgs(
+  tool: Pick<ToolDefinition, 'inputSchema' | 'splitOverlong'>,
+  args: Record<string, unknown>,
+): LenientArgs | null {
+  const fn = rawValidator(tool);
+  if (typeof fn === 'string' || fn(args)) return null;
+  const errors = [...(fn.errors ?? [])];
+  if (!errors.length || errors.some((e) => e.keyword !== 'maxLength')) return null;
+  const out = JSON.parse(JSON.stringify(args)) as Record<string, unknown>;
+  const check = JSON.parse(JSON.stringify(args)) as Record<string, unknown>;
+  const truncated: string[] = [];
+  const split: string[] = [];
+  for (const e of errors) {
+    const node = schemaAt(tool.inputSchema, e.schemaPath);
+    if (!isFreeText(node) || !e.instancePath) return null;
+    const cap = (e.params as { limit: number }).limit;
+    const value = getPointer(args, e.instancePath);
+    if (typeof value !== 'string') return null;
+    setPointer(check, e.instancePath, truncateAtCap(value, cap));
+    if (tool.splitOverlong?.includes(e.instancePath)) {
+      split.push(e.instancePath);
+    } else {
+      setPointer(out, e.instancePath, truncateAtCap(value, cap));
+      truncated.push(e.instancePath);
+    }
+  }
+  // Everything else must now validate (with split fields checked at their cap).
+  if (!fn(check)) return null;
+  return { args: out, truncated, split };
 }
 
 export type KnownRefs = Partial<Record<RefKind, Set<string>>>;
