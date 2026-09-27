@@ -208,3 +208,12 @@ Per run: Lambda and DynamoDB cost cents; LLM tokens are the real cost (roughly U
 | Logs show `knowledge search degraded` (stage `embed`/`rerank`, `AccessDeniedException`) | Enable model access for Cohere Embed v4 (EU profile) and Cohere Rerank 3.5 in eu-central-1 in the Bedrock console. Search still works (BM25 / without rerank) |
 | `Export … cannot be deleted as it is in use` when changing stacks | A cross-stack output changed. Deploy the consuming stack first or use `cdk deploy --all` (CDK orders them) |
 | No alarm/budget e-mails | Monitoring is off by default; deploy with `-c monitoring=true`, then confirm the SNS subscription e-mail |
+
+### Rerank quota (Cohere Rerank 3.5)
+
+On a new account, on-demand Cohere Rerank 3.5 in eu-central-1 is limited to **3 requests per minute**, and Service Quotas marks it not adjustable (Amazon Rerank 1.0 is 2/min). Retrieval therefore reranks **selectively**:
+- It skips when BM25 and the vector search agree on the top document.
+- It reuses cached results for repeated queries.
+- It spends at most `KB_RERANK_RPM` (default 3) per container through a token bucket that never waits. When the budget is spent, the search keeps the fused hybrid order.
+
+To lift the limit, open an AWS Support case (Service limit increase → Amazon Bedrock → eu-central-1 → "On-demand model inference requests per minute for Cohere Rerank 3.5"), then raise `KB_RERANK_RPM` and redeploy.

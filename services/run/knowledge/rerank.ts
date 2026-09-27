@@ -73,3 +73,50 @@ export function cohereReranker(opts: CohereRerankerOptions = {}): Reranker {
     },
   };
 }
+
+/**
+ * Per-container token bucket for the rerank quota (on-demand Cohere Rerank 3.5 is 3 requests/minute on a new account
+ * and not adjustable in Service Quotas). `tryTake()` never waits: when the bucket is empty the caller skips rerank and
+ * keeps the fused hybrid order, so a search is never slowed down or failed by the quota.
+ */
+export class RerankBudget {
+  private tokens: number;
+  private last: number;
+  constructor(
+    readonly perMinute: number,
+    private readonly now: () => number = Date.now,
+  ) {
+    this.tokens = perMinute;
+    this.last = now();
+  }
+  private refill(): void {
+    const t = this.now();
+    this.tokens = Math.min(this.perMinute, this.tokens + ((t - this.last) / 60_000) * this.perMinute);
+    this.last = t;
+  }
+  tryTake(): boolean {
+    if (this.perMinute <= 0) return true; // 0 = unlimited
+    this.refill();
+    if (this.tokens < 1) return false;
+    this.tokens -= 1;
+    return true;
+  }
+  /** Bedrock throttled us anyway (other containers share the account quota): back off for a full window. */
+  drain(): void {
+    this.tokens = Math.min(this.tokens, 0);
+    this.last = this.now();
+  }
+  available(): number {
+    this.refill();
+    return this.tokens;
+  }
+}
+
+/** True for Bedrock throttling errors. */
+export function isThrottle(err: unknown): boolean {
+  const e = err as { name?: string; message?: string } | null;
+  return (
+    !!e &&
+    (e.name === 'ThrottlingException' || /throttl|too many requests|rate exceeded/i.test(e.message ?? ''))
+  );
+}

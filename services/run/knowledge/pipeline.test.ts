@@ -150,7 +150,8 @@ describe('hybrid retrieval pipeline', () => {
     const rr = reverseReranker();
     const idx = indexFromFiles(files(), {
       embedder: fakeEmbedder(),
-      vectorSearch: fakeVectors(['airbus-x#1', 'asrs-2#1']),
+      // Dense top differs from the BM25 top, so selective rerank applies (agreement would skip it).
+      vectorSearch: fakeVectors(['asrs-2#1', 'airbus-x#1']),
       reranker: rr,
       env: ENV,
     });

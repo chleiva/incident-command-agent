@@ -46,7 +46,14 @@ import {
   type VectorStoreKind,
 } from '@ica/kb';
 import type { KnowledgeHit, KnowledgeIndex, KnowledgeQuery } from '@ica/schema';
-import { RERANK_MODEL, RERANK_REGION, cohereReranker, type Reranker } from './rerank';
+import {
+  RERANK_MODEL,
+  RERANK_REGION,
+  RerankBudget,
+  cohereReranker,
+  isThrottle,
+  type Reranker,
+} from './rerank';
 import {
   floatScorer,
   int8Scorer,
@@ -58,7 +65,7 @@ import {
 
 export type { Reranker } from './rerank';
 export type { VectorSearch, VectorHit, VectorQuery } from './vectors';
-export { cohereReranker } from './rerank';
+export { RerankBudget, cohereReranker } from './rerank';
 export { memoryVectorSearch, s3VectorSearch } from './vectors';
 
 export interface QueryEmbedder {
@@ -86,6 +93,8 @@ export interface LoadKnowledgeOptions {
   vectorSearch?: VectorSearch | null;
   /** Inject a reranker (tests), or `null` to disable reranking. */
   reranker?: Reranker | null;
+  /** Inject the rerank rate budget (tests). Default: `KB_RERANK_RPM` per minute (3), shared per container. */
+  rerankBudget?: RerankBudget;
   /** Where the local model files live / are cached (Lambda: a /tmp path or files synced from S3). */
   modelCacheDir?: string;
   /** Environment for backend selection (default process.env). */
@@ -99,6 +108,8 @@ export type RetrievalStage = 'bm25' | 'hybrid' | 'hybrid+rerank';
 export interface SearchTrace {
   mode: RetrievalStage;
   fallbacks: { stage: 'embed' | 'vector' | 'rerank'; error: string }[];
+  /** What happened at the rerank step (selective rerank under the per-minute quota). */
+  rerank?: 'applied' | 'cached' | 'skipped_agreement' | 'skipped_budget' | 'failed';
   ms: number;
 }
 
@@ -145,6 +156,8 @@ export const RERANK_CANDIDATES = 30;
 /** Characters of header + text sent to the reranker per candidate. */
 const RERANK_DOC_CHARS = 4000;
 const QUERY_CACHE_SIZE = 256;
+const RERANK_CACHE_SIZE = 256;
+let sharedRerankBudget: RerankBudget | undefined;
 
 const cache = new Map<string, Promise<LoadedKnowledgeIndex>>();
 const log = (level: 'info' | 'warn' | 'error', msg: string, extra: Record<string, unknown> = {}) =>
@@ -161,6 +174,8 @@ export interface KnowledgeRuntimeConfig {
   rerank: boolean;
   rerankModel: string;
   rerankRegion: string;
+  /** Rerank requests per minute this container may spend (0 = unlimited). */
+  rerankRpm: number;
   timeouts: { embedMs: number; vectorMs: number; rerankMs: number };
 }
 
@@ -188,6 +203,7 @@ export function knowledgeRuntimeConfig(
     rerank: rerankEnv ? rerankEnv === 'on' || rerankEnv === 'true' : store === 's3vectors' && !bm25Only,
     rerankModel: env.KB_RERANK_MODEL ?? RERANK_MODEL,
     rerankRegion: env.KB_RERANK_REGION ?? RERANK_REGION,
+    rerankRpm: num(env.KB_RERANK_RPM, 3),
     timeouts: {
       embedMs: num(env.KB_EMBED_TIMEOUT_MS, 1500),
       vectorMs: num(env.KB_VECTOR_TIMEOUT_MS, 1500),
@@ -288,7 +304,7 @@ class Lru<V> {
 
 export interface IndexFromFilesOptions extends Pick<
   LoadKnowledgeOptions,
-  'embeddings' | 'embedder' | 'modelCacheDir' | 'vectorSearch' | 'reranker' | 'env'
+  'embeddings' | 'embedder' | 'modelCacheDir' | 'vectorSearch' | 'reranker' | 'rerankBudget' | 'env'
 > {
   /** Lazily load float vectors (the `vectors/` files of a cohere build) for in-memory search. */
   loadFloatVectors?: () => Float32Array[] | null;
@@ -398,6 +414,14 @@ export function indexFromFiles(files: Files, opts: IndexFromFilesOptions = {}): 
         ? cohereReranker({ model: cfg.rerankModel, region: cfg.rerankRegion })
         : null;
 
+  // An injected reranker (tests) gets an unlimited budget unless one is injected too; the real Bedrock reranker
+  // shares one per-container budget sized to the account quota.
+  const rerankBudget =
+    opts.rerankBudget ??
+    (opts.reranker !== undefined
+      ? new RerankBudget(0)
+      : (sharedRerankBudget ??= new RerankBudget(cfg.rerankRpm)));
+  const rerankCache = new Map<string, { index: number; score: number }[]>();
   let trace: SearchTrace | null = null;
 
   return {
@@ -418,6 +442,8 @@ export function indexFromFiles(files: Files, opts: IndexFromFilesOptions = {}): 
         .sort((a, b) => b[1] - a[1] || a[0] - b[0])
         .slice(0, CANDIDATES);
       const ranks = new Map<number, number>();
+      const lexTopDoc = lexical.length ? docIdOf(chunks[lexical[0][0]]) : undefined;
+      let denseTopDoc: string | undefined;
       lexical.forEach(([doc], r) => ranks.set(doc, (ranks.get(doc) ?? 0) + 1 / (RRF_K + r + 1)));
 
       // (b) dense: embed → vector search; any failure falls back to BM25 only.
@@ -438,6 +464,7 @@ export function indexFromFiles(files: Files, opts: IndexFromFilesOptions = {}): 
               .map((h) => byId.get(h.key))
               .filter((i): i is number => i !== undefined && allowed(i, filter));
             dense.forEach((doc, r) => ranks.set(doc, (ranks.get(doc) ?? 0) + 1 / (RRF_K + r + 1)));
+            if (dense.length) denseTopDoc = docIdOf(chunks[dense[0]]);
             t.mode = 'hybrid';
           } catch (err) {
             t.fallbacks.push({ stage: 'vector', error: String(err) });
@@ -461,24 +488,44 @@ export function indexFromFiles(files: Files, opts: IndexFromFilesOptions = {}): 
       }));
       if (reranker && collapsed.length > 1) {
         const pool = ordered.slice(0, RERANK_CANDIDATES);
-        try {
-          const res = await withTimeout(cfg.timeouts.rerankMs, (signal) =>
-            reranker.rerank(
-              q.query,
-              pool.map((p) => indexText(chunks[p.i]).slice(0, RERANK_DOC_CHARS)),
-              Math.min(k, pool.length),
-              signal,
-            ),
-          );
-          if (!res.length) throw new Error('empty rerank result');
+        const apply = (res: { index: number; score: number }[]) => {
           const used = new Set(res.map((r) => r.index));
           ordered = [
             ...res.map((r) => ({ ...pool[r.index], rerankScore: Math.round(r.score * 1e6) / 1e6 })),
             ...pool.filter((_, j) => !used.has(j)),
           ];
           t.mode = t.mode === 'hybrid' ? 'hybrid+rerank' : t.mode;
-        } catch (err) {
-          t.fallbacks.push({ stage: 'rerank', error: String(err) });
+        };
+        const cacheKey = `${q.query}\u0000${pool.map((p) => chunks[p.i].chunkId).join(',')}`;
+        const cached = rerankCache.get(cacheKey);
+        if (lexTopDoc !== undefined && lexTopDoc === denseTopDoc) {
+          // Keyword and vector retrieval agree on the best document: a clear-cut query, keep the fused order.
+          t.rerank = 'skipped_agreement';
+        } else if (cached) {
+          apply(cached);
+          t.rerank = 'cached';
+        } else if (!rerankBudget.tryTake()) {
+          t.rerank = 'skipped_budget';
+        } else {
+          try {
+            const res = await withTimeout(cfg.timeouts.rerankMs, (signal) =>
+              reranker.rerank(
+                q.query,
+                pool.map((p) => indexText(chunks[p.i]).slice(0, RERANK_DOC_CHARS)),
+                Math.min(k, pool.length),
+                signal,
+              ),
+            );
+            if (!res.length) throw new Error('empty rerank result');
+            apply(res);
+            t.rerank = 'applied';
+            if (rerankCache.size >= RERANK_CACHE_SIZE) rerankCache.delete(rerankCache.keys().next().value!);
+            rerankCache.set(cacheKey, res);
+          } catch (err) {
+            if (isThrottle(err)) rerankBudget.drain();
+            t.rerank = 'failed';
+            t.fallbacks.push({ stage: 'rerank', error: String(err) });
+          }
         }
       }
 
