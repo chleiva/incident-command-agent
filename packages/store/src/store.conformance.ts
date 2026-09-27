@@ -345,6 +345,22 @@ export function runStoreConformance(name: string, factory: () => Store | Promise
       expect(await store.getAuthorDraft('missing-draft')).toBeNull();
     });
 
+    it('claimResume claims each attempt exactly once, in increasing order', async () => {
+      const store = await factory();
+      const meta = makeRunMeta();
+      await store.createRun(meta);
+      const claims = await Promise.all([
+        store.claimResume!(meta.runId, 1),
+        store.claimResume!(meta.runId, 1),
+      ]);
+      expect(claims.filter(Boolean)).toHaveLength(1);
+      expect((await store.getRun(meta.runId))!.resumeAttempt).toBe(1);
+      expect(await store.claimResume!(meta.runId, 1)).toBe(false);
+      expect(await store.claimResume!(meta.runId, 2)).toBe(true);
+      expect(await store.claimResume!(meta.runId, 1)).toBe(false);
+      expect((await store.getRun(meta.runId))!.resumeAttempt).toBe(2);
+    });
+
     it('keeps the additive RunMeta.preparing flag through create and update', async () => {
       const store = await factory();
       const m = makeRunMeta({ preparing: true });

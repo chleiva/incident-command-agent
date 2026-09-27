@@ -192,7 +192,12 @@ export function TimeScrubber({
           <div className="num flex justify-between text-micro text-fg-subtle">
             <span>{clock(0)}Z</span>
             <span className="flex gap-3">
-              {MARKER_LEGEND.map(([k, label]) => (
+              {[
+                ...MARKER_LEGEND,
+                ...(markers.some((m) => m.kind === 'recovery')
+                  ? ([['recovery', 'Recovery']] as typeof MARKER_LEGEND)
+                  : []),
+              ].map(([k, label]) => (
                 <span key={k} className="hidden items-center gap-1 2xl:inline-flex">
                   <MarkerGlyph kind={k} /> {label}
                 </span>

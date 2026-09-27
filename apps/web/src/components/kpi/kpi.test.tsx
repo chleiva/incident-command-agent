@@ -8,7 +8,14 @@ import { describe, expect, it } from 'vitest';
 import { kpiAtMinute, kpiSeries } from '../../lib/derive';
 import { createRunStore } from '../../store/runStore';
 import { S01, viewAt } from '../../test/fixtureViews';
-import { tileModels } from './kpiModel';
+import type { KpiSnapshot, RunProjection } from '@ica/schema/browser';
+import {
+  AUTO_APPROVED_NOT_HUMAN,
+  autoApprovedCount,
+  autoDecidedApprovals,
+  safetyChecks,
+  tileModels,
+} from './kpiModel';
 import { KpiStrip } from './KpiStrip';
 import { WhyDrawer } from './WhyDrawer';
 
@@ -36,6 +43,95 @@ describe('KPI strip', () => {
     expect(screen.getByRole('status', { name: 'Loading indicators' })).toBeInTheDocument();
     rerender(<KpiStrip kpis={null} series={[]} />);
     expect(screen.getAllByText('Waiting for the first snapshot')).toHaveLength(6);
+  });
+});
+
+describe('safety gate: a software decision is never shown as a human one', () => {
+  const { view } = viewAt(S01.agent, 31);
+  const k = view.kpis!;
+  const gate = (kpis: KpiSnapshot, ctx?: { autoApproved?: number }) =>
+    safetyChecks(kpis, ctx).find((c) => c.key === 'decisionsFirst')!;
+  const simApproved = (p: RunProjection): RunProjection => {
+    const [id, a] = Object.entries(p.approvals).find(([, x]) => x.decision)!;
+    return {
+      ...p,
+      approvals: {
+        ...p.approvals,
+        [id]: {
+          ...a,
+          decision: { ...a.decision!, decidedBy: { kind: 'policy', policy: 'simulation-auto' } },
+        },
+      },
+    } as RunProjection;
+  };
+
+  it('only human decisions: ✓ as before', () => {
+    expect(autoDecidedApprovals(view)).toBe(0);
+    expect(gate(k, { autoApproved: autoDecidedApprovals(view) }).status).toBe(
+      k.safety.value.humanDecisionsBeforeDependentActions > 0 ? 'pass' : 'pending',
+    );
+  });
+
+  it('derived from approval.decision (decidedBy.kind !== human): ⚠ "Auto-approved — not a human decision"', () => {
+    const auto = autoDecidedApprovals(simApproved(view));
+    expect(auto).toBe(1);
+    const c = gate(k, { autoApproved: auto });
+    expect(c.status).toBe('warning');
+    expect(c.short).toBe(AUTO_APPROVED_NOT_HUMAN);
+    expect(AUTO_APPROVED_NOT_HUMAN).toBe('Auto-approved — not a human decision');
+    expect(c.note).toContain('1 approval-gated action was approved by the simulation or a policy');
+  });
+
+  it('prefers the backend field (safety.autoApprovedActions) when present', () => {
+    const withField = {
+      ...k,
+      safety: { ...k.safety, value: { ...k.safety.value, autoApprovedActions: 2 } },
+    } as KpiSnapshot;
+    expect(autoApprovedCount(withField, { autoApproved: 0 })).toBe(2);
+    expect(gate(withField).status).toBe('warning');
+    const zero = {
+      ...k,
+      safety: { ...k.safety, value: { ...k.safety.value, autoApprovedActions: 0 } },
+    } as KpiSnapshot;
+    expect(gate(zero, { autoApproved: 5 }).status).not.toBe('warning');
+  });
+
+  it('eval/baseline policies count too; a rejection by policy does not (nothing went ahead)', () => {
+    const p = simApproved(view);
+    const [id, a] = Object.entries(p.approvals).find(([, x]) => x.decision)!;
+    const rejected = {
+      ...p,
+      approvals: { ...p.approvals, [id]: { ...a, decision: { ...a.decision!, decision: 'reject' } } },
+    } as RunProjection;
+    expect(autoDecidedApprovals(rejected)).toBe(0);
+  });
+
+  it('the tile shows ⚠ and the text, the summary counts it, and the tile is amber', () => {
+    render(<KpiStrip kpis={k} series={[]} safety={{ autoApproved: 1 }} />);
+    const li = screen.getByTestId('kpi-value-safety').querySelector('[data-check="decisionsFirst"]')!;
+    expect(li.getAttribute('data-status')).toBe('warning');
+    expect(li.textContent).toContain('⚠');
+    expect(li.textContent).toContain('Auto-approved — not a human decision');
+    expect(li.textContent).not.toContain('✓');
+    const safety = tileModels(k, null, { autoApproved: 1 }).find((m) => m.key === 'safety')!;
+    expect(safety.display).toContain('1 auto-approved');
+    expect(safety.tone).not.toBe('neutral');
+  });
+
+  it('the why-drawer lists the checks with the note', () => {
+    render(
+      <WhyDrawer
+        tile="safety"
+        kpis={k}
+        events={[]}
+        safety={{ autoApproved: 1 }}
+        onClose={() => {}}
+        onJump={() => {}}
+      />,
+    );
+    const item = screen.getByTestId('why-checks').querySelector('[data-check="decisionsFirst"]')!;
+    expect(item.getAttribute('data-status')).toBe('warning');
+    expect(item.textContent).toContain('Auto-approved — not a human decision');
   });
 });
 

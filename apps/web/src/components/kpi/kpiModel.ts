@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** The six KPI tiles: value, thresholds (colour only when crossed), ghost delta and "why this number". */
-import type { Kpi, KpiSnapshot } from '@ica/schema/browser';
+import type { Kpi, KpiSnapshot, RunProjection } from '@ica/schema/browser';
 import type { Tone } from '../ui/primitives';
 import {
   formatClockDuration,
@@ -17,12 +17,51 @@ import {
 export const KPI_TILES = ['clock', 'countdown', 'cost', 'satisfaction', 'compliance', 'safety'] as const;
 export type KpiTileKey = (typeof KPI_TILES)[number];
 
-/** A check-status line (compliance and safety render as ✓ / ✗ / pending lists, not numeric scores). */
+/**
+ * A check-status line (compliance and safety render as ✓ / ✗ / ⚠ / pending lists, not numeric scores). `warning`
+ * (⚠) is a gate that held only because software decided it (auto-approved in the simulation, or a policy): it is
+ * never shown as met.
+ */
 export interface CheckItem {
   key: string;
   label: string;
-  status: 'pass' | 'fail' | 'pending';
+  status: 'pass' | 'fail' | 'warning' | 'pending';
   note?: string;
+  /** Warning: the short text shown in place of the label (the label stays in the tooltip and drawer). */
+  short?: string;
+}
+
+/** The safety gate's warning text when any gated action was decided by software, not a person. */
+export const AUTO_APPROVED_NOT_HUMAN = 'Auto-approved — not a human decision';
+
+/** Extra context for the safety gate that the snapshot may not carry (derived from the run's approvals). */
+export interface SafetyContext {
+  /** Approval-gated actions approved by simulation/policy (not a person), derived from `approval.decision`. */
+  autoApproved?: number;
+}
+
+/**
+ * Approval-gated actions that went ahead on a software decision (simulation auto-approve, eval or baseline policy):
+ * approved or edited approvals whose `decidedBy.kind` is not `human`.
+ */
+export function autoDecidedApprovals(p: Pick<RunProjection, 'approvals'>): number {
+  return Object.values(p.approvals).filter(
+    (a) => a.decision && a.decision.decision !== 'reject' && a.decision.decidedBy.kind !== 'human',
+  ).length;
+}
+
+/**
+ * The auto-approved count: the backend's `safety.value.autoApprovedActions` (additive field) when present, else the
+ * count derived from the projection.
+ */
+export function autoApprovedCount(k: KpiSnapshot, ctx?: SafetyContext): number {
+  const v = k.safety.value as unknown as Record<string, unknown>;
+  const fromBackend = [
+    v.autoApprovedActions,
+    v.autoApprovedDecisions,
+    k.safety.inputs.autoApprovedActions,
+  ].find((x): x is number => typeof x === 'number' && Number.isFinite(x));
+  return fromBackend ?? ctx?.autoApproved ?? 0;
 }
 
 export interface TileModel {
@@ -78,9 +117,10 @@ export function complianceChecks(k: KpiSnapshot): CheckItem[] {
 }
 
 /** Safety gates as check status. Presenter-triggered attempts are counted like any other (and named). */
-export function safetyChecks(k: KpiSnapshot): CheckItem[] {
+export function safetyChecks(k: KpiSnapshot, ctx?: SafetyContext): CheckItem[] {
   const s = k.safety.value;
   const presenter = Number(k.safety.inputs.presenterTriggeredAttempts ?? 0);
+  const auto = autoApprovedCount(k, ctx);
   return [
     {
       key: 'noForbiddenAttempts',
@@ -98,9 +138,17 @@ export function safetyChecks(k: KpiSnapshot): CheckItem[] {
       status:
         s.dependentActionsWithoutDecision > 0
           ? 'fail'
-          : s.humanDecisionsBeforeDependentActions > 0
-            ? 'pass'
-            : 'pending',
+          : auto > 0
+            ? 'warning'
+            : s.humanDecisionsBeforeDependentActions > 0
+              ? 'pass'
+              : 'pending',
+      ...(s.dependentActionsWithoutDecision === 0 && auto > 0
+        ? {
+            short: AUTO_APPROVED_NOT_HUMAN,
+            note: `${AUTO_APPROVED_NOT_HUMAN}: ${auto} approval-gated action${auto === 1 ? ' was' : 's were'} approved by the simulation or a policy, not a person`,
+          }
+        : {}),
     },
     {
       key: 'engineeringDecision',
@@ -115,6 +163,7 @@ export function checkSummary(items: CheckItem[]): string {
   const parts = [
     `${n('pass')} met`,
     n('fail') ? `${n('fail')} not met` : '',
+    n('warning') ? `${n('warning')} auto-approved` : '',
     n('pending') ? `${n('pending')} pending` : '',
   ];
   return parts.filter(Boolean).join(', ');
@@ -138,10 +187,17 @@ export function compliancePassed(k: KpiSnapshot): { passed: number; applicable: 
 
 const primaryDelay = (k: KpiSnapshot) => Number(k.delayCostEur.inputs.primaryMin ?? 180 - k.minutesTo3h);
 
-export function tileModels(k: KpiSnapshot, base: KpiSnapshot | null): TileModel[] {
+export function tileModels(
+  k: KpiSnapshot,
+  base: KpiSnapshot | null,
+  ctx?: SafetyContext,
+  baseCtx?: SafetyContext,
+): TileModel[] {
   const d = (a: number, b: number) => a - b;
   const c = compliancePassed(k);
   const s = k.safety.value;
+  const safety = safetyChecks(k, ctx);
+  const auto = autoApprovedCount(k, ctx);
   return [
     {
       key: 'clock',
@@ -259,12 +315,16 @@ export function tileModels(k: KpiSnapshot, base: KpiSnapshot | null): TileModel[
       key: 'safety',
       label: 'Safety gates',
       value: s.forbiddenAttempts,
-      checks: safetyChecks(k),
-      display: checkSummary(safetyChecks(k)),
+      checks: safety,
+      display: checkSummary(safety),
       sub: 'check status',
       tone:
-        s.dependentActionsWithoutDecision > 0 ? 'critical' : s.forbiddenAttempts > 0 ? 'warning' : 'neutral',
-      ghost: base ? `baseline: ${checkSummary(safetyChecks(base))}` : undefined,
+        s.dependentActionsWithoutDecision > 0
+          ? 'critical'
+          : s.forbiddenAttempts > 0 || auto > 0
+            ? 'warning'
+            : 'neutral',
+      ghost: base ? `baseline: ${checkSummary(safetyChecks(base, baseCtx))}` : undefined,
       series: (x) => x.safety.value.humanDecisionsBeforeDependentActions,
       format: (n) => formatInt(n),
       why: (x) => ({
@@ -278,6 +338,10 @@ export function tileModels(k: KpiSnapshot, base: KpiSnapshot | null): TileModel[
             formatInt(x.safety.value.humanDecisionsBeforeDependentActions),
           ],
           ['Dependent actions without a decision', formatInt(x.safety.value.dependentActionsWithoutDecision)],
+          [
+            'Auto-approved (simulation or policy), not a person',
+            formatInt(autoApprovedCount(x, x === k ? ctx : undefined)),
+          ],
           [
             'Of the forbidden attempts, presenter-triggered demonstrations',
             formatInt(Number(x.safety.inputs.presenterTriggeredAttempts ?? 0)),

@@ -16,6 +16,7 @@ import { useRunActions } from '../app/actions';
 import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
 import { useLiveMinute } from '../app/useLiveMinute';
+import { useSpaceToggle } from '../app/useSpaceToggle';
 import { useRun, useRunConnection, useRunStoreInstance } from '../app/useRunConnection';
 import { useSharedRunStore } from '../store/sharedRuns';
 import { AgentStream } from '../components/agents/AgentStream';
@@ -27,7 +28,7 @@ import { CommsLog } from '../components/passenger/CommsLog';
 import { CohortBoard } from '../components/passenger/CohortBoard';
 import { PhoneMock } from '../components/passenger/PhoneMock';
 import { KpiStrip } from '../components/kpi/KpiStrip';
-import type { KpiTileKey } from '../components/kpi/kpiModel';
+import { autoDecidedApprovals, type KpiTileKey } from '../components/kpi/kpiModel';
 import { WhyDrawer } from '../components/kpi/WhyDrawer';
 import { Narrator } from '../components/narrator/Narrator';
 import { NetworkMap } from '../components/network/NetworkMap';
@@ -35,6 +36,8 @@ import { RotationGantt } from '../components/network/RotationGantt';
 import { SystemTabs } from '../components/inspector/SystemTabs';
 import type { PaletteCommand } from '../components/presenter/CommandPalette';
 import { RunEndedCard } from '../components/RunEndedCard';
+import { RunFailedBanner, RunRecoveryBanner } from '../components/RunHealthBanner';
+import { recoveryState, runFailure, runOutcome } from '../lib/runHealth';
 import { ScenarioAuthoringNotice } from '../components/ScenarioAuthoringNotice';
 import { TimeScrubber } from '../components/timeline/TimeScrubber';
 import { Badge, Button, cx } from '../components/ui/primitives';
@@ -60,9 +63,6 @@ import { ArrivalPanel } from '../components/ground/ArrivalPanel';
 import { latestCaption } from '../lib/narrator';
 import { usePalette } from '../store/palette';
 import { useUi } from '../store/ui';
-
-const INTERACTIVE =
-  'button, a, input, textarea, select, [role="slider"], [role="radio"], [role="tab"], [contenteditable="true"]';
 
 export default function Cockpit() {
   const { runId = '' } = useParams();
@@ -151,6 +151,8 @@ export default function Cockpit() {
   const recent = useMemo(() => recentMutations(events), [events]);
   const starts = useMemo(() => travelStarts(events), [events]);
   const caption = useMemo(() => latestCaption(events), [events]);
+  // Gated actions approved by the simulation or a policy (the safety gate shows ⚠, not ✓).
+  const safetyCtx = useMemo(() => ({ autoApproved: autoDecidedApprovals(view) }), [view]);
 
   const flights = Object.values(view.systems.occ.flights);
   const aircraft = Object.values(view.systems.mne.aircraft);
@@ -223,7 +225,20 @@ export default function Cockpit() {
     for (const id of Object.keys(optimistic)) if (head.approvals[id]?.decision) setOptimistic(id, null);
   }, [head, optimistic, setOptimistic]);
 
-  const ended = live && (head.meta.status === 'completed' || head.meta.status === 'failed');
+  const ended =
+    live &&
+    (head.meta.status === 'completed' || head.meta.status === 'failed' || head.meta.status === 'aborted');
+  // Run health: a final failure (calm banner + Start again) and self-recovery (additive events, optional).
+  const failure = useMemo(() => runFailure(head, allEvents), [head, allEvents, version]);
+  const recovery = useMemo(() => recoveryState(allEvents), [allEvents, version]);
+  const [recoveryDismissed, setRecoveryDismissed] = useState<number | null>(null);
+  const outcome = runOutcome(head.meta);
+  const restart = () =>
+    head.meta.scenarioId &&
+    void actions.start(head.meta.scenarioId, {
+      withBaseline: !!baselineRunId,
+      speed: head.meta.speed || 6,
+    });
   const say = useUi((s) => s.announce);
   useEffect(() => {
     if (ended)
@@ -294,18 +309,13 @@ export default function Cockpit() {
         e.preventDefault();
         const cur = useUi.getState().expandedZone;
         setExpanded(cur === zone ? null : zone);
-      } else if (
-        e.key === ' ' &&
-        !target.closest(INTERACTIVE) &&
-        !target.closest('[data-approval], [data-decision-popup]')
-      ) {
-        e.preventDefault();
-        toggleWorld();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
+  // Space pauses/resumes the world clock (also while the decision popup card has focus).
+  useSpaceToggle(toggleWorld);
 
   // ------------------------------------------------------------------------------------------ palette
   const setContext = usePalette((s) => s.setContext);
@@ -495,14 +505,14 @@ export default function Cockpit() {
           </span>
           <Badge
             tone={
-              head.meta.status === 'failed'
-                ? 'critical'
-                : head.meta.status === 'paused'
+              outcome.tone === 'good'
+                ? 'neutral'
+                : !failure && recovery?.status === 'recovering'
                   ? 'warning'
-                  : 'neutral'
+                  : outcome.tone
             }
           >
-            {head.meta.status}
+            {!failure && recovery?.status === 'recovering' ? 'recovering' : outcome.label}
             {head.meta.mode === 'baseline' ? ' · baseline' : ''}
           </Badge>
           <span className="num text-body text-fg-muted" aria-label="Scenario time (UTC)">
@@ -542,6 +552,14 @@ export default function Cockpit() {
           onDismiss={() => setAuthoringDismissed(authoring.seq)}
         />
       )}
+      {failure ? (
+        <RunFailedBanner failure={failure} onRestart={restart} restartDisabled={!head.meta.scenarioId} />
+      ) : (
+        recovery &&
+        recoveryDismissed !== recovery.seq && (
+          <RunRecoveryBanner recovery={recovery} onDismiss={() => setRecoveryDismissed(recovery.seq)} />
+        )
+      )}
       <div
         className={cx(
           'grid grid-cols-1 gap-2 p-2 xl:grid-cols-12 xl:grid-rows-[auto_minmax(0,1.3fr)_minmax(0,1fr)]',
@@ -561,6 +579,7 @@ export default function Cockpit() {
             status={zoneStatus}
             error={loadError}
             onOpen={setWhy}
+            safety={safetyCtx}
           />
         </div>
 
@@ -802,6 +821,7 @@ export default function Cockpit() {
         kpis={view.kpis}
         events={allEvents}
         startTime={startIso}
+        safety={safetyCtx}
         onClose={() => setWhy(null)}
         onJump={(seq) => {
           setPlaying(false);

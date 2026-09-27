@@ -41,6 +41,17 @@ import type { Registry } from './registry';
 import { IdCounter, deepClone, hash32, seededRng } from './util';
 
 export type StopReason = 'report' | 'horizon' | 'stopped';
+
+/** Id prefixes handed out by `ctx.ids` (seeded on resume so none is reused). */
+export const RESUME_ID_PREFIXES = [
+  'apr',
+  'tl',
+  'tc-demo',
+  'revision',
+  ...['orchestrator', 'maintenance', 'ground', 'flightops', 'passenger', 'record', 'author'].map(
+    (r) => `ar-${r}`,
+  ),
+];
 export type AbortReason = (typeof AGENT_ABORT_REASONS)[number];
 
 /** Why an agent (or the whole run) stopped early. `runLevel` breaches stop every agent. */
@@ -86,7 +97,15 @@ export interface RunContextOptions {
   rejectTools?: string[];
   signal?: AbortSignal;
   log?: (line: Record<string, unknown>) => void;
+  /** Resume: salt the seeded rng so a resumed run never repeats the ids/request ids of the first invocation. */
+  rngSalt?: string;
 }
+
+/** `abortDetail` when the run's AbortSignal stopped it (the handler's Lambda-timeout guard, or a caller). */
+export const RUN_SIGNAL_ABORT_DETAIL = 'run signal aborted';
+
+/** Consecutive failed appends (after the store's own retries) before the event log counts as unwritable. */
+export const LOG_UNWRITABLE_AFTER = 3;
 
 export class RunContext {
   readonly runId: string;
@@ -109,6 +128,11 @@ export class RunContext {
   readonly followUps: WorldScheduled[] = [];
 
   state: SystemState;
+  /**
+   * Mock-state version: +1 per applied mutation of any airline system (the incident `record` excluded). Read-only
+   * tool results are cached per agent run against it (see agent.ts).
+   */
+  stateVersion = 0;
   /** Scenario narrative as agents see it (neutralised when input screening flagged it). */
   narrative: string;
   totals: RunTotals;
@@ -127,6 +151,13 @@ export class RunContext {
   /** Background work the run waits for before it finishes (revisions after `approval.invalidated`). */
   private background = new Set<Promise<unknown>>();
   finishReason: StopReason | null = null;
+  /** `abortDetail` when the run's AbortSignal stopped it (the handler's Lambda-timeout guard, or a caller). */
+  RUN_SIGNAL_ABORT_DETAIL = 'run signal aborted';
+
+  /** Consecutive failed appends; at LOG_UNWRITABLE_AFTER the event log is unwritable and the run stops. */
+  private appendFailures = 0;
+  /** Set when the event log could not be written LOG_UNWRITABLE_AFTER times in a row (the only run-ending error). */
+  logUnwritable: string | null = null;
   abortReason: AbortReason | null = null;
   abortDetail = '';
   private unsubscribe?: () => void;
@@ -142,7 +173,7 @@ export class RunContext {
     this.llm = opts.deps.llm;
     this.limits = opts.deps.llm.limits;
     this.sim = new SimClock(opts.scenario.startSimTime, opts.speed ?? 6);
-    this.rng = seededRng(hash32(opts.runId));
+    this.rng = seededRng(hash32(opts.rngSalt ? `${opts.runId}:${opts.rngSalt}` : opts.runId));
     this.rejectTools = opts.rejectTools ?? [];
     this.knowledge = opts.deps.knowledge;
     this.startWallMs = this.clock.now();
@@ -164,8 +195,8 @@ export class RunContext {
       },
     });
     if (opts.signal) {
-      if (opts.signal.aborted) this.stop('stopped', 'aborted before start');
-      else opts.signal.addEventListener('abort', () => this.stop('stopped', 'run signal aborted'));
+      if (opts.signal.aborted) this.stop('stopped', RUN_SIGNAL_ABORT_DETAIL);
+      else opts.signal.addEventListener('abort', () => this.stop('stopped', RUN_SIGNAL_ABORT_DETAIL));
     }
     if (opts.deps.bus) {
       this.unsubscribe = opts.deps.bus.subscribe(this.runId, (evs) => {
@@ -270,7 +301,20 @@ export class RunContext {
    */
   append(drafts: EventDraft[], mutations: SystemMutation[] = []): Promise<RunEvent[]> {
     const run = this.chain.then(async () => {
-      const events = await this.deps.store.append(this.runId, drafts, mutations);
+      let events: RunEvent[];
+      try {
+        events = await this.deps.store.append(this.runId, drafts, mutations);
+      } catch (err) {
+        // The store already retried transient errors. A run of consecutive failures means the event log itself is
+        // unwritable: the only error that may end the run (it is then resumed from the log).
+        if (++this.appendFailures >= LOG_UNWRITABLE_AFTER && !this.logUnwritable) {
+          this.logUnwritable = `event log unwritable after ${this.appendFailures} failed appends: ${String((err as Error).message).slice(0, 300)}`;
+          this.log({ msg: 'event log unwritable', err: String((err as Error).message) });
+          this.stop('stopped', this.logUnwritable, 'error');
+        }
+        throw err;
+      }
+      this.appendFailures = 0;
       for (const m of mutations) this.applyMutation(m);
       for (const e of events) this.ingest(e);
       return events;
@@ -301,6 +345,7 @@ export class RunContext {
   }
 
   private applyMutation(m: SystemMutation): void {
+    if (m.system !== 'record') this.stateVersion++;
     const st = this.state as unknown as Record<string, Record<string, Record<string, unknown>>>;
     const sys = (st[m.system] ??= {});
     const ent = (sys[m.entity] ??= {});
@@ -310,6 +355,39 @@ export class RunContext {
 
   setInitialState(state: SystemState): void {
     this.state = deepClone(state);
+  }
+
+  /**
+   * Resume: take the event log of the interrupted invocation as already seen. Past approval decisions are
+   * recorded (a re-attached approval may already be decided); control and twist requests are NOT re-applied (they
+   * were handled before). The sim clock continues from the last event.
+   */
+  primeFromLog(events: RunEvent[]): void {
+    for (const e of events) {
+      if (this.seen.has(e.seq)) continue;
+      this.seen.add(e.seq);
+      this.events.push(e);
+      if (e.type === 'approval.decision' && !this.decisions.has(e.payload.approvalId))
+        this.decisions.set(e.payload.approvalId, {
+          decision: e.payload.decision,
+          editedArgs: e.payload.editedArgs,
+          selectedOptionId: e.payload.selectedOptionId,
+          reason: e.payload.reason,
+          decidedBy: e.payload.decidedBy,
+          seq: e.seq,
+        });
+    }
+    this.events.sort((a, b) => a.seq - b.seq);
+    const last = this.events.at(-1);
+    if (last) {
+      this.cursor = Math.max(this.cursor, last.seq);
+      this.sim.simMinute = Math.max(this.sim.simMinute, ...this.events.map((e) => e.simMinute));
+    }
+    const pauses = this.events.filter((e) => e.type === 'run.paused' || e.type === 'run.resumed');
+    this.sim.paused = pauses.at(-1)?.type === 'run.paused';
+    const kpi = this.events.findLast((e): e is RunEvent<'kpi.update'> => e.type === 'kpi.update');
+    if (kpi) this.latestKpis = kpi.payload;
+    this.ids.seedFrom(JSON.stringify(this.events), RESUME_ID_PREFIXES);
   }
 
   /** All events seen so far (own and external), in seq order. */

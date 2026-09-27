@@ -46,6 +46,7 @@ import {
   type VectorStoreKind,
 } from '@ica/kb';
 import type { KnowledgeHit, KnowledgeIndex, KnowledgeQuery } from '@ica/schema';
+import { withRetry } from '@ica/store';
 import {
   RERANK_MODEL,
   RERANK_REGION,
@@ -259,8 +260,11 @@ async function readS3(uri: string): Promise<Files | null> {
   await Promise.all(
     (Object.entries(INDEX_FILES) as [keyof typeof INDEX_FILES, string][]).map(async ([k, f]) => {
       try {
-        const res = await s3.send(
-          new GetObjectCommand({ Bucket: bucket, Key: prefix ? `${prefix.replace(/\/$/, '')}/${f}` : f }),
+        // Cold-start index load: transient S3 errors are retried (queries degrade to BM25 instead).
+        const res = await withRetry(() =>
+          s3.send(
+            new GetObjectCommand({ Bucket: bucket, Key: prefix ? `${prefix.replace(/\/$/, '')}/${f}` : f }),
+          ),
         );
         out[k] = new Uint8Array(await res.Body!.transformToByteArray());
       } catch (err) {

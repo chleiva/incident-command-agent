@@ -16,6 +16,7 @@ import { AuditView, AUDIT_NOTE } from '../components/audit/AuditView';
 import { RecentRunsTable, RunSelect, type FlightLookup } from '../components/audit/RunPicker';
 import type { LoadStatus } from '../components/ui/primitives';
 import { downloadBlob } from '../lib/evidencePdf';
+import { loadAllEvents, runLevelEvents, type RunLevelEvent } from '../lib/runHealth';
 import { useUi } from '../store/ui';
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -81,6 +82,29 @@ export default function Audit() {
     };
   }, [api, runId, attempt, setOpenRunId]);
 
+  // Run health for the header: the error message (RunMeta) and the run-level system events (failure, recovery,
+  // stop) from the event log. Best effort: the audit itself never waits for these.
+  const [health, setHealth] = useState<{ error: string | null; events: RunLevelEvent[] }>({
+    error: null,
+    events: [],
+  });
+  useEffect(() => {
+    if (!runId) return;
+    let live = true;
+    setHealth({ error: null, events: [] });
+    api.getRun(runId).then(
+      (m) => live && setHealth((h) => ({ ...h, error: m.error ?? null })),
+      () => undefined,
+    );
+    loadAllEvents((id, after) => api.listEvents(id, after), runId).then(
+      (events) => live && setHealth((h) => ({ ...h, events: runLevelEvents(events) })),
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [api, runId, attempt]);
+
   // One fetch per trace per page visit (the export reuses what the rows already loaded).
   const cache = useRef(new Map<string, Promise<LoadedTrace>>());
   useEffect(() => {
@@ -137,6 +161,8 @@ export default function Audit() {
             onExport={() => void onExport()}
             exportProgress={progress}
             picker={picker}
+            runError={health.error}
+            runEvents={health.events}
           />
         ) : (
           <div className="flex flex-col gap-3" data-testid="audit-view">

@@ -14,7 +14,15 @@
  *   at the ETA. A `busy` engineer becomes `available` at `availableFromMinute`.
  */
 import { getStation } from '@ica/kb';
-import type { Engineer, MockSystem, Scenario, SystemMutation, SystemState, SystemStateOf } from '@ica/schema';
+import {
+  respondingEngineer,
+  type Engineer,
+  type MockSystem,
+  type Scenario,
+  type SystemMutation,
+  type SystemState,
+  type SystemStateOf,
+} from '@ica/schema';
 import { routeDistanceKm } from '../pss/index';
 import { ceilTo, fail, minuteOf, randInt, updated, type Result } from '../util';
 
@@ -143,14 +151,25 @@ export function seedEngineers(scenario: Scenario): SystemStateOf<'engineers'> {
   return { engineers };
 }
 
-/** Page an engineer to `destination`: computes the travel plan and sets `paged`. */
+/** Engineers currently paged, travelling or on site (an active page). */
+export function activeEngineers(state: SystemState): Engineer[] {
+  return Object.values(state.engineers.engineers).filter(
+    (e) => e.status === 'paged' || e.status === 'travelling' || e.status === 'on_site',
+  );
+}
+
+/**
+ * Page an engineer to `destination`: computes the travel plan and sets `paged`. An ETA delay waiting for the next
+ * page (`pendingEtaDelayMin`, set by an engineer-ETA twist that fired before anyone was on the way) is added to this
+ * page's ETA and cleared.
+ */
 export function pageEngineer(
   state: SystemState,
   scenario: Scenario | undefined,
-  input: { engineerId: string; station: string },
+  input: { engineerId: string; station: string; reason?: string; workOrderId?: string },
   simMinute: number,
   rng: () => number,
-): Result<{ engineer: Engineer; plan: TravelPlan }> {
+): Result<{ engineer: Engineer; plan: TravelPlan; delayedByMin?: number }> {
   const e = state.engineers.engineers[input.engineerId];
   if (!e) return fail(`unknown engineer ${input.engineerId}`);
   if (e.status === 'busy')
@@ -161,13 +180,74 @@ export function pageEngineer(
     return fail(`${e.id} is already ${e.status}${e.destination ? ` to ${e.destination}` : ''}`);
   if (!getStation(input.station) && !scenario) return fail(`unknown station ${input.station}`);
   const plan = travelPlan(scenario, e.location, input.station, simMinute, rng);
+  const pending = Object.values(state.engineers.engineers).filter((x) => (x.pendingEtaDelayMin ?? 0) > 0);
+  const delay = pending.reduce((n, x) => n + (x.pendingEtaDelayMin ?? 0), 0);
+  const etaMinute = plan.etaMinute + delay;
   const m = updated('engineers', 'engineers', e.id, e, {
     status: 'paged',
     destination: input.station,
-    etaMinute: plan.etaMinute,
+    etaMinute,
     travelMode: plan.mode,
+    pagedAtMinute: Math.round(simMinute * 100) / 100,
+    pageReason: input.reason?.trim() || undefined,
+    workOrderId: input.workOrderId,
+    pendingEtaDelayMin: undefined,
   });
-  return { ok: true, value: { engineer: m.after as Engineer, plan }, mutations: [m] };
+  const clears = pending
+    .filter((x) => x.id !== e.id)
+    .map((x) => updated('engineers', 'engineers', x.id, x, { pendingEtaDelayMin: undefined }));
+  const finalPlan: TravelPlan = delay
+    ? { ...plan, etaMinute, detail: `${plan.detail}; held up ${delay} min (reported delay)` }
+    : plan;
+  return {
+    ok: true,
+    value: { engineer: m.after as Engineer, plan: finalPlan, ...(delay ? { delayedByMin: delay } : {}) },
+    mutations: [m, ...clears],
+  };
+}
+
+/**
+ * The engineer-ETA twist ("the engineer on the way is held up +N min"), resolved at apply time instead of against
+ * a fixed id: the named engineer when they are on the way, else THE responding engineer (assigned to a work order
+ * first). With nobody on the way yet the delay waits for the next page (`pendingEtaDelayMin`); with the engineer
+ * already on site it no longer applies. Every outcome returns a plain-language note: never a silent skip.
+ */
+export function delayEngineerEta(
+  state: SystemState,
+  namedId: string,
+  minutes: number,
+  simMinute: number,
+): { mutations: SystemMutation[]; note: string } | { error: string } {
+  const ahead = (e: Engineer | undefined): e is Engineer =>
+    !!e &&
+    (e.status === 'paged' || e.status === 'travelling') &&
+    typeof e.etaMinute === 'number' &&
+    e.etaMinute > simMinute;
+  const named = state.engineers.engineers[namedId];
+  const target = ahead(named) ? named : respondingEngineer(state, { statuses: ['paged', 'travelling'] });
+  if (ahead(target)) {
+    const eta = target.etaMinute!;
+    const m = updated('engineers', 'engineers', target.id, target, { etaMinute: eta + minutes });
+    return {
+      mutations: [m],
+      note: `Engineer ${target.name} (${target.id}) is held up: ETA minute ${Math.round(eta)} → ${Math.round(eta + minutes)}.`,
+    };
+  }
+  const onSite = respondingEngineer(state, { statuses: ['on_site'] });
+  if (onSite)
+    return {
+      mutations: [],
+      note: `The reported ${minutes}-minute engineer delay no longer applies: ${onSite.name} (${onSite.id}) is already on site.`,
+    };
+  const holder = named ?? Object.values(state.engineers.engineers)[0];
+  if (!holder) return { error: 'engineer delay: no engineers in this run' };
+  const m = updated('engineers', 'engineers', holder.id, holder, {
+    pendingEtaDelayMin: (holder.pendingEtaDelayMin ?? 0) + minutes,
+  });
+  return {
+    mutations: [m],
+    note: `No engineer is on the way yet: the next engineer paged will arrive ${minutes} min later than their normal travel time.`,
+  };
 }
 
 export function tickEngineers(state: SystemState, simMinute: number, _dtMin: number): SystemMutation[] {

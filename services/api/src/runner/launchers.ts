@@ -4,7 +4,14 @@
  */
 /** RunLauncher / AuthorInvoker implementations: Lambda invoke (AWS) and in-process (local dev server). */
 import { InvokeCommand, type LambdaClient } from '@aws-sdk/client-lambda';
-import type { AuthorResult, AuthoringRequest, ExecuteRunInput, RunDeps, Store } from '@ica/schema';
+import type {
+  AuthorResult,
+  AuthoringRequest,
+  ExecuteRunInput,
+  RunDeps,
+  RunResumeRequest,
+  Store,
+} from '@ica/schema';
 import { isNotImplemented, type AuthorInvoker, type RunLauncher } from '../http/deps';
 import { completeAuthorDraft } from '../http/drafts';
 import { errorFields, silentLogger, type Logger } from '../util/log';
@@ -83,7 +90,22 @@ export class InProcessRunLauncher implements RunLauncher {
     await fakeRun({ store: this.opts.store, runId, signal, stepMs: this.opts.fakeStepMs });
   }
 
-  private async run(runId: string, signal: AbortSignal, authoring?: AuthoringRequest): Promise<void> {
+  /** Self-recovery, locally: a resume is another in-process invocation of the same run (`{resume: {attempt}}`). */
+  private scheduleResume = async (req: RunResumeRequest): Promise<void> => {
+    const ctrl = new AbortController();
+    const key = `${req.runId}#resume-${req.attempt}`;
+    const done = this.run(req.runId, ctrl.signal, undefined, { attempt: req.attempt }).finally(() =>
+      this.running.delete(key),
+    );
+    this.running.set(key, { ctrl, done });
+  };
+
+  private async run(
+    runId: string,
+    signal: AbortSignal,
+    authoring?: AuthoringRequest,
+    resume?: { attempt: number },
+  ): Promise<void> {
     const mode = this.opts.mode ?? 'auto';
     const log = this.log.child({ runId });
     try {
@@ -91,9 +113,10 @@ export class InProcessRunLauncher implements RunLauncher {
       try {
         await this.opts.executeRun({
           runId,
-          deps: await this.opts.deps(),
+          deps: { ...(await this.opts.deps()), scheduleResume: this.scheduleResume },
           signal,
           ...(authoring ? { authoring } : {}),
+          ...(resume ? { resume } : {}),
         });
       } catch (err) {
         if (mode === 'auto' && isNotImplemented(err)) {

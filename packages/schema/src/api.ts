@@ -47,6 +47,8 @@ export const RunMetaSchema = Type.Object({
    * for it before loading the scenario, so both runs use the identical scenario.
    */
   preparing: Opt(Type.Boolean()),
+  /** Addition (self-recovery): the latest resume attempt claimed (`Store.claimResume`); absent = never resumed. */
+  resumeAttempt: Opt(Type.Integer({ minimum: 1 })),
 });
 export type RunMeta = Static<typeof RunMetaSchema>;
 

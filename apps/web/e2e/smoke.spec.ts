@@ -19,9 +19,10 @@ async function runCommand(page: Page, search: string, option: RegExp) {
   await expect(palette).toBeHidden();
 }
 
-// These flows decide by hand: turn the simulation's auto-approval off (the ⌘K setting, persisted per viewer).
+// These flows decide by hand: auto-approval is off by default (the ⌘K setting, persisted per viewer); made
+// explicit here so a stored preference can never turn it on.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove', 'off'));
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove.v2', 'off'));
 });
 
 test('start a run, approve a decision, scrub back in time', async ({ page }) => {

@@ -31,7 +31,9 @@ export type RowKind =
   | 'invalidated'
   | 'blocked'
   | 'stopped'
-  | 'report';
+  | 'report'
+  /** The run resumed after a system error (additive `run.resumed_after_error`); shown in the orchestrator column. */
+  | 'recovery';
 
 export type RowTier = 'executed' | 'proposed' | 'blocked';
 
@@ -44,8 +46,17 @@ export interface AgentRow {
   minute: number;
   role: AgentRole;
   agentRunId: string;
-  /** `iteration + 1` of the agent's turn (parallel calls in one turn share it). */
+  /** `iteration + 1` of the agent's turn within its agent run (parallel calls in one turn share it). */
   turn?: number;
+  /**
+   * The turn number shown (T1…Tn): continuous per column across re-briefs (several agent runs of one role), so the
+   * second brief's first turn follows the first brief's last turn.
+   */
+  columnTurn?: number;
+  /** Brief rows of the 2nd+ agent run of a role: the re-brief number (a divider row, "Re-brief 2 from …"). */
+  rebrief?: number;
+  /** Tool rows: later identical calls answered with this row's result (deduplicated/cached), not rows of their own. */
+  reused?: number;
   headline: string;
   tier?: RowTier;
   /** A tool result came back as an error (not a guardrail block). */
@@ -197,7 +208,7 @@ export function stopHeadline(a: P<'agent.aborted'>, limits?: Partial<RunLimits>)
     case 'stopped':
       return 'Stopped: the run was stopped';
     default: {
-      const prefix = 'Stopped: error — ';
+      const prefix = 'Stopped: system error — ';
       return fitHeadline(`${prefix}${clipText(a.detail || 'unknown', HEADLINE_MAX - prefix.length)}`);
     }
   }
@@ -208,6 +219,30 @@ export function waitingHeadline(tool: string): string {
 }
 
 export const THOUGHT_HEADLINE = 'Reasoned about next steps';
+
+export const RECOVERY_HEADLINE = 'Resumed after a system error — re-briefed from the record';
+
+/** A tool error that says the system could not record the action (a store failure, not the agent's mistake). */
+export function isRecordingFailure(preview: string | undefined): boolean {
+  return /could not (be )?record|couldn.t record|not recorded/i.test(preview ?? '');
+}
+
+/** The call is marked as answered from an earlier identical call (additive markers, read defensively). */
+function reuseMarker(p: Record<string, unknown>): { from?: string } | null {
+  const from = [p.deduplicatedFrom, p.cachedFrom, p.reusedFrom].find(
+    (x): x is string => typeof x === 'string' && !!x,
+  );
+  if (from) return { from };
+  return p.deduplicated === true || p.cached === true || p.reused === true ? {} : null;
+}
+
+const sameArgs = (a: unknown, b: unknown) => {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+};
 
 export function reportHeadline(report: AgentReportEvent): string {
   const n = report.openIssues?.length ?? 0;
@@ -235,6 +270,28 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
   /** Parent agentRunId → role → delegate rows not yet paired with a child's brief. */
   const openDelegations = new Map<string, Map<AgentRole, AgentRow[]>>();
   const pendingFlags = new Map<string, (P<'guardrail.flagged'> & { seq: number })[]>();
+  /** Deduplicated/cached calls folded into the row whose result they reused (no row of their own). */
+  const merged = new Map<string, AgentRow>();
+  const unpush = (row: AgentRow) => {
+    const i = allRows.indexOf(row);
+    if (i >= 0) allRows.splice(i, 1);
+    rowByKey.delete(row.key);
+    const runRows = runs.get(row.agentRunId)?.rows;
+    const j = runRows?.indexOf(row) ?? -1;
+    if (runRows && j >= 0) runRows.splice(j, 1);
+  };
+  const reuseSource = (
+    agentRunId: string,
+    tool: string,
+    args: unknown,
+    from?: string,
+  ): AgentRow | undefined => {
+    const byId = from ? (merged.get(from) ?? byCall.get(from)) : undefined;
+    if (byId) return byId;
+    return [...(runs.get(agentRunId)?.rows ?? [])]
+      .reverse()
+      .find((r) => r.call?.tool === tool && sameArgs(r.call.args, args) && rowByKey.has(r.key));
+  };
   const authoring: AuthoringStep[] = [];
   let limits: Partial<RunLimits> | undefined;
 
@@ -321,6 +378,14 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
         if (!e.agentRunId || !role) break;
         ensureRun(e.agentRunId, role, e.seq);
         const p = e.payload;
+        // A deduplicated/cached call (additive marker): a note on the original row, not a new row.
+        const marker = p.tool === 'delegate' ? null : reuseMarker(p as unknown as Record<string, unknown>);
+        const source = marker ? reuseSource(e.agentRunId, p.tool, p.args, marker.from) : undefined;
+        if (source) {
+          source.reused = (source.reused ?? 0) + 1;
+          merged.set(p.toolCallId, source);
+          break;
+        }
         const row: AgentRow = {
           key: `tc-${e.seq}`,
           kind: p.tier === 'propose' ? 'proposal' : 'tool',
@@ -345,13 +410,25 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
         break;
       }
       case 'agent.tool_result': {
+        if (merged.has(e.payload.toolCallId)) break;
         const row = byCall.get(e.payload.toolCallId);
         if (!row) break;
+        // An idempotent retry answered with an earlier call's result: fold it into that row.
+        const from = e.payload.deduplicatedFrom;
+        const original = from ? (merged.get(from) ?? byCall.get(from)) : undefined;
+        if (original && original !== row && row.kind === 'tool' && rowByKey.has(original.key)) {
+          original.reused = (original.reused ?? 0) + 1;
+          merged.set(e.payload.toolCallId, original);
+          unpush(row);
+          break;
+        }
         row.result = { ...e.payload, seq: e.seq };
         if (row.kind === 'blocked') break;
         const data = resultData(e.payload.result, e.payload.resultPreview);
         if (!e.payload.ok) {
           row.failed = true;
+          if (isRecordingFailure(e.payload.resultPreview) && row.call)
+            row.headline = fitHeadline(`Not recorded (system error): ${toolLabel(row.call.tool)}`);
           if (row.call?.tool === 'report' && !rowByKey.has(row.key)) {
             row.headline = 'Report sent back to the agent to fix';
             push(row);
@@ -513,8 +590,22 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
         });
         break;
       }
-      default:
+      default: {
+        // Self-recovery (additive event): the orchestrator picks up again from the record.
+        if ((e.type as string) !== 'run.resumed_after_error') break;
+        const orch = [...runs.values()].reverse().find((r) => r.role === 'orchestrator');
+        const agentRunId = e.agentRunId ?? orch?.agentRunId ?? 'recovery';
+        push({
+          key: `rc-${e.seq}`,
+          kind: 'recovery',
+          seq: e.seq,
+          minute: e.simMinute,
+          role: 'orchestrator',
+          agentRunId,
+          headline: fitHeadline(RECOVERY_HEADLINE),
+        });
         break;
+      }
     }
   }
   // Flags that never met a report stay visible on the agent's latest row.
@@ -540,7 +631,10 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
     if (!col.agentRunIds.includes(row.agentRunId)) col.agentRunIds.push(row.agentRunId);
     col.rows.push(row);
   }
-  for (const col of columnsByRole.values()) col.rows.sort((a, b) => a.seq - b.seq || rank(a) - rank(b));
+  for (const col of columnsByRole.values()) {
+    col.rows.sort((a, b) => a.seq - b.seq || rank(a) - rank(b));
+    numberTurns(col, runs);
+  }
   const columns = [...columnsByRole.values()]
     .sort((a, b) => a.firstSeq - b.firstSeq || ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role))
     .slice(0, 6);
@@ -559,6 +653,31 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
       : null;
 
   return { columns, author, rowByKey, runs };
+}
+
+/**
+ * Continuous turn numbers per column (T1…Tn across re-briefs) and the re-brief divider rows: the brief of the
+ * column's 2nd, 3rd… agent run reads "Re-brief 2 from Orchestrator".
+ */
+function numberTurns(col: AgentColumn, runs: Map<string, AgentRunInfo>): void {
+  // Each agent run continues after the previous runs' last turn (a single run keeps its own numbers, which match
+  // the Audit view's iteration + 1).
+  const offset = new Map<string, number>();
+  let total = 0;
+  for (const id of col.agentRunIds) {
+    offset.set(id, total);
+    total += Math.max(0, ...col.rows.filter((r) => r.agentRunId === id).map((r) => r.turn ?? 0));
+  }
+  for (const r of col.rows) {
+    if (r.turn !== undefined) r.columnTurn = (offset.get(r.agentRunId) ?? 0) + r.turn;
+    if (r.kind !== 'brief') continue;
+    const n = col.agentRunIds.indexOf(r.agentRunId) + 1;
+    if (n < 2) continue;
+    r.rebrief = n;
+    const parentId = runs.get(r.agentRunId)?.parentAgentRunId;
+    const parentRole = parentId ? runs.get(parentId)?.role : undefined;
+    r.headline = fitHeadline(`Re-brief ${n}${parentRole ? ` from ${roleShortName(parentRole)}` : ''}`);
+  }
 }
 
 /** Within one seq, a proposal comes before the wait it causes. */

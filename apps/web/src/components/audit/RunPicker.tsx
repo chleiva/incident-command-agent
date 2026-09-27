@@ -6,7 +6,23 @@
 import type { RunMeta } from '@ica/schema/browser';
 import { Link } from 'react-router-dom';
 import { flightOf } from '../../audit/audit';
+import { plainFailureReason, runOutcome } from '../../lib/runHealth';
 import { Badge, StateFrame, type LoadStatus } from '../ui/primitives';
+
+/** Status (never "completed" for a failed or aborted run) and, for a failure, the plain reason (technical on hover). */
+export function RunStatusCell({ run }: { run: Pick<RunMeta, 'status' | 'error'> }) {
+  const o = runOutcome({ status: run.status });
+  return (
+    <span className="flex flex-col items-start gap-0.5" data-run-status={o.kind}>
+      <Badge tone={o.tone === 'good' ? 'neutral' : o.tone}>{o.label}</Badge>
+      {o.kind === 'failed' && (
+        <span className="text-micro text-fg-muted" title={run.error ?? undefined} data-run-reason>
+          {plainFailureReason(run.error)}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export function runStarted(iso: string): string {
   const d = new Date(iso);
@@ -111,7 +127,7 @@ export function RecentRunsTable({
                 <Badge>{r.mode}</Badge>
               </td>
               <td className="px-2 py-1">
-                <Badge tone={r.status === 'failed' ? 'critical' : 'neutral'}>{r.status}</Badge>
+                <RunStatusCell run={r} />
               </td>
             </tr>
           ))}

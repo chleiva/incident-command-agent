@@ -282,13 +282,19 @@ export interface RunDeps {
   /**
    * Addition: the simulation safety net for the `human` policy. An approval still pending after this much REAL
    * (wall-clock) time is approved by `{kind:'policy', policy:'simulation-auto'}` through the conditional decide path
-   * (never twice). Absent = `DEFAULT_SIM_AUTO_APPROVE_AFTER_MS`; 0 = off. Not applied to baseline or eval-auto.
+   * (never twice). Absent = `DEFAULT_SIM_AUTO_APPROVE_AFTER_MS` (0 = OFF since the demo review: agent runs wait
+   * for a person); > 0 turns it on. Not applied to baseline or eval-auto (they decide by policy immediately).
    */
   simAutoApproveAfterMs?: number;
   /** Addition: secrets for provider keys (Lambda: Secrets Manager; local: env). */
   secrets?: SecretStore;
   /** Addition: local event bus, so blocked agents can subscribe instead of polling. */
   bus?: EventBus;
+  /**
+   * Addition (self-recovery): schedule a resume of a run that failed (or ran out of Lambda time with work left).
+   * Absent = no resume (the run fails as before).
+   */
+  scheduleResume?: (req: RunResumeRequest) => Promise<void>;
   /** Addition: inject providers directly (tests: scripted/replay). Keyed by provider id. */
   providers?: Partial<Record<ProviderId, LlmProvider>>;
 }
@@ -303,10 +309,25 @@ export interface AuthoringRequest {
   label?: string;
 }
 
+/** Addition (self-recovery): schedule a fresh invocation that resumes `runId` (Run Lambda: async self-invoke). */
+export interface RunResumeRequest {
+  runId: string;
+  attempt: number;
+  reason: string;
+}
+
+/** Addition (self-recovery): at most this many resumes per run; then `run.failed` as before. */
+export const MAX_RUN_RESUMES = 2;
+
+/** Addition (self-recovery): `AbortSignal.reason` the Run Lambda uses when it is about to time out. */
+export const LAMBDA_TIMEOUT_ABORT = 'lambda_timeout';
+
 export interface ExecuteRunInput {
   runId: string;
   deps: RunDeps;
   signal?: AbortSignal;
+  /** Addition (self-recovery): resume this run (attempt ≥ 1) from its event log instead of starting it. */
+  resume?: { attempt: number };
   /** Addition (async authoring): present on the invocation of the run that authors (see `RunMeta.preparing`). */
   authoring?: AuthoringRequest;
 }
@@ -335,8 +356,11 @@ export function mutationDraft(
   return { ...envelope, type: 'system.mutation', payload } as EventDraft<'system.mutation'>;
 }
 
-/** Addition: default of `RunDeps.simAutoApproveAfterMs` (120 s real time). */
-export const DEFAULT_SIM_AUTO_APPROVE_AFTER_MS = 120_000;
+/**
+ * Addition: default of `RunDeps.simAutoApproveAfterMs`. **0 = off** (demo review 2026-09-27: an agent run's
+ * approvals wait for a person; the server never approves on its own unless `SIM_AUTO_APPROVE_AFTER_MS` > 0).
+ */
+export const DEFAULT_SIM_AUTO_APPROVE_AFTER_MS = 0;
 
 /** `SIM_AUTO_APPROVE_AFTER_MS` (ms; 0 = off) → `RunDeps.simAutoApproveAfterMs`; invalid or unset → the default. */
 export function simAutoApproveAfterMsFromEnv(env: Record<string, string | undefined>): number {

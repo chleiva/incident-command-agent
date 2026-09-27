@@ -26,7 +26,8 @@ const meta: Meta<typeof DecisionPopup> = {
   args: {
     pending: [first],
     nowMinute: 39,
-    autoApprove: true,
+    // The default for everyone: the card waits for the viewer (auto-approve is turned on in ⌘K).
+    autoApprove: false,
     static: true,
     onDecide: fn(async (): Promise<DecideOutcome> => 'ok'),
   },
@@ -48,13 +49,16 @@ const meta: Meta<typeof DecisionPopup> = {
 export default meta;
 type Story = StoryObj<typeof DecisionPopup>;
 
+export const Waiting: Story = {
+  name: 'Waiting for the viewer (default: auto-approve off, Space hint)',
+};
 export const CountdownRunning: Story = {
-  name: 'Countdown running',
-  args: { initialRemainingMs: 7_000 },
+  name: 'Countdown running (auto-approve turned on in ⌘K)',
+  args: { autoApprove: true, initialRemainingMs: 7_000 },
 };
 export const Paused: Story = {
-  name: 'Paused (hovered or focused)',
-  args: { initialRemainingMs: 6_000, forcePaused: true },
+  name: 'Paused (hovered or focused, auto-approve on)',
+  args: { autoApprove: true, initialRemainingMs: 6_000, forcePaused: true },
 };
 export const QueueOfThree: Story = {
   name: 'Queue of 3 (most urgent first)',
@@ -68,13 +72,14 @@ export const Conflict: Story = {
   name: '409: decided elsewhere first (closes gracefully)',
   args: {
     pending: two,
+    autoApprove: true,
     durationMs: 1_500,
     onDecide: fn(async (): Promise<DecideOutcome> => 'conflict'),
   },
 };
 export const AutoApproveOff: Story = {
-  name: 'Auto-approve off (waits)',
-  args: { autoApprove: false },
+  name: 'Auto-approve off (waits), queue of 3',
+  args: { autoApprove: false, pending: QUEUE },
 };
 export const HistoryMode: Story = {
   name: 'Viewer in history mode (the card is live)',

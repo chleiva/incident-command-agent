@@ -4,8 +4,8 @@
  */
 /**
  * Decisions are always NOW (the rail reads the head whatever the cursor) and the gentle decision popup with its
- * simulation auto-approval countdown (pauses on hover/focus, cancelled by editing, rejecting or deciding manually,
- * off by the ⌘K toggle, 409-graceful). Plus "Auto-approved (simulation)" wherever a decision is shown.
+ * simulation auto-approval countdown (OFF by default; when turned on in ⌘K it pauses on hover/focus, is cancelled by
+ * editing, rejecting or deciding manually, and is 409-graceful). Plus "Auto-approved (simulation)" wherever a decision is shown.
  */
 import type { ApprovalDecisionRequest, ProjectedApproval, RunEvent } from '@ica/schema/browser';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
@@ -17,7 +17,9 @@ import { ApiRequestError } from '../../lib/api';
 import {
   AUTO_APPROVE_EXPLAINER,
   AUTO_APPROVE_MS,
+  AUTO_APPROVE_OFF_EXPLAINER,
   AUTO_APPROVE_SECONDS,
+  PAUSE_HINT,
   autoApproveMs,
   autoApproveRequest,
 } from '../../lib/autoApprove';
@@ -25,7 +27,7 @@ import { describeEvent } from '../../lib/describe';
 import { SIMULATION_AUTO_LABEL, actorLabel, decisionPhrase } from '../../lib/format';
 import { pendingByUrgency } from '../../lib/derive';
 import { createRunStore, type RunStore } from '../../store/runStore';
-import { AUTO_APPROVE_KEY, useUi } from '../../store/ui';
+import { AUTO_APPROVE_KEY, LEGACY_AUTO_APPROVE_KEYS, readAutoApprove, useUi } from '../../store/ui';
 import { S01, pendingApproval } from '../../test/fixtureViews';
 import { ApproverLine } from '../ui/primitives';
 import { DecisionPopup, resetDecisionPopupState, type DecisionPopupProps } from './DecisionPopup';
@@ -61,7 +63,7 @@ const tick = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
 beforeEach(() => resetDecisionPopupState());
 afterEach(() => {
   vi.useRealTimers();
-  useUi.setState({ autoApprove: true, optimistic: {} });
+  useUi.setState({ autoApprove: false, optimistic: {} });
 });
 
 describe('<DecisionPopup>', () => {
@@ -136,13 +138,36 @@ describe('<DecisionPopup>', () => {
     expect(onDecide).not.toHaveBeenCalled();
   });
 
-  it('never auto-approves when the toggle is off: the card waits indefinitely', () => {
+  it('never auto-approves when the toggle is off: the card waits indefinitely, with no countdown UI', () => {
     vi.useFakeTimers();
     const { card, onDecide } = popup({ autoApprove: false });
-    expect(card().textContent).toContain('Waiting for your decision (auto-approve is off)');
+    expect(card().querySelector('[data-countdown-off]')!.textContent).toContain('Waiting for your decision');
     expect(card().querySelector('[role="timer"]')).toBeNull();
+    expect(card().querySelector('[data-countdown-ring]')).toBeNull();
     tick(120_000);
     expect(onDecide).not.toHaveBeenCalled();
+    expect(card().querySelector('[role="timer"]')).toBeNull();
+  });
+
+  it('while it waits (auto-approve off), the presenter hint says Space pauses the clock', () => {
+    const { card } = popup({ autoApprove: false });
+    expect(card().querySelector('[data-popup-pause-hint]')!.textContent).toBe(PAUSE_HINT);
+    expect(PAUSE_HINT).toBe('Press Space to pause the clock while you decide');
+  });
+
+  it('no pause hint while the countdown runs (auto-approve on)', () => {
+    const { card } = popup();
+    expect(card().querySelector('[data-popup-pause-hint]')).toBeNull();
+    expect(card().querySelector('[role="timer"]')).not.toBeNull();
+  });
+
+  it('auto-approve off: the info tooltip says decisions wait and how to turn auto-approve on', async () => {
+    const { card } = popup({ autoApprove: false });
+    act(() => within(card()).getByRole('button', { name: 'About auto-approve' }).focus());
+    const tip = (await screen.findByRole('tooltip')).textContent;
+    expect(tip).toContain(AUTO_APPROVE_OFF_EXPLAINER);
+    expect(AUTO_APPROVE_OFF_EXPLAINER).toContain('⌘K');
+    expect(AUTO_APPROVE_OFF_EXPLAINER).toContain('Auto-approved (simulation)');
   });
 
   it('never auto-approves once the viewer starts editing (the DiffEditor), even after cancelling', () => {
@@ -275,8 +300,29 @@ describe('<DecisionPopup>', () => {
 });
 
 describe('the ⌘K auto-approve setting', () => {
-  it('defaults on, persists per viewer, and survives blocked storage', () => {
-    expect(useUi.getState().autoApprove).toBe(true);
+  afterEach(() => window.localStorage.clear());
+
+  it('defaults OFF for everyone', () => {
+    window.localStorage.clear();
+    expect(readAutoApprove()).toBe(false);
+  });
+
+  it('migrates once: a preference stored under the v1 key (on or off) is dropped, so the viewer starts OFF', () => {
+    expect(AUTO_APPROVE_KEY).toBe('ica.autoApprove.v2');
+    for (const legacy of ['on', 'off']) {
+      window.localStorage.setItem(LEGACY_AUTO_APPROVE_KEYS[0], legacy);
+      expect(readAutoApprove()).toBe(false);
+      expect(window.localStorage.getItem(LEGACY_AUTO_APPROVE_KEYS[0])).toBeNull();
+    }
+  });
+
+  it('only an explicit ⌘K "on" (v2) turns it on, and it persists', () => {
+    useUi.getState().setAutoApprove(true);
+    expect(window.localStorage.getItem(AUTO_APPROVE_KEY)).toBe('on');
+    expect(readAutoApprove()).toBe(true);
+  });
+
+  it('persists per viewer and survives blocked storage', () => {
     useUi.getState().setAutoApprove(false);
     expect(window.localStorage.getItem(AUTO_APPROVE_KEY)).toBe('off');
     const set = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {

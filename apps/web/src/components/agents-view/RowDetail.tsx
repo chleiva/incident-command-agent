@@ -168,6 +168,13 @@ function DetailBody({ row }: { row: AgentRow }) {
           <Icon name="edit" size={10} /> The runtime tidied this call&apos;s arguments before running it.
         </p>,
       );
+    if (row.reused)
+      parts.push(
+        <p key="reused" className="flex items-center gap-1 text-micro text-fg-subtle" data-reused-detail>
+          <Icon name="check" size={10} /> Called again {row.reused === 1 ? 'once' : `${row.reused} times`}{' '}
+          with the same details: the same result was reused, nothing was done twice.
+        </p>,
+      );
   }
   if (row.proposal && (row.kind === 'proposal' || row.kind === 'waiting')) {
     const p = row.proposal;
@@ -205,12 +212,12 @@ function DetailBody({ row }: { row: AgentRow }) {
     parts.push(
       <div key="decision" className="text-caption text-fg-muted" data-decision-detail>
         <span className="text-micro text-fg-subtle">
-          {isSimulationAuto(d.decidedBy) ? 'Decision' : 'Human decision'}
+          {d.decidedBy.kind === 'human' ? 'Human decision' : 'Decision (not a person)'}
         </span>
         {isSimulationAuto(d.decidedBy) ? (
           <p>
             <span className="text-fg">{SIMULATION_AUTO_LABEL}</span> at m{Math.round(d.minute)} — nobody
-            decided within the countdown, so the simulation approved it (not a person)
+            decided in time, so the simulation approved it (not a person)
           </p>
         ) : (
           <p>

@@ -25,7 +25,7 @@ export function captionFor(e: RunEvent): string | null {
       return `Decision needed — ${e.payload.summary}`;
     case 'approval.decision': {
       if (e.payload.decidedBy.kind === 'policy' && e.payload.decidedBy.policy === 'simulation-auto')
-        return 'Auto-approved (simulation) — no one decided within the countdown';
+        return 'Auto-approved (simulation) — no one decided in time';
       const who = e.payload.decidedBy.kind === 'human' ? e.payload.decidedBy.roleTitle : 'Policy';
       const verb =
         e.payload.decision === 'approve'

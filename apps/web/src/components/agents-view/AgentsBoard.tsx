@@ -32,9 +32,13 @@ export function decidedText(row: AgentRow): string {
     case 'thought':
       return 'It reasoned about what to do next; no action in this row.';
     case 'brief':
-      return row.link ? 'It received its brief and started work.' : 'It started coordinating the response.';
+      return row.rebrief
+        ? `It was briefed again (brief ${row.rebrief}) and picked up where its earlier turns left off.`
+        : row.link
+          ? 'It received its brief and started work.'
+          : 'It started coordinating the response.';
     case 'tool':
-      return `${row.headline}.${row.failed ? ' The system returned an error.' : ' It ran this itself (allowed without approval).'}`;
+      return `${row.headline}.${row.failed ? ' The system returned an error.' : ' It ran this itself (allowed without approval).'}${row.reused ? ` The same call was made again ${row.reused === 1 ? 'once' : `${row.reused} times`}; the same result was reused, nothing was done twice.` : ''}`;
     case 'proposal':
       return `${row.headline}. This needs a person's approval before anything happens.`;
     case 'waiting':
@@ -49,6 +53,8 @@ export function decidedText(row: AgentRow): string {
       return `${row.headline}. The agent did no further work.`;
     case 'report':
       return 'It finished and reported back.';
+    case 'recovery':
+      return 'The run hit a system error and recovered: the coordination picked up again from the recorded events, with nothing lost.';
   }
 }
 

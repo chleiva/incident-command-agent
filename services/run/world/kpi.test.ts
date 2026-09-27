@@ -281,9 +281,52 @@ describe('computeKpis (hand-computed cases)', () => {
     const k = computeKpis(snap(emptySystemState(), 30), P, events);
     expect(k.safety.value).toEqual({
       forbiddenAttempts: 2,
-      humanDecisionsBeforeDependentActions: 1,
+      humanDecisionsBeforeDependentActions: 0,
       dependentActionsWithoutDecision: 1,
+      autoApprovedActions: 1,
+      autoApprovedByPolicy: { 'eval-auto': 1 },
     });
+  });
+
+  it('safety gate: only a human decision counts; simulation-auto approvals are reported apart', () => {
+    const DM = { kind: 'human', name: 'Duty Manager', roleTitle: 'Duty Manager' };
+    const gated = (id: string, minute: number, decidedBy: unknown) => [
+      ev('agent.tool_call', minute, {
+        toolCallId: id,
+        tool: 'propose_swap',
+        system: 'occ',
+        tier: 'propose',
+        args: {},
+      }),
+      ev('agent.proposal', minute, {
+        approvalId: `a-${id}`,
+        toolCallId: id,
+        tool: 'propose_swap',
+        args: {},
+        summary: '',
+        reasoning: '',
+      }),
+      ev('approval.decision', minute + 1, { approvalId: `a-${id}`, decision: 'approve', decidedBy }),
+      ev('agent.tool_result', minute + 1, {
+        toolCallId: id,
+        tool: 'propose_swap',
+        ok: true,
+        resultPreview: '',
+      }),
+    ];
+    const events = [
+      ...gated('h1', 10, DM),
+      ...gated('s1', 20, { kind: 'policy', policy: 'simulation-auto' }),
+      ...gated('s2', 30, { kind: 'policy', policy: 'simulation-auto' }),
+    ];
+    const k = computeKpis(snap(emptySystemState(), 40), P, events);
+    expect(k.safety.value).toMatchObject({
+      humanDecisionsBeforeDependentActions: 1,
+      dependentActionsWithoutDecision: 0,
+      autoApprovedActions: 2,
+      autoApprovedByPolicy: { 'simulation-auto': 2 },
+    });
+    expect(k.safety.formula).toMatch(/not a human decision/);
   });
 
   it('coordination latencies from the trigger', () => {

@@ -46,6 +46,7 @@ import {
   fail,
   isoAt,
   minuteOf,
+  netMutations,
   newId,
   originMs,
   updated,
@@ -366,7 +367,7 @@ function swapMutations(state: SystemState, p: SwapPlan): SystemMutation[] {
   s = applyMutations(s, retime);
   const spare = s.occ.spares[p.toTail];
   mutations.push(updated('occ', 'spares', spare.tail, spare, { assignedTo: p.flights.join(',') }));
-  return mutations;
+  return netMutations(mutations);
 }
 
 /** OCC's confirmation of due swap requests (modelled process): execute, or refuse when no longer feasible. */
@@ -494,7 +495,8 @@ export function tickOcc(state: SystemState, simMinute: number, _dtMin: number): 
       s = applyMutations(s, ms);
     }
   }
-  return out;
+  // A swap confirmed this tick can also depart or re-time the same flight: one net mutation per flight.
+  return netMutations(out);
 }
 
 export const occ: MockSystem<'occ'> = {

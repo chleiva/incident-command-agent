@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import type { ToolDefinition } from '@ica/schema';
+import { engineerStatus } from './_engineers';
 import { S, incidentStation, obj, ok } from './_shared';
 
 export const get_stand_status: ToolDefinition<{ station?: string }> = {
   name: 'get_stand_status',
   description:
-    'Airport picture at a station (default: the incident station): stands with occupancy, pending/confirmed stand requests, tows/buses/stairs/fire-service requests with ETAs, handler equipment available, and handler tasks.',
+    'Airport picture at a station (default: the incident station): stands with occupancy, pending/confirmed stand requests, tows/buses/stairs/fire-service requests with ETAs, handler equipment available, handler tasks, and the engineer coming to the aircraft (the same responding engineer maintenance sees, with ETA).',
   inputSchema: obj({ station: S.station }),
   tier: 'execute',
   system: 'airport',
@@ -33,6 +34,7 @@ export const get_stand_status: ToolDefinition<{ station?: string }> = {
       resourceRequests: Object.values(a.resourceRequests).filter((r) => r.station === station),
       equipment: Object.values(ctx.state.handler.equipment).filter((e) => e.station === station),
       handlerTasks: Object.values(ctx.state.handler.tasks).filter((t) => t.station === station),
+      respondingEngineer: engineerStatus(ctx).responding,
     });
   },
 };

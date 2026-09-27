@@ -8,9 +8,10 @@
  */
 import { expect, test } from '@playwright/test';
 
-// These flows decide by hand: turn the simulation's auto-approval off (the ⌘K setting, persisted per viewer).
+// These flows decide by hand: auto-approval is off by default (the ⌘K setting, persisted per viewer); made
+// explicit here so a stored preference can never turn it on.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove', 'off'));
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove.v2', 'off'));
 });
 
 test('Agents view: waiting → decision, expand, delegation link, time sync, back to live', async ({
@@ -37,7 +38,9 @@ test('Agents view: waiting → decision, expand, delegation link, time sync, bac
   const waiting = passengers.locator('[data-kind="waiting"][data-pending="true"]');
   await expect(waiting).toContainText('Waiting for a decision: send a passenger message');
 
-  // Decide on the dashboard (the waiting row links to the decision rail), then come back.
+  // Decide on the dashboard (the waiting row links to the decision rail), then come back. The waiting decision
+  // card floats bottom-right (auto-approve is off, so it stays): minimise it so it does not cover the column.
+  await page.getByRole('button', { name: 'Minimise the decision card' }).click();
   await waiting.getByRole('link', { name: /Decide in the decision rail/ }).click();
   await expect(page).toHaveURL(runUrl + '#zone-decisions');
   const card = page.locator('[data-approval="ap-msg-1"]');
@@ -119,14 +122,12 @@ test('mock showcase: every row type, the author banner and a stop row', async ({
   );
 });
 
-test('About: opens from the top bar with the credit link', async ({ page }) => {
+test('About: opens from the top bar; no author line with the public brand defaults', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('about-button').click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('Designed and developed by Chris Beltran');
-  const credit = dialog.getByRole('link', { name: 'Chris Beltran' });
-  await expect(credit).toHaveAttribute('href', 'https://www.linkedin.com/in/chris-ai/');
-  await expect(credit).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(dialog).toContainText('Data sources and licences');
+  await expect(dialog.locator('[data-about-credit]')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   await expect(page.getByTestId('about-button')).toBeFocused();

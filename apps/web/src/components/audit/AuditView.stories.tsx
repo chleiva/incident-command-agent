@@ -50,12 +50,52 @@ export const ExpandedToolCall: Story = {
   args: { run: AUDIT_RUN, status: 'ready', picker, initialExpanded: [FIRST_TOOL.id, PROPOSED_TOOL.id] },
 };
 
+export const FailedRun: Story = {
+  name: 'Failed run: status, plain reason and run events',
+  args: {
+    run: { ...AUDIT_RUN, status: 'failed' },
+    status: 'ready',
+    picker,
+    runError: 'anthropic 529 overloaded_error after 3 retries',
+    runEvents: [
+      {
+        seq: 120,
+        minute: 18,
+        kind: 'recovering',
+        tone: 'warning',
+        text: 'System error — recovering (attempt 1): the run took longer than the system allows',
+        detail: 'Lambda timeout: 14 min wall clock',
+      },
+      {
+        seq: 124,
+        minute: 19,
+        kind: 'resumed',
+        tone: 'neutral',
+        text: 'Recovered — resumed at m19; the agents were re-briefed from the record',
+      },
+      {
+        seq: 210,
+        minute: 31,
+        kind: 'failed',
+        tone: 'critical',
+        text: 'Run stopped because of a system error: the AI service was too busy to answer',
+        detail: 'llm: anthropic 529 overloaded_error after 3 retries',
+      },
+    ],
+  },
+};
+
 export const RunList: StoryObj<typeof RecentRunsTable> = {
   name: 'Run picker (no run selected)',
   render: () => (
     <MemoryRouter>
       <RecentRunsTable
-        runs={[AUDIT_META, { ...AUDIT_META, runId: 'run-demo-s01-b', mode: 'baseline' }]}
+        runs={[
+          AUDIT_META,
+          { ...AUDIT_META, runId: 'run-demo-s01-b', mode: 'baseline' },
+          { ...AUDIT_META, runId: 'run-demo-s01-c', status: 'failed', error: 'fetch failed: ECONNRESET' },
+          { ...AUDIT_META, runId: 'run-demo-s01-d', status: 'aborted' },
+        ]}
         status="ready"
       />
     </MemoryRouter>

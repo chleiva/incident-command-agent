@@ -138,6 +138,17 @@ export interface RunProjection {
     endedWallTime?: string;
     /** Addition (async authoring): the latest `scenario.authoring` (preparing the scenario from free text). */
     authoring?: { status: ScenarioAuthoringStatus; detail: string; seq: number };
+    /**
+     * Addition (self-recovery): the latest `run.recovering` / `run.resumed_after_error` ("Recovered from a system
+     * error — resumed at m{atMinute}").
+     */
+    recovery?: {
+      status: 'recovering' | 'resumed';
+      attempt: number;
+      reason?: string;
+      atMinute: number;
+      seq: number;
+    };
   };
   simMinute: number;
   simTime: string | null;
@@ -268,6 +279,35 @@ export function applyEvent(state: RunProjection, e: RunEvent): RunProjection {
         },
         totals: e.payload.totals,
         kpis: e.payload.finalKpis,
+      };
+    case 'run.recovering':
+      return {
+        ...s,
+        meta: {
+          ...s.meta,
+          recovery: {
+            status: 'recovering',
+            attempt: e.payload.attempt,
+            reason: e.payload.reason,
+            atMinute: e.simMinute,
+            seq: e.seq,
+          },
+        },
+      };
+    case 'run.resumed_after_error':
+      return {
+        ...s,
+        meta: {
+          ...s.meta,
+          status: 'running',
+          recovery: {
+            status: 'resumed',
+            attempt: e.payload.attempt,
+            ...(s.meta.recovery?.reason ? { reason: s.meta.recovery.reason } : {}),
+            atMinute: e.payload.fromMinute,
+            seq: e.seq,
+          },
+        },
       };
     case 'run.failed':
       return {

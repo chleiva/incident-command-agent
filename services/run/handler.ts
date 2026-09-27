@@ -15,16 +15,24 @@
  *   `KB_EMBED_REGION`, `KB_RERANK`/`KB_RERANK_MODEL`/`KB_RERANK_REGION`: hybrid retrieval (BM25 + Cohere Embed v4 →
  *   S3 Vectors → Cohere Rerank 3.5), see services/run/knowledge/index.ts and docs/deploy.md
  * - `LLM_*`, `RUN_BUDGET_USD`, `RUN_HORIZON_MIN` (see .env.example)
- * - `SIM_AUTO_APPROVE_AFTER_MS`: the simulation safety net (default 120 000 ms real time; 0 = off)
+ * - `SIM_AUTO_APPROVE_AFTER_MS`: the simulation safety net for agent runs (default 0 = off; > 0 = ms of real time)
+ * - `AWS_LAMBDA_FUNCTION_NAME` (set by Lambda): self-recovery re-invokes this function asynchronously with
+ *   `{runId, resume: {attempt}}` when a run fails or runs out of time with work remaining (needs
+ *   `lambda:InvokeFunction` on itself; see the ApiStack)
  */
+import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import {
+  LAMBDA_TIMEOUT_ABORT,
+  MAX_RUN_RESUMES,
   simAutoApproveAfterMsFromEnv,
   type AuthoringRequest,
+  type RunResumeRequest,
   type KnowledgeIndex,
   type RunDeps,
   type SecretStore,
   type Store,
   type TraceStore,
+  type WallClock,
 } from '@ica/schema';
 import {
   DynamoStore,
@@ -33,6 +41,7 @@ import {
   envHydratedSecretNames,
   hydrateEnvFromSecrets,
   lambdaSecretIds,
+  withRetry,
 } from '@ica/store';
 import { executeRun } from './index';
 import { knowledgeS3PathFromEnv, loadKnowledgeIndex } from './knowledge/index';
@@ -52,6 +61,42 @@ export interface LambdaContextLike {
 export interface RunInvocation {
   runId: string;
   authoring?: AuthoringRequest;
+  /** Self-recovery: resume the run from its event log (attempt 1..MAX_RUN_RESUMES). */
+  resume?: { attempt: number };
+}
+
+/** Validate the (internal, but still untrusted) resume part of an invocation; malformed → ignored. */
+export function parseResume(x: unknown): { attempt: number } | undefined {
+  if (!x || typeof x !== 'object') return undefined;
+  const attempt = (x as { attempt?: unknown }).attempt;
+  return typeof attempt === 'number' &&
+    Number.isInteger(attempt) &&
+    attempt >= 1 &&
+    attempt <= MAX_RUN_RESUMES
+    ? { attempt }
+    : undefined;
+}
+
+/**
+ * Self-recovery: an asynchronous self-invoke (`InvocationType: 'Event'`) of this function with
+ * `{runId, resume: {attempt}}`. Retried on transient errors; throws when it cannot be scheduled.
+ */
+export function lambdaSelfInvoker(
+  functionName: string,
+  client: Pick<LambdaClient, 'send'> = new LambdaClient({}),
+): (req: RunResumeRequest) => Promise<void> {
+  return async ({ runId, attempt }) => {
+    const res = await withRetry(() =>
+      client.send(
+        new InvokeCommand({
+          FunctionName: functionName,
+          InvocationType: 'Event',
+          Payload: new TextEncoder().encode(JSON.stringify({ runId, resume: { attempt } })),
+        }),
+      ),
+    );
+    if (res.StatusCode !== 202) throw new Error(`resume invoke returned ${res.StatusCode}`);
+  };
 }
 
 /** Validate the (untrusted) authoring part of an invocation; malformed → ignored (the template scenario stands). */
@@ -73,6 +118,10 @@ export interface HandlerDeps {
   env?: Record<string, string | undefined>;
   /** Poll interval for the remaining-time guard (ms). */
   guardIntervalMs?: number;
+  /** Self-recovery: schedule a resume (default: async self-invoke of `AWS_LAMBDA_FUNCTION_NAME`). */
+  scheduleResume?: (req: RunResumeRequest) => Promise<void>;
+  /** Tests: a virtual wall clock. */
+  clock?: WallClock;
 }
 
 let containerDeps: HandlerDeps | undefined;
@@ -114,21 +163,28 @@ export function createRunHandler(getDeps: () => HandlerDeps) {
       llm: llmConfigFromEnv(env),
       approvalsPolicy: 'human',
       simAutoApproveAfterMs: simAutoApproveAfterMsFromEnv(env),
+      ...(d.clock ? { clock: d.clock } : {}),
     };
+    const functionName = env.AWS_LAMBDA_FUNCTION_NAME;
+    const scheduleResume = d.scheduleResume ?? (functionName ? lambdaSelfInvoker(functionName) : undefined);
+    if (scheduleResume) deps.scheduleResume = scheduleResume;
     const ac = new AbortController();
+    // About to time out: stop with a reason the runtime recognises (work remaining → resume, not "completed").
     const timer = context
       ? setInterval(() => {
-          if (context.getRemainingTimeInMillis() < STOP_MARGIN_MS) ac.abort();
+          if (context.getRemainingTimeInMillis() < STOP_MARGIN_MS) ac.abort(LAMBDA_TIMEOUT_ABORT);
         }, d.guardIntervalMs ?? 1_000)
       : undefined;
-    if (context && context.getRemainingTimeInMillis() < STOP_MARGIN_MS) ac.abort();
+    if (context && context.getRemainingTimeInMillis() < STOP_MARGIN_MS) ac.abort(LAMBDA_TIMEOUT_ABORT);
     try {
       const authoring = parseAuthoring(event.authoring);
+      const resume = parseResume(event.resume);
       const result = await executeRun({
         runId: event.runId,
         deps,
         signal: ac.signal,
-        ...(authoring ? { authoring } : {}),
+        ...(authoring && !resume ? { authoring } : {}),
+        ...(resume ? { resume } : {}),
       });
       console.log(
         JSON.stringify({
@@ -136,6 +192,8 @@ export function createRunHandler(getDeps: () => HandlerDeps) {
           runId: event.runId,
           status: result.status,
           reason: result.reason,
+          ...(resume ? { resumeAttempt: resume.attempt } : {}),
+          ...(result.error ? { error: result.error.slice(0, 300) } : {}),
         }),
       );
       return result;

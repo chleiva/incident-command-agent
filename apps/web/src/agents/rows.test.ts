@@ -117,7 +117,7 @@ describe('deriveAgents', () => {
     );
     expect(
       stopHeadline({ role: 'ground', reason: 'error', detail: 'provider timeout after 3 retries' }),
-    ).toBe('Stopped: error — provider timeout after 3 retries');
+    ).toBe('Stopped: system error — provider timeout after 3 retries');
     expect(
       stopHeadline({ role: 'ground', reason: 'tool_calls', detail: '' }, { maxToolCallsPerAgent: 40 }),
     ).toBe('Stopped: reached the 40 tool-call limit for this agent');

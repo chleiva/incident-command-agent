@@ -59,6 +59,8 @@ export const GUARDRAIL_LAYERS = [
   'arg_validation',
   'ref_validation',
 ] as const;
+/** Addition (self-recovery): what a contained `system.error` affected. */
+export const SYSTEM_ERROR_SCOPES = ['tool', 'agent', 'world', 'store'] as const;
 /** `demo_forbidden` (addition, task 06): presenter control that pushes a forbidden call through the tier gate. */
 export const CONTROL_ACTIONS = ['pause', 'resume', 'stop', 'set_speed', 'demo_forbidden'] as const;
 /** Tools the presenter may demonstrate with `demo_forbidden` (default `defer_defect`). */
@@ -101,6 +103,33 @@ export const EventPayloadSchemas = {
     finalKpis: KpiSnapshotSchema,
   }),
   'run.failed': Type.Object({ error: Str, where: Str }),
+  /**
+   * Addition (self-recovery): the run hit a system error (or ran out of Lambda time with work remaining) and a
+   * resume was scheduled: a fresh Run Lambda rebuilds the world from the event log and carries on.
+   */
+  'run.recovering': Type.Object({
+    attempt: Type.Integer({ minimum: 1 }),
+    reason: Str,
+    maxAttempts: Opt(Type.Integer({ minimum: 1 })),
+  }),
+  /** Addition (self-recovery): the resumed run is live again at `fromMinute` (sim clock kept). */
+  'run.resumed_after_error': Type.Object({
+    attempt: Type.Integer({ minimum: 1 }),
+    fromMinute: Type.Number(),
+    /** Approvals still pending at the resume; they execute when decided. */
+    pendingApprovals: Opt(Type.Integer({ minimum: 0 })),
+  }),
+  /**
+   * Addition (self-recovery): an error contained at the smallest scope (one tool call, one agent, one world
+   * process). The run continued; `scope` says what was affected.
+   */
+  'system.error': Type.Object({
+    scope: literalUnion(SYSTEM_ERROR_SCOPES),
+    message: Str,
+    tool: Opt(Str),
+    toolCallId: Opt(Str),
+    role: Opt(AgentRoleSchema),
+  }),
   /** Emitted once per sim minute (not every 10-second tick). */
   'world.tick': Type.Object({ simMinute: Type.Number() }),
   'world.twist': Type.Object({
@@ -166,6 +195,16 @@ export const EventPayloadSchemas = {
      * `maxLength`; the runtime accepted the call with the value truncated at the cap (and told the model).
      */
     argsTruncated: Opt(Type.Array(Str)),
+    /**
+     * Addition (demo review): an identical call (same tool + canonical args) earlier in the SAME model turn; this one
+     * did not run and received that call's result. Not counted against the per-agent tool cap.
+     */
+    deduplicatedFrom: Opt(Str),
+    /**
+     * Addition (demo review): a read-only call answered from this agent run's cache (same tool + args, no mutation
+     * of mock state since the original call). Not counted against the per-agent tool cap.
+     */
+    cachedFrom: Opt(Str),
   }),
   'agent.tool_result': Type.Object({
     toolCallId: Str,
@@ -175,8 +214,13 @@ export const EventPayloadSchemas = {
     resultPreview: Type.String({ maxLength: 500 }),
     result: Opt(Type.Unknown()),
     citations: Opt(Type.Array(CitationSchema)),
-    /** Addition (task 06): a retry with an already-used `requestId`: the original call's id (no new mutation). */
+    /**
+     * Addition (task 06): a retry with an already-used `requestId`: the original call's id (no new mutation). Also
+     * (demo review) an identical call earlier in the same model turn.
+     */
     deduplicatedFrom: Opt(Str),
+    /** Addition (demo review): a cached read-only result: the original call's id (see `agent.tool_call.cachedFrom`). */
+    cachedFrom: Opt(Str),
   }),
   'agent.proposal': Type.Object({
     approvalId: Str,

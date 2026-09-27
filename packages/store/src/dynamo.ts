@@ -11,7 +11,9 @@
  *      IF attribute_not_exists(SK); Put/Delete SYS# per mutation;
  *   3. on a condition failure (another writer won) re-read and retry, up to 5 times with jitter.
  * Mutations always travel in the same transaction as their `system.mutation` event. Batches larger than one
- * transaction (100 items) are split into several transactions, each atomic, in order.
+ * transaction (100 items) are split into several transactions, each atomic, in order. Within one transaction the
+ * mutations are coalesced per SYS# key (last write wins), because TransactWriteItems rejects two operations on one
+ * item ("Transaction request cannot include multiple operations on one item").
  */
 import { DynamoDBClient, TransactionCanceledException } from '@aws-sdk/client-dynamodb';
 import {
@@ -65,7 +67,9 @@ import {
   scenarioPk,
   sysSk,
 } from './keys';
-import { emptyStateFor, groupMutations, sleep, toEvent } from './util';
+import { randomUUID } from 'node:crypto';
+import { withRetry, type RetryOptions } from './retry';
+import { coalesceMutations, emptyStateFor, groupMutations, sleep, toEvent } from './util';
 
 type Item = Record<string, any>;
 type TransactItem = NonNullable<TransactWriteCommandInput['TransactItems']>[number];
@@ -81,6 +85,8 @@ export interface DynamoStoreOptions {
   traces?: TraceStore;
   maxRetries?: number;
   now?: () => Date;
+  /** Transient-error retry policy for every call (default: 5 attempts, full jitter, cap 8 s). Tests pass a no-op sleep. */
+  retry?: RetryOptions;
 }
 
 /** Convert a stored event row (or a stream NEW_IMAGE after `unmarshall`) back into a RunEvent. */
@@ -111,6 +117,7 @@ export class DynamoStore implements Store {
   private readonly traces?: TraceStore;
   private readonly maxRetries: number;
   private readonly now: () => Date;
+  private readonly retry: RetryOptions;
   /** Cached lastSeq per run (optimistic; a stale value just costs one retry). */
   private readonly seqCache = new Map<string, number>();
 
@@ -119,6 +126,7 @@ export class DynamoStore implements Store {
     this.traces = opts.traces;
     this.maxRetries = opts.maxRetries ?? 5;
     this.now = opts.now ?? (() => new Date());
+    this.retry = opts.retry ?? {};
     this.doc =
       opts.client ??
       DynamoDBDocumentClient.from(new DynamoDBClient({ region: opts.region, endpoint: opts.endpoint }), {
@@ -128,13 +136,19 @@ export class DynamoStore implements Store {
 
   private iso = () => this.now().toISOString();
 
+  /** Every DynamoDB call goes through here: transient errors (throttling, 5xx, network) are retried with backoff. */
+  private send<T = any>(cmd: unknown, onAttempt?: (attempt: number) => void): Promise<T> {
+    return withRetry((attempt) => {
+      onAttempt?.(attempt);
+      return this.doc.send(cmd as never) as Promise<T>;
+    }, this.retry);
+  }
+
   private async queryAll(input: Omit<QueryCommandInput, 'TableName'>): Promise<Item[]> {
     const out: Item[] = [];
     let ExclusiveStartKey: Record<string, any> | undefined;
     do {
-      const res = await this.doc.send(
-        new QueryCommand({ TableName: this.table, ...input, ExclusiveStartKey }),
-      );
+      const res = await this.send(new QueryCommand({ TableName: this.table, ...input, ExclusiveStartKey }));
       out.push(...((res.Items as Item[]) ?? []));
       ExclusiveStartKey = res.LastEvaluatedKey;
     } while (ExclusiveStartKey);
@@ -143,7 +157,7 @@ export class DynamoStore implements Store {
 
   // ------------------------------------------------------------------ scenarios
   async putScenario(s: Scenario): Promise<void> {
-    await this.doc.send(
+    await this.send(
       new PutCommand({
         TableName: this.table,
         Item: {
@@ -160,7 +174,7 @@ export class DynamoStore implements Store {
     );
   }
   async getScenario(id: string): Promise<Scenario | null> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new GetCommand({ TableName: this.table, Key: { PK: scenarioPk(id), SK: META } }),
     );
     return (res.Item?.body as Scenario) ?? null;
@@ -190,7 +204,7 @@ export class DynamoStore implements Store {
   }
 
   async createRun(meta: RunMeta): Promise<void> {
-    await this.doc.send(
+    await this.send(
       new PutCommand({
         TableName: this.table,
         Item: this.metaToItem({ ...meta, lastSeq: 0 }),
@@ -200,7 +214,7 @@ export class DynamoStore implements Store {
     this.seqCache.set(meta.runId, 0);
   }
   async getRun(runId: string): Promise<RunMeta | null> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new GetCommand({ TableName: this.table, Key: { PK: runPk(runId), SK: META }, ConsistentRead: true }),
     );
     return res.Item ? this.itemToMeta(res.Item) : null;
@@ -217,7 +231,7 @@ export class DynamoStore implements Store {
       return `#k${i} = :v${i}`;
     });
     try {
-      await this.doc.send(
+      await this.send(
         new UpdateCommand({
           TableName: this.table,
           Key: { PK: runPk(runId), SK: META },
@@ -233,8 +247,33 @@ export class DynamoStore implements Store {
       throw err;
     }
   }
+  async claimResume(runId: string, attempt: number): Promise<boolean> {
+    let attempts = 0;
+    try {
+      await this.send(
+        new UpdateCommand({
+          TableName: this.table,
+          Key: { PK: runPk(runId), SK: META },
+          UpdateExpression: 'SET resumeAttempt = :a, updatedAt = :now',
+          ConditionExpression:
+            'attribute_exists(PK) AND (attribute_not_exists(resumeAttempt) OR resumeAttempt < :a)',
+          ExpressionAttributeValues: { ':a': attempt, ':now': this.iso() },
+        }),
+        (n) => (attempts = n),
+      );
+      return true;
+    } catch (err) {
+      if ((err as { name?: string }).name !== 'ConditionalCheckFailedException') throw err;
+      if (attempts <= 1) {
+        if (!(await this.getRun(runId))) throw new RunNotFoundError(runId);
+        return false;
+      }
+      // Retried after a transient error: our first attempt may have landed (its response lost).
+      return (await this.getRun(runId))?.resumeAttempt === attempt;
+    }
+  }
   async listRuns(limit: number): Promise<RunMeta[]> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new QueryCommand({
         TableName: this.table,
         IndexName: GSI1,
@@ -250,7 +289,7 @@ export class DynamoStore implements Store {
     let count = 0;
     let ExclusiveStartKey: Record<string, any> | undefined;
     do {
-      const res = await this.doc.send(
+      const res = await this.send(
         new QueryCommand({
           TableName: this.table,
           IndexName: GSI1,
@@ -268,7 +307,7 @@ export class DynamoStore implements Store {
 
   // ------------------------------------------------------------------ events
   private async readLastSeq(runId: string): Promise<number> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new GetCommand({
         TableName: this.table,
         Key: { PK: runPk(runId), SK: META },
@@ -359,7 +398,9 @@ export class DynamoStore implements Store {
           },
         });
       }
-      for (const m of chunk.mutations) {
+      // One operation per SYS# row: DynamoDB cancels a transaction that touches one item twice. The paired
+      // `system.mutation` events stay exactly as emitted; only the row writes are coalesced (last write wins).
+      for (const m of coalesceMutations(chunk.mutations)) {
         const Key = { PK: runPk(runId), SK: sysSk(m.system, m.entity, m.id) };
         items.push(
           m.op === 'delete'
@@ -374,7 +415,10 @@ export class DynamoStore implements Store {
       }
 
       try {
-        await this.doc.send(new TransactWriteCommand({ TransactItems: items }));
+        // A transient failure retries the IDENTICAL request with the same ClientRequestToken, so a transaction that
+        // committed before its response was lost is not applied twice (DynamoDB idempotency window: 10 min).
+        const ClientRequestToken = randomUUID();
+        await this.send(new TransactWriteCommand({ TransactItems: items, ClientRequestToken }));
         this.seqCache.set(runId, next);
         return events;
       } catch (err) {
@@ -386,7 +430,7 @@ export class DynamoStore implements Store {
   }
 
   async listEvents(runId: string, afterSeq: number, limit = 500): Promise<EventPage> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new QueryCommand({
         TableName: this.table,
         KeyConditionExpression: 'PK = :pk AND SK BETWEEN :from AND :to',
@@ -408,7 +452,7 @@ export class DynamoStore implements Store {
 
   // ------------------------------------------------------------------ approvals
   async putApproval(a: ApprovalRecord): Promise<void> {
-    await this.doc.send(
+    await this.send(
       new PutCommand({
         TableName: this.table,
         Item: { PK: runPk(a.runId), SK: approvalSk(a.approvalId), status: a.status, record: a },
@@ -416,7 +460,7 @@ export class DynamoStore implements Store {
     );
   }
   async getApproval(runId: string, approvalId: string): Promise<ApprovalRecord | null> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new GetCommand({
         TableName: this.table,
         Key: { PK: runPk(runId), SK: approvalSk(approvalId) },
@@ -444,8 +488,9 @@ export class DynamoStore implements Store {
     });
     if (!sets.length && !removes.length)
       return (await this.getApproval(runId, approvalId))?.status === expectedStatus;
+    let attempts = 0;
     try {
-      await this.doc.send(
+      await this.send(
         new UpdateCommand({
           TableName: this.table,
           Key: { PK: runPk(runId), SK: approvalSk(approvalId) },
@@ -459,11 +504,16 @@ export class DynamoStore implements Store {
           ExpressionAttributeNames: names,
           ExpressionAttributeValues: values,
         }),
+        (n) => (attempts = n),
       );
       return true;
     } catch (err) {
-      if ((err as { name?: string }).name === 'ConditionalCheckFailedException') return false;
-      throw err;
+      if ((err as { name?: string }).name !== 'ConditionalCheckFailedException') throw err;
+      if (attempts <= 1) return false;
+      // Retried after a transient error: the first attempt may have succeeded (response lost). It did if the
+      // record now carries exactly this patch.
+      const cur = (await this.getApproval(runId, approvalId)) as Record<string, unknown> | null;
+      return !!cur && Object.entries(patch).every(([k, v]) => JSON.stringify(cur[k]) === JSON.stringify(v));
     }
   }
   async listApprovals(runId: string, status?: ApprovalStatus): Promise<ApprovalRecord[]> {
@@ -496,7 +546,7 @@ export class DynamoStore implements Store {
 
   // ------------------------------------------------------------------ connections
   async putConnection(connectionId: string, runId: string): Promise<void> {
-    await this.doc.send(
+    await this.send(
       new PutCommand({
         TableName: this.table,
         Item: {
@@ -517,7 +567,7 @@ export class DynamoStore implements Store {
       ExpressionAttributeValues: { ':pk': connectionPk(connectionId) },
     });
     for (const i of items) {
-      await this.doc.send(new DeleteCommand({ TableName: this.table, Key: { PK: i.PK, SK: i.SK } }));
+      await this.send(new DeleteCommand({ TableName: this.table, Key: { PK: i.PK, SK: i.SK } }));
     }
   }
   async listConnections(runId: string): Promise<string[]> {
@@ -531,7 +581,7 @@ export class DynamoStore implements Store {
 
   // ------------------------------------------------------------------ evals
   async putAuthorDraft(d: AuthorDraft): Promise<void> {
-    await this.doc.send(
+    await this.send(
       new PutCommand({
         TableName: this.table,
         Item: {
@@ -544,7 +594,7 @@ export class DynamoStore implements Store {
     );
   }
   async getAuthorDraft(draftId: string): Promise<AuthorDraft | null> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new GetCommand({
         TableName: this.table,
         Key: { PK: draftPk(draftId), SK: META },
@@ -555,7 +605,7 @@ export class DynamoStore implements Store {
   }
 
   async putEvalReport(r: EvalReport): Promise<void> {
-    await this.doc.send(
+    await this.send(
       new PutCommand({
         TableName: this.table,
         Item: { PK: evalPk(r.id), SK: META, GSI1PK: GSI1_EVALS, GSI1SK: `${r.createdAt}#${r.id}`, report: r },
@@ -563,7 +613,7 @@ export class DynamoStore implements Store {
     );
   }
   async getLatestEvalReport(): Promise<EvalReport | null> {
-    const res = await this.doc.send(
+    const res = await this.send(
       new QueryCommand({
         TableName: this.table,
         IndexName: GSI1,

@@ -8,10 +8,11 @@
  * polite live region; `D` focuses it and A / E / R work while it has focus. Approve · Edit (the DiffEditor) ·
  * Reject (a reason is required).
  *
- * Simulation auto-approval: a visible 10 s countdown ("Approving automatically in {s}s") approves the decision as
- * `{kind:'policy', policy:'simulation-auto'}`. It pauses while the card is hovered or focused (WCAG 2.2.1) and
- * resumes on leave; it is cancelled for good once the viewer starts editing or rejecting, or decides manually; it
- * never runs when auto-approval is off (⌘K). A 409 (decided elsewhere first) closes the card gracefully.
+ * Auto-approval is OFF by default: the card waits for the viewer, with a presenter hint ("Press Space to pause the
+ * clock while you decide"). Only when the viewer turns it on in ⌘K does a visible 10 s countdown ("Approving
+ * automatically in {s}s") approve the decision as `{kind:'policy', policy:'simulation-auto'}`. It pauses while the
+ * card is hovered or focused (WCAG 2.2.1) and resumes on leave; it is cancelled for good once the viewer starts
+ * editing or rejecting, or decides manually. A 409 (decided elsewhere first) closes the card gracefully.
  */
 import type { ApprovalDecisionRequest, ProjectedApproval } from '@ica/schema/browser';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -35,6 +36,7 @@ import { GlossaryText } from '../../glossary/Term';
 import {
   AUTO_APPROVE_EXPLAINER,
   AUTO_APPROVE_MS,
+  AUTO_APPROVE_OFF_EXPLAINER,
   autoApproveRequest,
   recommendedOptionId,
 } from '../../lib/autoApprove';
@@ -68,7 +70,7 @@ export interface DecisionPopupProps {
   pending: ProjectedApproval[];
   nowMinute: number;
   optimistic?: Record<string, OptimisticDecision>;
-  /** Simulation auto-approval on (⌘K toggle, default on). */
+  /** Simulation auto-approval on (⌘K toggle, default OFF). */
   autoApprove: boolean;
   /** Countdown length (`AUTO_APPROVE_MS`; a test hook may shorten it in mock mode). */
   durationMs?: number;
@@ -598,15 +600,16 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
             </span>
           </>
         ) : (
-          <span className="text-fg-muted" data-countdown-off>
-            {!autoApprove
-              ? 'Waiting for your decision (auto-approve is off)'
-              : engaged
-                ? 'Waiting for your decision'
-                : 'Sending…'}
+          <span className="flex min-w-0 flex-col gap-0.5 text-fg-muted" data-countdown-off>
+            <span>{autoApprove && !engaged && !certifying ? 'Sending…' : 'Waiting for your decision'}</span>
+            {!autoApprove && (
+              <span className="text-micro text-fg-subtle" data-popup-pause-hint>
+                Press <Kbd>Space</Kbd> to pause the clock while you decide
+              </span>
+            )}
           </span>
         )}
-        <InfoTip />
+        <InfoTip on={autoApprove} />
       </div>
     </article>
   );
@@ -649,14 +652,14 @@ function CountdownRing({ fraction, size }: { fraction: number; size: number }) {
   );
 }
 
-function InfoTip() {
+function InfoTip({ on }: { on: boolean }) {
   return (
     <Tooltip.Provider delayDuration={200}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <button
             type="button"
-            aria-label="Why decisions approve themselves"
+            aria-label={on ? 'Why decisions approve themselves' : 'About auto-approve'}
             className="ml-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-focus"
             data-popup-info
           >
@@ -671,7 +674,7 @@ function InfoTip() {
             collisionPadding={8}
             className="z-[80] max-w-xs rounded-md border border-border bg-surface-raised px-3 py-2 text-caption text-fg shadow-e2"
           >
-            {AUTO_APPROVE_EXPLAINER}
+            {on ? AUTO_APPROVE_EXPLAINER : AUTO_APPROVE_OFF_EXPLAINER}
             <Tooltip.Arrow className="fill-surface-raised" />
           </Tooltip.Content>
         </Tooltip.Portal>

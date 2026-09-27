@@ -152,11 +152,20 @@ describe('simulation safety net (human policy, real-time delay)', () => {
     ]);
   });
 
-  it('reads SIM_AUTO_APPROVE_AFTER_MS (0 = off; invalid → default)', () => {
+  it('reads SIM_AUTO_APPROVE_AFTER_MS (default and invalid → 0 = off for agent runs; the knob stays)', () => {
     expect(simAutoApproveAfterMsFromEnv({})).toBe(DEFAULT_SIM_AUTO_APPROVE_AFTER_MS);
-    expect(DEFAULT_SIM_AUTO_APPROVE_AFTER_MS).toBe(120_000);
+    expect(DEFAULT_SIM_AUTO_APPROVE_AFTER_MS).toBe(0);
     expect(simAutoApproveAfterMsFromEnv({ SIM_AUTO_APPROVE_AFTER_MS: '0' })).toBe(0);
     expect(simAutoApproveAfterMsFromEnv({ SIM_AUTO_APPROVE_AFTER_MS: '30000' })).toBe(30_000);
-    expect(simAutoApproveAfterMsFromEnv({ SIM_AUTO_APPROVE_AFTER_MS: 'soon' })).toBe(120_000);
+    expect(simAutoApproveAfterMsFromEnv({ SIM_AUTO_APPROVE_AFTER_MS: 'soon' })).toBe(0);
+  });
+
+  it('by default (off) an agent-run approval waits for the person, however long it takes', async () => {
+    const h = await harness(simAutoApproveAfterMsFromEnv({}));
+    decideLikeApi(h, { claimAfterMs: 600_000 });
+    const result = await h.run();
+    expect(result.status).toBe('completed');
+    const events = await h.events();
+    expect(decisions(events).map((d) => d.payload.decidedBy)).toEqual([DUTY_MANAGER]);
   });
 });

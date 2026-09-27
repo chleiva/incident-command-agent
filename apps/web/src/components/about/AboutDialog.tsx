@@ -4,13 +4,13 @@
  */
 /**
  * About (owner request): product, credit, build version, trust notes, data sources and licences, and the
- * repository. Radix Dialog: focus trap, Esc to close, focus returns to the trigger. The credit comes from the brand
- * pack (`about`), with the default values as a fallback.
+ * repository. Radix Dialog: focus trap, Esc to close, focus returns to the trigger. The credit and the repository
+ * link come ONLY from the active brand pack (`about`); without one there is no author line.
  */
 import * as Dialog from '@radix-ui/react-dialog';
 import type { BrandPack } from '@ica/schema/browser';
 import { useRef } from 'react';
-import { DEFAULT_ABOUT, PRODUCT_NAME } from '../../lib/brand';
+import { brandCredit, PRODUCT_NAME } from '../../lib/brand';
 import { Icon } from '../ui/Icon';
 
 export const ABOUT_TAGLINE =
@@ -56,7 +56,7 @@ export function AboutDialog({
   if (open && !wasOpen.current && typeof document !== 'undefined')
     returnTo.current = document.activeElement as HTMLElement | null;
   wasOpen.current = open;
-  const about = { ...DEFAULT_ABOUT, ...(brand?.about ?? {}) };
+  const about = brandCredit(brand);
   const product = brand?.productName ?? PRODUCT_NAME;
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -88,16 +88,22 @@ export function AboutDialog({
             </Dialog.Close>
           </div>
           <div className="zone-scroll flex min-h-0 flex-col gap-4 px-5 py-4 text-body text-fg-muted">
-            <p data-about-credit>
-              Designed and developed by{' '}
-              <a
-                href={about.authorUrl}
-                {...external}
-                className="text-fg underline decoration-border-control underline-offset-2 hover:decoration-fg"
-              >
-                {about.author}
-              </a>
-            </p>
+            {about && (
+              <p data-about-credit>
+                Designed and developed by{' '}
+                {about.authorUrl ? (
+                  <a
+                    href={about.authorUrl}
+                    {...external}
+                    className="text-fg underline decoration-border-control underline-offset-2 hover:decoration-fg"
+                  >
+                    {about.author}
+                  </a>
+                ) : (
+                  <span className="text-fg">{about.author}</span>
+                )}
+              </p>
+            )}
             <p className="text-caption">
               Version{' '}
               <span className="num font-mono text-fg" data-about-version>
@@ -126,7 +132,7 @@ export function AboutDialog({
                 ))}
               </ul>
             </section>
-            {about.repoUrl && (
+            {about?.repoUrl && (
               <p className="text-caption">
                 Source code:{' '}
                 <a

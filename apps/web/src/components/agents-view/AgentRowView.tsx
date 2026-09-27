@@ -24,6 +24,7 @@ export const ROW_KIND_LABEL: Record<RowKind, string> = {
   blocked: 'Blocked',
   stopped: 'Stopped',
   report: 'Report',
+  recovery: 'Recovery',
 };
 
 export function rowIcon(row: AgentRow): { name: IconName; tone: string } {
@@ -53,6 +54,8 @@ export function rowIcon(row: AgentRow): { name: IconName; tone: string } {
       return { name: 'stop', tone: 'text-critical' };
     case 'report':
       return { name: 'check', tone: 'text-good' };
+    case 'recovery':
+      return { name: 'undo', tone: 'text-fg-muted' };
   }
 }
 
@@ -75,6 +78,7 @@ const FRAME: Partial<Record<RowKind, string>> = {
   invalidated: 'border-warning/60 bg-warning-bg',
   blocked: 'border-critical/50 bg-critical-bg',
   stopped: 'border-critical/60 bg-critical-bg',
+  recovery: 'border-border bg-surface-sunken',
 };
 
 export interface AgentRowViewProps {
@@ -123,6 +127,9 @@ export const AgentRowView = forwardRef<HTMLButtonElement, AgentRowViewProps>(fun
       : `Go to the ${roleName(row.link.role)} delegation`
     : '';
   const linkText = row.link?.direction === 'out' ? 'Go to brief' : 'Go to delegation';
+  // Continuous per column across re-briefs (T1…Tn over the whole run).
+  const turn = row.columnTurn ?? row.turn;
+  const divider = row.kind === 'brief' && !!row.rebrief;
   return (
     <div
       data-row={row.key}
@@ -131,9 +138,13 @@ export const AgentRowView = forwardRef<HTMLButtonElement, AgentRowViewProps>(fun
       data-pending={live || undefined}
       data-highlighted={highlighted || undefined}
       data-future={future || undefined}
+      data-rebrief={row.rebrief}
       className={cx(
         'rounded-md border transition-shadow',
-        (row.kind === 'waiting' && !live ? undefined : FRAME[row.kind]) ?? 'border-border bg-surface-raised',
+        divider
+          ? 'border-transparent bg-transparent'
+          : ((row.kind === 'waiting' && !live ? undefined : FRAME[row.kind]) ??
+              'border-border bg-surface-raised'),
         highlighted && 'ring-2 ring-focus',
         // After the viewed moment (history mode): dashed, muted, still readable (AA contrast).
         future && 'border-dashed',
@@ -145,47 +156,76 @@ export const AgentRowView = forwardRef<HTMLButtonElement, AgentRowViewProps>(fun
         tabIndex={focused ? 0 : -1}
         aria-expanded={expanded}
         aria-controls={expanded ? detailId : undefined}
-        aria-label={`${row.turn ? `Turn ${row.turn}, ` : ''}minute ${Math.round(row.minute)}, ${ROW_KIND_LABEL[row.kind]}: ${row.headline}${badge ? `, ${badge.text}` : ''}`}
+        aria-label={`${turn ? `Turn ${turn}, ` : ''}minute ${Math.round(row.minute)}, ${ROW_KIND_LABEL[row.kind]}: ${row.headline}${badge ? `, ${badge.text}` : ''}`}
         data-row-button
         onClick={onToggle}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
         className="flex w-full items-start gap-2 rounded-md px-2 py-[6px] text-left outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
-        <Icon name={icon.name} size={14} className={cx('mt-0.5 shrink-0', icon.tone)} />
-        <span className="min-w-0 flex-1">
-          <span className="num flex min-h-5 items-center gap-[6px] text-micro text-fg-subtle">
-            {row.turn !== undefined && (
-              <span className="rounded-sm bg-surface-sunken px-1 font-mono text-fg-muted" data-turn>
-                T{row.turn}
-              </span>
-            )}
-            <span data-minute>m{Math.round(row.minute)}</span>
-            {row.kind === 'waiting' && !live && row.decision && (
-              <span data-waited>waited {Math.max(0, Math.round(row.decision.minute - row.minute))} min</span>
-            )}
-            {live && (
-              <span className="inline-flex items-center gap-1 font-medium text-warning">
-                <span className="h-[6px] w-[6px] animate-soft-pulse rounded-full bg-warning" aria-hidden />
-                pending
-              </span>
-            )}
-            <span className="ml-auto flex items-center gap-1">
-              {badge && <Badge tone={badge.tone}>{badge.text}</Badge>}
-              <Icon
-                name="chevronDown"
-                size={12}
-                className={cx('shrink-0 text-fg-subtle transition-transform', expanded && 'rotate-180')}
-              />
-            </span>
-          </span>
+        {divider ? (
           <span
-            data-headline
-            className={cx('line-clamp-2 text-body', isThought || future ? 'text-fg-muted' : 'text-fg')}
+            className="flex min-w-0 flex-1 items-center gap-2 text-micro text-fg-muted"
+            data-rebrief-divider
           >
-            {row.headline}
+            <span className="h-px flex-1 bg-border" aria-hidden />
+            <Icon name="arrowLeft" size={10} className="shrink-0 text-fg-subtle" />
+            <span data-headline className="shrink-0">
+              {row.headline}
+            </span>
+            <span className="num shrink-0 text-fg-subtle" data-minute>
+              m{Math.round(row.minute)}
+            </span>
+            <span className="h-px flex-1 bg-border" aria-hidden />
           </span>
-        </span>
+        ) : (
+          <>
+            <Icon name={icon.name} size={14} className={cx('mt-0.5 shrink-0', icon.tone)} />
+            <span className="min-w-0 flex-1">
+              <span className="num flex min-h-5 items-center gap-[6px] text-micro text-fg-subtle">
+                {turn !== undefined && (
+                  <span className="rounded-sm bg-surface-sunken px-1 font-mono text-fg-muted" data-turn>
+                    T{turn}
+                  </span>
+                )}
+                <span data-minute>m{Math.round(row.minute)}</span>
+                {row.kind === 'waiting' && !live && row.decision && (
+                  <span data-waited>
+                    waited {Math.max(0, Math.round(row.decision.minute - row.minute))} min
+                  </span>
+                )}
+                {live && (
+                  <span className="inline-flex items-center gap-1 font-medium text-warning">
+                    <span
+                      className="h-[6px] w-[6px] animate-soft-pulse rounded-full bg-warning"
+                      aria-hidden
+                    />
+                    pending
+                  </span>
+                )}
+                <span className="ml-auto flex items-center gap-1">
+                  {badge && <Badge tone={badge.tone}>{badge.text}</Badge>}
+                  <Icon
+                    name="chevronDown"
+                    size={12}
+                    className={cx('shrink-0 text-fg-subtle transition-transform', expanded && 'rotate-180')}
+                  />
+                </span>
+              </span>
+              <span
+                data-headline
+                className={cx('line-clamp-2 text-body', isThought || future ? 'text-fg-muted' : 'text-fg')}
+              >
+                {row.headline}
+              </span>
+              {!!row.reused && (
+                <span className="block text-micro text-fg-subtle" data-reused>
+                  same result reused{row.reused > 1 ? ` ×${row.reused}` : ''}
+                </span>
+              )}
+            </span>
+          </>
+        )}
       </button>
       {live && row.proposal && (
         <div className="flex flex-col gap-1 px-2 pb-2 pl-8 text-caption text-fg-muted" data-waiting-live>

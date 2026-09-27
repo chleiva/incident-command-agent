@@ -65,8 +65,14 @@ describe('idempotent notification and work-order tools (requestId)', () => {
       deduplicated: true,
     });
     expect(h.state.engineers.engineers['eng-1']!.pageRequestId).toBe(REQ);
-    // A genuinely new page of the same engineer still fails (already paged).
-    expect((await call(h, 'page_engineer', { ...input, requestId: 'another-request-2' })).ok).toBe(false);
+    // A new page of the same engineer sends nothing: it returns their current status and ETA (no mutation).
+    const again = await call(h, 'page_engineer', { ...input, requestId: 'another-request-2' });
+    expect(again.ok && again.mutations).toBeUndefined();
+    expect(okData(again)).toMatchObject({
+      alreadyPaged: true,
+      engineerId: 'eng-1',
+      etaMinute: first.etaMinute,
+    });
   });
 
   it('notify_handler, request_bus, request_tow and request_stand dedupe on requestId', async () => {

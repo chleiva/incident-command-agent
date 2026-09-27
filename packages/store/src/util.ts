@@ -63,3 +63,31 @@ export function groupMutations(
 }
 
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** The store key of one mock-state row (`SYS#{system}#{entity}#{id}` in DynamoDB). */
+export const mutationKey = (m: Pick<SystemMutation, 'system' | 'entity' | 'id'>): string =>
+  `${m.system}#${m.entity}#${m.id}`;
+
+/** Keys that more than one mutation of `mutations` writes (empty when every key is unique). */
+export function duplicateMutationKeys(mutations: SystemMutation[]): string[] {
+  const seen = new Set<string>();
+  const dup = new Set<string>();
+  for (const m of mutations) {
+    const k = mutationKey(m);
+    if (seen.has(k)) dup.add(k);
+    seen.add(k);
+  }
+  return [...dup];
+}
+
+/**
+ * Coalesce mutations per key so one transaction writes each row once (DynamoDB rejects a TransactWriteItems with
+ * two operations on one item). Applying the result gives the same final state as applying the input in order:
+ * the last mutation for a key wins (put-after-delete = put, delete-after-put = delete). Rows keep the position of
+ * their last write.
+ */
+export function coalesceMutations(mutations: SystemMutation[]): SystemMutation[] {
+  const last = new Map<string, number>();
+  mutations.forEach((m, i) => last.set(mutationKey(m), i));
+  return mutations.filter((m, i) => last.get(mutationKey(m)) === i);
+}

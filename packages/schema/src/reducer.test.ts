@@ -4,7 +4,14 @@
  */
 import { describe, expect, it } from 'vitest';
 import sample from '../fixtures/run.sample.events.json' with { type: 'json' };
-import { SYSTEM_ENTITIES, applyEvent, emptyProjection, foldEvents, type RunEvent } from './index';
+import {
+  SYSTEM_ENTITIES,
+  applyEvent,
+  emptyProjection,
+  foldEvents,
+  validateEvent,
+  type RunEvent,
+} from './index';
 
 const events = sample as unknown as RunEvent[];
 
@@ -114,5 +121,59 @@ describe('reducer properties', () => {
       payload: { system: 'occ', entity: 'spares', id: 'AX-FXB', op: 'delete' },
     } as unknown as RunEvent;
     expect(applyEvent(s, del).systems.occ.spares['AX-FXB']).toBeUndefined();
+  });
+});
+
+describe('self-recovery events', () => {
+  const base = {
+    runId: 'r',
+    actor: { kind: 'world' },
+    simTime: '2026-06-12T06:00:00Z',
+    wallTime: '2026-06-12T06:00:00Z',
+  };
+  it('run.recovering then run.resumed_after_error: meta.recovery and status running again', () => {
+    const recovering = {
+      ...base,
+      seq: 10,
+      simMinute: 42.5,
+      type: 'run.recovering',
+      payload: { attempt: 1, reason: 'event log unwritable', maxAttempts: 2 },
+    };
+    const resumed = {
+      ...base,
+      seq: 11,
+      simMinute: 42.5,
+      type: 'run.resumed_after_error',
+      payload: { attempt: 1, fromMinute: 42.5, pendingApprovals: 1 },
+    };
+    for (const e of [recovering, resumed]) expect(validateEvent(e).ok).toBe(true);
+    const a = applyEvent(emptyProjection('r'), recovering as unknown as RunEvent);
+    expect(a.meta.recovery).toEqual({
+      status: 'recovering',
+      attempt: 1,
+      reason: 'event log unwritable',
+      atMinute: 42.5,
+      seq: 10,
+    });
+    const b = applyEvent(a, resumed as unknown as RunEvent);
+    expect(b.meta.status).toBe('running');
+    expect(b.meta.recovery).toEqual({
+      status: 'resumed',
+      attempt: 1,
+      reason: 'event log unwritable',
+      atMinute: 42.5,
+      seq: 11,
+    });
+  });
+  it('system.error validates with a scope', () => {
+    const e = {
+      ...base,
+      seq: 3,
+      simMinute: 1,
+      type: 'system.error',
+      payload: { scope: 'tool', message: 'x', tool: 'page_engineer' },
+    };
+    expect(validateEvent(e).ok).toBe(true);
+    expect(validateEvent({ ...e, payload: { scope: 'nope', message: 'x' } }).ok).toBe(false);
   });
 });

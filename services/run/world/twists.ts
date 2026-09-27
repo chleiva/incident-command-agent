@@ -14,6 +14,7 @@ import {
 } from '@ica/schema';
 import { deepClone } from '../runtime/util';
 import { etdMin, retimeFlight } from '../systems/occ/index';
+import { delayEngineerEta } from '../systems/engineers/index';
 import { originMs } from '../systems/util';
 
 export interface AppliedTwist {
@@ -85,6 +86,25 @@ export function applyTwistEffects(state: SystemState, effects: TwistEffect[], no
       };
       work.occ.flights[eff.flight] = after;
       out.mutations.push({ system: 'occ', entity: 'flights', id: eff.flight, op: 'update', before, after });
+      continue;
+    }
+    if (
+      eff.op === 'shift' &&
+      eff.system === 'engineers' &&
+      eff.entity === 'engineers' &&
+      eff.field === 'etaMinute'
+    ) {
+      // Resolved at apply time: the engineer actually on the way (or the next page), never a silent no-op.
+      const typed = work as unknown as SystemState;
+      const r = delayEngineerEta(typed, eff.id, eff.minutes, now ?? Number.NEGATIVE_INFINITY);
+      if ('error' in r) {
+        out.errors.push(r.error);
+        continue;
+      }
+      for (const m of r.mutations)
+        (work.engineers.engineers as Record<string, unknown>)[m.id] = deepClone(m.after);
+      out.mutations.push(...r.mutations);
+      out.infos.push(r.note);
       continue;
     }
     if (eff.op === 'shift') {

@@ -64,6 +64,12 @@ export const NAG_SUPPRESSIONS: NagSuppression[] = [
       'lambda:InvokeFunction on the run/author functions including their versions/aliases (grantInvoke default).',
   },
   {
+    rule: /^AwsSolutions-IAM5\[Resource::arn:.*:lambda:.*:function:.*-RunFn\*\]$/,
+    path: /\/RunFn\//,
+    reason:
+      "Self-recovery: the Run Lambda re-invokes itself asynchronously to resume a failed run. Scoped to this stack's RunFn by name, because referencing the function ARN from its own role policy is a circular dependency.",
+  },
+  {
     rule: /^AwsSolutions-IAM5\[Resource::.*@connections\/\*\]$/,
     path: /\/FanoutFn\//,
     reason:

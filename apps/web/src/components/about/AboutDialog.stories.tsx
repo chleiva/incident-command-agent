@@ -14,8 +14,18 @@ const meta: Meta<typeof AboutDialog> = {
 export default meta;
 type Story = StoryObj<typeof AboutDialog>;
 
+/** The public defaults: no author line, no repository link. */
 export const Open: Story = {};
-export const Fallback: Story = {
-  name: 'Brand without an about block (fallback credit)',
-  args: { brand: {} },
+export const WithBrandCredit: Story = {
+  name: 'Brand pack with an about block (credit shown)',
+  args: {
+    brand: {
+      ...DEFAULT_BRAND,
+      about: {
+        author: 'Example Author',
+        authorUrl: 'https://example.org/author',
+        repoUrl: 'https://example.org/repo',
+      },
+    },
+  },
 };

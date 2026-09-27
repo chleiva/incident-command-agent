@@ -15,6 +15,8 @@ const SHAPE: Record<MarkerKind, string> = {
   blocked: 'h-2 w-2 rounded-full bg-warning',
   end: 'h-3 w-0.5 bg-fg-muted',
   baseline: 'h-2 w-2 rounded-full border border-fg-subtle',
+  recovery: 'h-2 w-2 rotate-45 border border-warning bg-surface',
+  failed: 'h-3 w-0.5 bg-critical',
 };
 
 export const MARKER_LEGEND: [MarkerKind, string][] = [

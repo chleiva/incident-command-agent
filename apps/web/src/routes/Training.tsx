@@ -13,7 +13,7 @@ import { useRunActions } from '../app/actions';
 import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
 import { authorAndWait } from '../lib/api';
-import { DEFAULT_ABOUT } from '../lib/brand';
+import { brandCredit } from '../lib/brand';
 import { AuthorBox } from '../components/presenter/AuthorBox';
 import { ScenarioPicker } from '../components/presenter/ScenarioPicker';
 import { RecentRuns } from '../components/home/HomePanels';
@@ -44,6 +44,7 @@ function useLoad<T>(
 
 export default function Training() {
   const { api, app, canRun } = useServices();
+  const credit = brandCredit(app.brand);
   const actions = useRunActions();
   const scenarios = useLoad<ScenarioSummary[]>(() => api.listScenarios().then((r) => r.items));
   const runs = useLoad<RunMeta[]>(() => api.listRuns(12).then((r) => r.items));
@@ -84,9 +85,12 @@ export default function Training() {
             )}
           </div>
         </div>
-        <p className="pb-2 text-center text-micro text-fg-subtle" data-credit>
-          Designed and developed by {(app.brand.about ?? DEFAULT_ABOUT).author}
-        </p>
+        {/* The credit only when the active brand pack provides one (none in the public defaults). */}
+        {credit && (
+          <p className="pb-2 text-center text-micro text-fg-subtle" data-credit>
+            Designed and developed by {credit.author}
+          </p>
+        )}
       </div>
     </AppShell>
   );

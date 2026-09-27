@@ -152,7 +152,7 @@ function GlobalPalette() {
       run: () => useUi.getState().togglePlainLanguage(),
     },
     {
-      // Simulation: pending decisions approve themselves after a 10 s countdown (default on, per viewer).
+      // Simulation: pending decisions approve themselves after a 10 s countdown (default OFF, per viewer).
       id: 'auto-approve',
       group: 'Decisions',
       label: `${AUTO_APPROVE_PALETTE_LABEL}: ${autoApprove ? 'on' : 'off'}`,

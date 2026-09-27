@@ -5,6 +5,7 @@
 /** SecretStore implementations. Never log secret values. */
 import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import type { SecretStore } from '@ica/schema';
+import { isTransientError, withRetry, type RetryOptions } from './retry';
 
 /** Local: reads `process.env` (populated from `.env` by the dev server). */
 export class EnvSecretStore implements SecretStore {
@@ -23,6 +24,8 @@ export interface SecretsManagerSecretStoreOptions {
   secretIds: string[];
   client?: SecretsManagerClient;
   region?: string;
+  /** Transient-error retry policy (default: 5 attempts, full jitter, cap 8 s). */
+  retry?: RetryOptions;
 }
 
 /**
@@ -37,9 +40,14 @@ export class SecretsManagerSecretStore implements SecretStore {
     this.client = opts.client ?? new SecretsManagerClient({ region: opts.region });
   }
 
+  private transientFailure = false;
+
   private async loadOne(secretId: string): Promise<Record<string, string>> {
     try {
-      const res = await this.client.send(new GetSecretValueCommand({ SecretId: secretId }));
+      const res = await withRetry(
+        () => this.client.send(new GetSecretValueCommand({ SecretId: secretId })),
+        this.opts.retry,
+      );
       const parsed: unknown = JSON.parse(res.SecretString ?? '{}');
       if (!parsed || typeof parsed !== 'object') return {};
       return Object.fromEntries(
@@ -49,15 +57,21 @@ export class SecretsManagerSecretStore implements SecretStore {
       ) as Record<string, string>;
     } catch (err) {
       const name = (err as { name?: string }).name ?? 'Error';
+      // A transient failure (after retries) is not cached: the next get() tries again.
+      if (isTransientError(err)) this.transientFailure = true;
       console.warn(JSON.stringify({ msg: 'secret unavailable', secretId, error: name }));
       return {};
     }
   }
 
   private load(): Promise<Record<string, string>> {
-    this.cache ??= Promise.all(this.opts.secretIds.map((id) => this.loadOne(id))).then((maps) =>
-      Object.assign({}, ...[...maps].reverse()),
-    );
+    this.cache ??= Promise.all(this.opts.secretIds.map((id) => this.loadOne(id))).then((maps) => {
+      if (this.transientFailure) {
+        this.transientFailure = false;
+        this.cache = null;
+      }
+      return Object.assign({}, ...[...maps].reverse()) as Record<string, string>;
+    });
     return this.cache;
   }
 

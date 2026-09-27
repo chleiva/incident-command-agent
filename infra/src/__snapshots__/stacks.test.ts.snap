@@ -2872,19 +2872,21 @@ exports[`ApiStack > matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
+                    "arn:aws:lambda:eu-west-2:",
                     {
-                      "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeBucketD7C8B00DArn0E6CDADF",
+                      "Ref": "AWS::AccountId",
                     },
-                    "/*",
+                    ":function:Ica-Api-RunFn*",
                   ],
                 ],
               },
+              "Sid": "SelfResumeInvoke",
             },
           ],
           "Version": "2012-10-17",
@@ -2903,10 +2905,18 @@ exports[`ApiStack > matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:ListBucket",
+              "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": {
-                "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeBucketD7C8B00DArn0E6CDADF",
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeBucketD7C8B00DArn0E6CDADF",
+                    },
+                    "/*",
+                  ],
+                ],
               },
             },
           ],
@@ -2922,6 +2932,29 @@ exports[`ApiStack > matches the snapshot 1`] = `
       "Type": "AWS::IAM::Policy",
     },
     "RunFninlinePolicyAddedToExecutionRole2FB33A190": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:ListBucket",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttKnowledgeBucketD7C8B00DArn0E6CDADF",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RunFninlinePolicyAddedToExecutionRole2FB33A190",
+        "Roles": [
+          {
+            "Ref": "RunFnServiceRole295129E9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RunFninlinePolicyAddedToExecutionRole3E7F0F4B0": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2946,7 +2979,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "RunFninlinePolicyAddedToExecutionRole2FB33A190",
+        "PolicyName": "RunFninlinePolicyAddedToExecutionRole3E7F0F4B0",
         "Roles": [
           {
             "Ref": "RunFnServiceRole295129E9",
@@ -2955,7 +2988,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "RunFninlinePolicyAddedToExecutionRole3E7F0F4B0": {
+    "RunFninlinePolicyAddedToExecutionRole41ABB33C6": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2989,7 +3022,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "RunFninlinePolicyAddedToExecutionRole3E7F0F4B0",
+        "PolicyName": "RunFninlinePolicyAddedToExecutionRole41ABB33C6",
         "Roles": [
           {
             "Ref": "RunFnServiceRole295129E9",
@@ -2998,7 +3031,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "RunFninlinePolicyAddedToExecutionRole41ABB33C6": {
+    "RunFninlinePolicyAddedToExecutionRole5C0D3DCB6": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -3016,7 +3049,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "RunFninlinePolicyAddedToExecutionRole41ABB33C6",
+        "PolicyName": "RunFninlinePolicyAddedToExecutionRole5C0D3DCB6",
         "Roles": [
           {
             "Ref": "RunFnServiceRole295129E9",

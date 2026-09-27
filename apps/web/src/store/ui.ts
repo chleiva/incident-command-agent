@@ -44,7 +44,10 @@ interface UiState {
   /** Agents view (task 08): hide thought rows. Persisted per viewer. */
   hideThoughts: boolean;
   aboutOpen: boolean;
-  /** Simulation: pending decisions approve themselves after a 10 s countdown. Default on; persisted per viewer. */
+  /**
+   * Simulation: pending decisions approve themselves after a 10 s countdown. Default OFF (the card waits for the
+   * viewer); turned on per viewer in ⌘K and persisted under `AUTO_APPROVE_KEY` (v2).
+   */
   autoApprove: boolean;
   setAutoApprove(on: boolean): void;
   setTheme(t: Theme): void;
@@ -70,7 +73,12 @@ const THEME_KEY = 'ica.theme';
 const CAPTIONS_KEY = 'ica.captions';
 export const PLAIN_LANGUAGE_KEY = 'ica.plainLanguage';
 export const HIDE_THOUGHTS_KEY = 'ica.agents.hideThoughts';
-export const AUTO_APPROVE_KEY = 'ica.autoApprove';
+/**
+ * v2: the default flipped to OFF (demo review). Any preference stored under the v1 key is dropped once, so every
+ * viewer starts with auto-approve off; only an explicit ⌘K "on" (written to v2) turns it back on.
+ */
+export const AUTO_APPROVE_KEY = 'ica.autoApprove.v2';
+export const LEGACY_AUTO_APPROVE_KEYS = ['ica.autoApprove'] as const;
 const OPEN_RUN_KEY = 'ica.openRun';
 
 function read(key: string): string | null {
@@ -87,6 +95,20 @@ function write(key: string, value: string): void {
     /* private mode: ignore */
   }
 }
+function remove(key: string): void {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    /* storage blocked: nothing to migrate */
+  }
+}
+
+/** Auto-approve preference: on only when the viewer turned it on under the v2 key (legacy keys are dropped). */
+export function readAutoApprove(): boolean {
+  for (const k of LEGACY_AUTO_APPROVE_KEYS) remove(k);
+  return read(AUTO_APPROVE_KEY) === 'on';
+}
+
 function readSession(key: string): string | null {
   try {
     return window.sessionStorage.getItem(key);
@@ -125,7 +147,7 @@ export const useUi = create<UiState>()((set, get) => ({
   openRunId: readSession(OPEN_RUN_KEY),
   hideThoughts: read(HIDE_THOUGHTS_KEY) === 'on',
   aboutOpen: false,
-  autoApprove: read(AUTO_APPROVE_KEY) !== 'off',
+  autoApprove: readAutoApprove(),
   setAutoApprove(autoApprove) {
     write(AUTO_APPROVE_KEY, autoApprove ? 'on' : 'off');
     set({ autoApprove });

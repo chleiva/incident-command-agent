@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * Decisions are always NOW, in mock mode: the gentle decision popup auto-approves after its countdown (shortened here
- * by the mock-only test hook) and the Agents view records "Auto-approved (simulation)"; in history mode the rail
- * still lists the live decisions and the Agents view hides the rows after the viewed moment.
+ * Decisions are always NOW, in mock mode: by default the decision popup waits for the viewer (auto-approve is OFF,
+ * with a "Press Space to pause the clock" hint); turned on in ⌘K, it auto-approves after its countdown (shortened
+ * here by the mock-only test hook) and the Agents view records "Auto-approved (simulation)"; in history mode the
+ * rail still lists the live decisions and the Agents view hides the rows after the viewed moment.
  */
 import { expect, test, type Page } from '@playwright/test';
 
@@ -18,12 +19,32 @@ async function startS01(page: Page) {
   await page.mouse.move(5, 5);
 }
 
-test('the decision popup auto-approves after its countdown, recorded as "Auto-approved (simulation)"', async ({
+test('by default the decision popup waits for a person: no countdown, a Space hint; Space pauses the clock', async ({
+  page,
+}) => {
+  // A stored v1 preference ("on") is migrated once to OFF.
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove', 'on'));
+  await startS01(page);
+  const popup = page.locator('[data-decision-popup] article[data-popup-approval="ap-msg-1"]');
+  await expect(popup).toBeVisible({ timeout: 30_000 });
+  await expect(popup).toContainText('Waiting for your decision');
+  await expect(popup.locator('[data-popup-pause-hint]')).toHaveText(
+    'Press Space to pause the clock while you decide',
+  );
+  await expect(popup.getByRole('timer')).toHaveCount(0);
+  // Space pauses the world clock while the card itself has focus.
+  await popup.focus();
+  await page.keyboard.press('Space');
+  await expect(page.locator('header').getByText('paused', { exact: true })).toBeVisible();
+  await expect(popup).toBeVisible();
+});
+
+test('turned on in ⌘K, the popup auto-approves after its countdown, recorded as "Auto-approved (simulation)"', async ({
   page,
 }) => {
   await page.addInitScript(() => {
     (window as unknown as Record<string, unknown>).__ICA_TEST_AUTO_APPROVE_MS__ = 2_000;
-    window.localStorage.removeItem('ica.autoApprove');
+    window.localStorage.setItem('ica.autoApprove.v2', 'on');
   });
   await startS01(page);
 
@@ -47,14 +68,13 @@ test('the decision popup auto-approves after its countdown, recorded as "Auto-ap
 test('history mode: the rail still lists live decisions; the Agents view hides later rows', async ({
   page,
 }) => {
-  // Auto-approval off (⌘K setting, persisted): the decision stays pending while we time-travel.
-  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove', 'off'));
+  // Auto-approval off (the default): the decision stays pending while we time-travel.
   await startS01(page);
 
   const rail = page.locator('#zone-decisions');
   await expect(rail.locator('[data-approval="ap-msg-1"]')).toBeVisible({ timeout: 30_000 });
   const popup = page.locator('[data-decision-popup] article[data-popup-approval="ap-msg-1"]');
-  await expect(popup).toContainText('Waiting for your decision (auto-approve is off)');
+  await expect(popup).toContainText('Waiting for your decision');
 
   // Scrub back to the start: the rail still shows the live decision, with a calm note.
   await page.getByTestId('scrubber').focus();

@@ -8,11 +8,16 @@
 import { getPublicScenario } from '@ica/scenarios';
 import {
   ENTITY_KEY,
+  LAMBDA_TIMEOUT_ABORT,
+  MAX_RUN_RESUMES,
+  RunNotFoundError,
   validateScenario,
+  type ApprovalRecord,
   type AuthorResult,
   type ExecuteRunInput,
   type KpiSnapshot,
   type RunDeps,
+  type RunMeta,
   type RunMode,
   type RunTotals,
   type Scenario,
@@ -20,7 +25,7 @@ import {
   type SystemMutation,
   type SystemState,
 } from '@ica/schema';
-import { MemoryStore } from '@ica/store';
+import { MemoryStore, withRetry } from '@ica/store';
 import minimalScenario from '@ica/schema/fixtures/scenario.minimal.json' with { type: 'json' };
 import { runBaseline } from '../baseline/run';
 import { screenText, type ScreenInputOptions } from '../guardrails/screen-input';
@@ -29,7 +34,9 @@ import { WorldEngine } from '../world/engine';
 import { runAgent } from './agent';
 import { prepareRunScenario } from './authoring';
 import type { ApprovalPolicy } from './approvals';
-import { RunContext } from './context';
+import { RUN_SIGNAL_ABORT_DETAIL, RunContext } from './context';
+import { reattachApproval } from './execute';
+import { buildResumeDigest, readEventLog, readSystemState, resumeBrief } from './resume';
 import { defaultRegistry, type Registry } from './registry';
 import { RUNTIME_TOOL_NAMES } from './tools';
 import { demonstrateForbidden, reviseAfterInvalidation } from './presenter';
@@ -59,7 +66,8 @@ export interface ExecuteRunOptions {
 
 export interface RunResult {
   runId: string;
-  status: 'completed' | 'aborted' | 'failed' | 'skipped';
+  /** `recovering`: the run failed (or ran out of Lambda time) and a resume was scheduled. */
+  status: 'completed' | 'aborted' | 'failed' | 'skipped' | 'recovering';
   reason?: 'report' | 'horizon' | 'stopped';
   abortReason?: string;
   totals?: RunTotals;
@@ -117,6 +125,31 @@ async function loadScenario(deps: RunDeps, scenarioId: string): Promise<Scenario
   return getPublicScenario(scenarioId) ?? (await deps.store.getScenario(scenarioId));
 }
 
+/** Final RunMeta write: retried with backoff on ANY error (not only transient ones); never throws. */
+export async function finaliseRunMeta(
+  deps: RunDeps,
+  runId: string,
+  patch: Partial<RunMeta>,
+  log: (line: Record<string, unknown>) => void = () => undefined,
+): Promise<boolean> {
+  try {
+    await withRetry(() => deps.store.updateRun(runId, patch), {
+      attempts: FINAL_WRITE_ATTEMPTS,
+      baseMs: 200,
+      retryOn: (err) => !(err instanceof RunNotFoundError),
+      ...(deps.clock ? { sleep: (ms: number) => deps.clock!.sleep(ms) } : {}),
+      onRetry: ({ attempt, err }) =>
+        log({ msg: 'final run status write failed; retrying', attempt, err: String((err as Error).message) }),
+    });
+    return true;
+  } catch (err) {
+    log({ msg: 'final run status NOT written', status: patch.status, err: String((err as Error).message) });
+    return false;
+  }
+}
+
+export const FINAL_WRITE_ATTEMPTS = 6;
+
 async function failRun(deps: RunDeps, runId: string, error: string, where: string): Promise<RunResult> {
   const meta = await deps.store.getRun(runId);
   const simMinute = meta?.simMinute ?? 0;
@@ -133,27 +166,46 @@ async function failRun(deps: RunDeps, runId: string, error: string, where: strin
   } catch {
     /* the run row may be gone; still update meta below */
   }
-  await deps.store
-    .updateRun(runId, { status: 'failed', error: error.slice(0, 500), endedAt: new Date().toISOString() })
-    .catch(() => undefined);
+  await finaliseRunMeta(deps, runId, {
+    status: 'failed',
+    error: error.slice(0, 500),
+    endedAt: new Date().toISOString(),
+  });
   return { runId, status: 'failed', error };
 }
 
-/** Run a whole scenario. Resolves when the run ends; never throws for run-level failures (they become events). */
+/** True when the Run Lambda aborted the run because it is about to time out (see handler.ts). */
+function lambdaTimedOut(signal: AbortSignal | undefined): boolean {
+  return !!signal?.aborted && signal.reason === LAMBDA_TIMEOUT_ABORT;
+}
+
+/**
+ * Run a whole scenario — or resume one (`input.resume`). Resolves when the run ends; never throws for run-level
+ * failures: a failure (or the Lambda running out of time with work remaining) schedules a resume when possible
+ * (`RunDeps.scheduleResume`, ≤ MAX_RUN_RESUMES, `run.recovering`), else becomes `run.failed`. The final RunMeta
+ * status is always written in a `finally`, with retries, and matches the final event.
+ */
 export async function executeRunWith(
   input: ExecuteRunInput,
   opts: ExecuteRunOptions = {},
 ): Promise<RunResult> {
   const { runId, deps } = input;
+  const resume = input.resume;
   const registry = opts.registry ?? defaultRegistry();
   const meta = await deps.store.getRun(runId);
   if (!meta) throw new Error(`run not found: ${runId}`);
-  if (meta.status !== 'created') {
+  if (resume) {
+    // Only a run that was interrupted can be resumed, and each attempt exactly once (Lambda may deliver twice).
+    if (!['running', 'paused', 'failed'].includes(meta.status))
+      return { runId, status: 'skipped', error: `run status is '${meta.status}'; nothing to resume` };
+    if (!deps.store.claimResume || !(await deps.store.claimResume(runId, resume.attempt)))
+      return { runId, status: 'skipped', error: `resume attempt ${resume.attempt} already claimed` };
+  } else if (meta.status !== 'created') {
     // Idempotency: Lambda retries async invocations; never run the same run twice.
     return { runId, status: 'skipped', error: `run status is '${meta.status}', not 'created'` };
   }
   // Async authoring: patch the template scenario from the free text (authoring run) or wait for it (paired run).
-  if (!opts.scenario && (input.authoring || meta.preparing)) {
+  if (!resume && !opts.scenario && (input.authoring || meta.preparing)) {
     await prepareRunScenario(meta, input.authoring, deps, {
       registry,
       signal: input.signal,
@@ -183,56 +235,108 @@ export async function executeRunWith(
     rejectTools: opts.rejectTools,
     signal: input.signal,
     log: opts.log,
+    ...(resume ? { rngSalt: `resume-${resume.attempt}` } : {}),
   });
   opts.onContext?.(ctx);
   const world = { kind: 'world' as const };
   let engine: WorldEngine | undefined;
-  try {
-    const first = await deps.store.listEvents(runId, 0, 1);
-    if (!first.events.length) {
-      await ctx.emit(
-        'run.created',
-        {
-          scenarioId: scenario.id,
-          mode,
-          ...(meta.pairedRunId ? { pairedRunId: meta.pairedRunId } : {}),
-          speed: ctx.sim.speed,
-          config: {
-            provider: mode === 'baseline' ? 'none' : deps.llm.provider,
-            model: mode === 'baseline' ? 'none' : deps.llm.model,
-            limits: deps.llm.limits,
-            ...(deps.llm.fallback ? { fallback: deps.llm.fallback } : {}),
-          },
-        },
-        world,
-      );
+  /** The RunMeta patch the `finally` writes (with retries): always set before returning. */
+  let final: Partial<RunMeta> | null = null;
+  const running: Promise<unknown>[] = [];
+
+  /** A failure (or a Lambda timeout with work left): schedule a resume if we still can, else fail the run. */
+  const recoverOrFail = async (reason: string, where: string): Promise<RunResult> => {
+    ctx.finish('stopped');
+    // Let the agents and the clock wind down (they stop at their next await) before handing over.
+    await Promise.race([Promise.allSettled(running), ctx.clock.sleep(5_000)]);
+    const attempt = (resume?.attempt ?? 0) + 1;
+    const totals = ctx.totalsNow();
+    if (deps.scheduleResume && deps.store.claimResume && attempt <= MAX_RUN_RESUMES) {
+      try {
+        await ctx
+          .emit(
+            'run.recovering',
+            { attempt, reason: reason.slice(0, 1000), maxAttempts: MAX_RUN_RESUMES },
+            world,
+          )
+          .catch(() => undefined);
+        await deps.scheduleResume({ runId, attempt, reason: reason.slice(0, 1000) });
+        ctx.log({ msg: 'run recovering', attempt, reason });
+        final = { status: 'running', totals, simMinute: ctx.sim.simMinute };
+        return { runId, status: 'recovering', error: reason, totals };
+      } catch (err) {
+        ctx.log({ msg: 'resume could not be scheduled', err: String((err as Error).message) });
+      }
     }
-    await deps.store.updateRun(runId, {
-      status: 'running',
-      ...(mode === 'agent' ? { llm: { provider: deps.llm.provider, model: deps.llm.model } } : {}),
-    });
+    ctx.log({ msg: 'run failed', err: reason });
+    await ctx.emit('run.failed', { error: reason.slice(0, 1000), where }, world).catch(() => undefined);
+    final = { status: 'failed', error: reason.slice(0, 500), totals, endedAt: new Date().toISOString() };
+    return { runId, status: 'failed', error: reason, totals };
+  };
+
+  try {
+    let brief = ORCHESTRATOR_BRIEF;
+    let baselineSkip = 0;
+    let pending: ApprovalRecord[] = [];
+    if (!resume) {
+      const first = await deps.store.listEvents(runId, 0, 1);
+      if (!first.events.length) {
+        await ctx.emit(
+          'run.created',
+          {
+            scenarioId: scenario.id,
+            mode,
+            ...(meta.pairedRunId ? { pairedRunId: meta.pairedRunId } : {}),
+            speed: ctx.sim.speed,
+            config: {
+              provider: mode === 'baseline' ? 'none' : deps.llm.provider,
+              model: mode === 'baseline' ? 'none' : deps.llm.model,
+              limits: deps.llm.limits,
+              ...(deps.llm.fallback ? { fallback: deps.llm.fallback } : {}),
+            },
+          },
+          world,
+        );
+      }
+      await deps.store.updateRun(runId, {
+        status: 'running',
+        ...(mode === 'agent' ? { llm: { provider: deps.llm.provider, model: deps.llm.model } } : {}),
+      });
+    }
 
     // Input screening of the (untrusted) narrative: flagged text is neutralised, never obeyed.
     const screening = await screenText(scenario.narrative, { toolNames: toolNamesFor(registry) });
     if (screening.verdict !== 'clean') {
       ctx.narrative = screening.neutralisedText ?? scenario.narrative;
-      await ctx.emit(
-        'guardrail.blocked',
-        {
-          layer: 'input_screen',
-          reason: `scenario narrative ${screening.verdict === 'rejected' ? 'contains injection patterns' : 'flagged'}; neutralised (${screening.findings.map((f) => f.pattern).join(', ')})`,
-          excerpt: screening.findings[0]?.excerpt,
-        },
-        world,
-      );
+      if (!resume)
+        await ctx.emit(
+          'guardrail.blocked',
+          {
+            layer: 'input_screen',
+            reason: `scenario narrative ${screening.verdict === 'rejected' ? 'contains injection patterns' : 'flagged'}; neutralised (${screening.findings.map((f) => f.pattern).join(', ')})`,
+            excerpt: screening.findings[0]?.excerpt,
+          },
+          world,
+        );
     }
 
-    // Seed: run.started, then the seed as system.mutation events (chunks keep each transaction small).
-    let seeded = registry.seedAll(valid.value, ctx.rng);
-    if (opts.seedPatches?.length) seeded = applySeedPatches(seeded, opts.seedPatches);
-    await ctx.emit('run.started', { speed: ctx.sim.speed }, world);
-    const seedMuts = seedMutations(seeded);
-    for (let i = 0; i < seedMuts.length; i += 40) await ctx.persist(seedMuts.slice(i, i + 40), world);
+    if (!resume) {
+      // Seed: run.started, then the seed as system.mutation events (chunks keep each transaction small).
+      let seeded = registry.seedAll(valid.value, ctx.rng);
+      if (opts.seedPatches?.length) seeded = applySeedPatches(seeded, opts.seedPatches);
+      await ctx.emit('run.started', { speed: ctx.sim.speed }, world);
+      const seedMuts = seedMutations(seeded);
+      for (let i = 0; i < seedMuts.length; i += 40) await ctx.persist(seedMuts.slice(i, i + 40), world);
+    } else {
+      // Resume: the store is event-sourced. SYS# rows are the current mock state; the log is everything so far.
+      const events = await readEventLog(ctx);
+      ctx.setInitialState(await readSystemState(ctx));
+      ctx.primeFromLog(events);
+      pending = await deps.store.listApprovals(runId, 'pending');
+      baselineSkip = events.filter((e) => e.type === 'baseline.action').length;
+      if (mode === 'agent')
+        brief = resumeBrief(buildResumeDigest(events, ctx.state, pending, resume.attempt, ctx.sim.simMinute));
+    }
 
     engine = new WorldEngine(ctx, {
       toolNames: toolNamesFor(registry),
@@ -245,39 +349,80 @@ export async function executeRunWith(
         : {}),
     });
     if (mode === 'agent') ctx.onDemoForbidden = (tool) => demonstrateForbidden(ctx, tool);
-    const k0 = engine.computeKpis();
-    ctx.latestKpis = k0;
-    await ctx.emit('kpi.update', k0, world);
+    if (!resume) {
+      const k0 = engine.computeKpis();
+      ctx.latestKpis = k0;
+      await ctx.emit('kpi.update', k0, world);
+    } else engine.primeFromLog(ctx.eventLog());
 
     const policy: ApprovalPolicy = mode === 'baseline' ? 'baseline' : (deps.approvalsPolicy ?? 'human');
+    if (resume) {
+      await ctx.emit(
+        'run.resumed_after_error',
+        {
+          attempt: resume.attempt,
+          fromMinute: Math.round(ctx.sim.simMinute * 100) / 100,
+          pendingApprovals: pending.length,
+        },
+        world,
+      );
+      await deps.store.updateRun(runId, { status: ctx.sim.paused ? 'paused' : 'running' });
+      // Pending approvals are re-attached: each executes on its own once decided (never blocks the run's end).
+      const byName = new Map(registry.tools.map((t) => [t.name, t]));
+      for (const a of pending)
+        void reattachApproval(ctx, a, byName.get(a.tool), policy).catch((err: unknown) =>
+          ctx.log({
+            msg: 're-attached approval ended',
+            approvalId: a.approvalId,
+            err: String((err as Error).message),
+          }),
+        );
+    }
+
+    let orchestratorError: string | null = null;
     const driver =
       mode === 'baseline'
-        ? runBaseline(ctx)
-        : runAgent('orchestrator', ORCHESTRATOR_BRIEF, ctx, { policy, agentPath: 'orchestrator' }).then(
-            async (out) => {
-              // Revisions after an invalidated approval finish before the run ends.
-              if (out.ok) await ctx.drainBackground();
-              ctx.finish(out.ok ? 'report' : 'stopped');
-            },
-          );
-    await Promise.all([driver.finally(() => ctx.finish('stopped')), engine.run()]);
+        ? runBaseline(ctx, { skipSteps: baselineSkip })
+        : runAgent('orchestrator', brief, ctx, { policy, agentPath: 'orchestrator' }).then(async (out) => {
+            // An unexpected error in the orchestrator's own loop is a run failure (resumed when possible).
+            if (!out.ok && out.reason === 'error' && !ctx.stopping) orchestratorError = out.detail;
+            // Revisions after an invalidated approval finish before the run ends.
+            if (out.ok) await ctx.drainBackground();
+            ctx.finish(out.ok ? 'report' : 'stopped');
+          });
+    const clockRun = engine.run();
+    running.push(driver, clockRun);
+    await Promise.all([driver.finally(() => ctx.finish('stopped')), clockRun]);
+
+    if (ctx.logUnwritable) return await recoverOrFail(ctx.logUnwritable, 'executeRun.eventLog');
+    if (orchestratorError)
+      return await recoverOrFail(`orchestrator: ${orchestratorError}`, 'executeRun.orchestrator');
+    // Out of Lambda time with work remaining: resume in a fresh invocation when possible; otherwise the run ends
+    // as stopped (as before).
+    const canResume =
+      !!deps.scheduleResume && !!deps.store.claimResume && (resume?.attempt ?? 0) < MAX_RUN_RESUMES;
+    if (lambdaTimedOut(input.signal) && ctx.abortDetail === RUN_SIGNAL_ABORT_DETAIL && canResume)
+      return await recoverOrFail(
+        'the Run Lambda reached its time limit with work remaining',
+        'executeRun.timeout',
+      );
 
     // Finalise.
     const finalKpis = engine.computeKpis();
     for (const a of await deps.store.listApprovals(runId, 'pending')) {
-      await deps.store.putApproval({ ...a, status: 'expired' });
+      await deps.store.putApproval({ ...a, status: 'expired' }).catch(() => undefined);
     }
     const reason = ctx.finishReason ?? 'stopped';
     const totals = ctx.totalsNow();
     await ctx.emit('run.completed', { reason, totals, finalKpis }, world);
     const limitAbort = ctx.abortReason && ctx.abortReason !== 'stopped';
-    await deps.store.updateRun(runId, {
+    final = {
       status: limitAbort ? 'aborted' : 'completed',
       totals,
       simMinute: ctx.sim.simMinute,
       endedAt: new Date().toISOString(),
       ...(limitAbort ? { error: `${ctx.abortReason}: ${ctx.abortDetail}` } : {}),
-    });
+    };
     ctx.log({ msg: 'run completed', reason, abortReason: ctx.abortReason, costUsd: totals.costUsd });
     return {
       runId,
@@ -288,24 +433,12 @@ export async function executeRunWith(
       finalKpis,
     };
   } catch (err) {
-    ctx.finish('stopped');
     const msg = (err as Error).message ?? String(err);
-    ctx.log({ msg: 'run failed', err: msg });
-    try {
-      await ctx.emit('run.failed', { error: msg.slice(0, 1000), where: 'executeRun' }, world);
-    } catch {
-      /* ignore */
-    }
-    await deps.store
-      .updateRun(runId, {
-        status: 'failed',
-        error: msg.slice(0, 500),
-        totals: ctx.totalsNow(),
-        endedAt: new Date().toISOString(),
-      })
-      .catch(() => undefined);
-    return { runId, status: 'failed', error: msg, totals: ctx.totalsNow() };
+    return await recoverOrFail(msg, 'executeRun');
   } finally {
+    // Always attempted, with retries, and consistent with the final event (live: a run logged "completed" while
+    // RunMeta still said "running").
+    if (final) await finaliseRunMeta(deps, runId, final, ctx.log);
     ctx.dispose();
   }
 }

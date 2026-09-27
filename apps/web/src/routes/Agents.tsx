@@ -19,10 +19,13 @@ import { useRunActions } from '../app/actions';
 import { useServices } from '../app/services';
 import { AppShell } from '../app/AppShell';
 import { useRun, useRunConnection } from '../app/useRunConnection';
+import { useSpaceToggle } from '../app/useSpaceToggle';
 import { AgentsBoard } from '../components/agents-view/AgentsBoard';
 import { AgentsTimelineBar } from '../components/agents-view/AgentsTimelineBar';
 import { LiveDecisionPopup } from '../components/decisions/LiveDecisionPopup';
+import { RunFailedBanner, RunRecoveryBanner } from '../components/RunHealthBanner';
 import { Badge } from '../components/ui/primitives';
+import { recoveryState, runFailure, runOutcome } from '../lib/runHealth';
 import { simClockAt } from '../lib/format';
 import { useSharedRunStore } from '../store/sharedRuns';
 import { useUi } from '../store/ui';
@@ -103,6 +106,19 @@ export default function Agents() {
   }, [live, playing, store]);
 
   const worldRunning = head.meta.status === 'running';
+  // Run health: a final failure or a self-recovery, told calmly in the header area (the same as the dashboard).
+  const failure = useMemo(() => runFailure(head, allEvents), [head, allEvents, version]);
+  const recovery = useMemo(() => recoveryState(allEvents), [allEvents, version]);
+  const [recoveryDismissed, setRecoveryDismissed] = useState<number | null>(null);
+  const outcome = runOutcome(head.meta);
+  const restart = () =>
+    head.meta.scenarioId &&
+    void actions.start(head.meta.scenarioId, {
+      withBaseline: !!head.meta.pairedRunId,
+      speed: head.meta.speed || 6,
+    });
+  // Space pauses/resumes the world clock here too (the decision popup's presenter hint).
+  useSpaceToggle(() => void actions.control(runId, { action: worldRunning ? 'pause' : 'resume' }));
   const loading = head.lastSeq === 0 && !loadError;
   const loadStatus = loadError && head.lastSeq === 0 ? 'error' : loading ? 'loading' : 'ready';
   const dashboard = `/runs/${encodeURIComponent(runId)}`;
@@ -124,7 +140,17 @@ export default function Agents() {
           <span className="truncate text-body text-fg">
             {title ?? head.meta.scenarioId ?? 'Loading run…'}
           </span>
-          <Badge tone={head.meta.status === 'failed' ? 'critical' : 'neutral'}>{head.meta.status}</Badge>
+          <Badge
+            tone={
+              !failure && recovery?.status === 'recovering'
+                ? 'warning'
+                : outcome.tone === 'good'
+                  ? 'neutral'
+                  : outcome.tone
+            }
+          >
+            {!failure && recovery?.status === 'recovering' ? 'recovering' : outcome.label}
+          </Badge>
           <Link
             to={dashboard}
             className="whitespace-nowrap text-caption text-fg-muted underline decoration-border-control underline-offset-2 hover:text-fg"
@@ -136,6 +162,23 @@ export default function Agents() {
     >
       <div className="flex h-[calc(100vh-48px)] min-h-0 flex-col gap-2 p-2" data-testid="agents-view">
         <h1 className="sr-only">Agents</h1>
+        {failure ? (
+          <RunFailedBanner
+            compact
+            failure={failure}
+            onRestart={restart}
+            restartDisabled={!head.meta.scenarioId}
+          />
+        ) : (
+          recovery &&
+          recoveryDismissed !== recovery.seq && (
+            <RunRecoveryBanner
+              compact
+              recovery={recovery}
+              onDismiss={() => setRecoveryDismissed(recovery.seq)}
+            />
+          )
+        )}
         <AgentsTimelineBar
           maxMinute={head.simMinute}
           cursorMinute={view.simMinute}

@@ -33,6 +33,7 @@ import {
   type ApprovalPolicy,
 } from './approvals';
 import { AgentAbort, type Decision, type RunContext } from './context';
+import { netMutations } from '../systems/util';
 import { deriveAssumptions } from './invalidation';
 import { forbiddenExplanation, forbiddenRule, isRuntimeTool, type RuntimeSite } from './tools';
 import { deepClone, preview } from './util';
@@ -248,7 +249,8 @@ async function runHandler(
     ]);
     return { ok: false, isError: true, content: wrapped(tool.name, tool.system, { error: outcome.error }) };
   }
-  const mutations: SystemMutation[] = outcome.mutations ?? [];
+  // One net mutation per row: a handler that chains helpers may touch a row twice (one transaction cannot).
+  const mutations: SystemMutation[] = netMutations(outcome.mutations ?? []);
   const citations: Citation[] | undefined = outcome.citations?.length ? outcome.citations : undefined;
   const drafts: EventDraft[] = [
     // A proposal approved by a person changes state on that person's authority: its mutations carry the approving
@@ -282,6 +284,150 @@ async function runHandler(
     content: wrapped(tool.name, tool.system, body ?? { ok: true }),
     data: outcome.data,
   };
+}
+
+/** Canonical JSON of tool args (keys sorted, recursively): the identity of a call for dedupe and caching. */
+export function canonicalArgs(value: unknown): string {
+  const norm = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(norm);
+    if (v && typeof v === 'object')
+      return Object.fromEntries(
+        Object.keys(v as Record<string, unknown>)
+          .filter((k) => (v as Record<string, unknown>)[k] !== undefined)
+          .sort()
+          .map((k) => [k, norm((v as Record<string, unknown>)[k])]),
+      );
+    return v;
+  };
+  return JSON.stringify(norm(value ?? {}));
+}
+
+/**
+ * Answer a call with an earlier call's outcome without running anything: an identical call in the same model turn
+ * (`deduplicated`) or a read-only cache hit (`cached`). Both events are written (visible in the timeline and the
+ * audit) with the original call's id; nothing is counted against the tool caps.
+ */
+export async function replayToolCall(
+  site: CallSite,
+  tool: ToolDefinition,
+  call: ToolCallInput,
+  source: { toolCallId: string; result: ToolCallResult },
+  kind: 'deduplicated' | 'cached',
+): Promise<ToolCallResult> {
+  const { ctx } = site;
+  const marker =
+    kind === 'deduplicated' ? { deduplicatedFrom: source.toolCallId } : { cachedFrom: source.toolCallId };
+  const prior = ctx
+    .eventLog()
+    .findLast(
+      (e): e is RunEvent<'agent.tool_result'> =>
+        e.type === 'agent.tool_result' && e.payload.toolCallId === source.toolCallId,
+    );
+  const {
+    deduplicatedFrom: _d,
+    cachedFrom: _c,
+    ...priorPayload
+  } = prior?.payload ?? {
+    tool: tool.name,
+    ok: source.result.ok,
+    resultPreview: preview(source.result.data ?? source.result.content),
+  };
+  await ctx.append([
+    ctx.draft(
+      'agent.tool_call',
+      {
+        toolCallId: call.id,
+        tool: tool.name,
+        system: tool.system,
+        tier: tool.tier,
+        args: (call.input ?? {}) as Record<string, unknown>,
+        ...marker,
+      },
+      site.actor,
+      envExtra(site),
+    ),
+    ctx.draft(
+      'agent.tool_result',
+      { ...priorPayload, toolCallId: call.id, tool: tool.name, ...marker },
+      site.actor,
+      envExtra(site),
+    ),
+  ]);
+  return source.result;
+}
+
+/**
+ * Resume: re-attach an approval that was still pending when the previous invocation stopped. Its proposing agent
+ * is gone, so this waits for the decision on its own and then runs the tool exactly as the agent would have
+ * (approve/edit → the handler with the approver; reject → a rejected result). Nothing is re-proposed.
+ */
+export async function reattachApproval(
+  ctx: RunContext,
+  record: ApprovalRecord,
+  tool: ToolDefinition | undefined,
+  policy: ApprovalPolicy,
+): Promise<void> {
+  const call = ctx
+    .eventLog()
+    .find(
+      (e): e is RunEvent<'agent.tool_call'> =>
+        e.type === 'agent.tool_call' && e.payload.toolCallId === record.toolCallId,
+    );
+  const role = record.role;
+  const site: CallSite = {
+    ctx,
+    agentRunId: record.agentRunId,
+    role,
+    agentPath: `${role}/reattached`,
+    actor: call?.actor ?? { kind: 'agent', role },
+    iteration: call?.iteration ?? 0,
+    reasoning: record.reasoning ?? '',
+    policy,
+  };
+  const auto =
+    policy === 'human'
+      ? null
+      : policyDecision(policy, record.tool, record.args, {
+          rejectTools: ctx.rejectTools,
+          scenario: ctx.scenario,
+        });
+  const afterMs = policy === 'human' ? simAutoApproveAfterMs(ctx) : 0;
+  const decision =
+    auto && policy !== 'human'
+      ? await applyPolicyDecision(ctx, record, policy, auto)
+      : await ctx.waitForDecision(
+          record.approvalId,
+          afterMs > 0 ? { afterMs, approve: () => applySimulationAutoApproval(ctx, record) } : undefined,
+        );
+  const input: ToolCallInput = { id: record.toolCallId, name: record.tool, input: record.args };
+  if (decision.decision === 'reject' || !tool || isRuntimeTool(tool)) {
+    const msg =
+      decision.decision === 'reject'
+        ? `rejected: ${decision.reason ?? 'no reason given'}`
+        : `${decision.decision}d (recorded; ${record.tool} is not re-run after a resume)`;
+    await ctx.append([
+      ctx.draft(
+        'agent.tool_result',
+        {
+          toolCallId: record.toolCallId,
+          tool: record.tool,
+          ok: decision.decision !== 'reject',
+          resultPreview: preview(msg),
+        },
+        site.actor,
+        envExtra(site),
+      ),
+    ]);
+    return;
+  }
+  const args =
+    decision.decision === 'edit'
+      ? ((decision.editedArgs ?? record.args) as Record<string, unknown>)
+      : record.args;
+  if (decision.decision === 'edit' && (await checkCall(site, tool, input, args))) return;
+  await runHandler(site, tool, input, args, call?.seq ?? 0, decision, decision.decidedBy).catch((err) =>
+    containToolFailure(site, tool, input, err),
+  );
 }
 
 const DEFAULT_EXCLUSIONS = [
@@ -404,6 +550,69 @@ function proposalSummary(tool: string, args: Record<string, unknown>): string {
  * (`splitOverlong`, e.g. `append_timeline` `/text`) pass through uncut. Every other validation still rejects.
  */
 export async function executeToolCall(
+  site: CallSite,
+  tool: ToolDefinition | undefined,
+  call: ToolCallInput,
+  opts: { availableToRole: boolean },
+): Promise<ToolCallResult> {
+  try {
+    return await executeToolCallLenient(site, tool, call, opts);
+  } catch (err) {
+    if (err instanceof AgentAbort) throw err;
+    return containToolFailure(site, tool, call, err);
+  }
+}
+
+/** What the agent is told when its call could not be recorded (self-recovery: the agent decides what next). */
+export const TOOL_FAILURE_MESSAGE =
+  'The system could not record this action; nothing was changed. Try again or continue.';
+
+/**
+ * Contain an unexpected failure of one tool call (a store write that failed after retries, a bug in a handler's
+ * persistence path): the call becomes an error result for the agent, never a failed run. The mutations and the
+ * tool result travel in ONE transaction, so a failed write changed nothing. A `system.error` (+ the tool result) is
+ * written best-effort so the failure is visible; when even that fails, the event log's own failure counter decides
+ * whether the run must stop.
+ */
+async function containToolFailure(
+  site: CallSite,
+  tool: ToolDefinition | undefined,
+  call: ToolCallInput,
+  err: unknown,
+): Promise<ToolCallResult> {
+  const { ctx } = site;
+  const detail = String((err as Error)?.message ?? err).slice(0, 300);
+  ctx.log({ msg: 'tool call contained', agentRunId: site.agentRunId, tool: call.name, err: detail });
+  await ctx
+    .append([
+      ctx.draft(
+        'system.error',
+        {
+          scope: 'tool',
+          message: `${call.name}: ${detail}`.slice(0, 1000),
+          tool: call.name,
+          toolCallId: call.id,
+          ...(site.actor.kind === 'agent' ? { role: site.actor.role } : {}),
+        },
+        site.actor,
+        envExtra(site),
+      ),
+      ctx.draft(
+        'agent.tool_result',
+        { toolCallId: call.id, tool: call.name, ok: false, resultPreview: TOOL_FAILURE_MESSAGE },
+        site.actor,
+        envExtra(site),
+      ),
+    ])
+    .catch(() => undefined);
+  return {
+    ok: false,
+    isError: true,
+    content: wrapped(call.name, tool?.system ?? 'runtime', { error: TOOL_FAILURE_MESSAGE }),
+  };
+}
+
+async function executeToolCallLenient(
   site: CallSite,
   tool: ToolDefinition | undefined,
   call: ToolCallInput,

@@ -5,8 +5,16 @@
 /** TraceStore implementations: full prompts/completions and oversized payloads (`traces/{runId}/{seq}{suffix}.json`). */
 import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+  type GetObjectCommandOutput,
+  type ListObjectsV2CommandOutput,
+} from '@aws-sdk/client-s3';
 import type { TraceObjectInfo, TracePutOptions, TraceStore } from '@ica/schema';
+import { withRetry, type RetryOptions } from './retry';
 
 const SAFE = /^[A-Za-z0-9._-]+$/;
 
@@ -87,18 +95,27 @@ export class MemoryTraceStore implements TraceStore {
 
 export interface S3TraceStoreOptions {
   bucket: string;
-  client?: S3Client;
+  client?: Pick<S3Client, 'send'>;
   region?: string;
+  /** Transient-error retry policy (default: 5 attempts, full jitter, cap 8 s). */
+  retry?: RetryOptions;
 }
 
 /** Traces bucket (DataStack): `s3://{bucket}/traces/{runId}/{seq}.json`. */
 export class S3TraceStore implements TraceStore {
-  private readonly client: S3Client;
+  private readonly s3: Pick<S3Client, 'send'>;
   private readonly bucket: string;
+  private readonly retry: RetryOptions;
   constructor(opts: S3TraceStoreOptions) {
     this.bucket = opts.bucket;
-    this.client = opts.client ?? new S3Client({ region: opts.region });
+    this.s3 = opts.client ?? new S3Client({ region: opts.region });
+    this.retry = opts.retry ?? {};
   }
+  /** S3 calls retry transient errors (throttling/SlowDown, 5xx, network) with backoff. */
+  private readonly client = {
+    send: <T>(cmd: unknown): Promise<T> =>
+      withRetry(() => this.s3.send(cmd as never) as Promise<T>, this.retry),
+  };
   async put(runId: string, seq: number | string, body: unknown, opts: TracePutOptions = {}): Promise<string> {
     const key = traceKey(runId, seq, opts.suffix);
     await this.client.send(
@@ -113,7 +130,9 @@ export class S3TraceStore implements TraceStore {
   }
   async get(key: string): Promise<unknown> {
     assertKey(key);
-    const res = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    const res = await this.client.send<GetObjectCommandOutput>(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
     const text = await res.Body?.transformToString('utf8');
     if (text === undefined) throw new Error(`empty trace: ${key}`);
     return JSON.parse(text);
@@ -124,7 +143,7 @@ export class S3TraceStore implements TraceStore {
     const out: TraceObjectInfo[] = [];
     let token: string | undefined;
     do {
-      const res = await this.client.send(
+      const res = await this.client.send<ListObjectsV2CommandOutput>(
         new ListObjectsV2Command({ Bucket: this.bucket, Prefix: prefix, ContinuationToken: token }),
       );
       for (const o of res.Contents ?? []) {

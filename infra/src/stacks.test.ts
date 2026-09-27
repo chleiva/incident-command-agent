@@ -266,6 +266,21 @@ describe('ApiStack', () => {
     expect(JSON.stringify(statements)).not.toMatch(/s3:\*|s3:Delete/);
   });
 
+  it('lets the Run Lambda invoke only itself (self-recovery resume), nothing else', () => {
+    const statements = Object.values(api.findResources('AWS::IAM::Policy'))
+      .filter((p) => JSON.stringify(p.Properties.Roles).includes('RunFn'))
+      .flatMap(
+        (p) =>
+          p.Properties.PolicyDocument.Statement as { Sid?: string; Action: unknown; Resource: unknown }[],
+      );
+    const invoke = statements.filter((s) => JSON.stringify(s.Action).includes('lambda:InvokeFunction'));
+    expect(invoke).toHaveLength(1);
+    expect(invoke[0]!.Sid).toBe('SelfResumeInvoke');
+    expect(invoke[0]!.Action).toBe('lambda:InvokeFunction');
+    expect(JSON.stringify(invoke[0]!.Resource)).toMatch(/:function:[^"*]*-RunFn\*/);
+    expect(JSON.stringify(invoke[0]!.Resource)).not.toMatch(/AuthorFn|ApiFn/);
+  });
+
   it('grants the knowledge Lambdas exactly the Cohere embed/rerank models and QueryVectors on the index', () => {
     const policies = Object.values(api.findResources('AWS::IAM::Policy'));
     const statements = policies.flatMap(

@@ -8,7 +8,16 @@
  * and recomputes the KPIs. Emits `world.tick` once per sim minute. **Never calls the LLM** (free-text twists are
  * structured by an injected function that runs the author agent).
  */
-import type { Actor, EventDraft, Flight, ScenarioTwist, SystemMutation, TwistEffect } from '@ica/schema';
+import type {
+  Actor,
+  EventDraft,
+  Flight,
+  RunEvent,
+  ScenarioTwist,
+  SystemMutation,
+  TwistEffect,
+} from '@ica/schema';
+import { netMutations } from '../systems/util';
 import { findInvalidations, type Invalidation } from '../runtime/invalidation';
 import { screenText } from '../guardrails/screen-input';
 import type { RunContext } from '../runtime/context';
@@ -88,16 +97,40 @@ export class WorldEngine {
         ctx.stop('stopped', `wall clock ${ctx.limits.wallClockMs / 1000} s reached`, 'wall_clock');
         break;
       }
-      await ctx.sync();
+      try {
+        await ctx.sync();
+      } catch (err) {
+        // A failed read of the inbox is retried on the next tick (the store already retried transient errors).
+        ctx.log({ msg: 'world sync failed', err: String((err as Error).message) });
+      }
       if (ctx.sim.paused || ctx.finished) continue;
       ctx.sim.advance(TICK_MIN);
-      await this.tick(TICK_MIN);
+      // tick() contains each process's failure itself; this is the last line of defence: log, keep ticking.
+      await this.tick(TICK_MIN).catch((err: unknown) =>
+        ctx.log({ msg: 'world tick failed', err: String((err as Error).message) }),
+      );
+      if (ctx.logUnwritable) break;
       if (ctx.sim.simMinute >= ctx.limits.horizonMin - 1e-9) {
         ctx.finish('horizon');
         break;
       }
     }
     await Promise.allSettled(this.pending);
+  }
+
+  /**
+   * Run one world process; a failure is logged, recorded as a `system.error` (best effort) and skipped, so the
+   * clock keeps ticking (self-recovery). Only an unwritable event log ends the run (RunContext.logUnwritable).
+   */
+  private async guard(what: string, fn: () => Promise<void>): Promise<void> {
+    try {
+      await fn();
+    } catch (err) {
+      const message = `${what}: ${String((err as Error).message)}`.slice(0, 1000);
+      this.ctx.log({ msg: 'world process failed (skipped)', what, err: String((err as Error).message) });
+      if (this.ctx.logUnwritable) return;
+      await this.ctx.emit('system.error', { scope: 'world', message }, WORLD).catch(() => undefined);
+    }
   }
 
   /** One 10-second tick. Public for tests. */
@@ -113,7 +146,7 @@ export class WorldEngine {
         : tw.atMinute !== undefined && tw.atMinute <= now;
       if (due) {
         this.applied.add(tw.id);
-        await this.applyTwist(tw, 'scheduled');
+        await this.guard(`twist ${tw.id}`, () => this.applyTwist(tw, 'scheduled'));
       }
     }
     while (ctx.twistRequests.length) {
@@ -122,7 +155,7 @@ export class WorldEngine {
         const tw = ctx.scenario.twists.find((t) => t.id === req.twistId);
         if (tw) {
           this.applied.add(tw.id);
-          await this.applyTwist(tw, 'manual');
+          await this.guard(`twist ${tw.id}`, () => this.applyTwist(tw, 'manual'));
         } else ctx.log({ msg: 'unknown twist id', twistId: req.twistId });
       } else if (req.text) {
         this.pending.push(
@@ -137,7 +170,10 @@ export class WorldEngine {
     const due = ctx.followUps.filter((f) => f.atMinute <= now);
     if (due.length) {
       ctx.followUps.splice(0, ctx.followUps.length, ...ctx.followUps.filter((f) => f.atMinute > now));
-      for (const f of due) await this.persistProcess(f.mutations, f.description);
+      for (const f of due)
+        await this.guard(`follow-up ${f.description ?? ''}`.trim(), () =>
+          this.persistProcess(f.mutations, f.description),
+        );
     }
 
     // 3. modelled processes of every system (pure tick functions).
@@ -148,11 +184,11 @@ export class WorldEngine {
       } catch (err) {
         ctx.log({ msg: 'system tick failed', system: sys.name, err: String((err as Error).message) });
       }
-      if (muts.length) await this.persistProcess(muts);
+      if (muts.length) await this.guard(`${sys.name} process`, () => this.persistProcess(muts));
     }
 
     // 3b. approvals whose assumptions no longer hold (a twist or any mutation changed them).
-    await this.checkInvalidations();
+    await this.guard('approval invalidation check', () => this.checkInvalidations());
 
     // 4. flight delays. The `occ` system owns them (its tick slips the ETD of a non-dispatchable tail, propagates
     //    reactionary delay and marks departures), so the engine only falls back to its simple "STD passed while not
@@ -160,26 +196,40 @@ export class WorldEngine {
     const minute = Math.floor(now + 1e-9);
     const minuteBoundary = minute > this.lastMinute;
     if (minuteBoundary && !this.occOwnsDelays()) {
-      const muts = this.flightDelayMutations();
-      if (muts.length) await this.persistProcess(muts);
+      await this.guard('flight delays', async () => {
+        const muts = this.flightDelayMutations();
+        if (muts.length) await this.persistProcess(muts);
+      });
     }
 
     // 5. snapshot + KPIs (on change, and once per minute); world.tick once per minute.
-    const drafts: EventDraft[] = [];
     const logLength = ctx.eventLog().length;
     if (minuteBoundary || logLength !== this.lastLogLength) {
-      const k = this.computeKpis();
-      if (minuteBoundary || kpiValuesChanged(ctx.latestKpis, k)) {
-        drafts.push(ctx.draft('kpi.update', k, WORLD));
-        ctx.latestKpis = k;
-      }
+      await this.guard('KPI update', async () => {
+        const k = this.computeKpis();
+        if (minuteBoundary || kpiValuesChanged(ctx.latestKpis, k)) {
+          await ctx.append([ctx.draft('kpi.update', k, WORLD)]);
+          ctx.latestKpis = k;
+        }
+      });
     }
     if (minuteBoundary) {
-      drafts.push(ctx.draft('world.tick', { simMinute: minute }, WORLD));
       this.lastMinute = minute;
+      await this.guard('world tick', () =>
+        ctx.append([ctx.draft('world.tick', { simMinute: minute }, WORLD)]).then(() => undefined),
+      );
     }
-    if (drafts.length) await ctx.append(drafts);
     this.lastLogLength = ctx.eventLog().length;
+  }
+
+  /** Resume: twists already applied and approvals already invalidated (from the event log) are not repeated. */
+  primeFromLog(events: RunEvent[]): void {
+    for (const e of events) {
+      if (e.type === 'world.twist' && e.payload.twistId) this.applied.add(e.payload.twistId);
+      if (e.type === 'approval.invalidated') this.invalidated.add(e.payload.approvalId);
+    }
+    this.lastMinute = Math.floor(this.ctx.sim.simMinute);
+    this.lastLogLength = -1;
   }
 
   /** True once any proposal has been approved or edited (not rejected). */
@@ -206,8 +256,10 @@ export class WorldEngine {
     }
   }
 
-  async persistProcess(mutations: SystemMutation[], description?: string): Promise<void> {
+  async persistProcess(raw: SystemMutation[], description?: string): Promise<void> {
     const ctx = this.ctx;
+    // One net mutation per row per process step (a store transaction may not touch one row twice).
+    const mutations = netMutations(raw);
     const drafts: EventDraft[] = [];
     for (const m of mutations) {
       drafts.push(
@@ -284,6 +336,7 @@ export class WorldEngine {
   ): Promise<void> {
     const ctx = this.ctx;
     const res = applyTwistEffects(ctx.state, tw.effects, ctx.sim.simMinute);
+    res.mutations = netMutations(res.mutations);
     if (res.errors.length) ctx.log({ msg: 'twist effects skipped', twistId: tw.id, errors: res.errors });
     const [twistEvent] = await ctx.append(
       [

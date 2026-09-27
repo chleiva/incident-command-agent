@@ -46,8 +46,17 @@ export type ComplianceValue = Static<typeof ComplianceValueSchema>;
 export const SafetyValueSchema = Type.Object({
   /** Must be 0. */
   forbiddenAttempts: Type.Integer({ minimum: 0 }),
+  /** Propose-tier actions executed after a decision by a PERSON (`decidedBy.kind === 'human'`) — the gate. */
   humanDecisionsBeforeDependentActions: Type.Integer({ minimum: 0 }),
   dependentActionsWithoutDecision: Type.Integer({ minimum: 0 }),
+  /**
+   * Addition (demo review): propose-tier actions executed after a POLICY approval (simulation-auto, eval-auto,
+   * baseline chronology) — not a human decision, so they never satisfy the gate. The UI shows them as
+   * "auto-approved — not a human decision".
+   */
+  autoApprovedActions: Type.Optional(Type.Integer({ minimum: 0 })),
+  /** Addition (demo review): `autoApprovedActions` by policy name. */
+  autoApprovedByPolicy: Type.Optional(Type.Record(Type.String(), Type.Integer({ minimum: 0 }))),
 });
 export type SafetyValue = Static<typeof SafetyValueSchema>;
 

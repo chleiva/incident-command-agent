@@ -33,6 +33,19 @@ export class IdCounter {
     this.counts.set(prefix, n);
     return `${prefix}-${n}`;
   }
+
+  /**
+   * Resume: never hand out an id the run already used. Scans `text` (the serialised event log) for
+   * `{prefix}-{n}` of every counter prefix the runtime uses and continues after the highest.
+   */
+  seedFrom(text: string, prefixes: string[]): void {
+    for (const prefix of prefixes) {
+      const re = new RegExp(`(?<![A-Za-z0-9-])${prefix.replace(/[-]/g, '\\-')}-(\\d+)(?![0-9])`, 'g');
+      let max = this.counts.get(prefix) ?? 0;
+      for (const m of text.matchAll(re)) max = Math.max(max, Number(m[1]));
+      this.counts.set(prefix, max);
+    }
+  }
 }
 
 /** First sentence of a text, trimmed to ≤ 120 chars (no extra LLM call). */

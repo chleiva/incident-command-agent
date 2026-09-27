@@ -401,8 +401,55 @@ export const EngineerSchema = Type.Object({
   destination: Opt(IataSchema),
   /** Addition (task 06): idempotency key of the page that set the current ETA. */
   pageRequestId: Opt(Str),
+  /** Addition (demo review): sim minute of the current page. */
+  pagedAtMinute: Opt(Minute),
+  /** Addition (demo review): why this engineer was paged when another was already on the way (e.g. "backup"). */
+  pageReason: Opt(Str),
+  /** Addition (demo review): the work order this engineer is assigned to by `page_engineer`. */
+  workOrderId: Opt(Str),
+  /**
+   * Addition (demo review): an ETA delay (minutes) waiting for the next page. Set by an engineer-ETA twist that
+   * fires before anyone is travelling; the next `page_engineer` adds it to that page's ETA and clears it.
+   */
+  pendingEtaDelayMin: Opt(Type.Number({ minimum: 0 })),
 });
 export type Engineer = Static<typeof EngineerSchema>;
+
+const ACTIVE_ENGINEER_STATUSES = ['on_site', 'travelling', 'paged'] as const;
+
+/**
+ * THE engineer responding to the incident (browser-safe; shared by `get_aircraft_status`/`get_stand_status`, the twist resolver and
+ * the cockpit's ground/airport ETA path so every view names the same person). Order: the engineer assigned to an
+ * open work order (on the incident tail when given), then any paged/travelling/on-site engineer that is not a
+ * backup, then any active engineer; within a group on site first, then the earliest ETA.
+ */
+export function respondingEngineer(
+  state: {
+    engineers: { engineers: Record<string, Engineer> };
+    mne?: { workOrders: Record<string, WorkOrder> };
+  },
+  opts: { tail?: string; station?: string; statuses?: readonly Engineer['status'][] } = {},
+): Engineer | undefined {
+  const statuses = opts.statuses ?? ACTIVE_ENGINEER_STATUSES;
+  const active = Object.values(state.engineers.engineers).filter(
+    (e) =>
+      statuses.includes(e.status) &&
+      (!opts.station || e.destination === opts.station || e.location === opts.station),
+  );
+  const rank = (e: Engineer) => (e.status === 'on_site' ? -1e9 : (e.etaMinute ?? 1e9));
+  const best = (list: Engineer[]) =>
+    [...list].sort((a, b) => rank(a) - rank(b) || a.id.localeCompare(b.id))[0];
+  const assigned = new Set(
+    Object.values(state.mne?.workOrders ?? {})
+      .filter((w) => w.status !== 'closed' && w.assignedEngineerId && (!opts.tail || w.tail === opts.tail))
+      .map((w) => w.assignedEngineerId!),
+  );
+  return (
+    best(active.filter((e) => assigned.has(e.id))) ??
+    best(active.filter((e) => !e.pageReason)) ??
+    best(active)
+  );
+}
 
 // ---------------------------------------------------------------- record (incident record; not an airline system)
 export const TimelineEntrySchema = Type.Object({

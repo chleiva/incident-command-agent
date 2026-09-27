@@ -102,6 +102,8 @@ export interface AuditToolEntry extends AuditEntryBase {
   argsTruncated?: string[];
   presenterTriggered?: boolean;
   deduplicatedFrom?: string;
+  /** Addition (demo review): a cached read-only result (the original call's id). */
+  cachedFrom?: string;
   citations?: Citation[];
   blocked?: AuditBlock;
   proposal?: AuditProposal;
@@ -284,6 +286,7 @@ export function buildAuditEntries(events: RunEvent[], traces: TraceObjectInfo[] 
         if (e.latencyMs !== undefined) t.latencyMs = e.latencyMs;
         if (p.citations?.length) t.citations = p.citations;
         if (p.deduplicatedFrom) t.deduplicatedFrom = p.deduplicatedFrom;
+        if (p.cachedFrom) t.cachedFrom = p.cachedFrom;
         break;
       }
       case 'guardrail.blocked':

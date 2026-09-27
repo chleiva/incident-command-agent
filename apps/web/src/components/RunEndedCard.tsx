@@ -6,6 +6,7 @@
 import type { KpiSnapshot, ProjectedApproval, RunProjection } from '@ica/schema/browser';
 import { motion } from 'framer-motion';
 import { actorLabel, formatDuration, formatEur, humaniseTool, signed } from '../lib/format';
+import { runFailure, runOutcome } from '../lib/runHealth';
 import { Icon } from './ui/Icon';
 import { Button, IconButton, cx } from './ui/primitives';
 
@@ -51,12 +52,17 @@ export function RunEndedCard({
   exporting?: 'pdf' | 'json' | null;
 }) {
   const k = view.kpis;
-  const failed = view.meta.status === 'failed';
-  const title = failed
-    ? 'Run failed'
-    : view.meta.completedReason === 'stopped'
-      ? 'Run stopped'
-      : 'Run complete';
+  const outcome = runOutcome(view.meta);
+  const failed = outcome.kind === 'failed';
+  const failure = failed ? runFailure(view) : null;
+  const title =
+    outcome.kind === 'failed'
+      ? 'Run stopped by a system error'
+      : outcome.kind === 'stopped'
+        ? 'Run stopped'
+        : outcome.kind === 'aborted'
+          ? 'Run aborted'
+          : 'Run complete';
   return (
     <motion.section
       role="region"
@@ -67,17 +73,24 @@ export function RunEndedCard({
       className="w-[520px] max-w-[calc(100vw-32px)] rounded-xl border border-border bg-surface-raised p-5 shadow-e3"
     >
       <div className="flex items-start gap-3">
-        <span className={cx('mt-1', failed ? 'text-critical' : 'text-good')}>
-          <Icon name={failed ? 'alert' : 'check'} size={18} />
+        <span
+          className={cx(
+            'mt-1',
+            failed ? 'text-critical' : outcome.kind === 'completed' ? 'text-good' : 'text-warning',
+          )}
+        >
+          <Icon name={outcome.kind === 'completed' ? 'check' : 'alert'} size={18} />
         </span>
         <div className="min-w-0 flex-1">
           <h2 id="run-ended-title" className="text-heading text-fg">
             {title}
           </h2>
           <p className="text-caption text-fg-muted">
-            {failed
-              ? view.meta.error?.error
-              : `${view.meta.completedReason ?? ''} · sim minute ${view.simMinute.toFixed(0)}`}
+            {failure
+              ? `Cause: ${failure.plain} · sim minute ${view.simMinute.toFixed(0)}`
+              : outcome.kind === 'stopped'
+                ? `Stopped by the presenter (kill switch) · sim minute ${view.simMinute.toFixed(0)}`
+                : `${view.meta.completedReason ?? outcome.label} · sim minute ${view.simMinute.toFixed(0)}`}
           </p>
         </div>
         <IconButton icon="close" label="Dismiss summary" onClick={onDismiss} />

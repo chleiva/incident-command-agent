@@ -28,9 +28,17 @@ import { putTrace, traceLabel } from './trace';
 import type { ApprovalPolicy } from './approvals';
 import { AgentAbort, type RunContext } from './context';
 import { repairCall, type ArgsSchemaView } from './call-repair';
-import { executeToolCall, type CallSite, type ToolCallInput, type ToolCallResult } from './execute';
+import {
+  canonicalArgs,
+  executeToolCall,
+  replayToolCall,
+  type CallSite,
+  type ToolCallInput,
+  type ToolCallResult,
+} from './execute';
 import {
   MAX_REPORT_ATTEMPTS,
+  coerceReportArgs,
   composeRuntimeReport,
   executedActions,
   mergeActions,
@@ -38,6 +46,11 @@ import {
 } from './report';
 import { ORCHESTRATOR_RUNTIME_TOOLS, reportTool, type RuntimeSite } from './tools';
 import { preview, summarise } from './util';
+
+/** A cached read-only result stays usable this many sim minutes (state-derived times such as margins move). */
+export const READ_CACHE_TTL_SIM_MIN = 5;
+/** Read-only tools never cached (live data). */
+const UNCACHEABLE = new Set(['web_search', 'get_weather']);
 
 export interface RunAgentOptions {
   parentAgentRunId?: string;
@@ -245,6 +258,11 @@ export async function runAgent(
     ? { approvalId: opts.supersedesApprovalId, used: false }
     : undefined;
   let twistCursor = ctx.twistFeed.length;
+  // Read-only results of this agent run, keyed by tool + canonical args; valid while no mock state changed.
+  const readCache = new Map<
+    string,
+    { toolCallId: string; result: ToolCallResult; version: number; atMinute: number; knowledge: boolean }
+  >();
 
   await ctx.emit(
     'agent.started',
@@ -268,12 +286,17 @@ export async function runAgent(
   ];
 
   const abort = async (reason: string, detail: string): Promise<AgentOutcome> => {
-    await ctx.emit(
-      'agent.aborted',
-      { role, reason: reason as never, detail: detail.slice(0, 1000) },
-      actor,
-      envelope(),
-    );
+    // Best effort: an agent that stops because the store is failing must still return to its caller.
+    await ctx
+      .emit(
+        'agent.aborted',
+        { role, reason: reason as never, detail: detail.slice(0, 1000) },
+        actor,
+        envelope(),
+      )
+      .catch((err: unknown) =>
+        ctx.log({ msg: 'agent.aborted not recorded', agentRunId, err: String((err as Error).message) }),
+      );
     ctx.log({ msg: 'agent aborted', agentRunId, role, reason, detail });
     return { ok: false, agentRunId, reason, detail };
   };
@@ -292,7 +315,10 @@ export async function runAgent(
       });
       return out.ok
         ? { ok: true, data: out.report }
-        : { ok: false, error: `${subRole} agent stopped early (${out.reason}): ${out.detail}` };
+        : {
+            ok: false,
+            error: `${subRole} agent stopped early (${out.reason}): ${out.detail}${out.reason === 'error' ? ' Its work so far is in the systems; you can re-brief it with delegate.' : ''}`,
+          };
     },
   });
 
@@ -352,6 +378,7 @@ export async function runAgent(
         return await abort('error', `model call failed: ${(err as Error).message}`);
       }
       const { response, provider, model, latencyMs, costUsd } = routed;
+      // A trace that cannot be stored never stops the agent (the audit then lacks this call's body).
       const traceKey = await putTrace(ctx.deps.traces, ctx.runId, label, {
         kind: 'llm',
         runId: ctx.runId,
@@ -364,6 +391,9 @@ export async function runAgent(
         latencyMs,
         request: { model, system, messages, tools: specs, maxTokens: ctx.llm.maxTokens, temperature },
         response,
+      }).catch((err: unknown) => {
+        ctx.log({ msg: 'trace not stored', agentRunId, err: String((err as Error).message) });
+        return undefined;
       });
 
       const names = response.toolCalls.map((c) => c.name);
@@ -445,9 +475,46 @@ export async function runAgent(
       // Delegates start concurrently (Promise.all); other calls run in order; results keep the call order.
       const results = new Map<string, Promise<ToolCallResult>>();
       let reportCall: ToolCallInput | undefined;
-      const run = (c: ToolCallInput, s: CallSite) => {
+      // Identical calls in this turn (same tool + canonical args) run once; the others get the same result.
+      const turnCalls = new Map<string, { toolCallId: string; promise: Promise<ToolCallResult> }>();
+      const run = async (c: ToolCallInput, s: CallSite): Promise<ToolCallResult> => {
         const def = byName.get(c.name) ?? registryByName.get(c.name);
-        return executeToolCall(s, def, c, { availableToRole: byName.has(c.name) });
+        if (!def || !byName.has(c.name) || c.name === 'delegate' || c.name === 'report')
+          return executeToolCall(s, def, c, { availableToRole: byName.has(c.name) });
+        const key = `${def.name}:${canonicalArgs(c.input)}`;
+        const first = turnCalls.get(key);
+        if (first) {
+          const result = await first.promise;
+          return replayToolCall(s, def, c, { toolCallId: first.toolCallId, result }, 'deduplicated');
+        }
+        const cacheable =
+          def.mutates === false &&
+          def.tier === 'execute' &&
+          registryByName.has(def.name) &&
+          !UNCACHEABLE.has(def.name);
+        if (cacheable) {
+          const hit = readCache.get(key);
+          if (
+            hit &&
+            hit.version === ctx.stateVersion &&
+            (hit.knowledge || ctx.sim.simMinute - hit.atMinute <= READ_CACHE_TTL_SIM_MIN)
+          )
+            return replayToolCall(s, def, c, hit, 'cached');
+        }
+        const version = ctx.stateVersion;
+        const atMinute = ctx.sim.simMinute;
+        const promise = executeToolCall(s, def, c, { availableToRole: true });
+        turnCalls.set(key, { toolCallId: c.id, promise });
+        const result = await promise;
+        if (cacheable && result.ok)
+          readCache.set(key, {
+            toolCallId: c.id,
+            result,
+            version,
+            atMinute,
+            knowledge: def.system === 'knowledge',
+          });
+        return result;
       };
       for (const c of calls) {
         if (c.name === 'delegate' && byName.has('delegate')) {
@@ -518,6 +585,20 @@ export async function runAgent(
         report?: AgentReport & Record<string, unknown>;
         errors?: string[];
       }> {
+        // Shape is coerced first (lists from text, text from lists/objects, numbers from strings, missing lists →
+        // []), recorded as argsRepaired: a report is only refused for a missing/placeholder summary.
+        // Without a summary nothing is coerced: the model sees exactly what it sent and what is missing.
+        const raw = (c.input ?? {}) as Record<string, unknown>;
+        const coerced =
+          raw.summary === undefined || raw.summary === null || raw.summary === ''
+            ? { args: raw, repaired: [] }
+            : coerceReportArgs(raw, report.inputSchema);
+        if (coerced.repaired.length)
+          c = {
+            ...c,
+            input: coerced.args,
+            argsRepaired: [...new Set([...(c.argsRepaired ?? []), ...coerced.repaired])],
+          };
         const input = (c.input ?? {}) as Record<string, unknown>;
         // Schema (relaxed: actionsTaken optional, extra keys allowed) and placeholder checks run in the pipeline.
         const res = await executeToolCall(site, report, c, { availableToRole: true });
@@ -617,9 +698,17 @@ export async function runAgent(
       return abort(err.reason, err.detail);
     }
     if (ctx.stopping) return abort('stopped', ctx.abortDetail || 'run ended');
+    // An unexpected exception ends only this agent: its caller (delegate) is told and can re-brief it.
+    ctx.log({
+      msg: 'agent failed',
+      agentRunId,
+      role,
+      err: String((err as Error).message),
+      stack: preview((err as Error).stack ?? '', 400),
+    });
     return abort(
       'error',
-      `${(err as Error).message}`.slice(0, 500) + ` ${preview((err as Error).stack ?? '', 200)}`,
+      `The ${role} agent stopped after an unexpected error: ${String((err as Error).message).slice(0, 300)}`,
     );
   }
 }

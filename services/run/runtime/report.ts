@@ -208,3 +208,191 @@ export function composeRuntimeReport(
     composedByRuntime: true,
   };
 }
+
+// ------------------------------------------------------------------ coercion (demo review: a report never blocks)
+
+type Schema = ObjectSchema & {
+  type?: string | string[];
+  anyOf?: Schema[];
+  items?: Schema;
+  const?: unknown;
+  enum?: unknown[];
+};
+
+function typesOf(s: Schema | undefined): Set<string> {
+  const out = new Set<string>();
+  if (!s) return out;
+  if (Array.isArray(s.type)) s.type.forEach((t) => out.add(t));
+  else if (typeof s.type === 'string') out.add(s.type);
+  for (const a of s.anyOf ?? []) typesOf(a).forEach((t) => out.add(t));
+  if (s.const !== undefined) out.add(typeof s.const);
+  return out;
+}
+
+/** A short, readable string for a value the schema wanted as text. */
+export function conciseText(v: unknown, max = 2000): string {
+  let text: string;
+  if (typeof v === 'string') text = v;
+  else if (Array.isArray(v))
+    text = v
+      .map((x) => conciseText(x, max))
+      .filter(Boolean)
+      .join('; ');
+  else if (v && typeof v === 'object')
+    text = Object.entries(v as Record<string, unknown>)
+      .filter(([, x]) => x !== undefined && x !== null && x !== '')
+      .map(([k, x]) => `${k}: ${typeof x === 'object' ? JSON.stringify(x) : String(x)}`)
+      .join('; ');
+  else if (v === undefined || v === null) text = '';
+  else text = String(v);
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+/** Split free text into list items: one per line, bullets and numbering stripped ("a; b" splits when one line). */
+export function splitListText(s: string): string[] {
+  const bullet = /^\s*(?:[-*•·–]|\d{1,2}[.)])\s+/;
+  let items = s
+    .split(/\r?\n/)
+    .map((x) => x.replace(bullet, '').trim())
+    .filter(Boolean);
+  if (items.length === 1 && /;\s/.test(items[0]!))
+    items = items[0]!
+      .split(/;\s+/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+  return items;
+}
+
+function parseJsonish(s: string): unknown {
+  const t = s.trim();
+  if (!/^[[{]/.test(t)) return undefined;
+  try {
+    return JSON.parse(t) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Coerce one value towards its property schema. Returns the (possibly) new value. */
+function coerceValue(v: unknown, s: Schema): unknown {
+  const types = typesOf(s);
+  if (types.has('array') && !Array.isArray(v)) {
+    const itemTypes = typesOf(s.items);
+    if (typeof v === 'string') {
+      const parsed = parseJsonish(v);
+      if (parsed !== undefined) return coerceValue(Array.isArray(parsed) ? parsed : [parsed], s);
+      return itemTypes.has('string') ? splitListText(v) : [];
+    }
+    if (v === null || v === undefined) return [];
+    return coerceValue([v], s);
+  }
+  if (types.has('array') && Array.isArray(v)) {
+    const item = s.items;
+    const itemTypes = typesOf(item);
+    const mapped = v
+      .filter((x) => x !== null && x !== undefined && x !== '')
+      .map((x) => (item ? coerceValue(x, item) : x));
+    if (!item) return mapped;
+    // Items that are still invalid are dropped (the whole field is not rejected for one bad item).
+    return mapped.filter(
+      (x) => validateAgainst(item, x).ok || (itemTypes.has('string') && typeof x === 'string'),
+    );
+  }
+  if (types.has('string') && typeof v !== 'string' && !types.has(typeof v)) {
+    if (s.const !== undefined || s.enum || s.anyOf?.some((a) => a.const !== undefined)) return v;
+    return conciseText(v);
+  }
+  if (
+    types.has('string') &&
+    typeof v === 'string' &&
+    (s.anyOf?.some((a) => a.const !== undefined) || s.enum)
+  ) {
+    // enum-ish: accept a case/spacing variant ("Swap", "deferral by certifying staff")
+    const options = [...(s.enum ?? []), ...(s.anyOf ?? []).map((a) => a.const)].filter(
+      (x): x is string => typeof x === 'string',
+    );
+    const norm = (x: string) => x.toLowerCase().replace(/[\s-]+/g, '_');
+    return options.find((o) => norm(o) === norm(v)) ?? v;
+  }
+  if ((types.has('number') || types.has('integer')) && typeof v !== 'number') {
+    if (typeof v === 'string') {
+      const m = /-?\d+(?:\.\d+)?/.exec(v);
+      if (m) return types.has('integer') && !types.has('number') ? Math.round(Number(m[0])) : Number(m[0]);
+    }
+    return types.has('null') ? null : v;
+  }
+  if (types.has('integer') && typeof v === 'number' && !Number.isInteger(v)) return Math.round(v);
+  if (types.has('boolean') && typeof v === 'string' && /^(true|false)$/i.test(v.trim()))
+    return v.trim().toLowerCase() === 'true';
+  if (types.has('object') && s.properties) {
+    const props = s.properties;
+    let obj: Record<string, unknown>;
+    if (typeof v === 'string') {
+      const parsed = parseJsonish(v);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed))
+        obj = parsed as Record<string, unknown>;
+      else if ('text' in props) obj = { text: v };
+      else return v;
+    } else if (v && typeof v === 'object' && !Array.isArray(v)) obj = { ...(v as Record<string, unknown>) };
+    else return v;
+    // Required literal fields (e.g. provisionalReading.unconfirmed: true) are filled; props coerced; unknowns dropped
+    // when the schema forbids them.
+    for (const [k, ps] of Object.entries(props)) {
+      const p = ps as Schema;
+      if (obj[k] === undefined && p.const !== undefined && s.required?.includes(k)) obj[k] = p.const;
+      else if (obj[k] !== undefined) {
+        const c = coerceValue(obj[k], p);
+        if (validateAgainst(p, c).ok) obj[k] = c;
+        else if (!s.required?.includes(k)) delete obj[k];
+      }
+    }
+    if (s.additionalProperties === false) for (const k of Object.keys(obj)) if (!(k in props)) delete obj[k];
+    return obj;
+  }
+  return v;
+}
+
+/**
+ * Coerce a model's report arguments towards the role's report schema BEFORE validation, so a report is never
+ * blocked by its shape (demo review: Ground's report was refused from m18 to m25 for "invalid details"): a string for
+ * a list field is split into items (lines, bullets, "; "), an array or object for a text field is joined into
+ * concise text, numbers are parsed from strings, a missing required list becomes `[]`, invalid items are dropped,
+ * and a known field that still does not fit is moved aside as `{field}_unparsed` (kept under `extras`). `summary` is
+ * only coerced to text: a report without a usable summary is still refused (and composed by the runtime after
+ * repeated attempts). Returns the keys changed (recorded as `argsRepaired`, like the markup repair).
+ */
+export function coerceReportArgs(
+  input: Record<string, unknown>,
+  schema: JSONSchema,
+): { args: Record<string, unknown>; repaired: string[] } {
+  const s = schema as Schema;
+  const props = (s.properties ?? {}) as Record<string, Schema>;
+  const required = new Set(s.required ?? []);
+  const args: Record<string, unknown> = { ...input };
+  const repaired: string[] = [];
+  for (const [k, ps] of Object.entries(props)) {
+    const before = args[k];
+    const listField = typesOf(ps).has('array');
+    if (before === undefined || (before === null && !typesOf(ps).has('null'))) {
+      if (before === null) delete args[k];
+      if (required.has(k) && listField) args[k] = [];
+      if (args[k] !== before) repaired.push(k);
+      continue;
+    }
+    let v = coerceValue(before, ps);
+    if (!validateAgainst(ps, v).ok && k !== 'summary') {
+      args[`${k}_unparsed`] = before;
+      if (required.has(k) && listField) v = [];
+      else {
+        delete args[k];
+        repaired.push(k);
+        continue;
+      }
+    }
+    if (JSON.stringify(v) !== JSON.stringify(before)) {
+      args[k] = v;
+      repaired.push(k);
+    }
+  }
+  return { args, repaired };
+}

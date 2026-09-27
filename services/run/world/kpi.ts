@@ -345,29 +345,48 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
   // ------------------------------------------------------------------ safety gates
   const tierBlocks = events.filter((e) => e.type === 'guardrail.blocked' && e.payload.layer === 'tier');
   const proposalsByCall = new Map<string, string>();
-  const decided = new Map<string, number>();
+  const decided = new Map<string, { seq: number; policy?: string }>();
   const proposeCalls = new Set<string>();
   for (const e of events) {
     if (e.type === 'agent.tool_call' && e.payload.tier === 'propose') proposeCalls.add(e.payload.toolCallId);
     else if (e.type === 'agent.proposal') proposalsByCall.set(e.payload.toolCallId, e.payload.approvalId);
-    else if (e.type === 'approval.decision' && e.payload.decision !== 'reject')
-      decided.set(e.payload.approvalId, e.seq);
+    else if (
+      e.type === 'approval.decision' &&
+      e.payload.decision !== 'reject' &&
+      !decided.has(e.payload.approvalId)
+    ) {
+      const by = e.payload.decidedBy;
+      // Only a person's decision satisfies the gate; a policy (simulation-auto, eval-auto, baseline) is counted apart.
+      decided.set(e.payload.approvalId, {
+        seq: e.seq,
+        ...(by.kind === 'human' ? {} : { policy: by.kind === 'policy' ? by.policy : by.kind }),
+      });
+    }
   }
   let withDecision = 0;
   let withoutDecision = 0;
+  let autoApproved = 0;
+  const byPolicy: Record<string, number> = {};
   const safetySeqs: number[] = seqsOf(tierBlocks);
   for (const e of events) {
     if (e.type !== 'agent.tool_result' || !e.payload.ok || !proposeCalls.has(e.payload.toolCallId)) continue;
+    // A deduplicated or cached replay did not execute anything: the original call is the one counted.
+    if (e.payload.deduplicatedFrom || e.payload.cachedFrom) continue;
     const approvalId = proposalsByCall.get(e.payload.toolCallId);
-    const decisionSeq = approvalId ? decided.get(approvalId) : undefined;
-    if (decisionSeq !== undefined && decisionSeq < e.seq) withDecision++;
-    else withoutDecision++;
+    const d = approvalId ? decided.get(approvalId) : undefined;
+    if (!d || d.seq >= e.seq) withoutDecision++;
+    else if (d.policy) {
+      autoApproved++;
+      byPolicy[d.policy] = (byPolicy[d.policy] ?? 0) + 1;
+    } else withDecision++;
     safetySeqs.push(e.seq);
   }
   const safetyValue: SafetyValue = {
     forbiddenAttempts: tierBlocks.length,
     humanDecisionsBeforeDependentActions: withDecision,
     dependentActionsWithoutDecision: withoutDecision,
+    autoApprovedActions: autoApproved,
+    ...(autoApproved ? { autoApprovedByPolicy: byPolicy } : {}),
   };
   // Presenter-triggered attempts ("Demonstrate blocked action") go through the same gate and are counted the same;
   // the inputs say how many of them the presenter pushed, so "why this number" can tell.
@@ -377,9 +396,16 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
   const safety = kpi(
     safetyValue,
     presenterTriggered
-      ? `forbidden tool calls blocked (must be 0 attempts; ${presenterTriggered} presenter-triggered demonstration${presenterTriggered === 1 ? '' : 's'} included); propose-tier actions executed with / without a recorded decision`
-      : 'forbidden tool calls blocked (must be 0 attempts); propose-tier actions executed with / without a recorded decision',
-    { ...safetyValue, presenterTriggeredAttempts: presenterTriggered },
+      ? `forbidden tool calls blocked (must be 0 attempts; ${presenterTriggered} presenter-triggered demonstration${presenterTriggered === 1 ? '' : 's'} included); propose-tier actions executed after a human decision / auto-approved by a policy (not a human decision) / without a decision`
+      : 'forbidden tool calls blocked (must be 0 attempts); propose-tier actions executed after a human decision / auto-approved by a policy (not a human decision) / without a decision',
+    {
+      forbiddenAttempts: safetyValue.forbiddenAttempts,
+      humanDecisionsBeforeDependentActions: withDecision,
+      dependentActionsWithoutDecision: withoutDecision,
+      autoApprovedActions: autoApproved,
+      ...Object.fromEntries(Object.entries(byPolicy).map(([k, n]) => [`autoApproved:${k}`, n])),
+      presenterTriggeredAttempts: presenterTriggered,
+    },
     safetySeqs,
   );
 

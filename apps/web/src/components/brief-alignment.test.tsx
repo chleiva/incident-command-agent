@@ -198,7 +198,7 @@ describe('labels (§1.8)', () => {
       expect(list.tagName).toBe('UL');
       expect(list.textContent).not.toMatch(/\d+\/\d+/);
       for (const li of list.querySelectorAll('li'))
-        expect(['pass', 'fail', 'pending']).toContain(li.getAttribute('data-status'));
+        expect(['pass', 'fail', 'warning', 'pending']).toContain(li.getAttribute('data-status'));
     }
     const safety = safetyChecks(view.kpis!);
     expect(safety.find((c) => c.key === 'noForbiddenAttempts')).toMatchObject({ status: 'fail' });

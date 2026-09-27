@@ -18,7 +18,7 @@ import { columnStatus, deriveAgents, turnCount, type AgentRow, type AgentsModel 
 import { ServicesProvider } from '../../app/services';
 import { AppShell } from '../../app/AppShell';
 import { agentFeed, activeRoles } from '../../lib/derive';
-import { DEFAULT_ABOUT } from '../../lib/brand';
+import { brandCredit } from '../../lib/brand';
 import { createMockServices } from '../../mocks/services';
 import { buildAgentsShowcase } from '../../mocks/agentsShowcase';
 import { RECORDINGS } from '../../mocks/recordings';
@@ -53,6 +53,29 @@ const firstRow = (model: AgentsModel, pred: (r: AgentRow) => boolean) =>
 
 afterEach(() => {
   useUi.setState({ hideThoughts: false, openRunId: null, aboutOpen: false });
+});
+
+describe('<AgentsBoard> demo review: re-briefs, continuous turns, reused results', () => {
+  it('renders the re-brief as a divider row and numbers turns continuously per column', () => {
+    const props = boardProps(SHOWCASE);
+    render(<AgentsBoard {...props} />);
+    const ground = props.model.columns.find((c) => c.role === 'ground')!;
+    const rebrief = ground.rows.find((r) => r.rebrief === 2)!;
+    const el = rowEl(rebrief.key);
+    expect(el.querySelector('[data-rebrief-divider]')!.textContent).toContain('Re-brief 2 from Orchestrator');
+    expect(el.querySelector('[data-link="in"]')).not.toBeNull();
+    const second = ground.rows.find((r) => r.agentRunId === rebrief.agentRunId && r.turn === 1)!;
+    expect(rowEl(second.key).querySelector('[data-turn]')!.textContent).toBe(`T${second.columnTurn}`);
+    expect(second.columnTurn).toBeGreaterThan(1);
+  });
+
+  it('shows "same result reused" on a row whose result was reused', () => {
+    const props = boardProps(SHOWCASE);
+    const tool = props.model.columns.flatMap((c) => c.rows).find((r) => r.kind === 'tool')!;
+    tool.reused = 2;
+    render(<AgentsBoard {...props} />);
+    expect(rowEl(tool.key).querySelector('[data-reused]')!.textContent).toBe('same result reused ×2');
+  });
 });
 
 describe('<AgentsBoard>', () => {
@@ -349,19 +372,13 @@ describe('top bar', () => {
     expect(link).toHaveAttribute('href', '/runs/run-xyz/agents');
   });
 
-  it('opens About with the credit, version and sources', async () => {
+  it('opens About with the version and sources, and no author line with the public defaults', async () => {
     await shell('/');
     await userEvent.click(screen.getByTestId('about-button'));
     const dialog = await screen.findByRole('dialog');
-    const credit = within(dialog).getByRole('link', { name: DEFAULT_ABOUT.author });
-    expect(credit).toHaveAttribute('href', 'https://www.linkedin.com/in/chris-ai/');
-    expect(credit).toHaveAttribute('target', '_blank');
-    expect(credit).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(dialog.textContent).toContain('Designed and developed by Chris Beltran');
+    expect(dialog.querySelector('[data-about-credit]')).toBeNull();
+    expect(dialog.textContent).not.toContain('Designed and developed by');
     expect(dialog.textContent).toContain('NASA ASRS');
-    expect(
-      within(dialog).getByRole('link', { name: /github\.com\/chleiva\/incident-command-agent/ }),
-    ).toBeInTheDocument();
     fireEvent.keyDown(dialog, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).toBeNull();
   });
@@ -377,7 +394,28 @@ describe('<AboutDialog>', () => {
         commit="abc1234"
       />,
     );
-    expect(screen.getByRole('link', { name: 'A. Person' })).toHaveAttribute('href', 'https://example.org/a');
+    const credit = screen.getByRole('link', { name: 'A. Person' });
+    expect(credit).toHaveAttribute('href', 'https://example.org/a');
+    expect(credit).toHaveAttribute('target', '_blank');
+    expect(credit).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(document.querySelector('[data-about-credit]')!.textContent).toBe(
+      'Designed and developed by A. Person',
+    );
     expect(document.querySelector('[data-about-version]')!.textContent).toBe('abc1234');
+  });
+
+  it('shows no author line and no repository link without a brand credit', () => {
+    render(<AboutDialog open onOpenChange={() => {}} brand={{}} commit="abc1234" />);
+    expect(document.querySelector('[data-about-credit]')).toBeNull();
+    expect(screen.queryByText(/Source code/)).toBeNull();
+  });
+
+  it('brandCredit needs an author', () => {
+    expect(brandCredit(undefined)).toBeNull();
+    expect(brandCredit({})).toBeNull();
+    expect(brandCredit({ about: { author: ' ', authorUrl: 'https://example.org' } })).toBeNull();
+    expect(brandCredit({ about: { author: 'A. Person', authorUrl: 'https://example.org' } })?.author).toBe(
+      'A. Person',
+    );
   });
 });

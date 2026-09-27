@@ -16,7 +16,13 @@ export {
   type TracePutOptions,
   type TraceStore,
 } from '@ica/schema';
-export { MemoryEventBus, MemoryStore, type MemoryStoreOptions, type MemoryStoreSnapshot } from './memory';
+export {
+  DuplicateMutationKeyError,
+  MemoryEventBus,
+  MemoryStore,
+  type MemoryStoreOptions,
+  type MemoryStoreSnapshot,
+} from './memory';
 export { DynamoStore, itemToEvent, type DynamoStoreOptions } from './dynamo';
 export {
   FsTraceStore,
@@ -36,5 +42,16 @@ export {
   lambdaSecretIds,
   type SecretsManagerSecretStoreOptions,
 } from './secrets';
+export {
+  DEFAULT_RETRY_ATTEMPTS,
+  DEFAULT_RETRY_CAP_MS,
+  TRANSIENT_ERROR_NAMES,
+  backoffMs,
+  classifyError,
+  isTransientError,
+  withRetry,
+  type ErrorClass,
+  type RetryOptions,
+} from './retry';
 export * as keys from './keys';
-export { groupMutations } from './util';
+export { coalesceMutations, duplicateMutationKeys, groupMutations, mutationKey } from './util';

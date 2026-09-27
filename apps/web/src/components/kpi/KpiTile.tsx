@@ -119,10 +119,11 @@ export function KpiTile({
 const GLYPH: Record<CheckItem['status'], { glyph: string; className: string; sr: string }> = {
   pass: { glyph: '✓', className: 'text-good', sr: 'met' },
   fail: { glyph: '✗', className: 'text-critical', sr: 'not met' },
+  warning: { glyph: '⚠', className: 'text-warning', sr: 'warning' },
   pending: { glyph: '…', className: 'text-fg-subtle', sr: 'pending' },
 };
 
-/** Compliance and safety as check status (✓ / ✗ / pending), never a numeric score. */
+/** Compliance and safety as check status (✓ / ✗ / ⚠ / pending), never a numeric score. */
 function CheckList({ items, testId, dense }: { items: CheckItem[]; testId: string; dense: boolean }) {
   return (
     <ul data-testid={testId} className={cx('flex min-w-0 flex-col', dense ? 'gap-0' : 'gap-0.5')}>
@@ -141,8 +142,20 @@ function CheckList({ items, testId, dense }: { items: CheckItem[]; testId: strin
             {GLYPH[i.status].glyph}
           </span>
           <span className="sr-only">{GLYPH[i.status].sr}: </span>
-          <span className={cx('min-w-0 truncate', i.status === 'fail' ? 'text-fg' : 'text-fg-muted')}>
-            <GlossaryText text={i.label} focusable={false} />
+          <span
+            className={cx(
+              'min-w-0 truncate',
+              i.status === 'fail' ? 'text-fg' : i.status === 'warning' ? 'text-warning' : 'text-fg-muted',
+            )}
+          >
+            {i.short ? (
+              <>
+                <span className="sr-only">{i.label}: </span>
+                {i.short}
+              </>
+            ) : (
+              <GlossaryText text={i.label} focusable={false} />
+            )}
           </span>
         </li>
       ))}

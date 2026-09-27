@@ -1,6 +1,6 @@
 # Incident Coordination Agent — Solution Specification
 
-26 Sept 2026 · Christian Leiva Beltran
+26 Sept 2026 · Incident Command Agent contributors
 
 Requirements and solution design for an open-source, serverless MVP of an agentic airline incident-coordination system on AWS: React front end on CloudFront, API Gateway + Lambda + DynamoDB back end, a hand-written ReAct agent loop calling Anthropic or OpenAI directly, stateful mocked airline systems, a scenario engine, an evaluation harness and single-user Cognito security.
 

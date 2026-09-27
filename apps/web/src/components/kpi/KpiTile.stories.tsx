@@ -29,3 +29,16 @@ export const Empty: Story = { ...s.Empty, name: 'Empty (no baseline, calm)' };
 export const Loading: Story = s.Loading;
 export const Live: Story = { ...s.Live, name: 'Live (thresholds crossed, ghost delta)' };
 export const ErrorState: Story = s.ErrorState;
+
+/** A gated action approved by the simulation: the safety gate shows ⚠ "Auto-approved — not a human decision". */
+export const SafetyAutoApproved: Story = {
+  name: 'Safety gate: auto-approved, not a human decision',
+  render: () => {
+    const m = tileModels(MID.view.kpis!, null, { autoApproved: 2 }).find((t) => t.key === 'safety')!;
+    return (
+      <div className="w-[260px]">
+        <KpiTile model={m} kpis={MID.view.kpis!} series={SERIES_MID} onOpen={fn()} />
+      </div>
+    );
+  },
+};

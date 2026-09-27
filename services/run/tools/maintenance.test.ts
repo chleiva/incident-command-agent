@@ -50,7 +50,10 @@ describe('maintenance tools', () => {
     expect(page.ok && page.mutations!.map((m) => m.entity).sort()).toEqual(['engineers', 'workOrders']);
     h.advanceTo(p.etaMinute + 21);
     expect(h.state.mne.workOrders[wo.id].status).toBe('awaiting_certification');
-    expect((await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN' })).ok).toBe(false); // already on site
+    // already on site: re-paging sends nothing new and returns the current status (no mutation)
+    const again = await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN' });
+    expect(again.ok && again.mutations).toBeUndefined();
+    expect(okData(again)).toMatchObject({ alreadyPaged: true, status: 'on_site' });
     expect(
       (
         await call(h, 'create_work_order', {
@@ -60,6 +63,89 @@ describe('maintenance tools', () => {
         }).catch((e) => e)
       ).message,
     ).toMatch(/args invalid/);
+  });
+
+  it('page_engineer is idempotent per engineer: page once, then check (live demo paged maintenance 4×)', async () => {
+    const h = await fixtureHarness();
+    const first = okData(await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN' }));
+    const before = JSON.stringify(h.state);
+    const again = await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN' });
+    expect(again.ok && again.mutations).toBeUndefined();
+    expect(okData(again)).toMatchObject({
+      alreadyPaged: true,
+      engineerId: 'eng-1',
+      etaMinute: first.etaMinute,
+    });
+    expect(okData(again).note).toMatch(/get_aircraft_status/);
+    expect(JSON.stringify(h.state)).toBe(before);
+  });
+
+  it('a second engineer needs a reason while one is on the way, and the reason is recorded', async () => {
+    const h = await fixtureHarness();
+    h.state.engineers.engineers['eng-2'] = { ...h.state.engineers.engineers['eng-2']!, status: 'available' };
+    okData(await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN' }));
+    const noReason = await call(h, 'page_engineer', { engineerId: 'eng-2', station: 'MAN' });
+    expect(noReason.ok).toBe(false);
+    expect(!noReason.ok && noReason.error).toMatch(/already paged.*reason/s);
+    const backup = okData(
+      await call(h, 'page_engineer', { engineerId: 'eng-2', station: 'MAN', reason: 'backup' }),
+    );
+    expect(backup.pageReason).toBe('backup');
+    expect(h.state.engineers.engineers['eng-2']).toMatchObject({ status: 'paged', pageReason: 'backup' });
+    expect(h.state.engineers.engineers['eng-1']!.pageReason).toBeUndefined();
+    // the responding engineer is still the first one (the backup never replaces them)
+    const st = okData(await call(h, 'get_aircraft_status', { tail: 'AX-FXA' })).engineers;
+    expect(st.responding.id).toBe('eng-1');
+  });
+
+  it('page_engineer with workOrderId assigns once; an existing assignment is kept and returned', async () => {
+    const h = await fixtureHarness();
+    h.state.engineers.engineers['eng-2'] = { ...h.state.engineers.engineers['eng-2']!, status: 'available' };
+    const wo = okData(
+      await call(h, 'create_work_order', {
+        tail: 'AX-FXA',
+        task: 'damage_assessment',
+        estimatedDurationMin: 30,
+      }),
+    ).workOrder;
+    const p1 = okData(
+      await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN', workOrderId: wo.id }),
+    );
+    expect(p1).toMatchObject({ workOrderId: wo.id, assignedEngineerId: 'eng-1' });
+    expect(h.state.mne.workOrders[wo.id]!.assignedEngineerId).toBe('eng-1');
+    expect(h.state.engineers.engineers['eng-1']!.workOrderId).toBe(wo.id);
+    // re-paging the same engineer with the work order: nothing changes
+    const again = await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN', workOrderId: wo.id });
+    expect(again.ok && again.mutations).toBeUndefined();
+    // a backup paged with the same work order does not take the assignment
+    const p2 = okData(
+      await call(h, 'page_engineer', {
+        engineerId: 'eng-2',
+        station: 'MAN',
+        workOrderId: wo.id,
+        reason: 'backup',
+      }),
+    );
+    expect(p2).toMatchObject({ assignedEngineerId: 'eng-1' });
+    expect(p2.assignmentNote).toMatch(/already assigned to eng-1/);
+    expect(h.state.mne.workOrders[wo.id]!.assignedEngineerId).toBe('eng-1');
+  });
+
+  it('get_aircraft_status and get_stand_status name the same responding engineer, with ETA', async () => {
+    const h = await fixtureHarness();
+    expect(okData(await call(h, 'get_aircraft_status', { tail: 'AX-FXA' })).engineers.responding).toBeNull();
+    const p = okData(await call(h, 'page_engineer', { engineerId: 'eng-1', station: 'MAN' }));
+    const st = okData(await call(h, 'get_aircraft_status', { tail: 'AX-FXA' })).engineers;
+    expect(st.responding).toMatchObject({
+      id: 'eng-1',
+      status: 'paged',
+      etaMinute: p.etaMinute,
+      destination: 'MAN',
+    });
+    expect(st.responding.minutesToArrival).toBe(Math.round(p.etaMinute - h.simMinute));
+    expect(st.roster).toHaveLength(2);
+    const ground = okData(await call(h, 'get_stand_status', {}, { role: 'ground' }));
+    expect(ground.respondingEngineer).toEqual(st.responding);
   });
 
   it('draft_techlog_entry needs an approval; stored AI-drafted and approved', async () => {

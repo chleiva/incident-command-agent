@@ -237,6 +237,18 @@ export class ApiStack extends Stack {
     });
     // A failed run must not be retried automatically (it would duplicate the run's events).
     this.runFn.configureAsyncInvoke({ retryAttempts: 0, maxEventAge: Duration.minutes(5) });
+    // Self-recovery: a run that fails (or runs out of time with work left) re-invokes this function asynchronously
+    // with {runId, resume}. Scoped by name (not by the function's own ARN attribute, which would be a circular
+    // dependency between the function and its role policy): only this stack's Run functions.
+    this.runFn.addToRolePolicy(
+      new PolicyStatement({
+        sid: 'SelfResumeInvoke',
+        actions: ['lambda:InvokeFunction'],
+        resources: [
+          `arn:${this.partition}:lambda:${this.region}:${this.account}:function:${this.stackName}-RunFn*`,
+        ],
+      }),
+    );
 
     // Invoked asynchronously by the api Lambda (POST /scenarios/author → draft); not behind API Gateway, so the
     // Scenario Author gets minutes, not 29 s. Flight-context authoring runs inside the Run Lambda instead.

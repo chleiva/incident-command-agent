@@ -13,6 +13,7 @@ import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
 import { useRun, useRunConnection, useRunStoreInstance } from '../app/useRunConnection';
 import { KpiStrip } from '../components/kpi/KpiStrip';
+import { autoDecidedApprovals } from '../components/kpi/kpiModel';
 import { RotationGantt } from '../components/network/RotationGantt';
 import { MarkerGlyph } from '../components/timeline/EventMarkers';
 import { TimeScrubber } from '../components/timeline/TimeScrubber';
@@ -241,7 +242,15 @@ export default function Compare() {
             </Badge>
             <span className="text-caption text-fg-muted">human decisions on agent proposals</span>
           </div>
-          <KpiStrip kpis={k} series={aSeries} baseline={bk} status={loading} label="Agent run indicators" />
+          <KpiStrip
+            kpis={k}
+            series={aSeries}
+            baseline={bk}
+            status={loading}
+            label="Agent run indicators"
+            safety={{ autoApproved: autoDecidedApprovals(aView) }}
+            baselineSafety={{ autoApproved: autoDecidedApprovals(bView) }}
+          />
           <div
             className="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-md bg-surface-sunken px-3 py-2"
             aria-label="Deltas versus the baseline"

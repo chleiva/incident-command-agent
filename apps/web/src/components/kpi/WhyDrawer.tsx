@@ -7,7 +7,7 @@ import type { KpiSnapshot, RunEvent } from '@ica/schema/browser';
 import { describeEvent } from '../../lib/describe';
 import { Drawer } from '../ui/Drawer';
 import { Icon } from '../ui/Icon';
-import { tileModels, type KpiTileKey } from './kpiModel';
+import { tileModels, type KpiTileKey, type SafetyContext } from './kpiModel';
 
 function fmtInput(v: unknown): string {
   if (v === null || v === undefined) return '—';
@@ -15,6 +15,9 @@ function fmtInput(v: unknown): string {
   if (typeof v === 'number') return Number.isInteger(v) ? v.toLocaleString('en-GB') : v.toFixed(1);
   return String(v);
 }
+
+const CHECK_GLYPH = { pass: '✓', fail: '✗', warning: '⚠', pending: '…' } as const;
+const CHECK_SR = { pass: 'met', fail: 'not met', warning: 'warning', pending: 'pending' } as const;
 
 const humanKey = (k: string) =>
   k.replace(/([a-z])([A-Z0-9])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
@@ -26,6 +29,7 @@ export function WhyDrawer({
   onClose,
   onJump,
   startTime,
+  safety,
 }: {
   tile: KpiTileKey | null;
   kpis: KpiSnapshot | null;
@@ -33,8 +37,10 @@ export function WhyDrawer({
   onClose: () => void;
   onJump: (seq: number) => void;
   startTime?: string | null;
+  /** Approval context the snapshot may lack (auto-approved gated actions). */
+  safety?: SafetyContext;
 }) {
-  const model = tile && kpis ? tileModels(kpis, null).find((m) => m.key === tile) : undefined;
+  const model = tile && kpis ? tileModels(kpis, null, safety).find((m) => m.key === tile) : undefined;
   const why = model && kpis ? model.why(kpis) : null;
   const bySeq = new Map(events.map((e) => [e.seq, e]));
   return (
@@ -57,6 +63,36 @@ export function WhyDrawer({
               {why.formula}
             </p>
           </section>
+          {model?.checks && (
+            <section>
+              <h3 className="caps mb-2 text-fg-muted">Checks</h3>
+              <ul className="flex flex-col gap-1" data-testid="why-checks">
+                {model.checks.map((c) => (
+                  <li key={c.key} data-check={c.key} data-status={c.status} className="text-body">
+                    <span className="flex gap-2">
+                      <span
+                        aria-hidden
+                        className={
+                          c.status === 'pass'
+                            ? 'text-good'
+                            : c.status === 'fail'
+                              ? 'text-critical'
+                              : c.status === 'warning'
+                                ? 'text-warning'
+                                : 'text-fg-subtle'
+                        }
+                      >
+                        {CHECK_GLYPH[c.status]}
+                      </span>
+                      <span className="sr-only">{CHECK_SR[c.status]}: </span>
+                      <span className="text-fg">{c.label}</span>
+                    </span>
+                    {c.note && <span className="block pl-6 text-caption text-fg-muted">{c.note}</span>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {why.extra && (
             <section>
               <h3 className="caps mb-2 text-fg-muted">Breakdown</h3>

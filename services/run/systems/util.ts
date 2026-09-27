@@ -66,6 +66,50 @@ export function applyMutations(state: SystemState, mutations: SystemMutation[]):
 }
 
 /**
+ * Merge a sequential mutation list into one net mutation per row (`system/entity/id`), placed where the row was
+ * first touched: `before` from the first, `after` from the last (create→update = create, create→delete = nothing,
+ * delete→create = update). Chained helpers (re-tail then re-time a flight) otherwise emit two mutations for one row,
+ * which one DynamoDB transaction cannot hold. Pure.
+ */
+export function netMutations(mutations: SystemMutation[]): SystemMutation[] {
+  const byKey = new Map<string, { first: SystemMutation; last: SystemMutation; count: number }>();
+  const order: string[] = [];
+  for (const m of mutations) {
+    const k = `${m.system}#${m.entity}#${m.id}`;
+    const cur = byKey.get(k);
+    if (cur) {
+      cur.last = m;
+      cur.count++;
+    } else {
+      byKey.set(k, { first: m, last: m, count: 1 });
+      order.push(k);
+    }
+  }
+  const out: SystemMutation[] = [];
+  for (const k of order) {
+    const { first, last, count } = byKey.get(k)!;
+    if (count === 1) {
+      out.push(first);
+      continue;
+    }
+    const existedBefore = first.op !== 'create';
+    if (last.op === 'delete') {
+      if (existedBefore) out.push({ ...last, ...(first.before ? { before: clone(first.before) } : {}) });
+      continue;
+    }
+    out.push({
+      system: last.system,
+      entity: last.entity,
+      id: last.id,
+      op: existedBefore ? 'update' : 'create',
+      ...(existedBefore && first.before ? { before: clone(first.before) } : {}),
+      after: clone(last.after),
+    } as SystemMutation);
+  }
+  return out;
+}
+
+/**
  * Deterministic, collision-resistant id: `PREFIX-NNN-xyz` where NNN is one more than the current count and xyz comes
  * from the seeded rng (two concurrent tool calls reading the same state still get different ids).
  */

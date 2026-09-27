@@ -4,10 +4,5 @@
   "carrierCode": "ACX",
   "colours": { "primary": "#1F3A5F", "accent": "#4F8FBF" },
   "stations": ["MAN", "PMI", "EDI", "FAO", "AGP", "DUB", "ALC", "TFS", "LGW", "AMS", "CDG", "BCN"],
-  "disclaimer": "Simulated systems · fictional carrier",
-  "about": {
-    "author": "Chris Beltran",
-    "authorUrl": "https://www.linkedin.com/in/chris-ai/",
-    "repoUrl": "https://github.com/chleiva/incident-command-agent"
-  }
+  "disclaimer": "Simulated systems · fictional carrier"
 }

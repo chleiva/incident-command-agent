@@ -6,7 +6,7 @@
 import type { KpiSnapshot } from '@ica/schema/browser';
 import type { KpiPoint } from '../../lib/derive';
 import { Skeleton, cx, type LoadStatus } from '../ui/primitives';
-import { KPI_TILES, tileModels, type KpiTileKey } from './kpiModel';
+import { KPI_TILES, tileModels, type KpiTileKey, type SafetyContext } from './kpiModel';
 import { KpiTile } from './KpiTile';
 
 const LABELS: Record<KpiTileKey, string> = {
@@ -27,6 +27,8 @@ export function KpiStrip({
   onOpen,
   dense = false,
   label = 'Key indicators',
+  safety,
+  baselineSafety,
 }: {
   kpis: KpiSnapshot | null;
   series: KpiPoint[];
@@ -36,6 +38,9 @@ export function KpiStrip({
   onOpen?: (key: KpiTileKey) => void;
   dense?: boolean;
   label?: string;
+  /** Approval context the snapshot may lack (auto-approved gated actions, derived from the projection). */
+  safety?: SafetyContext;
+  baselineSafety?: SafetyContext;
 }) {
   const grid = 'grid grid-cols-3 gap-2 xl:grid-cols-6';
   if (status === 'loading') {
@@ -67,7 +72,7 @@ export function KpiStrip({
       </div>
     );
   }
-  const models = tileModels(kpis, baseline);
+  const models = tileModels(kpis, baseline, safety, baselineSafety);
   return (
     <div className={grid} role="group" aria-label={label}>
       {models.map((m) => (

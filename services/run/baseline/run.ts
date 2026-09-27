@@ -43,14 +43,19 @@ async function waitForMinute(ctx: RunContext, minute: number): Promise<void> {
   }
 }
 
-export async function runBaseline(ctx: RunContext): Promise<void> {
+/**
+ * `skipSteps` (resume): the chronology steps already started before the interruption (one `baseline.action` each)
+ * are not repeated; the walk continues with the next one.
+ */
+export async function runBaseline(ctx: RunContext, opts: { skipSteps?: number } = {}): Promise<void> {
   const steps = [...ctx.scenario.baseline]
     .map((s, i) => ({ s, i }))
     .sort((a, b) => a.s.atMinute - b.s.atMinute || a.i - b.i)
     .map((x) => x.s);
   const byName = new Map(ctx.registry.tools.map((t) => [t.name, t]));
-  let n = 0;
-  for (const step of steps) {
+  const skip = Math.max(0, opts.skipSteps ?? 0);
+  let n = skip;
+  for (const step of steps.slice(skip)) {
     await waitForMinute(ctx, step.atMinute);
     if (ctx.finished) return;
     const actor = baselineActor(step);

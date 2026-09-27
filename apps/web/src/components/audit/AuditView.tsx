@@ -7,6 +7,7 @@ import type { AgentRole, AuditEntryKind } from '@ica/schema/browser';
 import { useMemo, useState, type ReactNode } from 'react';
 import { NO_FILTERS, filterEntries, rolesIn, type AuditFilters, type AuditRun } from '../../audit/audit';
 import { roleName } from '../../agents/roles';
+import { plainFailureReason, runOutcome, type RunLevelEvent } from '../../lib/runHealth';
 import { Icon } from '../ui/Icon';
 import { Badge, Button, StateFrame, type LoadStatus } from '../ui/primitives';
 import type { TraceLoader } from './AuditEntryDetail';
@@ -28,6 +29,10 @@ export interface AuditViewProps {
   virtualize?: boolean;
   /** Rows open initially (stories). */
   initialExpanded?: string[];
+  /** The run's error message (`RunMeta.error`), when it failed. */
+  runError?: string | null;
+  /** Run-level system events (failure, recovery, stop), from the run's event log. */
+  runEvents?: RunLevelEvent[];
 }
 
 const control =
@@ -44,6 +49,8 @@ export function AuditView({
   picker,
   virtualize,
   initialExpanded,
+  runError,
+  runEvents = [],
 }: AuditViewProps) {
   const [filters, setFilters] = useState<AuditFilters>(NO_FILTERS);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(initialExpanded));
@@ -59,6 +66,11 @@ export function AuditView({
       return n;
     });
   const exporting = !!exportProgress && exportProgress.done < exportProgress.total;
+  const failureEvent = runEvents.find((e) => e.kind === 'failed');
+  const failure =
+    run && runOutcome({ status: run.status }).kind === 'failed'
+      ? (runError ?? failureEvent?.detail ?? 'No error message was recorded.')
+      : null;
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3" data-testid="audit-view">
@@ -108,7 +120,7 @@ export function AuditView({
         >
           <span className="text-body font-medium text-fg">{run.runName}</span>
           <Badge>{run.mode}</Badge>
-          <Badge tone={run.status === 'failed' ? 'critical' : 'neutral'}>{run.status}</Badge>
+          <RunStatusBadge status={run.status} runEvents={runEvents} />
           <span>
             {entries.length} entries · {llmCount} model calls · {entries.length - llmCount} tool calls
           </span>
@@ -121,6 +133,52 @@ export function AuditView({
             </Badge>
           )}
         </div>
+      )}
+
+      {run && (failure || runEvents.length > 0) && (
+        <section
+          aria-label="Run events"
+          className="flex flex-col gap-1 rounded-md border border-border bg-surface px-3 py-2"
+          data-testid="audit-run-events"
+        >
+          {failure && !failureEvent && (
+            <p className="flex items-start gap-2 text-caption text-fg" data-run-event="failed">
+              <Icon name="alert" size={12} className="mt-0.5 shrink-0 text-critical" />
+              <span>
+                This run stopped because of a system error: {plainFailureReason(failure)}.
+                <details className="mt-0.5">
+                  <summary className="cursor-pointer text-micro text-fg-subtle">Technical details</summary>
+                  <span className="break-words font-mono text-micro text-fg-muted">{failure}</span>
+                </details>
+              </span>
+            </p>
+          )}
+          {runEvents.map((ev) => (
+            <div key={ev.seq} className="flex items-start gap-2 text-caption" data-run-event={ev.kind}>
+              <span className="num w-12 shrink-0 text-micro text-fg-subtle">m{Math.round(ev.minute)}</span>
+              <Icon
+                name={ev.kind === 'resumed' ? 'check' : 'alert'}
+                size={12}
+                className={
+                  ev.tone === 'critical'
+                    ? 'mt-0.5 shrink-0 text-critical'
+                    : ev.tone === 'warning'
+                      ? 'mt-0.5 shrink-0 text-warning'
+                      : 'mt-0.5 shrink-0 text-good'
+                }
+              />
+              <span className="min-w-0 flex-1 text-fg">
+                {ev.text}
+                {ev.detail && (
+                  <details className="mt-0.5">
+                    <summary className="cursor-pointer text-micro text-fg-subtle">Technical details</summary>
+                    <span className="break-words font-mono text-micro text-fg-muted">{ev.detail}</span>
+                  </details>
+                )}
+              </span>
+            </div>
+          ))}
+        </section>
       )}
 
       <form
@@ -200,5 +258,16 @@ export function AuditView({
         </StateFrame>
       </div>
     </div>
+  );
+}
+
+/** The run's status in plain words: "stopped" and "failed" never read as "completed". */
+export function RunStatusBadge({ status, runEvents = [] }: { status: string; runEvents?: RunLevelEvent[] }) {
+  const stopped = runEvents.some((e) => e.kind === 'stopped');
+  const o = runOutcome({ status, completedReason: stopped ? 'stopped' : undefined });
+  return (
+    <span data-run-status={o.kind}>
+      <Badge tone={o.tone === 'good' ? 'neutral' : o.tone}>{o.label}</Badge>
+    </span>
   );
 }

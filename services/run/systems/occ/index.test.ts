@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Scenario } from '@ica/schema';
 import { DUTY_MANAGER, fixtureScenario, harness } from '../testing';
-import { applyMutations } from '../util';
+import { applyMutations, netMutations } from '../util';
 import {
   compatibleType,
   curfewConflict,
@@ -13,6 +13,7 @@ import {
   executeCancel,
   executeSwap,
   planSwap,
+  requestSwap,
   retimeFlight,
   tickOcc,
 } from './index';
@@ -93,6 +94,43 @@ describe('occ swap rules', () => {
     expect(Object.values(s.occ.swaps)[0]).toMatchObject({ status: 'executed', approvedBy: DUTY_MANAGER });
     // the spare can't be used twice
     expect(planSwap(s, { fromTail: 'AX-FXA', toTail: 'AX-FXB', flights: ['ACX101'] }, 0).ok).toBe(false);
+  });
+
+  it('touches each row once per swap and per tick (one DynamoDB transaction cannot hold two writes to a row)', () => {
+    const h = harness();
+    const keys = (ms: { system: string; entity: string; id: string }[]) =>
+      ms.map((m) => `${m.system}/${m.entity}/${m.id}`);
+    const input = { fromTail: 'AX-FXA', toTail: 'AX-FXB', flights: ['ACX101', 'ACX102'] };
+    const r = executeSwap(h.state, input, 0, DUTY_MANAGER, h.rng);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(new Set(keys(r.mutations)).size).toBe(r.mutations.length);
+    // requested → OCC confirms in tick (re-tail + re-time of the same flights): still one mutation per row
+    const req = requestSwap(h.state, input, 0, DUTY_MANAGER, h.rng);
+    expect(req.ok).toBe(true);
+    if (!req.ok) return;
+    const s = applyMutations(h.state, req.mutations);
+    const tick = tickOcc(s, 5, 1 / 6);
+    expect(tick.length).toBeGreaterThan(0);
+    expect(new Set(keys(tick)).size).toBe(tick.length);
+    expect(applyMutations(s, tick).occ.flights.ACX101).toMatchObject({ tail: 'AX-FXB', delayMin: 40 });
+  });
+
+  it('netMutations merges a row touched several times into its net change', () => {
+    const base = { system: 'occ' as const, entity: 'flights', id: 'F' };
+    const u1 = { ...base, op: 'update' as const, before: { a: 0 }, after: { a: 1 } };
+    const u2 = { ...base, op: 'update' as const, before: { a: 1 }, after: { a: 2 } };
+    const other = { ...base, id: 'G', op: 'create' as const, after: { g: 1 } };
+    expect(netMutations([u1, other, u2])).toEqual([
+      { ...base, op: 'update', before: { a: 0 }, after: { a: 2 } },
+      other,
+    ]);
+    const c = { ...base, op: 'create' as const, after: { a: 1 } };
+    const d = { ...base, op: 'delete' as const };
+    expect(netMutations([c, u2])).toEqual([{ ...base, op: 'create', after: { a: 2 } }]);
+    expect(netMutations([c, d])).toEqual([]);
+    expect(netMutations([u1, d])).toEqual([{ ...d, before: { a: 0 } }]);
+    expect(netMutations([d, c])).toEqual([{ ...base, op: 'update', after: { a: 1 } }]);
   });
 
   it('rejects a spare at another station, of an incompatible type, or flights of another tail', () => {

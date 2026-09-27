@@ -65,6 +65,13 @@ export interface Store {
     patch: ApprovalPatch,
   ): Promise<boolean>;
 
+  /**
+   * Addition (self-recovery): claim resume attempt `attempt` of a run, atomically: sets `RunMeta.resumeAttempt`
+   * only when it is absent or lower, so exactly one invocation resumes each attempt (Lambda may deliver an async
+   * event twice). Returns false when the attempt was already claimed. Optional: a store without it never resumes.
+   */
+  claimResume?(runId: string, attempt: number): Promise<boolean>;
+
   // mock state (current, as persisted by append)
   getSystemState(runId: string, system?: StateSystemName): Promise<Partial<SystemState>>;
 

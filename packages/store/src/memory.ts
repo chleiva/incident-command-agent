@@ -24,7 +24,7 @@ import {
   type SystemMutation,
   type SystemState,
 } from '@ica/schema';
-import { clone, emptyStateFor, toEvent } from './util';
+import { clone, duplicateMutationKeys, emptyStateFor, toEvent } from './util';
 
 export class MemoryEventBus implements EventBus {
   private subs = new Map<string, Set<(events: RunEvent[]) => void>>();
@@ -55,6 +55,21 @@ export interface MemoryStoreOptions {
   /** Validate every appended event against the schema (default true: catches contract drift early). */
   validateEvents?: boolean;
   now?: () => string;
+  /**
+   * Throw when one append carries two mutations for the same row (the DynamoDB invariant: a transaction may not
+   * touch one item twice). DynamoStore coalesces such batches, but a producer that emits them is almost always a
+   * bug, so dev and tests fail loudly. Default: on, except with `NODE_ENV=production` or inside a Lambda (where an
+   * in-memory scratch store never talks to DynamoDB).
+   */
+  strictMutationKeys?: boolean;
+}
+
+/** Thrown by MemoryStore (strict mode) for an append with two mutations on one row. */
+export class DuplicateMutationKeyError extends Error {
+  constructor(readonly keys: string[]) {
+    super(`one append carries several mutations for the same row: ${keys.join(', ')}`);
+    this.name = 'DuplicateMutationKeyError';
+  }
 }
 
 type Loose = Record<string, Record<string, Record<string, unknown>>>;
@@ -84,9 +99,13 @@ export class MemoryStore implements Store {
   readonly bus?: EventBus;
   private readonly validate: boolean;
   private readonly now: () => string;
+  private readonly strictKeys: boolean;
 
   constructor(opts: MemoryStoreOptions = {}) {
     this.bus = opts.bus;
+    this.strictKeys =
+      opts.strictMutationKeys ??
+      (process.env.NODE_ENV !== 'production' && !process.env.AWS_LAMBDA_FUNCTION_NAME);
     this.validate = opts.validateEvents ?? true;
     this.now = opts.now ?? (() => new Date().toISOString());
   }
@@ -117,6 +136,14 @@ export class MemoryStore implements Store {
     const { lastSeq: _ignored, runId: _id, ...rest } = patch;
     this.runs.set(runId, clone({ ...cur, ...rest, updatedAt: rest.updatedAt ?? this.now() }));
   }
+  async claimResume(runId: string, attempt: number): Promise<boolean> {
+    // Check-and-set without an await in between: atomic on the event loop.
+    const cur = this.runs.get(runId);
+    if (!cur) throw new RunNotFoundError(runId);
+    if ((cur.resumeAttempt ?? 0) >= attempt) return false;
+    this.runs.set(runId, { ...cur, resumeAttempt: attempt, updatedAt: this.now() });
+    return true;
+  }
   async listRuns(limit: number): Promise<RunMeta[]> {
     return [...this.runs.values()]
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.runId.localeCompare(a.runId))
@@ -132,6 +159,10 @@ export class MemoryStore implements Store {
     const meta = this.runs.get(runId);
     if (!meta) throw new RunNotFoundError(runId);
     if (!drafts.length && !mutations.length) return [];
+    if (this.strictKeys) {
+      const dup = duplicateMutationKeys(mutations);
+      if (dup.length) throw new DuplicateMutationKeyError(dup);
+    }
     const log = this.events.get(runId)!;
     const start = meta.lastSeq;
     const created = drafts.map((d, i) => toEvent(runId, start + i + 1, d, this.now));

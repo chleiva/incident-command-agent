@@ -316,6 +316,11 @@ export const HEADLINE_TEMPLATES: Record<string, Template> = {
   },
   page_engineer: (a, r, ctx) => {
     const eta = num(r.etaMinute);
+    // Additive backend marker: the engineer was already on the way (no second page).
+    if (alreadyPaged(r)) {
+      const where = station(a.station) || station(r.station);
+      return `Engineer already paged${at(where)}${eta !== undefined ? ` — ETA m${Math.round(eta)}` : ''}`;
+    }
     const mins =
       eta !== undefined && ctx.minute !== undefined ? Math.max(0, Math.round(eta - ctx.minute)) : eta;
     const where = station(a.station);
@@ -489,6 +494,13 @@ export const HEADLINE_TEMPLATES: Record<string, Template> = {
  * The headline of one action. `result` is the tool result's data (`agent.tool_result.result`, or its parsed
  * `resultPreview`); omit it while the call is in flight or awaiting approval.
  */
+/** A page_engineer result that says the engineer was already paged (flag, status or note; read defensively). */
+export function alreadyPaged(r: Record<string, unknown>): boolean {
+  if (r.alreadyPaged === true || r.already_paged === true) return true;
+  if (typeof r.status === 'string' && /^already[_ ]paged$/i.test(r.status)) return true;
+  return [r.note, r.message, r.detail].some((x) => typeof x === 'string' && /already paged/i.test(x));
+}
+
 export function headline(tool: string, args?: unknown, result?: unknown, ctx: HeadlineContext = {}): string {
   const template = HEADLINE_TEMPLATES[tool];
   const r = ctx.failed ? {} : obj(result);

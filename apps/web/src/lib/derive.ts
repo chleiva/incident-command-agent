@@ -48,7 +48,16 @@ export function kpiAtMinute(series: readonly KpiPoint[], minute: number): KpiSna
 
 // ------------------------------------------------------------------------------------------------ timeline markers
 export type MarkerKind =
-  'trigger' | 'proposal' | 'decision' | 'message' | 'twist' | 'blocked' | 'end' | 'baseline';
+  | 'trigger'
+  | 'proposal'
+  | 'decision'
+  | 'message'
+  | 'twist'
+  | 'blocked'
+  | 'end'
+  | 'baseline'
+  | 'recovery'
+  | 'failed';
 
 export interface Marker {
   seq: number;
@@ -105,7 +114,14 @@ export function eventMarkers(events: readonly RunEvent[]): Marker[] {
         out.push({ ...m, kind: 'blocked', label: `Blocked: ${e.payload.tool ?? e.payload.layer}` });
         break;
       case 'run.completed':
-        out.push({ ...m, kind: 'end', label: 'Run complete' });
+        out.push({
+          ...m,
+          kind: 'end',
+          label: e.payload.reason === 'stopped' ? 'Run stopped (kill switch)' : 'Run complete',
+        });
+        break;
+      case 'run.failed':
+        out.push({ ...m, kind: 'failed', label: 'Run stopped: system error' });
         break;
       case 'baseline.action':
         out.push({
@@ -114,8 +130,21 @@ export function eventMarkers(events: readonly RunEvent[]): Marker[] {
           label: `Baseline: ${e.payload.actor} — ${e.payload.tool.replace(/_/g, ' ')}`,
         });
         break;
-      default:
+      default: {
+        // Self-recovery (additive, optional events): read by type name.
+        const type = e.type as string;
+        if (type === 'run.recovering') {
+          const attempt = (e.payload as { attempt?: unknown }).attempt;
+          out.push({
+            ...m,
+            kind: 'recovery',
+            label: `System error — recovering${typeof attempt === 'number' ? ` (attempt ${attempt})` : ''}`,
+          });
+        } else if (type === 'run.resumed_after_error') {
+          out.push({ ...m, kind: 'recovery', label: 'Resumed after a system error' });
+        }
         break;
+      }
     }
   }
   return out;

@@ -12,6 +12,7 @@ import {
   type RunLimits,
   type RunMode,
   type Scenario,
+  type Store,
 } from '@ica/schema';
 import { MemoryEventBus, MemoryStore, MemoryTraceStore } from '@ica/store';
 import minimal from '@ica/schema/fixtures/scenario.minimal.json' with { type: 'json' };
@@ -40,6 +41,10 @@ export interface HarnessOptions {
   bus?: boolean;
   runOptions?: ExecuteRunOptions;
   speed?: number;
+  /** Wrap the MemoryStore the run uses (fault injection); `h.store` stays the inner store for inspection. */
+  wrapStore?: (store: MemoryStore) => Store;
+  /** Self-recovery: `RunDeps.scheduleResume` (tests record the request and call `h.resume`). */
+  scheduleResume?: RunDeps['scheduleResume'];
 }
 
 export interface Harness {
@@ -50,6 +55,8 @@ export interface Harness {
   deps: RunDeps;
   ctx?: RunContext;
   run(): Promise<RunResult>;
+  /** A resumed invocation of the same run (what the Run Lambda does on `{runId, resume: {attempt}}`). */
+  resume(attempt: number): Promise<RunResult>;
   events(): Promise<RunEvent[]>;
 }
 
@@ -84,7 +91,8 @@ export async function makeHarness(opts: HarnessOptions = {}): Promise<Harness> {
     });
   }
   const deps: RunDeps = {
-    store,
+    store: opts.wrapStore ? opts.wrapStore(store) : store,
+    ...(opts.scheduleResume ? { scheduleResume: opts.scheduleResume } : {}),
     traces,
     knowledge: fakeKnowledge(),
     llm: {
@@ -110,6 +118,21 @@ export async function makeHarness(opts: HarnessOptions = {}): Promise<Harness> {
     async run() {
       return executeRunWith(
         { runId, deps },
+        {
+          registry: opts.registry ?? fakeRegistry(),
+          scenario,
+          log: () => undefined,
+          ...opts.runOptions,
+          onContext: (ctx) => {
+            h.ctx = ctx;
+            opts.runOptions?.onContext?.(ctx);
+          },
+        },
+      );
+    },
+    async resume(attempt: number) {
+      return executeRunWith(
+        { runId, deps, resume: { attempt } },
         {
           registry: opts.registry ?? fakeRegistry(),
           scenario,

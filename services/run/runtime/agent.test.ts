@@ -129,7 +129,9 @@ describe('runAgent: tiers', () => {
     expect(rec?.decision?.seq).toBe(decision.seq);
     const p = foldEvents(events);
     expect(Object.values(p.systems.pss.messages)[0].status).toBe('sent');
-    expect(p.kpis?.safety.value.humanDecisionsBeforeDependentActions).toBe(1);
+    // eval-auto is a policy approval, not a human decision: it never satisfies the gate
+    expect(p.kpis?.safety.value.humanDecisionsBeforeDependentActions).toBe(0);
+    expect(p.kpis?.safety.value.autoApprovedActions).toBe(1);
     expect(p.kpis?.safety.value.dependentActionsWithoutDecision).toBe(0);
   });
 
@@ -315,7 +317,7 @@ describe('runAgent: concurrency, validation and guardrail layers', () => {
     const h = await makeHarness({
       script: scriptByAgent({
         orchestrator: [
-          step('Bad report.', call('report', { summary: 1 }, 'tu_r1')),
+          step('Bad report.', call('report', { openIssues: [] }, 'tu_r1')),
           step('Good.', call('report', REPORT)),
         ],
       }),

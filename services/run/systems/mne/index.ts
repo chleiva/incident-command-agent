@@ -156,6 +156,9 @@ export function assignWorkOrder(state: SystemState, woId: string, engineerId: st
   if (!wo) return fail(`unknown work order ${woId}`);
   if (!state.engineers.engineers[engineerId]) return fail(`unknown engineer ${engineerId}`);
   if (wo.status === 'closed') return fail(`work order ${woId} is closed`);
+  // Exactly one engineer per work order: an existing assignment is never silently replaced.
+  if (wo.assignedEngineerId && wo.assignedEngineerId !== engineerId)
+    return fail(`work order ${woId} is already assigned to ${wo.assignedEngineerId}`);
   const m = updated('mne', 'workOrders', woId, wo, {
     assignedEngineerId: engineerId,
     status: wo.status === 'created' ? 'assigned' : wo.status,
