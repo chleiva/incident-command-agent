@@ -309,8 +309,22 @@ export class ApiStack extends Stack {
     authorFn.grantInvoke(apiFn);
     // Explicit S3 actions (no grant-helper wildcards like s3:GetObject*).
     const s3 = (actions: string[], resources: string[]) => new PolicyStatement({ actions, resources });
+    apiFn.addToRolePolicy(s3(['s3:PutObject'], [tracesBucket.arnForObjects('traces/*/export.json')]));
+    // Audit logs + offloaded event payloads: read-only on the trace objects, listing only under traces/.
     apiFn.addToRolePolicy(
-      s3(['s3:GetObject', 's3:PutObject'], [tracesBucket.arnForObjects('traces/*/export.json')]),
+      new PolicyStatement({
+        sid: 'AuditReadTraces',
+        actions: ['s3:GetObject'],
+        resources: [tracesBucket.arnForObjects('traces/*')],
+      }),
+    );
+    apiFn.addToRolePolicy(
+      new PolicyStatement({
+        sid: 'AuditListTraces',
+        actions: ['s3:ListBucket'],
+        resources: [tracesBucket.bucketArn],
+        conditions: { StringLike: { 's3:prefix': ['traces/*'] } },
+      }),
     );
     // Resolve the approver's display name from the user pool (read-only, this pool only).
     apiFn.addToRolePolicy(

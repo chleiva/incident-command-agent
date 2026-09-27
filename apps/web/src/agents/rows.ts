@@ -166,8 +166,11 @@ function deciderTitle(a: Actor): string {
 }
 
 export function decisionHeadline(d: P<'approval.decision'>, minute: number): string {
-  const who = deciderTitle(d.decidedBy);
   const when = ` at m${Math.round(minute)}`;
+  // A simulation auto-approval never reads as a person.
+  if (d.decidedBy.kind === 'policy' && d.decidedBy.policy === 'simulation-auto')
+    return fitHeadline(`Auto-approved (simulation)${when}`);
+  const who = deciderTitle(d.decidedBy);
   if (d.decision === 'reject') {
     const reason = d.reason?.trim();
     if (!reason) return fitHeadline(`Rejected by ${who}${when}`);
@@ -578,6 +581,23 @@ export function turnCount(rows: readonly AgentRow[], uptoSeq = Number.POSITIVE_I
   const seen = new Set<string>();
   for (const r of rows) if (r.turn !== undefined && r.seq <= uptoSeq) seen.add(`${r.agentRunId}#${r.turn}`);
   return seen.size;
+}
+
+/**
+ * History mode: per column of the full (live) model, the rows after the cursor — the actions the viewer does not see
+ * at that moment ("{n} later actions — Back to live"). Thought rows are not counted when they are hidden.
+ */
+export function laterActions(
+  full: AgentsModel,
+  cursorSeq: number,
+  opts: { hideThoughts?: boolean } = {},
+): Partial<Record<AgentRole, number>> {
+  const out: Partial<Record<AgentRole, number>> = {};
+  for (const c of full.columns) {
+    const n = c.rows.filter((r) => r.seq > cursorSeq && !(opts.hideThoughts && r.kind === 'thought')).length;
+    if (n > 0) out[c.role] = n;
+  }
+  return out;
 }
 
 export const STATUS_LABEL: Record<ColumnStatus, string> = {

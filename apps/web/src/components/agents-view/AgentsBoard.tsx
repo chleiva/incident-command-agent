@@ -63,6 +63,11 @@ export interface AgentsBoardProps {
   loadStatus?: LoadStatus;
   error?: string | null;
   onSelectRow?: (row: AgentRow) => void;
+  /** History mode: rows after the cursor per column (hidden; the column footer offers "Back to live"). */
+  laterByRole?: Partial<Record<AgentRole, number>>;
+  onLive?: () => void;
+  /** Approvals pending at the head (live): only their waiting rows offer "Decide". */
+  livePendingIds?: ReadonlySet<string>;
   decisionHref?: string;
   onOpenDecisions?: () => void;
   /** Force virtualisation (stories/tests). */
@@ -79,6 +84,9 @@ export function AgentsBoard({
   loadStatus = 'ready',
   error,
   onSelectRow,
+  laterByRole = {},
+  onLive,
+  livePendingIds,
   decisionHref,
   onOpenDecisions,
   virtualize,
@@ -245,6 +253,9 @@ export function AgentsBoard({
                 onFocusRow={(r) => activate(r.role, r.key)}
                 onRowKeyDown={onRowKeyDown}
                 onFollowLink={followLink}
+                later={laterByRole[c.role] ?? 0}
+                onLive={onLive}
+                livePendingIds={livePendingIds}
                 decisionHref={decisionHref}
                 onOpenDecisions={onOpenDecisions}
                 virtualize={virtualize}

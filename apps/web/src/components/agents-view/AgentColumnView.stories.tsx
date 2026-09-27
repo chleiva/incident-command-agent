@@ -14,13 +14,18 @@ function ColumnStory({
   role,
   loadStatus = 'ready',
   empty = false,
+  historyAtSeq,
 }: {
   role: 'passenger' | 'ground' | 'maintenance';
   loadStatus?: 'ready' | 'loading' | 'error';
   empty?: boolean;
+  /** History mode: only the rows up to this seq, and a "later actions" footer. */
+  historyAtSeq?: number;
 }) {
   const col = SHOWCASE_MODEL.columns.find((c) => c.role === role)!;
-  const rows = empty ? [] : col.rows;
+  const all = empty ? [] : col.rows;
+  const rows = historyAtSeq === undefined ? all : all.filter((r) => r.seq <= historyAtSeq);
+  const later = all.length - rows.length;
   const [expanded, setExpanded] = useState<string | null>(null);
   const [focused, setFocused] = useState<string | null>(rows[0]?.key ?? null);
   return (
@@ -48,6 +53,8 @@ function ColumnStory({
         onFocusRow={(r) => setFocused(r.key)}
         onRowKeyDown={() => {}}
         onFollowLink={() => {}}
+        later={later}
+        onLive={() => {}}
       />
     </div>
   );
@@ -65,3 +72,7 @@ export const Loading: Story = { args: { role: 'maintenance', loadStatus: 'loadin
 export const Live: Story = { name: 'Live (passengers: waits and decisions)', args: { role: 'passenger' } };
 export const Stopped: Story = { name: 'Live (ground: stopped by a limit)', args: { role: 'ground' } };
 export const ErrorState: Story = { name: 'Error', args: { role: 'maintenance', loadStatus: 'error' } };
+export const History: Story = {
+  name: 'History (later actions hidden)',
+  args: { role: 'passenger', historyAtSeq: 100 },
+};

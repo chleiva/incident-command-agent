@@ -128,7 +128,7 @@ export function actorLabel(a: Actor | undefined): string {
     case 'agent':
       return `${a.role} agent`;
     case 'policy':
-      return `${a.policy} policy`;
+      return a.policy === 'simulation-auto' ? 'Auto-approved (simulation)' : `${a.policy} policy`;
     case 'world':
       return 'world';
   }

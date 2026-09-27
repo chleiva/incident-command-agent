@@ -53,8 +53,10 @@ function build() {
     publicScenarios,
     settings,
     appConfigSource: async () => ({ brand, stations }),
-    presign: (key) =>
-      getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn: 900 }),
+    presign: (key, opts) =>
+      getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), {
+        expiresIn: opts?.expiresIn ?? 900,
+      }),
     log,
     ...(resolveUserName ? { resolveUserName } : {}),
   });

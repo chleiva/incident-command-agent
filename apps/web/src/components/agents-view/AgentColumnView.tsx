@@ -54,6 +54,11 @@ export interface AgentColumnViewProps {
   onFocusRow: (row: AgentRow) => void;
   onRowKeyDown: (e: KeyboardEvent<HTMLButtonElement>, row: AgentRow) => void;
   onFollowLink: (row: AgentRow) => void;
+  /** History mode: actions after the viewed moment (hidden), with a "Back to live" footer. */
+  later?: number;
+  onLive?: () => void;
+  /** Approvals pending at the head: only those waiting rows link to the decision rail. */
+  livePendingIds?: ReadonlySet<string>;
   decisionHref?: string;
   onOpenDecisions?: () => void;
   /** Force virtualisation on or off (default: on above `VIRTUALIZE_AFTER` rows). */
@@ -78,6 +83,9 @@ export const AgentColumnView = forwardRef<ColumnHandle, AgentColumnViewProps>(fu
     onFocusRow,
     onRowKeyDown,
     onFollowLink,
+    later = 0,
+    onLive,
+    livePendingIds,
     decisionHref,
     onOpenDecisions,
     virtualize,
@@ -163,6 +171,8 @@ export const AgentColumnView = forwardRef<ColumnHandle, AgentColumnViewProps>(fu
 
   const renderRow = (row: AgentRow) => {
     const detailId = `detail-${row.key}`;
+    // Decide only on what is pending NOW (a row pending at a past moment may have been decided since).
+    const canDecide = !livePendingIds || (!!row.approvalId && livePendingIds.has(row.approvalId));
     return (
       <AgentRowView
         ref={(el) => {
@@ -179,8 +189,8 @@ export const AgentColumnView = forwardRef<ColumnHandle, AgentColumnViewProps>(fu
         onFocus={() => onFocusRow(row)}
         onKeyDown={(e) => onRowKeyDown(e, row)}
         onFollowLink={row.link ? () => onFollowLink(row) : undefined}
-        decisionHref={decisionHref}
-        onOpenDecisions={onOpenDecisions}
+        decisionHref={canDecide ? decisionHref : undefined}
+        onOpenDecisions={canDecide ? onOpenDecisions : undefined}
       >
         {expandedKey === row.key ? renderDetail(row, detailId) : null}
       </AgentRowView>
@@ -238,6 +248,28 @@ export const AgentColumnView = forwardRef<ColumnHandle, AgentColumnViewProps>(fu
           )}
         </StateFrame>
       </div>
+      {later > 0 && (
+        <div
+          className="flex shrink-0 items-center justify-center gap-1 border-t border-dashed border-border px-2 py-1.5 text-caption text-fg-muted"
+          data-later-footer
+        >
+          <span data-later-count={later}>
+            {later} later action{later === 1 ? '' : 's'}
+          </span>
+          {onLive && (
+            <>
+              <span aria-hidden> — </span>
+              <button
+                type="button"
+                onClick={onLive}
+                className="text-fg underline decoration-border-control underline-offset-2 hover:decoration-fg"
+              >
+                Back to live
+              </button>
+            </>
+          )}
+        </div>
+      )}
       {behind > 0 && (
         <button
           type="button"

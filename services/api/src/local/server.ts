@@ -15,7 +15,12 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { executeRun, loadKnowledgeIndex, runAuthor, screenInput, screenInputFast } from '@ica/run';
 import { publicScenarios } from '@ica/scenarios';
-import { validateScenario, type KnowledgeIndex, type RunDeps } from '@ica/schema';
+import {
+  simAutoApproveAfterMsFromEnv,
+  validateScenario,
+  type KnowledgeIndex,
+  type RunDeps,
+} from '@ica/schema';
 import {
   EnvSecretStore,
   FsTraceStore,
@@ -80,7 +85,15 @@ async function main() {
   let knowledge: Promise<KnowledgeIndex> | null = null;
   const deps = async (): Promise<RunDeps> => {
     knowledge ??= loadKnowledgeIndex({ source: 'fs', path: knowledgeDir() });
-    return { store, traces, knowledge: await knowledge, llm: llmConfigFromEnv(env), secrets, bus };
+    return {
+      store,
+      traces,
+      knowledge: await knowledge,
+      llm: llmConfigFromEnv(env),
+      secrets,
+      bus,
+      simAutoApproveAfterMs: simAutoApproveAfterMsFromEnv(env),
+    };
   };
 
   const launcher = new InProcessRunLauncher({

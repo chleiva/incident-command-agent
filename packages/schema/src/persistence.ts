@@ -101,6 +101,20 @@ export interface TraceStore {
    */
   put(runId: string, seq: number | string, body: unknown, opts?: TracePutOptions): Promise<string>;
   get(key: string): Promise<unknown>;
+  /**
+   * Addition (audit logs): every object under `traces/{runId}/` (LLM call traces, oversized payloads, exports), in
+   * key order. Optional: stores that cannot list return no LLM entries in the audit.
+   */
+  list?(runId: string): Promise<TraceObjectInfo[]>;
+}
+
+/** One stored trace object (audit logs). */
+export interface TraceObjectInfo {
+  key: string;
+  /** Bytes, when the store knows it. */
+  size?: number;
+  /** ISO time the object was written, when the store knows it. */
+  lastModified?: string;
 }
 
 export interface SecretStore {

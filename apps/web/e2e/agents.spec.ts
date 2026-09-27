@@ -8,6 +8,11 @@
  */
 import { expect, test } from '@playwright/test';
 
+// These flows decide by hand: turn the simulation's auto-approval off (the ⌘K setting, persisted per viewer).
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove', 'off'));
+});
+
 test('Agents view: waiting → decision, expand, delegation link, time sync, back to live', async ({
   page,
 }) => {

@@ -33,6 +33,8 @@ export interface HarnessOptions {
   scenario?: Scenario;
   mode?: RunMode;
   policy?: RunDeps['approvalsPolicy'];
+  /** The human policy's simulation safety net (real ms); tests default to 0 (off) unless they test it. */
+  simAutoApproveAfterMs?: number;
   limits?: Partial<RunLimits>;
   latencyMs?: number;
   bus?: boolean;
@@ -96,6 +98,7 @@ export async function makeHarness(opts: HarnessOptions = {}): Promise<Harness> {
     clock,
     providers,
     approvalsPolicy: opts.policy ?? 'eval-auto',
+    simAutoApproveAfterMs: opts.simAutoApproveAfterMs ?? 0,
     ...(bus ? { bus } : {}),
   };
   const h: Harness = {

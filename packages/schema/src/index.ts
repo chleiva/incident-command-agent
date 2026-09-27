@@ -17,4 +17,5 @@ export * from './reducer';
 export * from './runtime';
 export * from './persistence';
 export * from './api';
+export * from './audit';
 export * from './validate';

@@ -44,6 +44,9 @@ interface UiState {
   /** Agents view (task 08): hide thought rows. Persisted per viewer. */
   hideThoughts: boolean;
   aboutOpen: boolean;
+  /** Simulation: pending decisions approve themselves after a 10 s countdown. Default on; persisted per viewer. */
+  autoApprove: boolean;
+  setAutoApprove(on: boolean): void;
   setTheme(t: Theme): void;
   toggleCaptions(): void;
   setPlainLanguage(on: boolean): void;
@@ -67,6 +70,7 @@ const THEME_KEY = 'ica.theme';
 const CAPTIONS_KEY = 'ica.captions';
 export const PLAIN_LANGUAGE_KEY = 'ica.plainLanguage';
 export const HIDE_THOUGHTS_KEY = 'ica.agents.hideThoughts';
+export const AUTO_APPROVE_KEY = 'ica.autoApprove';
 const OPEN_RUN_KEY = 'ica.openRun';
 
 function read(key: string): string | null {
@@ -121,6 +125,11 @@ export const useUi = create<UiState>()((set, get) => ({
   openRunId: readSession(OPEN_RUN_KEY),
   hideThoughts: read(HIDE_THOUGHTS_KEY) === 'on',
   aboutOpen: false,
+  autoApprove: read(AUTO_APPROVE_KEY) !== 'off',
+  setAutoApprove(autoApprove) {
+    write(AUTO_APPROVE_KEY, autoApprove ? 'on' : 'off');
+    set({ autoApprove });
+  },
   setTheme(theme) {
     write(THEME_KEY, theme);
     applyTheme(theme);

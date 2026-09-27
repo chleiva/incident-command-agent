@@ -12,20 +12,27 @@ import type {
 } from '@ica/schema/browser';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ApiClient } from '../lib/api';
+import { ApiRequestError, type ApiClient } from '../lib/api';
 import { downloadBlob } from '../lib/evidencePdf';
 import { useUi } from '../store/ui';
 import { useServices } from './services';
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
-/** Optimistic approval: mark "decided (sending…)" now; the `approval.decision` event reconciles; roll back on error. */
+/** The outcome of a decision request: `conflict` = someone (or something) else decided first (HTTP 409). */
+export type DecideOutcome = 'ok' | 'conflict' | 'error';
+
+/**
+ * Optimistic approval: mark "decided (sending…)" now; the `approval.decision` event reconciles; roll back on error.
+ * A 409 (already decided elsewhere: the simulation's auto-approval, another tab) is not an error: the decision
+ * that won arrives as an event, so it only rolls back and says so calmly.
+ */
 export async function decideOptimistically(
   api: Pick<ApiClient, 'decideApproval'>,
   runId: string,
   approvalId: string,
   req: ApprovalDecisionRequest,
-): Promise<boolean> {
+): Promise<DecideOutcome> {
   const ui = useUi.getState();
   ui.setOptimistic(approvalId, {
     decision: req.decision,
@@ -34,11 +41,20 @@ export async function decideOptimistically(
   });
   try {
     await api.decideApproval(runId, approvalId, req);
-    return true;
+    return 'ok';
   } catch (e) {
     useUi.getState().setOptimistic(approvalId, null);
+    if (e instanceof ApiRequestError && e.status === 409) {
+      if (req.policy !== 'simulation-auto')
+        useUi.getState().pushToast({
+          tone: 'info',
+          title: 'Already decided',
+          body: 'This decision was taken a moment ago elsewhere; the run continues with it.',
+        });
+      return 'conflict';
+    }
     useUi.getState().pushToast({ tone: 'critical', title: 'Decision not sent', body: message(e) }, 8_000);
-    return false;
+    return 'error';
   }
 }
 

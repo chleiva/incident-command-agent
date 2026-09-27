@@ -226,6 +226,11 @@ export const ApprovalDecisionRequestSchema = Type.Object(
     reason: Opt(Type.String({ maxLength: 2000 })),
     /** Addition: the approver's role title (default 'Duty Manager'). */
     roleTitle: Opt(Type.String({ minLength: 1, maxLength: 80 })),
+    /**
+     * Addition: `simulation-auto` = the viewer's countdown ran out (simulation). Only with `decision: 'approve'`;
+     * recorded as `decidedBy: {kind:'policy', policy:'simulation-auto'}`, never as the person.
+     */
+    policy: Opt(Type.Literal('simulation-auto')),
   },
   { additionalProperties: false },
 );
@@ -356,6 +361,10 @@ export const API_ROUTES = {
   exportRun: { method: 'GET', path: '/runs/{id}/export' },
   getConfig: { method: 'GET', path: '/config' },
   getLatestEval: { method: 'GET', path: '/evals/latest' },
+  /** Addition (audit logs): every LLM call (metadata + `traceKey`) and tool call of a run, chronological. */
+  getRunAudit: { method: 'GET', path: '/runs/{id}/audit' },
+  /** Addition (audit logs): one stored LLM trace (`?key=traces/{runId}/…json`), or a presigned URL when large. */
+  getRunAuditLlm: { method: 'GET', path: '/runs/{id}/audit/llm' },
 } as const;
 export type ApiRouteName = keyof typeof API_ROUTES;
 

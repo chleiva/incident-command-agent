@@ -46,6 +46,8 @@ export function AppShell({
   const runMatch = useMatch('/runs/:runId/*');
   const openRunId = useUi((s) => s.openRunId);
   const agentsRunId = runMatch?.params.runId ?? openRunId;
+  // Evals stays reachable from the ⌘K palette only (owner request); Audit replaces it in the menu.
+  const auditMatch = useMatch('/audit');
   const nav = ({ isActive }: { isActive: boolean }) =>
     cx(
       'rounded-md px-2 py-1 text-body',
@@ -102,11 +104,14 @@ export function AppShell({
               </Tooltip.Root>
             </Tooltip.Provider>
           )}
+          <NavLink
+            to={agentsRunId ? `/runs/${encodeURIComponent(agentsRunId)}/audit` : '/audit'}
+            className={(a) => nav({ isActive: a.isActive || !!auditMatch })}
+          >
+            Audit
+          </NavLink>
           <NavLink to="/training" className={nav}>
             Training scenarios
-          </NavLink>
-          <NavLink to="/evals" className={nav}>
-            Evals
           </NavLink>
         </nav>
         {!agentsRunId && (

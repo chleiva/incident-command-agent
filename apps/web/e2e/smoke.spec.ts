@@ -19,6 +19,11 @@ async function runCommand(page: Page, search: string, option: RegExp) {
   await expect(palette).toBeHidden();
 }
 
+// These flows decide by hand: turn the simulation's auto-approval off (the ⌘K setting, persisted per viewer).
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove', 'off'));
+});
+
 test('start a run, approve a decision, scrub back in time', async ({ page }) => {
   await page.goto('/training?timescale=4');
   await expect(page.getByText('Simulated systems · fictional carrier').first()).toBeVisible();

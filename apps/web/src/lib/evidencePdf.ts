@@ -19,7 +19,16 @@ import type {
 } from '@ica/schema/browser';
 import { PROVISIONAL_READING_LABEL } from '@ica/schema/browser';
 import { simulatedLabel } from './brand';
-import { actorLabel, formatDuration, formatEur, humaniseTool, simClockAt } from './format';
+import {
+  SIMULATION_AUTO_LABEL,
+  actorLabel,
+  decisionPhrase,
+  formatDuration,
+  formatEur,
+  humaniseTool,
+  isSimulationAuto,
+  simClockAt,
+} from './format';
 
 export interface EvidenceInput {
   carrierName: string;
@@ -94,14 +103,14 @@ export function evidenceSections(input: EvidenceInput): Section[] {
 
   const decided = Object.values(p.approvals).filter((a) => a.decision);
   sections.push({
-    heading: 'Decisions (tier: propose; every one taken by a named human)',
+    heading: 'Decisions (tier: propose; the approver of each; simulation auto-approvals are marked as such)',
     lines: decided.length
       ? decided.map((a) => {
           const d = a.decision!;
           const option = d.selectedOptionId
             ? a.options?.find((o) => o.id === d.selectedOptionId)?.label
             : undefined;
-          return `${clock(d.atMinute)} ${humaniseTool(a.tool)}: ${d.decision.toUpperCase()}${option ? ` — ${option}` : ''} — ${a.summary} — by ${actorLabel(d.decidedBy)}${d.reason ? ` (reason: ${d.reason})` : ''}`;
+          return `${clock(d.atMinute)} ${humaniseTool(a.tool)}: ${d.decision.toUpperCase()}${option ? ` — ${option}` : ''} — ${a.summary} — ${isSimulationAuto(d.decidedBy) ? SIMULATION_AUTO_LABEL : `by ${actorLabel(d.decidedBy)}`}${d.reason ? ` (reason: ${d.reason})` : ''}`;
         })
       : ['No decisions recorded.'],
   });
@@ -135,7 +144,7 @@ export function evidenceSections(input: EvidenceInput): Section[] {
     lines: messages.length
       ? messages.map(
           (m) =>
-            `${m.sentAtMinute !== undefined ? clock(m.sentAtMinute) : '--:--'} [${m.status}] ${m.channel.toUpperCase()} to ${m.cohortIds.join(', ')}: "${m.body}"${m.approvedBy ? ` — approved by ${actorLabel(m.approvedBy)}` : ''}`,
+            `${m.sentAtMinute !== undefined ? clock(m.sentAtMinute) : '--:--'} [${m.status}] ${m.channel.toUpperCase()} to ${m.cohortIds.join(', ')}: "${m.body}"${m.approvedBy ? ` — ${decisionPhrase(m.approvedBy, 'approved')}` : ''}`,
         )
       : ['No messages.'],
   });

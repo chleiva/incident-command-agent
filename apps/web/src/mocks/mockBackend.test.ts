@@ -84,6 +84,28 @@ describe('mock backend', () => {
     expect(view.simMinute).toBeGreaterThan(20);
   });
 
+  it('a simulation auto-approval is recorded as the policy (never the presenter), also on its consequences', async () => {
+    const { api } = setup();
+    const c = api.createRun({ scenarioId: 's01-pushback-tug-contact', mode: 'agent', speed: 30 });
+    await settle(100);
+    const { runId } = await c;
+    await settle(5_000);
+    const d = api.decideApproval(runId, 'ap-msg-1', { decision: 'approve', policy: 'simulation-auto' });
+    await settle(100);
+    expect((await d).accepted).toBe(true);
+    // The person arriving a moment later gets a 409.
+    const late = api.decideApproval(runId, 'ap-msg-1', { decision: 'approve' }).catch((e: unknown) => e);
+    await settle(100);
+    expect((await late) as { status: number }).toMatchObject({ status: 409 });
+    await settle(20_000);
+    const p = all(api, runId);
+    await settle(200);
+    const view = foldEvents(await p);
+    const sim = { kind: 'policy', policy: 'simulation-auto' };
+    expect(view.approvals['ap-msg-1']!.decision!.decidedBy).toEqual(sim);
+    expect(view.systems.pss.messages['msg-1']).toMatchObject({ status: 'sent', approvedBy: sim });
+  });
+
   it('a rejection drops the recorded consequences', async () => {
     const { api } = setup();
     const c = api.createRun({ scenarioId: 's01-pushback-tug-contact', mode: 'agent', speed: 30 });

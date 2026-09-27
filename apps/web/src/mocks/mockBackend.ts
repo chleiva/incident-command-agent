@@ -14,6 +14,7 @@
  */
 import {
   SHIPPED_SCENARIOS,
+  SIMULATION_AUTO_ACTOR,
   foldEvents,
   summariseScenario,
   type Actor,
@@ -34,6 +35,7 @@ import {
 } from '@ica/schema/browser';
 import { DEFAULT_APP_CONFIG } from '../lib/brand';
 import type { SocketLike, Transport } from '../lib/transport';
+import { mockAudit, mockLlmTrace } from './auditTraces';
 import { MOCK_EVAL_REPORT } from './evalReport';
 import { SHOWCASE_RUN_ID, buildAgentsShowcase } from './agentsShowcase';
 import { RECORDINGS, recordingFor, type Recording } from './recordings';
@@ -69,6 +71,8 @@ interface MockRun {
   /** template seq → released seq */
   seqMap: Map<number, number>;
   decided: Map<string, RunEvent<'approval.decision'>['payload']>;
+  /** Recorded decision seq → who actually decided (the approver recorded on its consequences). */
+  deciders: Map<number, Actor>;
   dropped: Set<number>;
   paused: boolean;
   done: boolean;
@@ -284,6 +288,17 @@ export class MockBackend {
           hasMore: rest.length > limit,
         });
       }
+      if (method === 'GET' && c === 'audit' && !d)
+        return json(200, mockAudit(run.meta, run.scenario, run.released, q.get('cursor'), q.get('limit')));
+      if (method === 'GET' && c === 'audit' && d === 'llm') {
+        const key = q.get('key') ?? '';
+        const thought = run.released.find(
+          (e): e is RunEvent<'agent.thought'> => e.type === 'agent.thought' && e.traceKey === key,
+        );
+        if (!thought) return err(400, 'invalid_trace_key', 'key is not a trace of this run');
+        const trace = mockLlmTrace(run.released, thought, run.scenario);
+        return json(200, { key, sizeBytes: JSON.stringify(trace).length, trace });
+      }
       if (method === 'POST' && c === 'approvals' && d)
         return this.decide(run, d, body as ApprovalDecisionRequest);
       if (method === 'POST' && c === 'twists') return this.twist(run, body as TwistRequest);
@@ -495,12 +510,17 @@ export class MockBackend {
       ...(req.editedArgs ? { editedArgs: req.editedArgs } : {}),
       ...(req.selectedOptionId ? { selectedOptionId: req.selectedOptionId } : {}),
       ...(req.reason ? { reason: req.reason } : {}),
-      decidedBy: { ...PRESENTER, roleTitle: req.roleTitle ?? 'Duty Manager' } as Actor,
+      // A simulation auto-approval (the countdown ran out) is the policy, never the presenter (like the real API).
+      decidedBy:
+        req.policy === 'simulation-auto'
+          ? SIMULATION_AUTO_ACTOR
+          : ({ ...PRESENTER, roleTitle: req.roleTitle ?? 'Duty Manager' } as Actor),
     };
     run.decided.set(approvalId, payload);
     const recorded = run.script.find(
       (e) => e.type === 'approval.decision' && e.payload.approvalId === approvalId,
     );
+    if (recorded) run.deciders.set(recorded.seq, payload.decidedBy);
     const recommended = a.options?.find((o) => o.recommended)?.id;
     const offPath =
       req.decision === 'reject' ||
@@ -641,6 +661,7 @@ export class MockBackend {
       released: [],
       seqMap: new Map(),
       decided: new Map(),
+      deciders: new Map(),
       dropped: new Set(),
       paused: false,
       done: false,
@@ -721,6 +742,10 @@ export class MockBackend {
     if (e.type === 'system.mutation' && e.payload.causedBySeq) {
       const s = map(e.payload.causedBySeq);
       const { causedBySeq: _drop, ...rest } = e.payload;
+      // The approver recorded on a decision's consequences is whoever decided now (presenter or simulation).
+      const decider = run.deciders.get(e.payload.causedBySeq);
+      const after = rest.after as Record<string, unknown> | undefined;
+      if (decider && after && 'approvedBy' in after) rest.after = { ...after, approvedBy: decider };
       return { ...e, payload: s ? { ...rest, causedBySeq: s } : rest } as RunEvent;
     }
     if (e.type === 'kpi.update' || e.type === 'run.completed') {

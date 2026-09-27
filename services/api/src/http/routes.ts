@@ -16,6 +16,7 @@ import {
   compileSchema,
   draft,
   summariseScenario,
+  SIMULATION_AUTO_ACTOR,
   type Actor,
   type AppConfig,
   type ApprovalDecisionResponse,
@@ -40,6 +41,7 @@ import {
   type TwistResponse,
 } from '@ica/schema';
 import { buildAppConfig } from '../config/app-config';
+import { createAuditRoutes } from './audit';
 import { errorFields, silentLogger } from '../util/log';
 import { isNotImplemented, type ApiDeps } from './deps';
 import { defaultDraftId, presentDraft } from './drafts';
@@ -139,7 +141,13 @@ export function createApiHandler(deps: ApiDeps) {
     return e;
   }
 
+  const audit = createAuditRoutes(deps, { requireRun, findScenario });
+
   const routes: RouteTable = {
+    // ---------------------------------------------------------------- audit logs (audit.ts)
+    getRunAudit: audit.getRunAudit,
+    getRunAuditLlm: audit.getRunAuditLlm,
+
     // ---------------------------------------------------------------- scenarios
     async listScenarios() {
       const priv = await store.listScenarios();
@@ -353,7 +361,14 @@ export function createApiHandler(deps: ApiDeps) {
       if (req.selectedOptionId && !rec.options?.some((o) => o.id === req.selectedOptionId)) {
         throw validationFailed([`/selectedOptionId unknown option ${req.selectedOptionId}`]);
       }
-      const decidedBy = humanActor(ctx.principal, req.roleTitle ?? 'Duty Manager');
+      if (req.policy === 'simulation-auto' && (req.decision !== 'approve' || req.editedArgs)) {
+        throw validationFailed(['/policy simulation-auto is only valid with decision approve (no edits)']);
+      }
+      // A simulation auto-approval (the viewer's countdown ran out) is recorded as the policy, never as the person.
+      const decidedBy: Actor =
+        req.policy === 'simulation-auto'
+          ? SIMULATION_AUTO_ACTOR
+          : humanActor(ctx.principal, req.roleTitle ?? 'Duty Manager');
       const payload = {
         approvalId,
         decision: req.decision,

@@ -323,10 +323,10 @@ describe('top bar', () => {
     );
   }
 
-  it('orders the nav Network · Agents · Training scenarios · Evals; Agents is disabled with no run open', async () => {
+  it('orders the nav Network · Agents · Audit · Training scenarios; Agents is disabled with no run open', async () => {
     await shell('/');
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    expect(nav.textContent).toBe('NetworkAgentsTraining scenariosEvals');
+    expect(nav.textContent).toBe('NetworkAgentsAuditTraining scenarios');
     const agents = within(nav).getByText('Agents');
     expect(agents).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getAllByText('Open an incident first').length).toBeGreaterThan(0);

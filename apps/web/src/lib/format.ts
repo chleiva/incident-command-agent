@@ -83,11 +83,34 @@ export function actorLabel(a: Actor | undefined | null): string {
     case 'human':
       return `${a.name} · ${a.roleTitle}`;
     case 'policy':
-      return a.policy === 'baseline' ? 'Baseline policy' : 'Eval auto-approver';
+      return a.policy === 'baseline'
+        ? 'Baseline policy'
+        : a.policy === 'simulation-auto'
+          ? SIMULATION_AUTO_LABEL
+          : 'Eval auto-approver';
     default:
       return 'World';
   }
 }
+
+/** How a simulation auto-approval reads everywhere a decision is shown (never as the user). */
+export const SIMULATION_AUTO_LABEL = 'Auto-approved (simulation)';
+
+export function isSimulationAuto(a: Actor | undefined | null): boolean {
+  return a?.kind === 'policy' && a.policy === 'simulation-auto';
+}
+
+/**
+ * "Approved by Sam Okafor · Duty Manager", "Rejected by …", or just "Auto-approved (simulation)" for the
+ * simulation policy (which only ever approves).
+ */
+export function decisionPhrase(a: Actor | undefined | null, verb = 'Approved'): string {
+  if (isSimulationAuto(a)) return verb === 'Approved' ? SIMULATION_AUTO_LABEL : SIMULATION_NOT_DECIDED_LABEL;
+  return `${verb} by ${actorLabel(a)}`;
+}
+
+/** A certifying-staff decision the simulation closed without approving it (nobody decided in time). */
+export const SIMULATION_NOT_DECIDED_LABEL = 'Not decided: certifying staff only (simulation)';
 
 /** "send_passenger_message" → "Send passenger message". */
 export function humaniseTool(tool: string): string {

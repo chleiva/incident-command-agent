@@ -108,7 +108,7 @@ Roles: `orchestrator, maintenance, ground, flightops, passenger, record, author`
 
 ## Environment variables (`.env.example` is authoritative)
 
-`LLM_PROVIDER`, `LLM_MODEL`, `LLM_FALLBACK_PROVIDER`, `LLM_FALLBACK_MODEL`, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`, `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` (local only; Secrets Manager in AWS), `RUN_BUDGET_USD`, `RUN_HORIZON_MIN`, `MAX_RUNS_PER_DAY`, `EVAL_JUDGE_MODEL`, `EVAL_LIFETIME_CAP_GBP` (can only lower the hard-coded £10), `GBP_USD_RATE`, `KB_EMBEDDINGS` (+ `KB_ASRS_CAP`; the Lambda-only `KB_VECTOR_*`, `KB_EMBED_*`, `KB_RERANK*` are set by CDK), `KB_INCLUDE_FSF`, `SCREEN_WITH_LLM`, `FEATURE_WEB_SEARCH`, `FEATURE_LIVE_WEATHER`, `TAVILY_API_KEY`/`BRAVE_API_KEY`, `AUTH_MODE`, `AWS_REGION` (default `eu-west-2`), `ALERT_EMAIL`, `COGNITO_DOMAIN_PREFIX`.
+`LLM_PROVIDER`, `LLM_MODEL`, `LLM_FALLBACK_PROVIDER`, `LLM_FALLBACK_MODEL`, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`, `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` (local only; Secrets Manager in AWS), `RUN_BUDGET_USD`, `RUN_HORIZON_MIN`, `MAX_RUNS_PER_DAY`, `EVAL_JUDGE_MODEL`, `EVAL_LIFETIME_CAP_GBP` (can only lower the hard-coded £10), `GBP_USD_RATE`, `KB_EMBEDDINGS` (+ `KB_ASRS_CAP`; the Lambda-only `KB_VECTOR_*`, `KB_EMBED_*`, `KB_RERANK*` are set by CDK), `KB_INCLUDE_FSF`, `SCREEN_WITH_LLM`, `FEATURE_WEB_SEARCH`, `FEATURE_LIVE_WEATHER`, `TAVILY_API_KEY`/`BRAVE_API_KEY`, `SIM_AUTO_APPROVE_AFTER_MS` (simulation safety net, default 120 000 ms, 0 = off), `AUTH_MODE`, `AWS_REGION` (default `eu-west-2`), `ALERT_EMAIL`, `COGNITO_DOMAIN_PREFIX`.
 
 ## Conventions
 

@@ -6,16 +6,22 @@
  * The Agents view (task 08, `/runs/:runId/agents`): a per-agent account of the incident, derived in the browser
  * from the run's event log. It shares the dashboard's run store, so selecting a row puts the dashboard into history
  * mode at that moment, and "Back to live" returns both.
+ *
+ * History mode reconstructs that moment: the model is derived from the events up to the cursor, so later rows are
+ * hidden (each column says how many), a column appears only once its agent had acted, and status dots, turn counts,
+ * waiting/decision rows and the author banner are as they were then. Decisions stay live: the popup and the
+ * "Decide" links use the head, and following a "Decide" link returns to live.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { deriveAgents, columnStatus, turnCount, type AgentRow } from '../agents/rows';
+import { deriveAgents, columnStatus, laterActions, turnCount, type AgentRow } from '../agents/rows';
 import { useRunActions } from '../app/actions';
 import { useServices } from '../app/services';
 import { AppShell } from '../app/AppShell';
 import { useRun, useRunConnection } from '../app/useRunConnection';
 import { AgentsBoard } from '../components/agents-view/AgentsBoard';
 import { AgentsTimelineBar } from '../components/agents-view/AgentsTimelineBar';
+import { LiveDecisionPopup } from '../components/decisions/LiveDecisionPopup';
 import { Badge } from '../components/ui/primitives';
 import { simClockAt } from '../lib/format';
 import { useSharedRunStore } from '../store/sharedRuns';
@@ -31,6 +37,7 @@ export default function Agents() {
   const allEvents = useRun(store, (s) => s.log.events);
   const version = useRun(store, (s) => s.version);
   const view = useRun(store, (s) => s.view);
+  const events = useRun(store, (s) => s.events);
   const head = useRun(store, (s) => s.head);
   const cursorSeq = useRun(store, (s) => s.cursorSeq);
   const loadError = useRun(store, (s) => s.loadError);
@@ -39,10 +46,14 @@ export default function Agents() {
   const [title, setTitle] = useState<string | null>(null);
   useEffect(() => {
     if (!head.meta.scenarioId) return;
+    let active = true; // ignore a late response after unmount or a scenario change
     api.getScenario(head.meta.scenarioId).then(
-      (s) => setTitle(s.title),
-      () => setTitle(null),
+      (s) => active && setTitle(s.title),
+      () => active && setTitle(null),
     );
+    return () => {
+      active = false;
+    };
   }, [api, head.meta.scenarioId]);
 
   const setOpenRunId = useUi((s) => s.setOpenRunId);
@@ -51,18 +62,23 @@ export default function Agents() {
   const setHideThoughts = useUi((s) => s.setHideThoughts);
 
   // Keyed on the append counter too: the log array is mutable and grows in place.
-  const model = useMemo(() => deriveAgents(allEvents), [allEvents, version]);
+  const fullModel = useMemo(() => deriveAgents(allEvents), [allEvents, version]);
+  // History mode: the moment itself, derived from the events up to the cursor (`events` is a fresh slice).
+  const model = useMemo(() => (live ? fullModel : deriveAgents(events)), [live, fullModel, events]);
   const statusByRole = useMemo(
     () => Object.fromEntries(model.columns.map((c) => [c.role, columnStatus(view, c.role)])),
     [model, view],
   );
   const turnsByRole = useMemo(
-    () =>
-      Object.fromEntries(
-        model.columns.map((c) => [c.role, turnCount(c.rows, cursorSeq ?? Number.POSITIVE_INFINITY)]),
-      ),
-    [model, cursorSeq],
+    () => Object.fromEntries(model.columns.map((c) => [c.role, turnCount(c.rows)])),
+    [model],
   );
+  const laterByRole = useMemo(
+    () => (live ? {} : laterActions(fullModel, cursorSeq ?? 0, { hideThoughts })),
+    [live, fullModel, cursorSeq, hideThoughts],
+  );
+  // "Decide" affordances only for approvals pending NOW.
+  const livePendingIds = useMemo(() => new Set(head.pendingApprovalIds), [head]);
 
   const startIso = view.simTime
     ? new Date(Date.parse(view.simTime) - view.simMinute * 60_000).toISOString()
@@ -90,6 +106,11 @@ export default function Agents() {
   const loading = head.lastSeq === 0 && !loadError;
   const loadStatus = loadError && head.lastSeq === 0 ? 'error' : loading ? 'loading' : 'ready';
   const dashboard = `/runs/${encodeURIComponent(runId)}`;
+
+  const backToLive = () => {
+    setPlaying(false);
+    store.getState().setCursor(null);
+  };
 
   const onSelectRow = (row: AgentRow) => {
     setPlaying(false);
@@ -130,10 +151,7 @@ export default function Agents() {
             setPlaying(false);
             store.getState().setCursorAtMinute(m);
           }}
-          onLive={() => {
-            setPlaying(false);
-            store.getState().setCursor(null);
-          }}
+          onLive={backToLive}
           hideThoughts={hideThoughts}
           onHideThoughts={setHideThoughts}
         />
@@ -147,10 +165,18 @@ export default function Agents() {
           loadStatus={loadStatus}
           error={loadError}
           onSelectRow={onSelectRow}
+          laterByRole={laterByRole}
+          onLive={backToLive}
+          livePendingIds={livePendingIds}
           decisionHref={`${dashboard}#zone-decisions`}
-          onOpenDecisions={() => navigate(`${dashboard}#zone-decisions`)}
+          onOpenDecisions={() => {
+            // Decisions are live: leave history mode on the way to the decision rail.
+            backToLive();
+            navigate(`${dashboard}#zone-decisions`);
+          }}
         />
       </div>
+      <LiveDecisionPopup runId={runId} store={store} />
     </AppShell>
   );
 }

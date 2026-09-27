@@ -422,19 +422,48 @@ export class RunContext {
   }
 
   // ------------------------------------------------------------------ approvals
-  /** Resolve when an `approval.decision` for `approvalId` exists (polls ≤ 1 s, or wakes on the bus). */
-  async waitForDecision(approvalId: string): Promise<Decision> {
+  /**
+   * Resolve when an `approval.decision` for `approvalId` exists (polls ≤ 1 s, or wakes on the bus).
+   * `auto` (the `human` policy's simulation safety net): once the approval has waited `afterMs` of REAL time (not
+   * counted while the run is paused), `approve()` is tried once; it claims the approval conditionally, so when a
+   * person (or the browser's countdown) decided first it returns false and the wait picks up that decision instead.
+   */
+  async waitForDecision(
+    approvalId: string,
+    auto?: { afterMs: number; approve: () => Promise<boolean> },
+  ): Promise<Decision> {
     const existing = this.decisions.get(approvalId);
     if (existing) return existing;
     let resolve!: (d: Decision) => void;
     const promise = new Promise<Decision>((r) => (resolve = r));
     this.waiters.set(approvalId, { resolve, promise });
+    let waitedMs = 0;
+    let last = this.clock.now();
+    let autoTried = !auto || auto.afterMs <= 0;
     try {
       for (;;) {
         const d = this.decisions.get(approvalId);
         if (d) return d;
         if (this.stopping) throw this.stoppedError();
-        await Promise.race([promise, this.idle(500)]);
+        const now = this.clock.now();
+        if (!this.sim.paused) waitedMs += now - last;
+        last = now;
+        if (!autoTried && auto && waitedMs >= auto.afterMs) {
+          autoTried = true;
+          await this.sync();
+          if (this.decisions.has(approvalId)) continue;
+          const ok = await auto.approve().catch((err: unknown) => {
+            this.log({ msg: 'simulation auto-approve failed', approvalId, err: String(err) });
+            return false;
+          });
+          this.log({
+            msg: ok ? 'simulation auto-approved' : 'simulation auto-approve lost the race',
+            approvalId,
+          });
+          continue;
+        }
+        const nap = autoTried || !auto ? 500 : Math.max(1, Math.min(500, auto.afterMs - waitedMs));
+        await Promise.race([promise, this.idle(nap)]);
         await this.sync();
       }
     } finally {

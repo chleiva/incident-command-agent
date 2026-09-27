@@ -19,7 +19,8 @@ import { useLiveMinute } from '../app/useLiveMinute';
 import { useRun, useRunConnection, useRunStoreInstance } from '../app/useRunConnection';
 import { useSharedRunStore } from '../store/sharedRuns';
 import { AgentStream } from '../components/agents/AgentStream';
-import { DecisionQueue } from '../components/decisions/DecisionQueue';
+import { DecisionRail, useLiveDecisions } from '../components/decisions/DecisionRail';
+import { LiveDecisionPopup } from '../components/decisions/LiveDecisionPopup';
 import { AirworthinessPanel } from '../components/ground/AirworthinessPanel';
 import { StandView } from '../components/ground/StandView';
 import { CommsLog } from '../components/passenger/CommsLog';
@@ -48,8 +49,6 @@ import {
   kpiSeries,
   latestEngineeringDecision,
   latestProvisionalReading,
-  openInvalidations,
-  pendingByUrgency,
   recentMutations,
   travelStarts,
 } from '../lib/derive';
@@ -77,12 +76,13 @@ export default function Cockpit() {
   useRunConnection(primary, runId);
   const setOpenRunId = useUi((s) => s.setOpenRunId);
   useEffect(() => setOpenRunId(runId), [runId, setOpenRunId]);
-  // `#zone-decisions` (the Agents view's "Decide in the decision rail") focuses the decision rail.
+  // `#zone-decisions` (the Agents view's "Decide in the decision rail") returns to live and focuses the rail.
   useEffect(() => {
     if (window.location.hash !== '#zone-decisions') return;
+    primary.getState().setCursor(null);
     const t = setTimeout(() => document.getElementById('zone-decisions')?.focus(), 50);
     return () => clearTimeout(t);
-  }, [runId]);
+  }, [runId, primary]);
 
   const view = useRun(primary, (s) => s.view);
   const head = useRun(primary, (s) => s.head);
@@ -121,11 +121,21 @@ export default function Cockpit() {
   const preparing = authoring?.status === 'started' && head.meta.status === 'created';
   const loading = (view.lastSeq === 0 || preparing) && !loadError;
   const zoneStatus = loadError && view.lastSeq === 0 ? 'error' : loading ? 'loading' : 'ready';
+  // The decision rail is always live, so its loading state follows the head, not the cursor.
+  const railStatus =
+    loadError && head.lastSeq === 0
+      ? 'error'
+      : (head.lastSeq === 0 || preparing) && !loadError
+        ? 'loading'
+        : 'ready';
   const startIso =
     scenario?.startSimTime ??
     (view.simTime ? new Date(Date.parse(view.simTime) - view.simMinute * 60_000).toISOString() : null);
   const clock = (m: number) => simClockAt(startIso, m);
   const nowMinute = useLiveMinute(view, live);
+  // Decisions are always NOW: the rail and the popup read the head (live) projection, whatever the cursor.
+  const liveDecisions = useLiveDecisions(primary);
+  const { pending, invalidated } = liveDecisions;
 
   const series = useMemo(() => kpiSeries(events), [events]);
   const baseSeries = useMemo(() => kpiSeries(baselineEvents), [baselineEvents, baselineVersion]);
@@ -137,9 +147,6 @@ export default function Cockpit() {
   );
   const feed = useMemo(() => agentFeed(events), [events]);
   const roleStates = useMemo(() => activeRoles(view), [view]);
-  const pending = useMemo(() => pendingByUrgency(view), [view]);
-  const decided = useMemo(() => decidedApprovals(view), [view]);
-  const invalidated = useMemo(() => openInvalidations(view), [view]);
   const reading = useMemo(() => latestProvisionalReading(view)?.reading ?? null, [view]);
   const recent = useMemo(() => recentMutations(events), [events]);
   const starts = useMemo(() => travelStarts(events), [events]);
@@ -287,7 +294,11 @@ export default function Cockpit() {
         e.preventDefault();
         const cur = useUi.getState().expandedZone;
         setExpanded(cur === zone ? null : zone);
-      } else if (e.key === ' ' && !target.closest(INTERACTIVE) && !target.closest('[data-approval]')) {
+      } else if (
+        e.key === ' ' &&
+        !target.closest(INTERACTIVE) &&
+        !target.closest('[data-approval], [data-decision-popup]')
+      ) {
         e.preventDefault();
         toggleWorld();
       }
@@ -650,24 +661,12 @@ export default function Cockpit() {
             )}
             bodyClassName="zone-scroll p-2"
           >
-            <DecisionQueue
-              invalidated={invalidated}
-              pending={pending}
-              decided={decided}
-              nowMinute={nowMinute}
+            <DecisionRail
+              decisions={liveDecisions}
               optimistic={optimistic}
-              status={zoneStatus}
+              status={railStatus}
               error={loadError}
-              announce={live}
-              onDecide={(approvalId, req) => {
-                if (!live) {
-                  useUi
-                    .getState()
-                    .pushToast({ tone: 'info', title: 'Viewing history', body: 'Go live to decide.' });
-                  return;
-                }
-                void actions.decide(runId, approvalId, req);
-              }}
+              onDecide={(approvalId, req) => void actions.decide(runId, approvalId, req)}
             />
           </Zone>
           <Zone
@@ -795,6 +794,8 @@ export default function Cockpit() {
           />
         </div>
       )}
+
+      <LiveDecisionPopup runId={runId} store={primary} />
 
       <WhyDrawer
         tile={why}

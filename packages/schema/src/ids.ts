@@ -102,11 +102,23 @@ export const ActorSchema = Type.Union([
   }),
   Type.Object({
     kind: Type.Literal('policy'),
-    policy: Type.Union([Type.Literal('baseline'), Type.Literal('eval-auto')]),
+    /**
+     * `simulation-auto` (addition): a simulation decision that approved itself after a countdown (browser, 10 s) or
+     * the runtime's safety net (120 s). Never shown as a person: the UI reads "Auto-approved (simulation)".
+     */
+    policy: Type.Union([
+      Type.Literal('baseline'),
+      Type.Literal('eval-auto'),
+      Type.Literal('simulation-auto'),
+    ]),
   }),
   Type.Object({ kind: Type.Literal('world') }),
 ]);
 export type Actor = Static<typeof ActorSchema>;
+
+/** Addition: the policy value of a simulation auto-approval (`{kind:'policy', policy:'simulation-auto'}`). */
+export const SIMULATION_AUTO_POLICY = 'simulation-auto' as const;
+export const SIMULATION_AUTO_ACTOR: Actor = { kind: 'policy', policy: SIMULATION_AUTO_POLICY };
 
 /** The shipped scenario ids: ten ground families (task 03) and five airborne incidents (task 07). */
 export const SCENARIO_IDS = [

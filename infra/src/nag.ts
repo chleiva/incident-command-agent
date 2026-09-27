@@ -49,7 +49,7 @@ export const NAG_SUPPRESSIONS: NagSuppression[] = [
     rule: /^AwsSolutions-IAM5\[Resource::.*\/traces\/\*(\/export\.json)?\]$/,
     path: OUR_FUNCTIONS,
     reason:
-      'Trace objects are keyed traces/{runId}/{seq}.json per run; access is limited to that prefix of the private traces bucket.',
+      'Trace objects are keyed traces/{runId}/{seq}.json per run; access is limited to that prefix of the private traces bucket (the API Lambda reads it read-only for the audit logs and writes only traces/*/export.json).',
   },
   {
     rule: /^AwsSolutions-IAM5\[Resource::.*KnowledgeBucket.*\/\*\]$/,

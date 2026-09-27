@@ -18,7 +18,14 @@ export {
 } from '@ica/schema';
 export { MemoryEventBus, MemoryStore, type MemoryStoreOptions, type MemoryStoreSnapshot } from './memory';
 export { DynamoStore, itemToEvent, type DynamoStoreOptions } from './dynamo';
-export { FsTraceStore, MemoryTraceStore, S3TraceStore, traceKey, type S3TraceStoreOptions } from './traces';
+export {
+  FsTraceStore,
+  MemoryTraceStore,
+  S3TraceStore,
+  traceKey,
+  traceRunPrefix,
+  type S3TraceStoreOptions,
+} from './traces';
 export {
   DEFAULT_SECRET_IDS,
   ENV_HYDRATED_SECRETS,

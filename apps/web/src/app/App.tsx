@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider, useNavigate, Outlet } from 'react-
 import { CommandPalette, type PaletteCommand } from '../components/presenter/CommandPalette';
 import { Skeleton } from '../components/ui/primitives';
 import type { Services } from '../lib/config';
+import { AUTO_APPROVE_PALETTE_LABEL } from '../lib/autoApprove';
 import { usePalette } from '../store/palette';
 import { useUi } from '../store/ui';
 import { ServicesProvider } from './services';
@@ -19,6 +20,7 @@ const Cockpit = lazy(() => import('../routes/Cockpit'));
 const Compare = lazy(() => import('../routes/Compare'));
 const Agents = lazy(() => import('../routes/Agents'));
 const Evals = lazy(() => import('../routes/Evals'));
+const Audit = lazy(() => import('../routes/Audit'));
 
 function PageSkeleton() {
   return (
@@ -72,6 +74,7 @@ function GlobalPalette() {
   const freeText = usePalette((s) => s.freeTextTwist);
   const theme = useUi((s) => s.theme);
   const plain = useUi((s) => s.plainLanguage);
+  const autoApprove = useUi((s) => s.autoApprove);
   const navigate = useNavigate();
   const openRunId = useUi((s) => s.openRunId);
 
@@ -109,6 +112,14 @@ function GlobalPalette() {
       run: () => navigate('/training'),
     },
     {
+      id: 'audit',
+      group: 'Navigate',
+      label: 'Audit logs',
+      icon: 'shield',
+      keywords: ['audit', 'logs', 'trace', 'prompts', 'llm', 'tool calls', 'raw'],
+      run: () => navigate(openRunId ? `/runs/${encodeURIComponent(openRunId)}/audit` : '/audit'),
+    },
+    {
       id: 'evals',
       group: 'Navigate',
       label: 'Evaluation report',
@@ -139,6 +150,25 @@ function GlobalPalette() {
       icon: 'captions',
       keywords: ['plain language', 'glossary', 'jargon', 'explain', 'terms'],
       run: () => useUi.getState().togglePlainLanguage(),
+    },
+    {
+      // Simulation: pending decisions approve themselves after a 10 s countdown (default on, per viewer).
+      id: 'auto-approve',
+      group: 'Decisions',
+      label: `${AUTO_APPROVE_PALETTE_LABEL}: ${autoApprove ? 'on' : 'off'}`,
+      icon: 'clock',
+      keywords: ['auto-approve', 'automatic', 'countdown', 'simulation', 'decisions', 'approve', 'timer'],
+      run: () => {
+        const on = !useUi.getState().autoApprove;
+        useUi.getState().setAutoApprove(on);
+        useUi.getState().pushToast({
+          tone: 'info',
+          title: on ? 'Auto-approve on' : 'Auto-approve off',
+          body: on
+            ? 'Decisions approve themselves after 10 s unless you look at them.'
+            : 'Decision cards now wait for you.',
+        });
+      },
     },
   ];
   return (
@@ -173,6 +203,8 @@ export function App({ services }: { services: Services }) {
         { path: '/runs/:runId/agents', element: <Agents /> },
         { path: '/compare/:agentRunId/:baselineRunId', element: <Compare /> },
         { path: '/evals', element: <Evals /> },
+        { path: '/audit', element: <Audit /> },
+        { path: '/runs/:runId/audit', element: <Audit /> },
         { path: '*', element: <Home /> },
       ],
     },

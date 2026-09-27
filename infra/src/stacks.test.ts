@@ -237,6 +237,35 @@ describe('ApiStack', () => {
     });
   });
 
+  it('gives the API Lambda read-only trace access for the audit (GetObject on traces/*, ListBucket under traces/)', () => {
+    const statements = Object.values(api.findResources('AWS::IAM::Policy'))
+      .filter((p) => JSON.stringify(p.Properties.Roles).includes('ApiFn'))
+      .flatMap(
+        (p) =>
+          p.Properties.PolicyDocument.Statement as {
+            Sid?: string;
+            Action: unknown;
+            Resource: unknown;
+            Condition?: unknown;
+          }[],
+      );
+    expect(statements.length).toBeGreaterThan(0);
+    const read = statements.find((s) => s.Sid === 'AuditReadTraces')!;
+    expect(read.Action).toBe('s3:GetObject');
+    expect(JSON.stringify(read.Resource)).toContain('/traces/*');
+    const list = statements.find((s) => s.Sid === 'AuditListTraces')!;
+    expect(list.Action).toBe('s3:ListBucket');
+    expect(JSON.stringify(list.Resource)).toContain('TracesBucket');
+    expect(JSON.stringify(list.Resource)).not.toContain('/*');
+    expect(list.Condition).toEqual({ StringLike: { 's3:prefix': ['traces/*'] } });
+    // No write on trace objects except the export file; no delete anywhere.
+    const s3Writes = statements.filter((s) => JSON.stringify(s.Action).match(/s3:(Put|Delete)/));
+    expect(s3Writes).toHaveLength(1);
+    expect(s3Writes[0]!.Action).toBe('s3:PutObject');
+    expect(JSON.stringify(s3Writes[0]!.Resource)).toContain('/traces/*/export.json');
+    expect(JSON.stringify(statements)).not.toMatch(/s3:\*|s3:Delete/);
+  });
+
   it('grants the knowledge Lambdas exactly the Cohere embed/rerank models and QueryVectors on the index', () => {
     const policies = Object.values(api.findResources('AWS::IAM::Policy'));
     const statements = policies.flatMap(

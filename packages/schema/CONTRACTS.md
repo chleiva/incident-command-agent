@@ -35,7 +35,7 @@ Packages are consumed as TypeScript source (no build). JSON fixtures: `@ica/sche
 | `RefKind` | `tail, station, flight, cohort, crew, engineer, stand, defect, workOrder, approval` |
 | `KnowledgeCollection` | `mel, procedure, passenger_rights, precedent, rules` |
 | `Jurisdiction` | `EU, UK, US` |
-| `Actor` | `{kind:'agent', role}` · `{kind:'human', name, roleTitle}` · `{kind:'policy', policy:'baseline'\|'eval-auto'}` · `{kind:'world'}` |
+| `Actor` | `{kind:'agent', role}` · `{kind:'human', name, roleTitle}` · `{kind:'policy', policy:'baseline'\|'eval-auto'\|'simulation-auto'}` · `{kind:'world'}` |
 | `SCENARIO_IDS`, `SHIPPED_SCENARIOS` | the ten fixed ids (with title, station, twist) |
 | `CARRIER` | `{name:'Accent Air', code:'ACX', mainBase:'MAN'}` |
 | Patterns | `FLIGHT_NUMBER_PATTERN` `^ACX[1-9][0-9]{2}$`, `TAIL_PATTERN` `^AX-[A-Z]{3}$`, `IATA_PATTERN`, `HHMM_PATTERN`, `SCENARIO_ID_PATTERN` `^[a-z0-9-]{3,64}$` |
@@ -229,7 +229,7 @@ swapOrCancelDecisionMin|null}}`. Formulas: task 02 (`services/run/world/kpi.ts`)
   content,isError?})[]}`; `LlmResponse {text, toolCalls[{id,name,input}], usage: LlmUsage, stopReason, model, raw?}`;
   `LlmConfig {provider, model, fallback?, temperature, maxTokens, limits}`; `WallClock {now, sleep}`.
 - `RunDeps {store, traces, knowledge, llm, clock?, approvalsPolicy?: human|baseline|eval-auto, secrets?, bus?,
-  providers?}`; `ExecuteRunInput {runId, deps, signal?}`; `AuthorResult {scenario?, errors?, screening}`.
+  providers?, simAutoApproveAfterMs?}`; `ExecuteRunInput {runId, deps, signal?}`; `AuthorResult {scenario?, errors?, screening}`.
 
 ## 8. API (`src/api.ts`)
 
@@ -243,13 +243,15 @@ swapOrCancelDecisionMin|null}}`. Formulas: task 02 (`services/run/world/kpi.ts`)
 | `GET /runs?limit=` | – | `{items: RunMeta[]}` |
 | `GET /runs/{id}` | – | `RunMeta` |
 | `GET /runs/{id}/events?after=&limit=` | limit ≤ `MAX_EVENTS_PAGE` (500) | `{events, lastSeq, hasMore}` |
-| `POST /runs/{id}/approvals/{approvalId}` | `ApprovalDecisionRequest {decision, editedArgs?, selectedOptionId?, reason?, roleTitle?}` | `{accepted: true, seq}` |
+| `POST /runs/{id}/approvals/{approvalId}` | `ApprovalDecisionRequest {decision, editedArgs?, selectedOptionId?, reason?, roleTitle?, policy?: 'simulation-auto'}` | `{accepted: true, seq}` |
 | `POST /runs/{id}/twists` | `TwistRequest {twistId} \| {text ≤2000}` | `{accepted, seq?, screening?}` |
 | `POST /runs/{id}/control` | `ControlRequest {action, speed?, tool?}` | `{accepted, seq}` |
 | `GET /runs/{id}/systems/{name}` | – | `{system, entities, asOfSeq}` |
 | `GET /runs/{id}/export` | – | `{trace: RunEvent[] \| {url}, evidencePack?}` |
 | `GET /config` | – | `AppConfig {brand: BrandPack, features {webSearch, liveWeather, narrator, sideBySide}, stations: Station[], limits {maxRunsPerDay, runBudgetUsd, horizonMin, speedMin, speedMax}}` |
 | `GET /evals/latest` | – | `EvalReport` |
+| `GET /runs/{id}/audit?cursor=&limit=` *(addition)* | limit ≤ `AUDIT_PAGE_MAX` (2000, default 500) | `RunAuditResponse {runId, runName, scenarioId, scenarioTitle, flight?, mode, status, createdAt, startSimTime?, total, entries: AuditEntry[], nextCursor?, tracesListed}` |
+| `GET /runs/{id}/audit/llm?key=` *(addition)* | `key` must be `traces/{runId}/{name}.json` of this run | `RunAuditLlmResponse {key, sizeBytes, trace? \| url?}` (5-minute presigned URL above `AUDIT_LLM_INLINE_MAX_BYTES`, 5 MB) |
 
 `API_ROUTES` names every route. Request bodies have TypeBox schemas (`…RequestSchema`, strict) — validate with
 `compileSchema(schema)`. Errors: `ApiError {error, code}`. WebSocket: connect with `?token=<JWT>&runId=<id>`;
@@ -288,7 +290,7 @@ interface Store {
   putEvalReport(r); getLatestEvalReport();
 }
 interface EventBus { subscribe(runId, onEvents) → unsubscribe; publish(runId, events) }
-interface TraceStore { put(runId, seq: number|string, body, {suffix?}) → key; get(key) }
+interface TraceStore { put(runId, seq: number|string, body, {suffix?}) → key; get(key); list?(runId) → TraceObjectInfo[] }
 interface SecretStore { get(name) }
 class RunNotFoundError
 ```
@@ -368,3 +370,5 @@ Additions beyond the task-01 brief (all optional or new, none breaking):
 | events/runtime (live run 2) | `agent.tool_call.argsTruncated?: string[]` (JSON pointers truncated at their `maxLength`, suffix ` …[truncated]`); `ToolDefinition.splitOverlong?: string[]` (fields the tool splits itself, e.g. `append_timeline` `/text` → sequential entries) | a 560-char timeline entry was rejected at a 400-char cap; length-only failures on free-text fields are now accepted (truncated or split) instead of wasting a tool call. Free-text caps raised: timeline 2,000, techlog 2,000, rationale 2,000, incident summary 2,000, objective/question 1,000, brief 4,000, passenger message 1,000, stand plan 1,000 |
 | api (task 08, owner request) | `BrandPack.about? {author, authorUrl, repoUrl?}` (set in `config/brand.default.json`; the web falls back to the same values) | the About dialog's credit and repository link are configurable per brand |
 | runtime (live run 2) | `repairLeakedParameters(input, schema?)` / `repairCall(…, schemaOf?)`: leaked markup repaired for any tool using its argument names (`</k>`, `<k2>…</k2>`, `</parameter><parameter name="k2">`), JSON-parsed per schema type, never overwriting a validly provided key (`argsRepaired`) | a report's `openIssues` arrived inside `summary` as `…</summary> <openIssues>[…]` |
+| ids/api/runtime (decisions & time fix) | `Actor` policy value **`simulation-auto`** (`SIMULATION_AUTO_POLICY`, `SIMULATION_AUTO_ACTOR`); `ApprovalDecisionRequest.policy?: 'simulation-auto'` (only with `decision: 'approve'`, no edits; 400 otherwise) → the API records `decidedBy: {kind:'policy', policy:'simulation-auto'}`, never the caller; `RunDeps.simAutoApproveAfterMs?` (absent = `DEFAULT_SIM_AUTO_APPROVE_AFTER_MS` = 120 000 ms real time; 0 = off) and `simAutoApproveAfterMsFromEnv(env)` (`SIM_AUTO_APPROVE_AFTER_MS`) | simulation auto-approval: the browser's decision popup approves after a 10 s countdown (pauses on hover/focus; ⌘K toggle, default on), and the runtime's `human`-policy wait auto-approves anything still pending after 120 s through the conditional claim (`Store.decideApproval`), so an unattended run never stalls and the two can never double-decide. Not applied to `baseline` or `eval-auto`. Shown everywhere as "Auto-approved (simulation)". Human-only domain rules still refuse a policy approver in code (e.g. an engineering decision) |
+| api/store/schema (audit logs) | New routes `getRunAudit` `GET /runs/{id}/audit` and `getRunAuditLlm` `GET /runs/{id}/audit/llm?key=`; `src/audit.ts` (browser-safe): `AuditEntry` = `AuditLlmEntry {kind:'llm', traceKey, provider?, model?, usage?, costUsd?, latencyMs?, sizeBytes?, summary?, unmatched?}` \| `AuditToolEntry {kind:'tool', toolCallId, tool, system?, tier?, args?, ok?, result?, resultPreview?, error?, latencyMs?, normalisedFrom?, argsRepaired?, argsTruncated?, presenterTriggered?, deduplicatedFrom?, citations?, blocked?, proposal?, decision? {decision, decidedBy, …}}` (common: `id, agentRunId?, role?, iteration?, seq?, simMinute?, simTime?, wallTime?`), `RunAuditResponse`, `RunAuditLlmResponse`, `buildAuditEntries(events, traces)`, `parseLlmTraceKey`, `isRunTraceKey`, `auditRunName`, `AUDIT_PAGE_DEFAULT/MAX`, `AUDIT_LLM_INLINE_MAX_BYTES`. Optional `TraceStore.list?(runId) → TraceObjectInfo {key, size?, lastModified?}[]` (Memory, Fs, S3 `ListObjectsV2`); `traceRunPrefix()` | owner request: a full audit of what was sent to and returned by the model and the tools (the web Audit view). The API Lambda gets read-only `s3:GetObject` on `traces/*` and `s3:ListBucket` limited to `s3:prefix` `traces/*` |

@@ -5,7 +5,7 @@
 /** Small design-system primitives: Button, Badge, trust badges, Kbd, Skeleton, state frames. */
 import type { Actor, Tier } from '@ica/schema/browser';
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { actorLabel } from '../../lib/format';
+import { SIMULATION_AUTO_LABEL, actorLabel, isSimulationAuto } from '../../lib/format';
 import { Icon, type IconName } from './Icon';
 
 export const cx = (...xs: (string | false | null | undefined)[]) => xs.filter(Boolean).join(' ');
@@ -149,6 +149,13 @@ export function ApproverLine({
   prefix?: string;
 }) {
   if (!actor) return null;
+  if (isSimulationAuto(actor))
+    return (
+      <span className="inline-flex items-center gap-1 text-caption text-fg-muted" data-simulation-auto>
+        <Icon name="clock" size={12} />
+        <span className="text-fg">{SIMULATION_AUTO_LABEL}</span>
+      </span>
+    );
   return (
     <span className="inline-flex items-center gap-1 text-caption text-fg-muted">
       <Icon name="user" size={12} />

@@ -25,7 +25,13 @@ import type {
 import { getPointer, screenOutput, textAtPointers } from '../guardrails/screen-output';
 import { lenientArgs, validateRefs, validateToolArgs } from '../guardrails/validate';
 import { wrapToolResult } from '../guardrails/wrap';
-import { applyPolicyDecision, policyDecision, type ApprovalPolicy } from './approvals';
+import {
+  applyPolicyDecision,
+  applySimulationAutoApproval,
+  policyDecision,
+  simAutoApproveAfterMs,
+  type ApprovalPolicy,
+} from './approvals';
 import { AgentAbort, type Decision, type RunContext } from './context';
 import { deriveAssumptions } from './invalidation';
 import { forbiddenExplanation, forbiddenRule, isRuntimeTool, type RuntimeSite } from './tools';
@@ -623,7 +629,14 @@ async function executeToolCallCore(
     scriptedDecision: site.scriptedDecision,
   });
   if (auto && site.policy !== 'human') decision = await applyPolicyDecision(ctx, record, site.policy, auto);
-  else decision = await ctx.waitForDecision(approvalId);
+  else {
+    // The simulation safety net applies to the human policy only (baseline and eval-auto decided above).
+    const afterMs = site.policy === 'human' ? simAutoApproveAfterMs(ctx) : 0;
+    decision = await ctx.waitForDecision(
+      approvalId,
+      afterMs > 0 ? { afterMs, approve: () => applySimulationAutoApproval(ctx, record) } : undefined,
+    );
+  }
 
   const who =
     decision.decidedBy.kind === 'human'

@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** TraceStore implementations: full prompts/completions and oversized payloads (`traces/{runId}/{seq}{suffix}.json`). */
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import type { TracePutOptions, TraceStore } from '@ica/schema';
+import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import type { TraceObjectInfo, TracePutOptions, TraceStore } from '@ica/schema';
 
 const SAFE = /^[A-Za-z0-9._-]+$/;
 
@@ -14,6 +14,12 @@ export function traceKey(runId: string, seq: number | string, suffix = ''): stri
   const name = `${seq}${suffix}`;
   if (!SAFE.test(runId) || !SAFE.test(name)) throw new Error(`unsafe trace key parts: ${runId}/${name}`);
   return `traces/${runId}/${name}.json`;
+}
+
+/** `traces/{runId}/` for a safe run id (listing). */
+export function traceRunPrefix(runId: string): string {
+  if (!SAFE.test(runId) || runId.includes('..')) throw new Error(`unsafe trace run id: ${runId}`);
+  return `traces/${runId}/`;
 }
 
 function assertKey(key: string): void {
@@ -39,6 +45,22 @@ export class FsTraceStore implements TraceStore {
     assertKey(key);
     return JSON.parse(await readFile(join(this.root, key), 'utf8'));
   }
+  async list(runId: string): Promise<TraceObjectInfo[]> {
+    const prefix = traceRunPrefix(runId);
+    let names: string[];
+    try {
+      names = await readdir(join(this.root, prefix));
+    } catch {
+      return [];
+    }
+    const out: TraceObjectInfo[] = [];
+    for (const name of names.filter((n) => n.endsWith('.json')).sort()) {
+      const st = await stat(join(this.root, prefix, name));
+      if (st.isFile())
+        out.push({ key: `${prefix}${name}`, size: st.size, lastModified: st.mtime.toISOString() });
+    }
+    return out;
+  }
 }
 
 /** In-memory traces for tests. */
@@ -53,6 +75,13 @@ export class MemoryTraceStore implements TraceStore {
     const v = this.items.get(key);
     if (v === undefined) throw new Error(`trace not found: ${key}`);
     return JSON.parse(v);
+  }
+  async list(runId: string): Promise<TraceObjectInfo[]> {
+    const prefix = traceRunPrefix(runId);
+    return [...this.items.entries()]
+      .filter(([k]) => k.startsWith(prefix))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, v]) => ({ key, size: Buffer.byteLength(v, 'utf8') }));
   }
 }
 
@@ -88,5 +117,26 @@ export class S3TraceStore implements TraceStore {
     const text = await res.Body?.transformToString('utf8');
     if (text === undefined) throw new Error(`empty trace: ${key}`);
     return JSON.parse(text);
+  }
+  /** `ListObjectsV2` under `traces/{runId}/` (needs `s3:ListBucket` with an `s3:prefix` of `traces/*`). */
+  async list(runId: string): Promise<TraceObjectInfo[]> {
+    const prefix = traceRunPrefix(runId);
+    const out: TraceObjectInfo[] = [];
+    let token: string | undefined;
+    do {
+      const res = await this.client.send(
+        new ListObjectsV2Command({ Bucket: this.bucket, Prefix: prefix, ContinuationToken: token }),
+      );
+      for (const o of res.Contents ?? []) {
+        if (!o.Key) continue;
+        out.push({
+          key: o.Key,
+          ...(o.Size !== undefined ? { size: o.Size } : {}),
+          ...(o.LastModified ? { lastModified: o.LastModified.toISOString() } : {}),
+        });
+      }
+      token = res.IsTruncated ? res.NextContinuationToken : undefined;
+    } while (token);
+    return out;
   }
 }

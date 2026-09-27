@@ -21,6 +21,8 @@ import type {
   ListEventsResponse,
   ListRunsResponse,
   ListScenariosResponse,
+  RunAuditLlmResponse,
+  RunAuditResponse,
   RunMeta,
   Scenario,
   StateSystemName,
@@ -54,6 +56,13 @@ export interface ApiClientOptions {
 export type ApiClient = ReturnType<typeof createApiClient>;
 
 const enc = encodeURIComponent;
+
+function query(params: Record<string, string | undefined>): string {
+  const parts = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== '')
+    .map(([k, v]) => `${k}=${enc(v!)}`);
+  return parts.length ? `?${parts.join('&')}` : '';
+}
 
 export function createApiClient(opts: ApiClientOptions) {
   const retries = opts.retries ?? 3;
@@ -120,6 +129,15 @@ export function createApiClient(opts: ApiClientOptions) {
     exportRun: (runId: string) => request<ExportResponse>('GET', `/runs/${enc(runId)}/export`),
     getConfig: () => request<AppConfig>('GET', '/config'),
     getLatestEval: () => request<EvalReport>('GET', '/evals/latest'),
+    /** Audit logs: one page of entries (`nextCursor` for the next). */
+    getRunAudit: (runId: string, cursor?: string, limit?: number) =>
+      request<RunAuditResponse>(
+        'GET',
+        `/runs/${enc(runId)}/audit${query({ cursor, limit: limit === undefined ? undefined : String(limit) })}`,
+      ),
+    /** Audit logs: one stored LLM trace (or a short-lived URL to it when large). */
+    getRunAuditLlm: (runId: string, key: string) =>
+      request<RunAuditLlmResponse>('GET', `/runs/${enc(runId)}/audit/llm?key=${enc(key)}`),
   };
 }
 

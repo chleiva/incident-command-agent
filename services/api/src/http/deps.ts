@@ -43,14 +43,19 @@ export interface ApiDeps {
    * container; see user-names.ts). Without it, the username is recorded.
    */
   resolveUserName?(username: string): Promise<string | null>;
-  /** Presigned GET URL for a trace key (Lambda only). Without it, exports are always inline. */
-  presign?(key: string): Promise<string>;
+  /**
+   * Presigned GET URL for a trace key (Lambda only; default lifetime 15 min, audit traces pass 5 min). Without it,
+   * exports and audit traces are always inline.
+   */
+  presign?(key: string, opts?: { expiresIn?: number }): Promise<string>;
   now?(): Date;
   newRunId?(): string;
   newDraftId?(): string;
   log?: Logger;
   /** Exports above this size are offloaded to the TraceStore and returned as a URL (default 5 MB). */
   exportInlineMaxBytes?: number;
+  /** Audit LLM traces above this size are returned as a presigned URL (default 5 MB). */
+  auditInlineMaxBytes?: number;
   /** AppConfig cache lifetime in ms (default 60 s). */
   configTtlMs?: number;
 }

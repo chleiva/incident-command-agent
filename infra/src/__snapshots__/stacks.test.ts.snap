@@ -375,10 +375,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-              ],
+              "Action": "s3:PutObject",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -409,6 +406,69 @@ exports[`ApiStack > matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttTracesBucketEEE0B20CArnDCC53306",
+                    },
+                    "/traces/*",
+                  ],
+                ],
+              },
+              "Sid": "AuditReadTraces",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiFninlinePolicyAddedToExecutionRole120C4F42D",
+        "Roles": [
+          {
+            "Ref": "ApiFnServiceRoleD18AAE0E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiFninlinePolicyAddedToExecutionRole26D9E3D9A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:ListBucket",
+              "Condition": {
+                "StringLike": {
+                  "s3:prefix": [
+                    "traces/*",
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Ica-Data:ExportsOutputFnGetAttTracesBucketEEE0B20CArnDCC53306",
+              },
+              "Sid": "AuditListTraces",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiFninlinePolicyAddedToExecutionRole26D9E3D9A",
+        "Roles": [
+          {
+            "Ref": "ApiFnServiceRoleD18AAE0E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiFninlinePolicyAddedToExecutionRole368299F78": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
               "Action": "cognito-idp:AdminGetUser",
               "Effect": "Allow",
               "Resource": {
@@ -421,7 +481,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "ApiFninlinePolicyAddedToExecutionRole120C4F42D",
+        "PolicyName": "ApiFninlinePolicyAddedToExecutionRole368299F78",
         "Roles": [
           {
             "Ref": "ApiFnServiceRoleD18AAE0E",
@@ -1737,6 +1797,112 @@ exports[`ApiStack > matches the snapshot 1`] = `
                 "Ref": "HttpApiF5A9A8A7",
               },
               "/*/*/runs/{id}",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "HttpApiGETrunsidauditApiIntegrationPermissionD8034F75": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "ApiFnE0725F78",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:execute-api:eu-west-2:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "HttpApiF5A9A8A7",
+              },
+              "/*/*/runs/{id}/audit",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "HttpApiGETrunsidauditBC8D340A": {
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApiF5A9A8A7",
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "HttpApiCognitoJwt4B02D8E4",
+        },
+        "RouteKey": "GET /runs/{id}/audit",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "HttpApiGETscenariosApiIntegrationB4663493",
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::ApiGatewayV2::Route",
+    },
+    "HttpApiGETrunsidauditllm2F33CC0E": {
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApiF5A9A8A7",
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "HttpApiCognitoJwt4B02D8E4",
+        },
+        "RouteKey": "GET /runs/{id}/audit/llm",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "HttpApiGETscenariosApiIntegrationB4663493",
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::ApiGatewayV2::Route",
+    },
+    "HttpApiGETrunsidauditllmApiIntegrationPermissionA85CC4E8": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "ApiFnE0725F78",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:execute-api:eu-west-2:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "HttpApiF5A9A8A7",
+              },
+              "/*/*/runs/{id}/audit/llm",
             ],
           ],
         },

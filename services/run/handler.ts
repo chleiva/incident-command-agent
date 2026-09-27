@@ -15,8 +15,17 @@
  *   `KB_EMBED_REGION`, `KB_RERANK`/`KB_RERANK_MODEL`/`KB_RERANK_REGION`: hybrid retrieval (BM25 + Cohere Embed v4 →
  *   S3 Vectors → Cohere Rerank 3.5), see services/run/knowledge/index.ts and docs/deploy.md
  * - `LLM_*`, `RUN_BUDGET_USD`, `RUN_HORIZON_MIN` (see .env.example)
+ * - `SIM_AUTO_APPROVE_AFTER_MS`: the simulation safety net (default 120 000 ms real time; 0 = off)
  */
-import type { AuthoringRequest, KnowledgeIndex, RunDeps, SecretStore, Store, TraceStore } from '@ica/schema';
+import {
+  simAutoApproveAfterMsFromEnv,
+  type AuthoringRequest,
+  type KnowledgeIndex,
+  type RunDeps,
+  type SecretStore,
+  type Store,
+  type TraceStore,
+} from '@ica/schema';
 import {
   DynamoStore,
   S3TraceStore,
@@ -104,6 +113,7 @@ export function createRunHandler(getDeps: () => HandlerDeps) {
       knowledge: await d.knowledge(),
       llm: llmConfigFromEnv(env),
       approvalsPolicy: 'human',
+      simAutoApproveAfterMs: simAutoApproveAfterMsFromEnv(env),
     };
     const ac = new AbortController();
     const timer = context

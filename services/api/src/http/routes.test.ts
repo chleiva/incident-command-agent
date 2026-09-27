@@ -351,6 +351,30 @@ describe('approvals', () => {
     expect((await h.store.getApproval(runId, 'apr-1'))?.status).toBe('pending');
   });
 
+  it('records a simulation auto-approval as the policy, never as the person (and only for approve)', async () => {
+    const h = makeDeps();
+    const runId = await createRun(h);
+    await h.store.putApproval(pendingApproval(runId));
+    const post = (body: unknown) => h.handler(req('POST', `/runs/${runId}/approvals/apr-1`, { body }));
+    expect((await post({ decision: 'reject', reason: 'x', policy: 'simulation-auto' })).statusCode).toBe(400);
+    expect((await post({ decision: 'approve', policy: 'someone-else' })).statusCode).toBe(400);
+    const ok = await post({ decision: 'approve', policy: 'simulation-auto' });
+    expect(ok.statusCode).toBe(200);
+    const [e] = (await h.store.listEvents(runId, 1)).events;
+    expect(e).toMatchObject({
+      type: 'approval.decision',
+      actor: { kind: 'policy', policy: 'simulation-auto' },
+      payload: { decision: 'approve', decidedBy: { kind: 'policy', policy: 'simulation-auto' } },
+    });
+    const rec = await h.store.getApproval(runId, 'apr-1');
+    expect(rec).toMatchObject({
+      status: 'approved',
+      decision: { decidedBy: { kind: 'policy', policy: 'simulation-auto' } },
+    });
+    // The person deciding a moment later gets a 409 (the browser closes its card gracefully).
+    expect((await post({ decision: 'approve' })).statusCode).toBe(409);
+  });
+
   it('refuses decisions on ended runs (409)', async () => {
     const h = makeDeps();
     const runId = await createRun(h);

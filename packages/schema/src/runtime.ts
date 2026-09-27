@@ -279,6 +279,12 @@ export interface RunDeps {
   llm: LlmConfig;
   clock?: WallClock;
   approvalsPolicy?: 'human' | 'baseline' | 'eval-auto';
+  /**
+   * Addition: the simulation safety net for the `human` policy. An approval still pending after this much REAL
+   * (wall-clock) time is approved by `{kind:'policy', policy:'simulation-auto'}` through the conditional decide path
+   * (never twice). Absent = `DEFAULT_SIM_AUTO_APPROVE_AFTER_MS`; 0 = off. Not applied to baseline or eval-auto.
+   */
+  simAutoApproveAfterMs?: number;
   /** Addition: secrets for provider keys (Lambda: Secrets Manager; local: env). */
   secrets?: SecretStore;
   /** Addition: local event bus, so blocked agents can subscribe instead of polling. */
@@ -327,4 +333,15 @@ export function mutationDraft(
   if (m.after !== undefined) payload.after = m.after;
   if (causedBySeq !== undefined) payload.causedBySeq = causedBySeq;
   return { ...envelope, type: 'system.mutation', payload } as EventDraft<'system.mutation'>;
+}
+
+/** Addition: default of `RunDeps.simAutoApproveAfterMs` (120 s real time). */
+export const DEFAULT_SIM_AUTO_APPROVE_AFTER_MS = 120_000;
+
+/** `SIM_AUTO_APPROVE_AFTER_MS` (ms; 0 = off) → `RunDeps.simAutoApproveAfterMs`; invalid or unset → the default. */
+export function simAutoApproveAfterMsFromEnv(env: Record<string, string | undefined>): number {
+  const raw = env.SIM_AUTO_APPROVE_AFTER_MS?.trim();
+  if (!raw) return DEFAULT_SIM_AUTO_APPROVE_AFTER_MS;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : DEFAULT_SIM_AUTO_APPROVE_AFTER_MS;
 }

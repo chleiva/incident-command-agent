@@ -11,7 +11,7 @@ import { useId, useState } from 'react';
 import { headline, resultData } from '../../agents/headline';
 import { GlossaryText } from '../../glossary/Term';
 import type { FeedItem, ToolFeedItem } from '../../lib/derive';
-import { ROLE_LABEL, actorLabel } from '../../lib/format';
+import { ROLE_LABEL, SIMULATION_AUTO_LABEL, actorLabel, isSimulationAuto } from '../../lib/format';
 import { Icon } from '../ui/Icon';
 import { AiDraftedBadge, Badge, TierBadge, cx } from '../ui/primitives';
 import { ProvenancePanel } from '../decisions/Provenance';
@@ -148,14 +148,18 @@ export function ToolCallCard({ item, defaultOpen = false }: { item: ToolFeedItem
           <Icon name="user" size={12} />
           {item.decision ? (
             <>
-              <span>
-                {item.decision.decision === 'reject'
-                  ? 'Rejected'
-                  : item.decision.decision === 'edit'
-                    ? 'Edited and approved'
-                    : 'Approved'}{' '}
-                by <span className="text-fg">{actorLabel(item.decision.decidedBy)}</span>
-              </span>
+              {isSimulationAuto(item.decision.decidedBy) ? (
+                <span className="text-fg">{SIMULATION_AUTO_LABEL}</span>
+              ) : (
+                <span>
+                  {item.decision.decision === 'reject'
+                    ? 'Rejected'
+                    : item.decision.decision === 'edit'
+                      ? 'Edited and approved'
+                      : 'Approved'}{' '}
+                  by <span className="text-fg">{actorLabel(item.decision.decidedBy)}</span>
+                </span>
+              )}
             </>
           ) : (
             <Badge tone="warning">Awaiting a human decision</Badge>

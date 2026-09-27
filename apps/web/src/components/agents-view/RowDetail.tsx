@@ -14,7 +14,7 @@ import type { ReactNode } from 'react';
 import type { AgentRow, Fact } from '../../agents/rows';
 import { roleName } from '../../agents/roles';
 import { GlossaryText } from '../../glossary/Term';
-import { actorLabel } from '../../lib/format';
+import { SIMULATION_AUTO_LABEL, actorLabel, isSimulationAuto } from '../../lib/format';
 import { ArgsList, ArgValue, CitationChips, LongText } from '../agents/ArgValue';
 import { AUTHORITY_FALLBACK } from '../agents/PolicyCards';
 import { Icon } from '../ui/Icon';
@@ -204,11 +204,24 @@ function DetailBody({ row }: { row: AgentRow }) {
     const d = row.decision;
     parts.push(
       <div key="decision" className="text-caption text-fg-muted" data-decision-detail>
-        <span className="text-micro text-fg-subtle">Human decision</span>
-        <p>
-          {d.decision === 'reject' ? 'Rejected' : d.decision === 'edit' ? 'Approved with edits' : 'Approved'}{' '}
-          by <span className="text-fg">{decidedByLine(d.decidedBy)}</span> at m{Math.round(d.minute)}
-        </p>
+        <span className="text-micro text-fg-subtle">
+          {isSimulationAuto(d.decidedBy) ? 'Decision' : 'Human decision'}
+        </span>
+        {isSimulationAuto(d.decidedBy) ? (
+          <p>
+            <span className="text-fg">{SIMULATION_AUTO_LABEL}</span> at m{Math.round(d.minute)} — nobody
+            decided within the countdown, so the simulation approved it (not a person)
+          </p>
+        ) : (
+          <p>
+            {d.decision === 'reject'
+              ? 'Rejected'
+              : d.decision === 'edit'
+                ? 'Approved with edits'
+                : 'Approved'}{' '}
+            by <span className="text-fg">{decidedByLine(d.decidedBy)}</span> at m{Math.round(d.minute)}
+          </p>
+        )}
         {d.reason && <p>Reason: {d.reason}</p>}
         {d.editedArgs && (
           <>

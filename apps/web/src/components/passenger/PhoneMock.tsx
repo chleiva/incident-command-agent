@@ -5,7 +5,7 @@
 /** The exact message passengers received, on a phone, labelled AI-drafted with its approver. */
 import type { PassengerMessage } from '@ica/schema/browser';
 import { AnimatePresence, motion } from 'framer-motion';
-import { actorLabel } from '../../lib/format';
+import { decisionPhrase } from '../../lib/format';
 import { AiDraftedBadge, Badge, Skeleton, type LoadStatus } from '../ui/primitives';
 
 export function PhoneMock({
@@ -69,8 +69,12 @@ export function PhoneMock({
             {message.status !== 'sent' && <Badge tone="warning">{message.status.replace('_', ' ')}</Badge>}
           </span>
           {message.approvedBy && (
-            <span className="truncate text-micro text-fg-muted" title={actorLabel(message.approvedBy)}>
-              Approved by {actorLabel(message.approvedBy)}
+            <span
+              className="truncate text-micro text-fg-muted"
+              title={decisionPhrase(message.approvedBy)}
+              data-approved-by
+            >
+              {decisionPhrase(message.approvedBy)}
             </span>
           )}
         </figcaption>
