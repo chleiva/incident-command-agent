@@ -121,5 +121,6 @@ Roles: `orchestrator, maintenance, ground, flightops, passenger, record, author`
 
 - `main` is the integration branch; the task branches are `task/0N-*`. Commit only green code (typecheck, lint, test). Commit messages use the conventional style (`feat(run): …`).
 - The pre-commit hook runs gitleaks plus the word-list check (`config/private-words.txt`, git-ignored). **Never commit** `.env`, `config/brand.local.json`, `scenarios/private/`, `data/raw/` or keys.
-- The user adds the GitHub remote. Don't push unless asked. **Squash the history before the first public push** (spec §13).
+- Remote: `origin` = github.com/chleiva/incident-command-agent (**public**). Don't push unless asked.
+- **Public history is squashed; local history is not.** Local `main` keeps the full development history (backup tag `backup/full-history-2026-09-27`). The published line is the local branch `public/main` → `origin/main`. To publish, run the pre-push scans (private-word list over the tree, secret patterns), then create one commit with the current tree on top of the public line and push it: `git commit-tree HEAD^{tree} -p public/main -m "<release notes + attribution>"` → `git branch -f public/main <sha>` → `git push origin public/main:main`. Never push local `main` itself: that would publish the full history.
 - End commit messages with the attribution trailer the session provides.

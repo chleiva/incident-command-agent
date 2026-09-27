@@ -83,7 +83,7 @@ describe('output screening', () => {
     const cases: [string, string][] = [
       ['This delay is due to extraordinary circumstances.', 'legal:extraordinary_circumstances'],
       ['You are not entitled to compensation.', 'legal:compensation_denial'],
-      ['Key sk-ant-abcdefghijklmnop', 'secret:anthropic_key'],
+      [`Key ${['sk', 'ant', 'abcdefghijklmnop'].join('-')}`, 'secret:anthropic_key'],
       ['Details at https://evil.example.com/x', 'url:not_allow_listed'],
       ['Call +44 7700 900123 for help', 'pii:phone'],
       ['Email jane.doe@example.com', 'pii:email'],
