@@ -1,8 +1,8 @@
 # Demo script
 
-Two presenter scripts for the Ground Incident Coordination Agent cockpit: a **90-second** version for the README GIF and a
+Two presenter scripts for the Incident Coordination Agent cockpit: a **90-second** version for the README GIF and a
 **10-minute** version for a live presentation. Everything shown is a simulation of a fictional carrier
-(Northwind Air); keep the "Simulated systems · fictional carrier" badge in shot.
+(Accent Air); keep the "Simulated systems · fictional carrier" badge in shot.
 
 ## Before you start
 
@@ -16,6 +16,9 @@ The only switch between local and AWS is `apps/web/public/config.json` (`WebRunt
 
 Mock-mode URL parameters:
 
+- Home (`/`): `?at=HH:MM` starts the network clock at a time of day (UTC); `?flight=ACX123` opens a flight; `?network=<seed>`
+  picks another fictional day. **Report incident** works in mock mode too: the scenario is built from the flight in the
+  browser and a recorded response (s01 at a base, s04 at an outstation) replays with its identifiers moved onto the flight.
 - `?autopilot=1`: every decision is taken with the recorded human decision after its recorded delay (hands-free).
 - `?timescale=4`: compresses the replay pacing on top of the run speed (rehearsals only).
 - `/runs/<id>?at=31`: open a run at a sim minute (history view); `?dev=1` shows the dev overlay (event counts,
@@ -39,20 +42,20 @@ listed under *Recent runs* (useful for side-by-side without waiting).
 
 ## 90 seconds (README GIF)
 
-Setup: mock mode, 1920×1080, dark theme, captions on. On the home page tick *Run the human baseline alongside* and set
+Setup: mock mode, 1920×1080, dark theme, captions on. On *Training scenarios* tick *Run the human baseline alongside* and set
 **Speed 30×**. Start recording.
 
 | Time | Do | Say (caption) |
 |---|---|---|
-| 0:00 | Home page. Point at **s01 · Towbar shear and nose-gear contact on pushback**; press **Start** | "A tug hits the nose gear during pushback at Manchester. 174 passengers on board." |
+| 0:00 | *Training scenarios*. Point at **s01 · Towbar shear and nose-gear contact on pushback**; press **Start** | "A tug hits the nose gear during pushback at Manchester. 174 passengers on board." |
 | 0:05 | Cockpit opens; KPI strip and zones fill in under 2 s | "Six numbers answer *how bad is it*. Grey figures are the same moment in today's manual process." |
 | 0:12 | Agent avatars light up; the stream shows the orchestrator briefing four specialists in parallel; the engineer's `E` starts moving on the stand view | "The orchestrator fans out: maintenance pages a B1 engineer, ground asks for a tow, flight ops checks the rotation." |
 | 0:20 | The first card arrives in **Decision needed**: the first passenger message, labelled **AI-drafted**, with a countdown | "Anything that touches people waits for a human. This is the first message, drafted by the passenger agent." |
 | 0:25 | Press **A** (or click Approve). The phone mock-up shows the exact SMS with *Approved by …* | "Approved at minute 6. The baseline team sends its first message at minute 28." |
 | 0:35 | The scheduled twist "Second tug unavailable" (caption); stairs and buses appear on the stand | "No tug: ground switches to stairs and buses so nobody is stuck on board." |
 | 0:45 | Calm amber card in the stream: **Blocked: Defer defect** | "The agent tried to defer the defect. That is a certifying engineer's call, so the code blocked it: nothing changed." |
-| 0:55 | The options card: swap to spare NW-LRM (recommended), hold, cancel. Click **Choose** on the recommended row | "Three real options, ranked. Choosing a row *is* the decision." |
-| 1:05 | The Gantt bars re-flow onto NW-LRM and turn from red back to amber; the cost ticks down | "The swap recedes the delay across the whole day's rotation." |
+| 0:55 | The options card: swap to spare AX-LRM (recommended), hold, cancel. Click **Choose** on the recommended row | "Three real options, ranked. Choosing a row *is* the decision." |
+| 1:05 | The Gantt bars re-flow onto AX-LRM and turn from red back to amber; the cost ticks down | "The swap recedes the delay across the whole day's rotation." |
 | 1:15 | Point at the KPI strip: cost, satisfaction and the 3-hour margin against the grey baseline figures | "Same incident, same world: cheaper, earlier, calmer than the baseline." |
 | 1:25 | Stop recording on the **Run complete** card (or when the swap has settled) | — |
 
@@ -68,14 +71,14 @@ Setup: local dev server (`npm run dev`) or mock mode, 1920×1080, speed 6×, cap
 
 ### 1. The problem and the promise (0:00–1:00)
 
-Home page. "Ground incidents are coordination problems: engineering, ramp, crew, passengers, all at once. Today it is
+Open on the live network (home), then *Training scenarios*. "Ground incidents are coordination problems: engineering, ramp, crew, passengers, all at once. Today it is
 phones and spreadsheets. Here, specialist agents do the legwork on simulated airline systems; humans keep every
 decision that matters." Point at the badge: simulated systems, fictional carrier.
 
 ### 2. The options case: s04 lightning strike at Faro (1:00–3:30)
 
 - Start **s04** with the baseline. "A lightning strike on arrival at Faro; no licensed engineer on site."
-- Show the zones in reading order: KPI strip (*how bad*), network map (*where it spreads*: FAO → MAN, spare NW-PQT at
+- Show the zones in reading order: KPI strip (*how bad*), network map (*where it spreads*: FAO → MAN, spare AX-PQT at
   Gatwick), stand view (*what is happening at the aircraft*), decision rail (*what needs me*), passengers (*who is
   affected*), timeline and inspector (*what changed*).
 - Approve the first passenger message (**A**). Point out the AI-drafted label and the approver line on the phone.
@@ -110,7 +113,7 @@ decision that matters." Point at the badge: simulated systems, fictional carrier
 
 ### 6. A free-text scenario (6:30–7:45)
 
-- Home → *Write a scenario*: "A catering truck clips the forward door of an A320 at Palma during turnaround; two
+- *Training scenarios* → *Write a scenario*: "A catering truck clips the forward door of an A320 at Palma during turnaround; two
   wheelchair users on board." → **Author scenario**. Show the screening verdict and the schema-valid preview (AI-drafted).
 - **Start this scenario**, watch the first seconds, then return to the s01 demo pair.
 

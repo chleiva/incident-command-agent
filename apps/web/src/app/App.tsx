@@ -14,6 +14,7 @@ import { useUi } from '../store/ui';
 import { ServicesProvider } from './services';
 
 const Home = lazy(() => import('../routes/Home'));
+const Training = lazy(() => import('../routes/Training'));
 const Cockpit = lazy(() => import('../routes/Cockpit'));
 const Compare = lazy(() => import('../routes/Compare'));
 const Evals = lazy(() => import('../routes/Evals'));
@@ -48,7 +49,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
           <h1 className="text-heading">Something went wrong</h1>
           <p className="mt-2 text-fg-muted">{this.state.error.message}</p>
           <a className="mt-4 inline-block underline" href="/">
-            Back to scenarios
+            Back to the network
           </a>
         </div>
       );
@@ -84,7 +85,15 @@ function GlobalPalette() {
   }, [setOpen]);
 
   const base: PaletteCommand[] = [
-    { id: 'home', group: 'Navigate', label: 'Scenarios (home)', icon: 'plane', run: () => navigate('/') },
+    { id: 'home', group: 'Navigate', label: 'Live network (home)', icon: 'plane', run: () => navigate('/') },
+    {
+      id: 'training',
+      group: 'Navigate',
+      label: 'Training scenarios',
+      icon: 'file',
+      keywords: ['scenarios', 'library', 'training'],
+      run: () => navigate('/training'),
+    },
     {
       id: 'evals',
       group: 'Navigate',
@@ -137,6 +146,7 @@ export function App({ services }: { services: Services }) {
       element: <Root />,
       children: [
         { path: '/', element: <Home /> },
+        { path: '/training', element: <Training /> },
         { path: '/runs/:runId', element: <Cockpit /> },
         { path: '/compare/:agentRunId/:baselineRunId', element: <Compare /> },
         { path: '/evals', element: <Evals /> },

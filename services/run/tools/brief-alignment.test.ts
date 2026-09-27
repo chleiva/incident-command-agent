@@ -38,7 +38,7 @@ describe('idempotent notification and work-order tools (requestId)', () => {
 
   it('create_work_order: a retry returns the original work order and creates nothing', async () => {
     const h = await fixtureHarness();
-    const input = { tail: 'NW-FXA', task: 'damage_assessment', estimatedDurationMin: 60, requestId: REQ };
+    const input = { tail: 'AX-FXA', task: 'damage_assessment', estimatedDurationMin: 60, requestId: REQ };
     const first = await call(h, 'create_work_order', input);
     expect(first.ok && first.mutations).toHaveLength(1);
     const retry = await call(h, 'create_work_order', input);
@@ -72,10 +72,10 @@ describe('idempotent notification and work-order tools (requestId)', () => {
   it('notify_handler, request_bus, request_tow and request_stand dedupe on requestId', async () => {
     const h = await fixtureHarness();
     for (const [name, input] of [
-      ['notify_handler', { kind: 'hold_boarding', tail: 'NW-FXA', requestId: 'handler-req-1' }],
-      ['request_bus', { count: 1, tail: 'NW-FXA', requestId: 'bus-req-0001' }],
-      ['request_tow', { tail: 'NW-FXA', requestId: 'tow-req-00001' }],
-      ['request_stand', { tail: 'NW-FXA', standId: 'R5', requestId: 'stand-req-001' }],
+      ['notify_handler', { kind: 'hold_boarding', tail: 'AX-FXA', requestId: 'handler-req-1' }],
+      ['request_bus', { count: 1, tail: 'AX-FXA', requestId: 'bus-req-0001' }],
+      ['request_tow', { tail: 'AX-FXA', requestId: 'tow-req-00001' }],
+      ['request_stand', { tail: 'AX-FXA', standId: 'R5', requestId: 'stand-req-001' }],
     ] as const) {
       const first = await call(h, name, input);
       expect(first.ok, `${name}: ${!first.ok && first.error}`).toBe(true);
@@ -92,7 +92,7 @@ describe('idempotent notification and work-order tools (requestId)', () => {
     const input = {
       cohortIds: ['c-general'],
       channel: 'sms',
-      body: 'NWD101 is delayed while engineers check the aircraft. Next update by 06:45.',
+      body: 'ACX101 is delayed while engineers check the aircraft. Next update by 06:45.',
       requestId: REQ,
     };
     const first = okData(await call(h, 'send_passenger_message', input, { approvedBy: DUTY_MANAGER }));
@@ -107,7 +107,7 @@ describe('idempotent notification and work-order tools (requestId)', () => {
     const input = {
       standbyId: 'crew-cpt-sby',
       replacesCrewId: 'crew-cpt-1',
-      flight: 'NWD101',
+      flight: 'ACX101',
       requestId: REQ,
     };
     okData(await call(h, 'assign_standby_crew', input, { approvedBy: DUTY_MANAGER }));
@@ -128,14 +128,14 @@ describe('missing maintenance data is "Unknown" (never a default)', () => {
 
   it('the seed does not invent a record', () => {
     const mne = seedMne(withoutRecord());
-    expect(mne.aircraft['NW-FXA']!.maintenance).toBeUndefined();
-    expect(mne.aircraft['NW-FXA']!.status).toBe('unserviceable');
+    expect(mne.aircraft['AX-FXA']!.maintenance).toBeUndefined();
+    expect(mne.aircraft['AX-FXA']!.status).toBe('unserviceable');
     expect(mne.defects['DEF-001']!.ata).toBeUndefined();
   });
 
   it('get_aircraft_status and get_open_defects show Unknown for every missing field', async () => {
     const h = await fixtureHarness(withoutRecord());
-    const s = okData(await call(h, 'get_aircraft_status', { tail: 'NW-FXA' }));
+    const s = okData(await call(h, 'get_aircraft_status', { tail: 'AX-FXA' }));
     expect(s.maintenanceRecord).toEqual({
       lastCheckType: UNKNOWN,
       lastCheckDate: UNKNOWN,
@@ -151,7 +151,7 @@ describe('missing maintenance data is "Unknown" (never a default)', () => {
     const s = withoutRecord();
     s.aircraft.maintenance = { lastCheckType: 'A-check', lastCheckDate: '2026-05-30' };
     const h = await fixtureHarness(s);
-    const r = okData(await call(h, 'get_aircraft_status', { tail: 'NW-FXA' }));
+    const r = okData(await call(h, 'get_aircraft_status', { tail: 'AX-FXA' }));
     expect(r.maintenanceRecord).toEqual({
       lastCheckType: 'A-check',
       lastCheckDate: '2026-05-30',

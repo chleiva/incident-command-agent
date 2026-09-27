@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Scenarios use the fictional carrier **Northwind Air** only (NWD flights, NW-XXX tails, real IATA airports). No real airline, client or personal names. Do not paste proprietary manual text.
+        Scenarios use the fictional carrier **Accent Air** only (ACX flights, AX-XXX tails, real IATA airports). No real airline, client or personal names. Do not paste proprietary manual text.
   - type: input
     id: title
     attributes:

@@ -18,9 +18,9 @@
         "limits": {
           "maxIterationsPerAgent": 25,
           "maxToolCallsPerRun": 60,
-          "maxInputTokensPerRun": 200000,
+          "maxInputTokensPerRun": 0,
           "wallClockMs": 480000,
-          "budgetUsd": 2,
+          "budgetUsd": 0,
           "horizonMin": 180
         }
       }
@@ -47,10 +47,10 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-TQA",
+      "id": "AX-TQA",
       "op": "create",
       "after": {
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "type": "A321",
         "station": "FAO",
         "status": "serviceable",
@@ -70,11 +70,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD517",
+      "id": "ACX517",
       "op": "create",
       "after": {
-        "flight": "NWD517",
-        "tail": "NW-TQA",
+        "flight": "ACX517",
+        "tail": "AX-TQA",
         "from": "MAN",
         "to": "FAO",
         "std": "2026-07-03T10:05:00Z",
@@ -97,11 +97,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "create",
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -124,11 +124,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD540",
+      "id": "ACX540",
       "op": "create",
       "after": {
-        "flight": "NWD540",
-        "tail": "NW-TQA",
+        "flight": "ACX540",
+        "tail": "AX-TQA",
         "from": "MAN",
         "to": "AMS",
         "std": "2026-07-03T17:10:00Z",
@@ -151,9 +151,9 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-PQT",
+      "id": "AX-PQT",
       "op": "create",
-      "after": { "tail": "NW-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }
+      "after": { "tail": "AX-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }
     }
   },
   {
@@ -180,7 +180,7 @@
         "maxFdpMin": 600,
         "fdpUsedMin": 285,
         "fdpRemainingMin": 315,
-        "assignedFlight": "NWD518"
+        "assignedFlight": "ACX518"
       }
     }
   },
@@ -208,7 +208,7 @@
         "maxFdpMin": 600,
         "fdpUsedMin": 285,
         "fdpRemainingMin": 315,
-        "assignedFlight": "NWD518"
+        "assignedFlight": "ACX518"
       }
     }
   },
@@ -236,7 +236,7 @@
         "maxFdpMin": 600,
         "fdpUsedMin": 285,
         "fdpRemainingMin": 315,
-        "assignedFlight": "NWD518"
+        "assignedFlight": "ACX518"
       }
     }
   },
@@ -257,7 +257,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 168,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0
       }
@@ -280,7 +280,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 18,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Six families with young children"
@@ -304,7 +304,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Three WCHR, one WCHS"
@@ -328,7 +328,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 22,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-07-03T19:30:00Z",
@@ -349,7 +349,7 @@
       "entity": "stands",
       "id": "5",
       "op": "create",
-      "after": { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "NW-TQA" }
+      "after": { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "AX-TQA" }
     }
   },
   {
@@ -722,7 +722,7 @@
       "op": "create",
       "after": {
         "id": "def-4",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "description": "Lightning strike on approach into FAO: inspection required before next flight",
         "ata": "05",
         "status": "open",
@@ -741,11 +741,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "update",
       "before": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -756,8 +756,8 @@
         "pax": 212
       },
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -1391,7 +1391,7 @@
     "payload": {
       "actor": "Maintenance control",
       "tool": "page_engineer",
-      "args": { "engineerId": "eng-m1", "tail": "NW-TQA" },
+      "args": { "engineerId": "eng-m1", "tail": "AX-TQA" },
       "note": "Home-base engineer called by phone to fly out."
     }
   },
@@ -1662,7 +1662,7 @@
       "description": "Airport operations close the ramp for 20 minutes while a thunderstorm cell passes overhead.",
       "source": "scheduled",
       "effects": [
-        { "op": "delay", "flight": "NWD518", "minutes": 20 },
+        { "op": "delay", "flight": "ACX518", "minutes": 20 },
         { "op": "info", "text": "Airport: ramp operations suspended for 20 minutes (lightning within 5 km)." }
       ]
     }
@@ -2192,7 +2192,7 @@
         "id": "msg-b41",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 is delayed for technical reasons. We apologise for the inconvenience.",
+        "body": "ACX518 is delayed for technical reasons. We apologise for the inconvenience.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 38,

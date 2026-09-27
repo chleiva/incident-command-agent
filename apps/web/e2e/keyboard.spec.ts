@@ -6,7 +6,7 @@
 import { expect, test } from '@playwright/test';
 
 test('palette, full-screen zone, pause/resume and first-event latency', async ({ page }) => {
-  await page.goto('/?timescale=4');
+  await page.goto('/training?timescale=4');
   await page
     .getByRole('button', { name: 'Start Lightning strike at outstation, no licensed engineer on site' })
     .click();

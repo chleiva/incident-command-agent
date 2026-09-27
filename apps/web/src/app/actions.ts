@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** Presenter and duty-manager actions, with optimistic approvals and error toasts. */
-import type { ApprovalDecisionRequest, ControlRequest, TwistRequest } from '@ica/schema/browser';
+import type {
+  ApprovalDecisionRequest,
+  ControlRequest,
+  CreateRunRequest,
+  CreateRunResponse,
+  TwistRequest,
+} from '@ica/schema/browser';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ApiClient } from '../lib/api';
@@ -62,8 +68,51 @@ export function useRunActions() {
         return null;
       }
     };
+    /**
+     * Report an incident on a live-network flight (task 07). The server rebuilds the scenario from the flight; with a
+     * baseline, the baseline request builds (and stores) it first and the agent run reuses its id, so the pair runs
+     * the same scenario — as `start` does for library scenarios.
+     */
+    const startFromFlight = async (
+      report: Pick<CreateRunRequest, 'flightContext' | 'incidentType' | 'text'>,
+      opts: { withBaseline: boolean; speed: number },
+    ) => {
+      useUi.getState().markTriggered();
+      try {
+        let runId: string;
+        let res: CreateRunResponse;
+        if (opts.withBaseline) {
+          res = await api.createRun({ ...report, mode: 'baseline', speed: opts.speed });
+          const agent = await api.createRun({
+            scenarioId: res.scenarioId!,
+            mode: 'agent',
+            speed: opts.speed,
+            pairedRunId: res.runId,
+          });
+          runId = agent.runId;
+          useUi.getState().setPair(runId, res.runId);
+        } else {
+          res = await api.createRun({ ...report, mode: 'agent', speed: opts.speed });
+          runId = res.runId;
+        }
+        if (res.authorFallback)
+          toast({
+            tone: 'warning',
+            title: 'Scenario Author unavailable',
+            body: 'The run uses the incident template for this flight; your details were not added.',
+          });
+        else if (res.screening?.verdict === 'neutralised')
+          toast({ tone: 'info', title: 'Details neutralised by screening before reaching the agents.' });
+        navigate(`/runs/${encodeURIComponent(runId)}`);
+        return runId;
+      } catch (e) {
+        toast({ tone: 'critical', title: 'Could not start the run', body: message(e) }, 8_000);
+        return null;
+      }
+    };
     return {
       start,
+      startFromFlight,
       decide: (runId: string, approvalId: string, req: ApprovalDecisionRequest) =>
         decideOptimistically(api, runId, approvalId, req),
       control: async (runId: string, req: ControlRequest) => {

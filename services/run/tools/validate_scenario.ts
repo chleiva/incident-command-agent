@@ -9,7 +9,7 @@ import { obj, ok } from './_shared';
 export const validate_scenario: ToolDefinition<{ scenario: Record<string, unknown> }> = {
   name: 'validate_scenario',
   description:
-    'Validate a candidate scenario JSON against the schema (schemaVersion 1) plus domain checks: real IATA stations, fictional Northwind data (NWD flight numbers, NW-XXX tails), unique ids, a fresh id. Returns ok, or the list of errors as JSON pointers to fix. Call it until it returns ok.',
+    'Validate a candidate scenario JSON against the schema (schemaVersion 1) plus domain checks: real IATA stations, fictional Accent Air data (ACX flight numbers, AX-XXX tails), unique ids, a fresh id. Returns ok, or the list of errors as JSON pointers to fix. Call it until it returns ok.',
   inputSchema: obj({ scenario: { type: 'object', description: 'The complete scenario object' } }, [
     'scenario',
   ]),

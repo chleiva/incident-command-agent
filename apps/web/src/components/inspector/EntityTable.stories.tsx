@@ -17,8 +17,8 @@ const s = fourStates(
       title="flights"
       rows={flights}
       keyField="flight"
-      recent={new Map([['NWD214', 120]])}
-      latestId="NWD215"
+      recent={new Map([['ACX214', 120]])}
+      latestId="ACX215"
     />
   ),
   () => <EntityTable title="swaps" rows={[]} keyField="id" />,

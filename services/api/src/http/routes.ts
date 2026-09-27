@@ -22,6 +22,7 @@ import {
   type ApprovalDecisionResponse,
   type AuthorScenarioResponse,
   type ControlResponse,
+  type CreateRunRequest,
   type CreateRunResponse,
   type EventDraft,
   type EvidencePack,
@@ -40,6 +41,7 @@ import {
 import { buildAppConfig } from '../config/app-config';
 import { errorFields, silentLogger } from '../util/log';
 import { isNotImplemented, type ApiDeps } from './deps';
+import { buildFlightScenario } from './flight-context';
 import { HttpError, badRequest, conflict, notFound, validationFailed } from './errors';
 import { createRouter, humanActor, type RouteContext, type RouteTable } from './router';
 
@@ -97,6 +99,9 @@ export function createApiHandler(deps: ApiDeps) {
   async function findScenario(id: string): Promise<Scenario | null> {
     return findPublic(id) ?? (await store.getScenario(id));
   }
+
+  const scenarioFromFlight = (ctx: RouteContext, req: CreateRunRequest) =>
+    buildFlightScenario(deps, req, now().getTime(), ctx.log);
 
   async function requireRun(ctx: RouteContext): Promise<RunMeta> {
     const runId = ctx.params.id;
@@ -188,7 +193,17 @@ export function createApiHandler(deps: ApiDeps) {
     // ---------------------------------------------------------------- runs
     async createRun(ctx) {
       const req = validate(validators.createRun, ctx.body);
-      const scenario = await findScenario(req.scenarioId);
+      let scenario: Scenario | null;
+      let extra: Pick<CreateRunResponse, 'screening' | 'authorFallback'> = {};
+      if (req.flightContext) {
+        if (req.scenarioId) throw badRequest('give either scenarioId or flightContext, not both');
+        const built = await scenarioFromFlight(ctx, req);
+        scenario = built.scenario;
+        extra = built.extra;
+      } else {
+        if (!req.scenarioId) throw badRequest('scenarioId or flightContext is required');
+        scenario = await findScenario(req.scenarioId);
+      }
       if (!scenario) throw notFound('scenario', 'scenario_not_found');
       if (req.pairedRunId && !(await store.getRun(req.pairedRunId))) {
         throw notFound('paired run', 'paired_run_not_found');
@@ -253,7 +268,7 @@ export function createApiHandler(deps: ApiDeps) {
         );
         throw new HttpError(502, 'launch_failed', message, { runId });
       }
-      return { status: 201, body: { runId } satisfies CreateRunResponse };
+      return { status: 201, body: { runId, scenarioId: scenario.id, ...extra } satisfies CreateRunResponse };
     },
 
     async listRuns(ctx) {

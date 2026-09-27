@@ -2,7 +2,7 @@
   "name": "@ica/web",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — React 18 + Vite cockpit SPA and Storybook. Owned by task 05.",
+  "description": "Incident Coordination Agent — React 18 + Vite cockpit SPA and Storybook. Owned by task 05.",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
@@ -22,6 +22,7 @@
     "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
+    "@ica/network": "*",
     "@ica/schema": "*",
     "@ica/ui-tokens": "*",
     "@radix-ui/react-dialog": "^1.1.23",

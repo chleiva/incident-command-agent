@@ -2,7 +2,7 @@
   "name": "@ica/kb",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — Knowledge-base build pipeline (kb:build), airports data (airports:build), SOURCES.md, fixtures. Owned by task 03.",
+  "description": "Incident Coordination Agent — Knowledge-base build pipeline (kb:build), airports data (airports:build), SOURCES.md, fixtures. Owned by task 03.",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {

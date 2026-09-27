@@ -26,7 +26,7 @@ describe('shipped scenarios', () => {
   for (const id of SCENARIO_IDS) {
     it(`${id}: fictional carrier data, twists, and a baseline that runs through the real tools`, async () => {
       const s = byId(id);
-      expect(s.narrative).toMatch(/Northwind|NW-/);
+      expect(s.narrative).toMatch(/Accent Air|AX-/);
       expect(s.twists.some((t) => t.atMinute !== undefined)).toBe(true);
       expect(s.twists.some((t) => t.atMinute === undefined)).toBe(true);
       expect(s.world.cohorts.length).toBeGreaterThanOrEqual(3);
@@ -84,7 +84,7 @@ describe('shipped scenarios', () => {
     expect(now.remainingMin).toBeGreaterThan(120);
     expect(now.remainingMin).toBeLessThan(200);
     const { retimeFlight } = await import('./systems/occ/index');
-    const later = applyMutations(h.state, retimeFlight(h.state, 'NWD741', 50 + 150));
+    const later = applyMutations(h.state, retimeFlight(h.state, 'ACX741', 50 + 150));
     expect(computeFdp(later, cpt, 60).remainingMin).toBeLessThan(0);
   });
 

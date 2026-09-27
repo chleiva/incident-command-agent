@@ -33,7 +33,7 @@ describe('record', () => {
       appendTimeline(h.state, { atMinute: 3, text: 'Incident opened', source: 'orchestrator' }, h.rng),
       recordEngineeringDecision(
         h.state,
-        { tail: 'NW-FXA', decision: 'rectify' },
+        { tail: 'AX-FXA', decision: 'rectify' },
         CERTIFYING,
         'Replace sensor',
         10,

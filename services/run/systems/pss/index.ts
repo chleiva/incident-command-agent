@@ -10,7 +10,7 @@
  *   €600. Compensation exposure applies when the projected arrival delay reaches 3 h (or the flight is cancelled).
  * - Rebooking only onto flights of the same route with enough `seatsAvailable`, which it decrements.
  * - Messages record `sentAtMinute` and set each cohort's `firstInformedAtMinute` (first time only).
- * - Rebooking options are generated at seed: fictional later NWD flights with seeded seat counts.
+ * - Rebooking options are generated at seed: fictional later ACX flights with seeded seat counts.
  */
 import { distanceKm, isEuStation } from '@ica/kb';
 import type {
@@ -61,7 +61,7 @@ export function seedPss(scenario: Scenario, rng: () => number): SystemStateOf<'p
     if (c.notes) cohort.notes = c.notes;
     cohorts[c.id] = cohort;
   }
-  // Fictional rebooking options: 2–3 later NWD departures on each affected route.
+  // Fictional rebooking options: 2–3 later ACX departures on each affected route.
   const used = new Set<string>([
     ...scenario.world.rotation.map((r) => r.flight),
     ...scenario.aircraft.nextSectors.map((s) => s.flight),
@@ -80,8 +80,8 @@ export function seedPss(scenario: Scenario, rng: () => number): SystemStateOf<'p
     const count = randInt(rng, 2, 3);
     let offset = randInt(rng, 120, 200);
     for (let i = 0; i < count; i++) {
-      while (used.has(`NWD${n}`)) n++;
-      const flight = `NWD${n}`;
+      while (used.has(`ACX${n}`)) n++;
+      const flight = `ACX${n}`;
       used.add(flight);
       n += randInt(rng, 1, 7);
       const std = isoAt(scenario.startSimTime, minuteOf(scenario.startSimTime, leg.std) + offset);

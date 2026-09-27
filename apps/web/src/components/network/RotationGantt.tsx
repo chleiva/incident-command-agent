@@ -31,8 +31,11 @@ export function RotationGantt({
   nowIso,
   status = 'ready',
   error,
+  tailLabel,
 }: {
   flights: Flight[];
+  /** Sub-label under each tail (default: the aircraft status, or "spare"). */
+  tailLabel?: (tail: string) => string;
   aircraft?: Aircraft[];
   /** Current scenario time (ISO) for the "now" line. */
   nowIso?: string | null;
@@ -63,10 +66,12 @@ export function RotationGantt({
   const h = model.tails.length * ROW_H + 22;
   const ticks = useMemo(() => {
     const out: number[] = [];
-    const step = 60 * 60_000;
+    // One tick per hour, thinned so labels never overlap (≈ 44 px per label).
+    const hours = (model.t1 - model.t0) / 3_600_000;
+    const step = Math.max(1, Math.ceil((hours * 44) / plotW)) * 60 * 60_000;
     for (let t = Math.ceil(model.t0 / step) * step; t <= model.t1; t += step) out.push(t);
     return out;
-  }, [model.t0, model.t1]);
+  }, [model.t0, model.t1, plotW]);
   const hovered = flights.find((f) => f.flight === hover);
 
   return (
@@ -100,7 +105,7 @@ export function RotationGantt({
                   {tail}
                 </text>
                 <text x={0} y={i * ROW_H + 28} fontSize={9} fill="rgb(var(--c-fg-subtle))">
-                  {ac ? ac.status : 'spare'}
+                  {tailLabel ? tailLabel(tail) : ac ? ac.status : 'spare'}
                 </text>
               </g>
             );

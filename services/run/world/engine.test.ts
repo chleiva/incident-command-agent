@@ -27,8 +27,8 @@ function busyOrchestrator(n: number) {
         'Structuring.',
         call('report', {
           ...REPORT,
-          summary: 'The twist delays NWD101 by twenty minutes.',
-          effects: [{ op: 'delay', flight: 'NWD101', minutes: 20 }],
+          summary: 'The twist delays ACX101 by twenty minutes.',
+          effects: [{ op: 'delay', flight: 'ACX101', minutes: 20 }],
         }),
       ),
   });
@@ -85,9 +85,9 @@ describe('world engine', () => {
     const twists = ofType(events, 'world.twist');
     expect(twists.find((t) => t.payload.twistId === 'tw-caution-returns')?.payload.source).toBe('manual');
     const free = twists.find((t) => t.payload.source === 'free_text')!;
-    expect(free.payload.effects).toEqual([{ op: 'delay', flight: 'NWD101', minutes: 20 }]);
+    expect(free.payload.effects).toEqual([{ op: 'delay', flight: 'ACX101', minutes: 20 }]);
     expect(ofType(events, 'agent.started').some((e) => e.payload.role === 'author')).toBe(true);
-    expect(foldEvents(events).systems.occ.flights.NWD101.delayMin).toBeGreaterThanOrEqual(20);
+    expect(foldEvents(events).systems.occ.flights.ACX101.delayMin).toBeGreaterThanOrEqual(20);
   });
 
   it('a free-text twist with instruction-like text is neutralised and applied as info only', async () => {
@@ -130,7 +130,7 @@ describe('world engine', () => {
   });
 
   it('delays the next flight once its STD passes while the aircraft is not ready; KPIs follow', async () => {
-    // NWD101 STD 06:10 = minute 40; the fake aircraft is unserviceable with an open defect.
+    // ACX101 STD 06:10 = minute 40; the fake aircraft is unserviceable with an open defect.
     const h = await makeHarness({
       script: busyOrchestrator(10),
       latencyMs: 60_000,
@@ -139,7 +139,7 @@ describe('world engine', () => {
     await h.run();
     const events = await h.events();
     const p = foldEvents(events);
-    const f = p.systems.occ.flights.NWD101;
+    const f = p.systems.occ.flights.ACX101;
     expect(f.status).toBe('delayed');
     expect(f.delayMin).toBeGreaterThan(0);
     expect(f.delayMin).toBeLessThanOrEqual(Math.ceil(p.simMinute - 40));

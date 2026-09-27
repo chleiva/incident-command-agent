@@ -20,10 +20,10 @@ export interface OutputScreenResult {
 }
 
 /** Domains a passenger message may link to (the fictional carrier only). */
-export const PASSENGER_URL_ALLOWLIST = ['northwindair.example'];
+export const PASSENGER_URL_ALLOWLIST = ['accentair.example'];
 /** Domains a report or techlog may cite (the open knowledge sources, spec §9). */
 export const REPORT_URL_ALLOWLIST = [
-  'northwindair.example',
+  'accentair.example',
   'asrs.arc.nasa.gov',
   'nasa.gov',
   'gov.uk',

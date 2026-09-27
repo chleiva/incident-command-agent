@@ -31,9 +31,9 @@ describe('approval invalidation (pure)', () => {
       status: 'travelling',
       etaMinute: 12,
     };
-    expect(deriveAssumptions(h.state, 'propose_swap', { toTail: 'NW-FXB' })).toEqual([
+    expect(deriveAssumptions(h.state, 'propose_swap', { toTail: 'AX-FXB' })).toEqual([
       { key: 'engineerEtaMinute', value: 12, source: 'engineers/engineers/eng-1#etaMinute' },
-      { key: 'spareAvailableFromMinute', value: 45, source: 'occ/spares/NW-FXB#availableFromMinute' },
+      { key: 'spareAvailableFromMinute', value: 45, source: 'occ/spares/AX-FXB#availableFromMinute' },
     ]);
     expect(parseSource('engineers/engineers/eng-1#etaMinute')).toEqual({
       system: 'engineers',

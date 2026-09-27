@@ -29,7 +29,7 @@ describe('pss EU261 tiers', () => {
     const h = harness();
     const before = estimateExposure(h.state, h.scenario, undefined);
     expect(before.ok && before.value).toMatchObject({ totalEur: 0, minutesTo3h: 180 });
-    const late = applyMutations(h.state, retimeFlight(h.state, 'NWD101', 40 + 185));
+    const late = applyMutations(h.state, retimeFlight(h.state, 'ACX101', 40 + 185));
     const after = estimateExposure(late, h.scenario, ['c-general']);
     expect(after.ok && after.value.lines[0]).toMatchObject({
       tierEur: 250,
@@ -40,12 +40,12 @@ describe('pss EU261 tiers', () => {
 });
 
 describe('pss rebooking', () => {
-  it('generates fictional NWD options on the affected route', () => {
+  it('generates fictional ACX options on the affected route', () => {
     const { state } = harness();
     const opts = Object.values(state.pss.rebookingOptions);
     expect(opts.length).toBeGreaterThanOrEqual(2);
     for (const o of opts) {
-      expect(o.flight).toMatch(/^NWD[1-9]\d{2}$/);
+      expect(o.flight).toMatch(/^ACX[1-9]\d{2}$/);
       expect(o).toMatchObject({ from: 'MAN', to: 'DUB' });
     }
   });
@@ -62,7 +62,7 @@ describe('pss rebooking', () => {
     expect(s.pss.rebookingOptions[opt.flight].seatsAvailable).toBe(opt.seatsAvailable - 4);
     expect(s.pss.cohorts['c-prm']).toMatchObject({ status: 'rebooked', rebookedTo: opt.flight });
     expect(rebookCohort(s, 'c-prm', opt.flight).ok).toBe(false);
-    expect(rebookCohort(h.state, 'c-prm', 'NWD999').ok).toBe(false);
+    expect(rebookCohort(h.state, 'c-prm', 'ACX999').ok).toBe(false);
   });
 });
 

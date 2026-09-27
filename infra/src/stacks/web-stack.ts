@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Ground Incident Coordination Agent contributors
+ * Copyright 2026 Incident Command Agent contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
@@ -72,7 +72,7 @@ export class WebStack extends Stack {
     });
 
     const headers = new ResponseHeadersPolicy(this, 'SecurityHeaders', {
-      comment: 'Ground Incident Coordination Agent: strict security headers',
+      comment: 'Incident Coordination Agent: strict security headers',
       securityHeadersBehavior: {
         contentSecurityPolicy: {
           contentSecurityPolicy: contentSecurityPolicy(this.region, props.cognitoDomainPrefix),
@@ -105,7 +105,7 @@ export class WebStack extends Stack {
 
     const origin = S3BucketOrigin.withOriginAccessControl(site);
     this.distribution = new Distribution(this, 'Distribution', {
-      comment: 'Ground Incident Coordination Agent cockpit',
+      comment: 'Incident Coordination Agent cockpit',
       defaultRootObject: 'index.html',
       httpVersion: HttpVersion.HTTP2_AND_3,
       priceClass: PriceClass.PRICE_CLASS_100,

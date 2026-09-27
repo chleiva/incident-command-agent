@@ -18,9 +18,9 @@
         "limits": {
           "maxIterationsPerAgent": 25,
           "maxToolCallsPerRun": 60,
-          "maxInputTokensPerRun": 200000,
+          "maxInputTokensPerRun": 0,
           "wallClockMs": 480000,
-          "budgetUsd": 2,
+          "budgetUsd": 0,
           "horizonMin": 180
         }
       }
@@ -47,9 +47,9 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-KES",
+      "id": "AX-KES",
       "op": "create",
-      "after": { "tail": "NW-KES", "type": "A320", "station": "MAN", "status": "serviceable", "stand": "32" }
+      "after": { "tail": "AX-KES", "type": "A320", "station": "MAN", "status": "serviceable", "stand": "32" }
     }
   },
   {
@@ -63,11 +63,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "create",
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -90,11 +90,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD215",
+      "id": "ACX215",
       "op": "create",
       "after": {
-        "flight": "NWD215",
-        "tail": "NW-KES",
+        "flight": "ACX215",
+        "tail": "AX-KES",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -117,11 +117,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD230",
+      "id": "ACX230",
       "op": "create",
       "after": {
-        "flight": "NWD230",
-        "tail": "NW-KES",
+        "flight": "ACX230",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-14T13:10:00Z",
@@ -144,11 +144,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD231",
+      "id": "ACX231",
       "op": "create",
       "after": {
-        "flight": "NWD231",
-        "tail": "NW-KES",
+        "flight": "ACX231",
+        "tail": "AX-KES",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-14T14:50:00Z",
@@ -171,9 +171,9 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-LRM",
+      "id": "AX-LRM",
       "op": "create",
-      "after": { "tail": "NW-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35 }
+      "after": { "tail": "AX-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35 }
     }
   },
   {
@@ -187,9 +187,9 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-PQT",
+      "id": "AX-PQT",
       "op": "create",
-      "after": { "tail": "NW-PQT", "type": "A320", "station": "LGW", "availableFromMinute": 90 }
+      "after": { "tail": "AX-PQT", "type": "A320", "station": "LGW", "availableFromMinute": 90 }
     }
   },
   {
@@ -216,7 +216,7 @@
         "maxFdpMin": 660,
         "fdpUsedMin": 55,
         "fdpRemainingMin": 605,
-        "assignedFlight": "NWD214"
+        "assignedFlight": "ACX214"
       }
     }
   },
@@ -244,7 +244,7 @@
         "maxFdpMin": 660,
         "fdpUsedMin": 55,
         "fdpRemainingMin": 605,
-        "assignedFlight": "NWD214"
+        "assignedFlight": "ACX214"
       }
     }
   },
@@ -272,7 +272,7 @@
         "maxFdpMin": 660,
         "fdpUsedMin": 55,
         "fdpRemainingMin": 605,
-        "assignedFlight": "NWD214"
+        "assignedFlight": "ACX214"
       }
     }
   },
@@ -320,7 +320,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 144,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0
       }
@@ -343,7 +343,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Four families with young children"
@@ -367,7 +367,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Two WCHR, one WCHC"
@@ -391,7 +391,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Escorted by cabin crew"
@@ -415,7 +415,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-06-14T12:30:00Z",
@@ -436,7 +436,7 @@
       "entity": "stands",
       "id": "32",
       "op": "create",
-      "after": { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-KES" }
+      "after": { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "AX-KES" }
     }
   },
   {
@@ -456,7 +456,7 @@
         "id": "34",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-LRM",
+        "occupiedByTail": "AX-LRM",
         "occupiedUntilMinute": 35
       }
     }
@@ -871,7 +871,7 @@
       "op": "create",
       "after": {
         "id": "def-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "description": "Tug contact with nose landing gear during pushback (towbar shear pin failure)",
         "ata": "32",
         "status": "open",
@@ -890,17 +890,17 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-KES",
+      "id": "AX-KES",
       "op": "update",
       "before": {
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "type": "A320",
         "station": "MAN",
         "status": "serviceable",
         "stand": "32"
       },
       "after": {
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "type": "A320",
         "station": "MAN",
         "status": "unserviceable",
@@ -919,11 +919,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -934,8 +934,8 @@
         "pax": 174
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -1000,7 +1000,7 @@
       "tool": "open_incident",
       "system": "runtime",
       "tier": "execute",
-      "args": { "title": "NW-KES nose-gear contact on pushback", "severity": "high" }
+      "args": { "title": "AX-KES nose-gear contact on pushback", "severity": "high" }
     }
   },
   {
@@ -1019,7 +1019,7 @@
       "after": {
         "id": "tl-1",
         "atMinute": 2.4,
-        "text": "Incident opened: NW-KES nose-gear contact on pushback (NWD214)",
+        "text": "Incident opened: AX-KES nose-gear contact on pushback (ACX214)",
         "source": "orchestrator"
       }
     }
@@ -1059,7 +1059,7 @@
       "system": "runtime",
       "tier": "execute",
       "args": {
-        "objective": "Safe outcome for NW-KES, first passenger message before minute 15, protect the PMI rotation."
+        "objective": "Safe outcome for AX-KES, first passenger message before minute 15, protect the PMI rotation."
       }
     }
   },
@@ -1099,7 +1099,7 @@
       "tier": "execute",
       "args": {
         "role": "maintenance",
-        "brief": "Get a B1 engineer to NW-KES, raise a work order and establish the damage and an estimate. Deferral and release are for certifying staff only."
+        "brief": "Get a B1 engineer to AX-KES, raise a work order and establish the damage and an estimate. Deferral and release are for certifying staff only."
       }
     }
   },
@@ -1139,7 +1139,7 @@
       "tier": "execute",
       "args": {
         "role": "ground",
-        "brief": "Get NW-KES back on stand 32 safely and plan disembarkation if the tow is delayed."
+        "brief": "Get AX-KES back on stand 32 safely and plan disembarkation if the tow is delayed."
       }
     }
   },
@@ -1179,7 +1179,7 @@
       "tier": "execute",
       "args": {
         "role": "flightops",
-        "brief": "Assess the knock-on for the NW-KES rotation, crew FDP and spare options."
+        "brief": "Assess the knock-on for the AX-KES rotation, crew FDP and spare options."
       }
     }
   },
@@ -1219,7 +1219,7 @@
       "tier": "execute",
       "args": {
         "role": "passenger",
-        "brief": "Inform NWD214 passengers early, with PRM, unaccompanied minors and connections first."
+        "brief": "Inform ACX214 passengers early, with PRM, unaccompanied minors and connections first."
       }
     }
   },
@@ -1254,7 +1254,7 @@
     "wallTime": "2026-06-14T09:00:27.450Z",
     "payload": {
       "role": "maintenance",
-      "brief": "Get a B1 engineer to NW-KES, raise a work order and establish the damage and an estimate. Deferral and release are for certifying staff only.",
+      "brief": "Get a B1 engineer to AX-KES, raise a work order and establish the damage and an estimate. Deferral and release are for certifying staff only.",
       "parentAgentRunId": "ar-orch-1"
     }
   },
@@ -1270,7 +1270,7 @@
     "wallTime": "2026-06-14T09:00:27.540Z",
     "payload": {
       "role": "ground",
-      "brief": "Get NW-KES back on stand 32 safely and plan disembarkation if the tow is delayed.",
+      "brief": "Get AX-KES back on stand 32 safely and plan disembarkation if the tow is delayed.",
       "parentAgentRunId": "ar-orch-1"
     }
   },
@@ -1286,7 +1286,7 @@
     "wallTime": "2026-06-14T09:00:27.000Z",
     "payload": {
       "role": "flightops",
-      "brief": "Assess the knock-on for the NW-KES rotation, crew FDP and spare options.",
+      "brief": "Assess the knock-on for the AX-KES rotation, crew FDP and spare options.",
       "parentAgentRunId": "ar-orch-1"
     }
   },
@@ -1302,7 +1302,7 @@
     "wallTime": "2026-06-14T09:00:27.090Z",
     "payload": {
       "role": "passenger",
-      "brief": "Inform NWD214 passengers early, with PRM, unaccompanied minors and connections first.",
+      "brief": "Inform ACX214 passengers early, with PRM, unaccompanied minors and connections first.",
       "parentAgentRunId": "ar-orch-1"
     }
   },
@@ -1359,7 +1359,7 @@
       "tool": "get_aircraft_status",
       "system": "mne",
       "tier": "execute",
-      "args": { "tail": "NW-KES" }
+      "args": { "tail": "AX-KES" }
     }
   },
   {
@@ -1378,8 +1378,8 @@
       "toolCallId": "tc-7",
       "tool": "get_aircraft_status",
       "ok": true,
-      "resultPreview": "{\"tail\":\"NW-KES\",\"status\":\"unserviceable\",\"openDefects\":[\"def-1\"],\"stand\":\"32\"}",
-      "result": { "tail": "NW-KES", "status": "unserviceable", "openDefects": ["def-1"], "stand": "32" }
+      "resultPreview": "{\"tail\":\"AX-KES\",\"status\":\"unserviceable\",\"openDefects\":[\"def-1\"],\"stand\":\"32\"}",
+      "result": { "tail": "AX-KES", "status": "unserviceable", "openDefects": ["def-1"], "stand": "32" }
     }
   },
   {
@@ -1482,7 +1482,7 @@
       "tier": "execute",
       "args": {
         "engineerId": "eng-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "standId": "32",
         "requestId": "356c4222-0000-4000-8000-000000000009"
       }
@@ -1582,7 +1582,7 @@
       "system": "mne",
       "tier": "execute",
       "args": {
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "requestId": "781c0156-0000-4000-8000-000000000010"
@@ -1604,7 +1604,7 @@
       "op": "create",
       "after": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "assigned",
@@ -1697,8 +1697,8 @@
       "toolCallId": "tc-11",
       "tool": "get_stand_status",
       "ok": true,
-      "resultPreview": "{\"standId\":\"32\",\"kind\":\"contact\",\"occupiedByTail\":\"NW-KES\"}",
-      "result": { "standId": "32", "kind": "contact", "occupiedByTail": "NW-KES" }
+      "resultPreview": "{\"standId\":\"32\",\"kind\":\"contact\",\"occupiedByTail\":\"AX-KES\"}",
+      "result": { "standId": "32", "kind": "contact", "occupiedByTail": "AX-KES" }
     }
   },
   {
@@ -1717,7 +1717,7 @@
       "tool": "request_tow",
       "system": "airport",
       "tier": "execute",
-      "args": { "tail": "NW-KES", "standId": "32", "requestId": "781c0158-0000-4000-8000-000000000012" }
+      "args": { "tail": "AX-KES", "standId": "32", "requestId": "781c0158-0000-4000-8000-000000000012" }
     }
   },
   {
@@ -1755,7 +1755,7 @@
         "kind": "tow",
         "status": "queued",
         "ackAtMinute": 7,
-        "note": "Tow NW-KES back on stand 32 with a second tug and towbar"
+        "note": "Tow AX-KES back on stand 32 with a second tug and towbar"
       }
     }
   },
@@ -1920,7 +1920,7 @@
       "tool": "get_manifest_summary",
       "system": "pss",
       "tier": "execute",
-      "args": { "flight": "NWD214" }
+      "args": { "flight": "ACX214" }
     }
   },
   {
@@ -1939,9 +1939,9 @@
       "toolCallId": "tc-13",
       "tool": "get_manifest_summary",
       "ok": true,
-      "resultPreview": "{\"flight\":\"NWD214\",\"pax\":174,\"cohorts\":{\"general\":144,\"families\":11,\"prm\":3,\"unaccompanied_minors\":2,\"connections\":14}}",
+      "resultPreview": "{\"flight\":\"ACX214\",\"pax\":174,\"cohorts\":{\"general\":144,\"families\":11,\"prm\":3,\"unaccompanied_minors\":2,\"connections\":14}}",
       "result": {
-        "flight": "NWD214",
+        "flight": "ACX214",
         "pax": 174,
         "cohorts": { "general": 144, "families": 11, "prm": 3, "unaccompanied_minors": 2, "connections": 14 }
       }
@@ -2031,7 +2031,7 @@
         "id": "msg-1",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
+        "body": "ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
         "status": "draft",
         "aiDrafted": true
       }
@@ -2108,7 +2108,7 @@
         "id": "msg-1",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
+        "body": "ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
         "status": "draft",
         "aiDrafted": true
       },
@@ -2116,7 +2116,7 @@
         "id": "msg-1",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
+        "body": "ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
         "status": "pending_approval",
         "aiDrafted": true
       }
@@ -2141,10 +2141,10 @@
         "messageId": "msg-1",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
+        "body": "ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
         "requestId": "781c015c-0000-4000-8000-000000000016"
       },
-      "summary": "Send the first delay message to all 174 passengers on NWD214 (SMS).",
+      "summary": "Send the first delay message to all 174 passengers on ACX214 (SMS).",
       "reasoning": "Passengers have had no information since the aircraft stopped. The message states the cause in plain words, the next step (engineer inspection) and the time of the next update, and makes no compensation claims.",
       "expiresAtMinute": 15,
       "tier": "propose",
@@ -2197,8 +2197,8 @@
     "wallTime": "2026-06-14T09:00:52.180Z",
     "traceKey": "traces/run-demo-s01/93.json",
     "payload": {
-      "text": "Look at the rest of the NW-KES day and what a 45 to 180 minute delay does to it.",
-      "summary": "Look at the rest of the NW-KES day and what a 45 to 180 minute delay does to it."
+      "text": "Look at the rest of the AX-KES day and what a 45 to 180 minute delay does to it.",
+      "summary": "Look at the rest of the AX-KES day and what a 45 to 180 minute delay does to it."
     }
   },
   {
@@ -2217,7 +2217,7 @@
       "tool": "get_rotation",
       "system": "occ",
       "tier": "execute",
-      "args": { "tail": "NW-KES" }
+      "args": { "tail": "AX-KES" }
     }
   },
   {
@@ -2236,8 +2236,8 @@
       "toolCallId": "tc-17",
       "tool": "get_rotation",
       "ok": true,
-      "resultPreview": "{\"tail\":\"NW-KES\",\"sectors\":[\"NWD214\",\"NWD215\",\"NWD230\",\"NWD231\"]}",
-      "result": { "tail": "NW-KES", "sectors": ["NWD214", "NWD215", "NWD230", "NWD231"] }
+      "resultPreview": "{\"tail\":\"AX-KES\",\"sectors\":[\"ACX214\",\"ACX215\",\"ACX230\",\"ACX231\"]}",
+      "result": { "tail": "AX-KES", "sectors": ["ACX214", "ACX215", "ACX230", "ACX231"] }
     }
   },
   {
@@ -2256,7 +2256,7 @@
       "tool": "get_crew_fdp",
       "system": "crew",
       "tier": "execute",
-      "args": { "flight": "NWD214" }
+      "args": { "flight": "ACX214" }
     }
   },
   {
@@ -2314,11 +2314,11 @@
       "toolCallId": "tc-19",
       "tool": "find_spare_aircraft",
       "ok": true,
-      "resultPreview": "{\"candidates\":[{\"tail\":\"NW-LRM\",\"station\":\"MAN\",\"availableFromMinute\":35},{\"tail\":\"NW-PQT\",\"station\":\"LGW\",\"availableFromMinute\":90}]}",
+      "resultPreview": "{\"candidates\":[{\"tail\":\"AX-LRM\",\"station\":\"MAN\",\"availableFromMinute\":35},{\"tail\":\"AX-PQT\",\"station\":\"LGW\",\"availableFromMinute\":90}]}",
       "result": {
         "candidates": [
-          { "tail": "NW-LRM", "station": "MAN", "availableFromMinute": 35 },
-          { "tail": "NW-PQT", "station": "LGW", "availableFromMinute": 90 }
+          { "tail": "AX-LRM", "station": "MAN", "availableFromMinute": 35 },
+          { "tail": "AX-PQT", "station": "LGW", "availableFromMinute": 90 }
         ]
       }
     }
@@ -2444,8 +2444,8 @@
     "wallTime": "2026-06-14T09:01:00.360Z",
     "traceKey": "traces/run-demo-s01/102.json",
     "payload": {
-      "text": "NW-LRM on stand 34 frees up at 07:25Z: a swap would protect the PMI return if the inspection finds damage.",
-      "summary": "NW-LRM on stand 34 frees up at 07:25Z: a swap would protect the PMI return if the inspection finds damage."
+      "text": "AX-LRM on stand 34 frees up at 07:25Z: a swap would protect the PMI return if the inspection finds damage.",
+      "summary": "AX-LRM on stand 34 frees up at 07:25Z: a swap would protect the PMI return if the inspection finds damage."
     }
   },
   {
@@ -2479,7 +2479,7 @@
         "id": "msg-1",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
+        "body": "ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
         "status": "pending_approval",
         "aiDrafted": true
       },
@@ -2487,7 +2487,7 @@
         "id": "msg-1",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
+        "body": "ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 6.4,
@@ -2513,7 +2513,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 144,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0
       },
@@ -2521,7 +2521,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 144,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "firstInformedAtMinute": 6.4
@@ -2546,7 +2546,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Four families with young children"
@@ -2555,7 +2555,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Four families with young children",
@@ -2581,7 +2581,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Two WCHR, one WCHC"
@@ -2590,7 +2590,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Two WCHR, one WCHC",
@@ -2616,7 +2616,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Escorted by cabin crew"
@@ -2625,7 +2625,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Escorted by cabin crew",
@@ -2651,7 +2651,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-06-14T12:30:00Z",
@@ -2661,7 +2661,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "onwardDeadline": "2026-06-14T12:30:00Z",
@@ -2844,7 +2844,7 @@
         "kind": "tow",
         "status": "queued",
         "ackAtMinute": 7,
-        "note": "Tow NW-KES back on stand 32 with a second tug and towbar"
+        "note": "Tow AX-KES back on stand 32 with a second tug and towbar"
       },
       "after": {
         "id": "ht-1",
@@ -2852,7 +2852,7 @@
         "kind": "tow",
         "status": "acknowledged",
         "ackAtMinute": 7,
-        "note": "Tow NW-KES back on stand 32 with a second tug and towbar"
+        "note": "Tow AX-KES back on stand 32 with a second tug and towbar"
       }
     }
   },
@@ -3396,7 +3396,7 @@
       "system": "engineers",
       "entity": "engineers",
       "id": "eng-1",
-      "change": "Engineer on site at NW-KES"
+      "change": "Engineer on site at AX-KES"
     }
   },
   {
@@ -3453,7 +3453,7 @@
       "op": "update",
       "before": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "assigned",
@@ -3464,7 +3464,7 @@
       },
       "after": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "in_progress",
@@ -3507,11 +3507,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -3523,8 +3523,8 @@
         "etd": "2026-06-14T07:37:00Z"
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -3758,7 +3758,7 @@
       "op": "update",
       "before": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "in_progress",
@@ -3769,7 +3769,7 @@
       },
       "after": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "in_progress",
@@ -4007,7 +4007,7 @@
           "id": "MAN:tug",
           "patch": { "available": 0 }
         },
-        { "op": "info", "text": "Handler: no tug available for NW-KES before 07:50Z." }
+        { "op": "info", "text": "Handler: no tug available for AX-KES before 07:50Z." }
       ]
     }
   },
@@ -4058,11 +4058,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -4074,8 +4074,8 @@
         "etd": "2026-06-14T08:02:00Z"
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -4223,7 +4223,7 @@
       "args": {
         "station": "MAN",
         "count": 2,
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "requestId": "781c0177-0000-4000-8000-000000000022"
       }
     }
@@ -4293,7 +4293,7 @@
       "args": {
         "station": "MAN",
         "kind": "stairs",
-        "note": "Two sets of stairs to NW-KES for an apron disembark",
+        "note": "Two sets of stairs to AX-KES for an apron disembark",
         "requestId": "781c0178-0000-4000-8000-000000000023"
       }
     }
@@ -4317,7 +4317,7 @@
         "kind": "stairs",
         "status": "queued",
         "ackAtMinute": 22,
-        "note": "Two sets of stairs to NW-KES"
+        "note": "Two sets of stairs to AX-KES"
       }
     }
   },
@@ -4804,7 +4804,7 @@
         "kind": "stairs",
         "status": "queued",
         "ackAtMinute": 22,
-        "note": "Two sets of stairs to NW-KES"
+        "note": "Two sets of stairs to AX-KES"
       },
       "after": {
         "id": "ht-2",
@@ -4812,7 +4812,7 @@
         "kind": "stairs",
         "status": "acknowledged",
         "ackAtMinute": 22,
-        "note": "Two sets of stairs to NW-KES"
+        "note": "Two sets of stairs to AX-KES"
       }
     }
   },
@@ -4860,7 +4860,7 @@
       "op": "update",
       "before": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "in_progress",
@@ -4871,7 +4871,7 @@
       },
       "after": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "in_progress",
@@ -5012,7 +5012,7 @@
       "system": "airport",
       "entity": "resourceRequests",
       "id": "rr-stairs-1",
-      "change": "Stairs on site at NW-KES"
+      "change": "Stairs on site at AX-KES"
     }
   },
   {
@@ -5063,7 +5063,7 @@
         "kind": "stairs",
         "status": "acknowledged",
         "ackAtMinute": 22,
-        "note": "Two sets of stairs to NW-KES"
+        "note": "Two sets of stairs to AX-KES"
       },
       "after": {
         "id": "ht-2",
@@ -5071,7 +5071,7 @@
         "kind": "stairs",
         "status": "done",
         "ackAtMinute": 22,
-        "note": "Two sets of stairs to NW-KES"
+        "note": "Two sets of stairs to AX-KES"
       }
     }
   },
@@ -5212,7 +5212,7 @@
       "system": "airport",
       "entity": "resourceRequests",
       "id": "rr-bus-1",
-      "change": "Buses at NW-KES; disembark under way"
+      "change": "Buses at AX-KES; disembark under way"
     }
   },
   {
@@ -5360,7 +5360,7 @@
       "op": "update",
       "before": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact",
         "status": "in_progress",
@@ -5371,7 +5371,7 @@
       },
       "after": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact — finding: torque-link bracket cracked",
         "status": "in_progress",
@@ -5397,7 +5397,7 @@
       "op": "update",
       "before": {
         "id": "def-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "description": "Tug contact with nose landing gear during pushback (towbar shear pin failure)",
         "ata": "32",
         "status": "open",
@@ -5405,7 +5405,7 @@
       },
       "after": {
         "id": "def-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "description": "Nose landing gear torque-link bracket cracked after tug contact",
         "ata": "32",
         "status": "open",
@@ -5424,11 +5424,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -5440,8 +5440,8 @@
         "etd": "2026-06-14T08:27:00Z"
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -5465,11 +5465,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD215",
+      "id": "ACX215",
       "op": "update",
       "before": {
-        "flight": "NWD215",
-        "tail": "NW-KES",
+        "flight": "ACX215",
+        "tail": "AX-KES",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -5480,8 +5480,8 @@
         "pax": 168
       },
       "after": {
-        "flight": "NWD215",
-        "tail": "NW-KES",
+        "flight": "ACX215",
+        "tail": "AX-KES",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -5504,11 +5504,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD230",
+      "id": "ACX230",
       "op": "update",
       "before": {
-        "flight": "NWD230",
-        "tail": "NW-KES",
+        "flight": "ACX230",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-14T13:10:00Z",
@@ -5519,8 +5519,8 @@
         "pax": 151
       },
       "after": {
-        "flight": "NWD230",
-        "tail": "NW-KES",
+        "flight": "ACX230",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-14T13:10:00Z",
@@ -5543,11 +5543,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD231",
+      "id": "ACX231",
       "op": "update",
       "before": {
-        "flight": "NWD231",
-        "tail": "NW-KES",
+        "flight": "ACX231",
+        "tail": "AX-KES",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-14T14:50:00Z",
@@ -5558,8 +5558,8 @@
         "pax": 139
       },
       "after": {
-        "flight": "NWD231",
-        "tail": "NW-KES",
+        "flight": "ACX231",
+        "tail": "AX-KES",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-14T14:50:00Z",
@@ -5682,8 +5682,8 @@
     "wallTime": "2026-06-14T09:04:45.540Z",
     "traceKey": "traces/run-demo-s01/202.json",
     "payload": {
-      "text": "Rectification is about 150 minutes: NW-KES will not make NWD214 before the 3-hour threshold. Reporting to the orchestrator so it can put the alternatives to the Duty Manager.",
-      "summary": "Rectification is about 150 minutes: NW-KES will not make NWD214 before the 3-hour threshold."
+      "text": "Rectification is about 150 minutes: AX-KES will not make ACX214 before the 3-hour threshold. Reporting to the orchestrator so it can put the alternatives to the Duty Manager.",
+      "summary": "Rectification is about 150 minutes: AX-KES will not make ACX214 before the 3-hour threshold."
     }
   },
   {
@@ -5702,7 +5702,7 @@
       "tool": "get_open_defects",
       "system": "mne",
       "tier": "execute",
-      "args": { "tail": "NW-KES" }
+      "args": { "tail": "AX-KES" }
     }
   },
   {
@@ -5855,8 +5855,8 @@
     "wallTime": "2026-06-14T09:05:01.450Z",
     "traceKey": "traces/run-demo-s01/208.json",
     "payload": {
-      "text": "Three real alternatives: swap to NW-LRM, hold for rectification, or cancel. The Duty Manager decides. Swap is fastest and keeps the PMI return; holding crosses the 3-hour threshold for 174 passengers.",
-      "summary": "Three real alternatives: swap to NW-LRM, hold for rectification, or cancel. The Duty Manager decides."
+      "text": "Three real alternatives: swap to AX-LRM, hold for rectification, or cancel. The Duty Manager decides. Swap is fastest and keeps the PMI return; holding crosses the 3-hour threshold for 174 passengers.",
+      "summary": "Three real alternatives: swap to AX-LRM, hold for rectification, or cancel. The Duty Manager decides."
     }
   },
   {
@@ -5874,7 +5874,7 @@
       "tool": "request_decision",
       "system": "runtime",
       "tier": "propose",
-      "args": { "question": "How should NWD214 operate?" }
+      "args": { "question": "How should ACX214 operate?" }
     }
   },
   {
@@ -5891,13 +5891,13 @@
       "approvalId": "ap-decision-1",
       "toolCallId": "tc-26",
       "tool": "request_decision",
-      "args": { "question": "How should NWD214 operate?", "flights": ["NWD214", "NWD215"] },
-      "summary": "Choose how NWD214 operates: swap to spare NW-LRM (recommended), hold for rectification, or cancel.",
-      "reasoning": "The engineer’s finding needs about 150 minutes of rectification (a provisional reading until the certifying engineer decides). NW-LRM is free on stand 34 from 07:25Z, crew FDP has 10 h left, and a swap departs about 55 minutes late. Holding projects 178 minutes, at the EU261 3-hour threshold for 174 passengers. Cancelling triggers rebooking on the evening flight.",
+      "args": { "question": "How should ACX214 operate?", "flights": ["ACX214", "ACX215"] },
+      "summary": "Choose how ACX214 operates: swap to spare AX-LRM (recommended), hold for rectification, or cancel.",
+      "reasoning": "The engineer’s finding needs about 150 minutes of rectification (a provisional reading until the certifying engineer decides). AX-LRM is free on stand 34 from 07:25Z, crew FDP has 10 h left, and a swap departs about 55 minutes late. Holding projects 178 minutes, at the EU261 3-hour threshold for 174 passengers. Cancelling triggers rebooking on the evening flight.",
       "options": [
         {
           "id": "opt-swap",
-          "label": "Swap NWD214/215 to spare NW-LRM (stand 34)",
+          "label": "Swap ACX214/215 to spare AX-LRM (stand 34)",
           "metrics": {
             "timeToDepartureMin": 25,
             "costEur": 13300,
@@ -5906,16 +5906,16 @@
             "constraints": ["Spare free from 07:25Z", "Crew FDP OK (10 h left)"]
           },
           "recommended": true,
-          "unresolvedChecks": ["Crew for NW-LRM confirmed by crew control"],
+          "unresolvedChecks": ["Crew for AX-LRM confirmed by crew control"],
           "approvalScope": {
-            "authorises": "Choosing “Swap NWD214/215 to spare NW-LRM” as the plan. Each action it leads to is proposed and approved separately.",
+            "authorises": "Choosing “Swap ACX214/215 to spare AX-LRM” as the plan. Each action it leads to is proposed and approved separately.",
             "doesNotAuthorise": ["Executing the swap: OCC confirms and executes it"]
           },
           "dataAsOfMinute": 28.7
         },
         {
           "id": "opt-hold",
-          "label": "Hold NW-KES for rectification",
+          "label": "Hold AX-KES for rectification",
           "metrics": {
             "timeToDepartureMin": 150,
             "costEur": 114400,
@@ -5929,7 +5929,7 @@
         },
         {
           "id": "opt-cancel",
-          "label": "Cancel NWD214 and rebook on NWD218",
+          "label": "Cancel ACX214 and rebook on ACX218",
           "metrics": {
             "timeToDepartureMin": 610,
             "costEur": 61800,
@@ -6087,7 +6087,7 @@
       "op": "update",
       "before": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact — finding: torque-link bracket cracked",
         "status": "in_progress",
@@ -6098,7 +6098,7 @@
       },
       "after": {
         "id": "wo-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "defectId": "def-1",
         "task": "Inspect nose landing gear after tug contact — finding: torque-link bracket cracked",
         "status": "awaiting_certification",
@@ -6152,7 +6152,7 @@
       "tool": "draft_occurrence_report",
       "system": "record",
       "tier": "execute",
-      "args": { "kind": "occurrence", "tail": "NW-KES" }
+      "args": { "kind": "occurrence", "tail": "AX-KES" }
     }
   },
   {
@@ -6171,7 +6171,7 @@
       "after": {
         "id": "rep-1",
         "kind": "occurrence",
-        "body": "DRAFT for a named reporter. On 14 June at 06:52Z during pushback of NW-KES (NWD214, MAN stand 32) the towbar shear pin failed and the tug contacted the nose landing gear. No injuries. Passengers disembarked on the apron by stairs and bus. Inspection found a cracked torque-link bracket; the aircraft is out of service pending rectification.",
+        "body": "DRAFT for a named reporter. On 14 June at 06:52Z during pushback of AX-KES (ACX214, MAN stand 32) the towbar shear pin failed and the tug contacted the nose landing gear. No injuries. Passengers disembarked on the apron by stairs and bus. Inspection found a cracked torque-link bracket; the aircraft is out of service pending rectification.",
         "status": "draft",
         "forHumanReporter": true,
         "aiDrafted": true,
@@ -6328,8 +6328,8 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-LRM",
-      "change": "Spare NW-LRM available on stand 34"
+      "id": "AX-LRM",
+      "change": "Spare AX-LRM available on stand 34"
     }
   },
   {
@@ -6349,14 +6349,14 @@
         "id": "34",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-LRM",
+        "occupiedByTail": "AX-LRM",
         "occupiedUntilMinute": 35
       },
       "after": {
         "id": "34",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-LRM",
+        "occupiedByTail": "AX-LRM",
         "occupiedUntilMinute": 35
       }
     }
@@ -6536,7 +6536,7 @@
       "tool": "propose_swap",
       "system": "occ",
       "tier": "propose",
-      "args": { "fromTail": "NW-KES", "toTail": "NW-LRM", "flights": ["NWD214", "NWD215"] }
+      "args": { "fromTail": "AX-KES", "toTail": "AX-LRM", "flights": ["ACX214", "ACX215"] }
     }
   },
   {
@@ -6554,9 +6554,9 @@
       "approvalId": "ap-swap-1",
       "toolCallId": "tc-28",
       "tool": "propose_swap",
-      "args": { "fromTail": "NW-KES", "toTail": "NW-LRM", "flights": ["NWD214", "NWD215"] },
-      "summary": "Send the swap request to OCC: NW-LRM takes over NWD214 and NWD215 from NW-KES.",
-      "reasoning": "The Duty Manager chose the swap option. NW-LRM is on stand 34 and free from 07:25Z; the crew keep their duty margin. OCC confirms and executes the swap.",
+      "args": { "fromTail": "AX-KES", "toTail": "AX-LRM", "flights": ["ACX214", "ACX215"] },
+      "summary": "Send the swap request to OCC: AX-LRM takes over ACX214 and ACX215 from AX-KES.",
+      "reasoning": "The Duty Manager chose the swap option. AX-LRM is on stand 34 and free from 07:25Z; the crew keep their duty margin. OCC confirms and executes the swap.",
       "tier": "propose",
       "unresolvedChecks": [
         "Spare aircraft serviceability confirmed by maintenance control",
@@ -6572,7 +6572,7 @@
       },
       "dataAsOfMinute": 35,
       "assumptions": [
-        { "key": "spareAvailableFromMinute", "value": 35, "source": "occ/spares/NW-LRM#availableFromMinute" }
+        { "key": "spareAvailableFromMinute", "value": 35, "source": "occ/spares/AX-LRM#availableFromMinute" }
       ]
     }
   },
@@ -6607,9 +6607,9 @@
       "op": "create",
       "after": {
         "id": "swap-1",
-        "fromTail": "NW-KES",
-        "toTail": "NW-LRM",
-        "flights": ["NWD214", "NWD215"],
+        "fromTail": "AX-KES",
+        "toTail": "AX-LRM",
+        "flights": ["ACX214", "ACX215"],
         "status": "requested",
         "approvedBy": { "kind": "human", "name": "Sam Okafor", "roleTitle": "Duty Manager" },
         "requestedAtMinute": 36.95,
@@ -6634,13 +6634,13 @@
       "toolCallId": "tc-28",
       "tool": "propose_swap",
       "ok": true,
-      "resultPreview": "{\"swap\":{\"id\":\"swap-1\",\"fromTail\":\"NW-KES\",\"toTail\":\"NW-LRM\",\"flights\":[\"NWD214\",\"NWD215\"],\"status\":\"requested\"},\"note\":\"Swap request sent to OCC; OCC confirms and executes it (expected at minute 41.95).\",\"expectedDepartureMinute\":60,\"expectedDelayMin\":58}",
+      "resultPreview": "{\"swap\":{\"id\":\"swap-1\",\"fromTail\":\"AX-KES\",\"toTail\":\"AX-LRM\",\"flights\":[\"ACX214\",\"ACX215\"],\"status\":\"requested\"},\"note\":\"Swap request sent to OCC; OCC confirms and executes it (expected at minute 41.95).\",\"expectedDepartureMinute\":60,\"expectedDelayMin\":58}",
       "result": {
         "swap": {
           "id": "swap-1",
-          "fromTail": "NW-KES",
-          "toTail": "NW-LRM",
-          "flights": ["NWD214", "NWD215"],
+          "fromTail": "AX-KES",
+          "toTail": "AX-LRM",
+          "flights": ["ACX214", "ACX215"],
           "status": "requested"
         },
         "note": "Swap request sent to OCC; OCC confirms and executes it (expected at minute 41.95).",
@@ -6665,7 +6665,7 @@
       "after": {
         "id": "tl-6",
         "atMinute": 36.97,
-        "text": "Duty Manager chose the swap to NW-LRM; swap request sent to OCC",
+        "text": "Duty Manager chose the swap to AX-LRM; swap request sent to OCC",
         "source": "orchestrator"
       }
     }
@@ -6791,8 +6791,8 @@
     "wallTime": "2026-06-14T09:06:10.000Z",
     "traceKey": "traces/run-demo-s01/238.json",
     "payload": {
-      "text": "Passengers are in the terminal; request stand 34 for boarding on NW-LRM and release the buses.",
-      "summary": "Passengers are in the terminal; request stand 34 for boarding on NW-LRM and release the buses."
+      "text": "Passengers are in the terminal; request stand 34 for boarding on AX-LRM and release the buses.",
+      "summary": "Passengers are in the terminal; request stand 34 for boarding on AX-LRM and release the buses."
     }
   },
   {
@@ -6811,7 +6811,7 @@
       "tool": "request_stand",
       "system": "airport",
       "tier": "execute",
-      "args": { "standId": "34", "tail": "NW-LRM", "requestId": "781c017e-0000-4000-8000-000000000029" }
+      "args": { "standId": "34", "tail": "AX-LRM", "requestId": "781c017e-0000-4000-8000-000000000029" }
     }
   },
   {
@@ -6830,7 +6830,7 @@
       "after": {
         "id": "sr-1",
         "standId": "34",
-        "tail": "NW-LRM",
+        "tail": "AX-LRM",
         "status": "requested",
         "confirmAtMinute": 40
       }
@@ -6919,7 +6919,7 @@
         "id": "msg-2",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
+        "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
         "status": "draft",
         "aiDrafted": true
       }
@@ -6986,7 +6986,7 @@
         "id": "msg-2",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
+        "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
         "status": "draft",
         "aiDrafted": true
       },
@@ -6994,7 +6994,7 @@
         "id": "msg-2",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
+        "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
         "status": "pending_approval",
         "aiDrafted": true
       }
@@ -7019,7 +7019,7 @@
         "messageId": "msg-2",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
+        "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
         "requestId": "781c0195-0000-4000-8000-000000000031"
       },
       "summary": "Tell all 174 passengers about the aircraft change and the new departure time (about 07:50).",
@@ -7313,7 +7313,7 @@
       "system": "airport",
       "entity": "standRequests",
       "id": "sr-1",
-      "change": "Stand 34 confirmed for NW-LRM"
+      "change": "Stand 34 confirmed for AX-LRM"
     }
   },
   {
@@ -7332,14 +7332,14 @@
       "before": {
         "id": "sr-1",
         "standId": "34",
-        "tail": "NW-LRM",
+        "tail": "AX-LRM",
         "status": "requested",
         "confirmAtMinute": 40
       },
       "after": {
         "id": "sr-1",
         "standId": "34",
-        "tail": "NW-LRM",
+        "tail": "AX-LRM",
         "status": "confirmed",
         "confirmAtMinute": 40
       }
@@ -7388,7 +7388,7 @@
         "messageId": "msg-2",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34 (boarding from 07:30). Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30."
+        "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34 (boarding from 07:30). Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30."
       },
       "reason": "Add the boarding time.",
       "decidedBy": { "kind": "human", "name": "Sam Okafor", "roleTitle": "Duty Manager" }
@@ -7411,7 +7411,7 @@
         "id": "msg-2",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
+        "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
         "status": "pending_approval",
         "aiDrafted": true
       },
@@ -7419,7 +7419,7 @@
         "id": "msg-2",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34 (boarding from 07:30). Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
+        "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34 (boarding from 07:30). Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 41.3,
@@ -7460,7 +7460,7 @@
       "system": "occ",
       "entity": "swaps",
       "id": "swap-1",
-      "change": "OCC confirmed and executed the swap: NWD214/215 re-tailed to NW-LRM"
+      "change": "OCC confirmed and executed the swap: ACX214/215 re-tailed to AX-LRM"
     }
   },
   {
@@ -7478,9 +7478,9 @@
       "op": "update",
       "before": {
         "id": "swap-1",
-        "fromTail": "NW-KES",
-        "toTail": "NW-LRM",
-        "flights": ["NWD214", "NWD215"],
+        "fromTail": "AX-KES",
+        "toTail": "AX-LRM",
+        "flights": ["ACX214", "ACX215"],
         "status": "requested",
         "approvedBy": { "kind": "human", "name": "Sam Okafor", "roleTitle": "Duty Manager" },
         "requestedAtMinute": 36.95,
@@ -7488,9 +7488,9 @@
       },
       "after": {
         "id": "swap-1",
-        "fromTail": "NW-KES",
-        "toTail": "NW-LRM",
-        "flights": ["NWD214", "NWD215"],
+        "fromTail": "AX-KES",
+        "toTail": "AX-LRM",
+        "flights": ["ACX214", "ACX215"],
         "status": "executed",
         "approvedBy": { "kind": "human", "name": "Sam Okafor", "roleTitle": "Duty Manager" },
         "requestedAtMinute": 36.95,
@@ -7511,15 +7511,15 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-LRM",
+      "id": "AX-LRM",
       "op": "update",
-      "before": { "tail": "NW-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35 },
+      "before": { "tail": "AX-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35 },
       "after": {
-        "tail": "NW-LRM",
+        "tail": "AX-LRM",
         "type": "A320",
         "station": "MAN",
         "availableFromMinute": 35,
-        "assignedTo": "NWD214"
+        "assignedTo": "ACX214"
       },
       "causedBySeq": 232
     }
@@ -7535,11 +7535,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -7551,8 +7551,8 @@
         "etd": "2026-06-14T09:50:00Z"
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -7577,11 +7577,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD215",
+      "id": "ACX215",
       "op": "update",
       "before": {
-        "flight": "NWD215",
-        "tail": "NW-KES",
+        "flight": "ACX215",
+        "tail": "AX-KES",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -7592,8 +7592,8 @@
         "pax": 168
       },
       "after": {
-        "flight": "NWD215",
-        "tail": "NW-LRM",
+        "flight": "ACX215",
+        "tail": "AX-LRM",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -7617,11 +7617,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD230",
+      "id": "ACX230",
       "op": "update",
       "before": {
-        "flight": "NWD230",
-        "tail": "NW-KES",
+        "flight": "ACX230",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-14T13:10:00Z",
@@ -7632,8 +7632,8 @@
         "pax": 151
       },
       "after": {
-        "flight": "NWD230",
-        "tail": "NW-KES",
+        "flight": "ACX230",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-14T13:10:00Z",
@@ -7657,11 +7657,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD231",
+      "id": "ACX231",
       "op": "update",
       "before": {
-        "flight": "NWD231",
-        "tail": "NW-KES",
+        "flight": "ACX231",
+        "tail": "AX-KES",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-14T14:50:00Z",
@@ -7672,8 +7672,8 @@
         "pax": 139
       },
       "after": {
-        "flight": "NWD231",
-        "tail": "NW-KES",
+        "flight": "ACX231",
+        "tail": "AX-KES",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-14T14:50:00Z",
@@ -7926,7 +7926,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Four families with young children",
@@ -7936,7 +7936,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "care_issued",
         "careIssued": 11,
         "notes": "Four families with young children",
@@ -7985,7 +7985,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Two WCHR, one WCHC",
@@ -7995,7 +7995,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "care_issued",
         "careIssued": 3,
         "notes": "Two WCHR, one WCHC",
@@ -8044,7 +8044,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Escorted by cabin crew",
@@ -8054,7 +8054,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "care_issued",
         "careIssued": 2,
         "notes": "Escorted by cabin crew",
@@ -8322,7 +8322,7 @@
       "tool": "record_engineering_decision",
       "system": "mne",
       "tier": "propose",
-      "args": { "tail": "NW-KES", "decision": "rectify" }
+      "args": { "tail": "AX-KES", "decision": "rectify" }
     }
   },
   {
@@ -8341,11 +8341,11 @@
       "toolCallId": "tc-33",
       "tool": "record_engineering_decision",
       "args": {
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "decision": "rectify",
         "rationale": "Cracked torque-link bracket; replace before next flight."
       },
-      "summary": "Record the certifying engineer’s decision: rectify NW-KES (replace the torque-link bracket).",
+      "summary": "Record the certifying engineer’s decision: rectify AX-KES (replace the torque-link bracket).",
       "reasoning": "Only certifying staff may decide rectify, defer or release. This records Ada Pennick’s decision so the work order and stores request can proceed.",
       "tier": "propose",
       "unresolvedChecks": ["Inspection completed and signed by certifying staff"],
@@ -8487,8 +8487,8 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
-      "change": "Boarding NWD214 on NW-LRM at stand 34"
+      "id": "ACX214",
+      "change": "Boarding ACX214 on AX-LRM at stand 34"
     }
   },
   {
@@ -8502,11 +8502,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -8518,8 +8518,8 @@
         "etd": "2026-06-14T07:50:00Z"
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -8571,7 +8571,7 @@
       "op": "create",
       "after": {
         "id": "ed-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "decision": "rectify",
         "decidedBy": { "kind": "human", "name": "Ada Pennick", "roleTitle": "Certifying Engineer (B1)" },
         "atMinute": 47.5,
@@ -8615,7 +8615,7 @@
       "op": "create",
       "after": {
         "id": "tlg-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "text": "NLG torque-link bracket found cracked following tug contact on pushback. Rectification decided by the certifying engineer; replacement bracket requested from stores. (Draft for certifying engineer.)",
         "status": "draft",
         "aiDrafted": true
@@ -8931,9 +8931,9 @@
     "payload": {
       "role": "ground",
       "report": {
-        "summary": "Passengers disembarked by stairs and bus while no tug was available; stand 34 confirmed for NW-LRM.",
+        "summary": "Passengers disembarked by stairs and bus while no tug was available; stand 34 confirmed for AX-LRM.",
         "actionsTaken": ["Tow requested", "Two buses and stairs", "Stand 34 requested and confirmed"],
-        "openIssues": ["Tow NW-KES to the hangar when a tug is free"],
+        "openIssues": ["Tow AX-KES to the hangar when a tug is free"],
         "recommendations": ["Keep one tug in reserve during the morning wave"],
         "citations": []
       }
@@ -8953,14 +8953,14 @@
     "payload": {
       "role": "flightops",
       "report": {
-        "summary": "NWD214/215 swapped to NW-LRM; NWD230/231 protected on the original schedule.",
+        "summary": "ACX214/215 swapped to AX-LRM; ACX230/231 protected on the original schedule.",
         "actionsTaken": [
           "Rotation and FDP checked",
           "Spare identified",
           "Swap request sent to OCC after the Duty Manager’s decision; OCC executed it"
         ],
         "openIssues": [],
-        "recommendations": ["Plan NW-KES back into the rotation after rectification"],
+        "recommendations": ["Plan AX-KES back into the rotation after rectification"],
         "citations": []
       }
     }
@@ -9192,8 +9192,8 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
-      "change": "NWD214 pushed back on NW-LRM"
+      "id": "ACX214",
+      "change": "ACX214 pushed back on AX-LRM"
     }
   },
   {
@@ -9207,11 +9207,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -9223,8 +9223,8 @@
         "etd": "2026-06-14T07:50:00Z"
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -9253,7 +9253,7 @@
       "after": {
         "id": "tl-7",
         "atMinute": 54.2,
-        "text": "NWD214 departed on NW-LRM, 58 minutes late",
+        "text": "ACX214 departed on AX-LRM, 58 minutes late",
         "source": "record"
       }
     }
@@ -9404,7 +9404,7 @@
     "payload": {
       "role": "maintenance",
       "report": {
-        "summary": "Cracked torque-link bracket found on NW-KES; rectification decided and recorded by the certifying engineer.",
+        "summary": "Cracked torque-link bracket found on AX-KES; rectification decided and recorded by the certifying engineer.",
         "actionsTaken": [
           "Engineer paged at minute 3.5",
           "Work order wo-1",
@@ -9581,7 +9581,7 @@
             {
               "id": "tl-1",
               "atMinute": 2.4,
-              "text": "Incident opened: NW-KES nose-gear contact on pushback (NWD214)",
+              "text": "Incident opened: AX-KES nose-gear contact on pushback (ACX214)",
               "source": "orchestrator"
             },
             {
@@ -9611,13 +9611,13 @@
             {
               "id": "tl-6",
               "atMinute": 36.97,
-              "text": "Duty Manager chose the swap to NW-LRM; swap request sent to OCC",
+              "text": "Duty Manager chose the swap to AX-LRM; swap request sent to OCC",
               "source": "orchestrator"
             },
             {
               "id": "tl-7",
               "atMinute": 54.2,
-              "text": "NWD214 departed on NW-LRM, 58 minutes late",
+              "text": "ACX214 departed on AX-LRM, 58 minutes late",
               "source": "record"
             }
           ],
@@ -9675,7 +9675,7 @@
               "id": "msg-1",
               "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
               "channel": "sms",
-              "body": "NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
+              "body": "ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.",
               "status": "sent",
               "aiDrafted": true,
               "sentAtMinute": 6.4,
@@ -9685,7 +9685,7 @@
               "id": "msg-2",
               "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
               "channel": "sms",
-              "body": "NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34 (boarding from 07:30). Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
+              "body": "ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34 (boarding from 07:30). Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.",
               "status": "sent",
               "aiDrafted": true,
               "sentAtMinute": 41.3,
@@ -9696,7 +9696,7 @@
             {
               "id": "rep-1",
               "kind": "occurrence",
-              "body": "DRAFT for a named reporter. On 14 June at 06:52Z during pushback of NW-KES (NWD214, MAN stand 32) the towbar shear pin failed and the tug contacted the nose landing gear. No injuries. Passengers disembarked on the apron by stairs and bus. Inspection found a cracked torque-link bracket; the aircraft is out of service pending rectification.",
+              "body": "DRAFT for a named reporter. On 14 June at 06:52Z during pushback of AX-KES (ACX214, MAN stand 32) the towbar shear pin failed and the tug contacted the nose landing gear. No injuries. Passengers disembarked on the apron by stairs and bus. Inspection found a cracked torque-link bracket; the aircraft is out of service pending rectification.",
               "status": "draft",
               "forHumanReporter": true,
               "aiDrafted": true,
@@ -9895,8 +9895,8 @@
     "wallTime": "2026-06-14T09:09:41.540Z",
     "traceKey": "traces/run-demo-s01/328.json",
     "payload": {
-      "text": "All specialists have reported; NWD214 is airborne on NW-LRM and the open issues are with named humans.",
-      "summary": "All specialists have reported; NWD214 is airborne on NW-LRM and the open issues are with named humans."
+      "text": "All specialists have reported; ACX214 is airborne on AX-LRM and the open issues are with named humans.",
+      "summary": "All specialists have reported; ACX214 is airborne on AX-LRM and the open issues are with named humans."
     }
   },
   {
@@ -9912,13 +9912,13 @@
     "payload": {
       "role": "orchestrator",
       "report": {
-        "summary": "NWD214 departed 58 minutes late on spare NW-LRM after the Duty Manager chose the swap and OCC executed it; NW-KES is out of service for the rectification the certifying engineer decided. Passengers informed at minute 6.4.",
+        "summary": "ACX214 departed 58 minutes late on spare AX-LRM after the Duty Manager chose the swap and OCC executed it; AX-KES is out of service for the rectification the certifying engineer decided. Passengers informed at minute 6.4.",
         "actionsTaken": [
           "Incident opened and specialists briefed in parallel",
           "Options decision put to the Duty Manager",
           "Evidence pack exported"
         ],
-        "openIssues": ["Occurrence report to be filed by a named person", "NW-KES bracket from stores"],
+        "openIssues": ["Occurrence report to be filed by a named person", "AX-KES bracket from stores"],
         "recommendations": ["Review tug reserve policy for the morning wave"],
         "citations": [],
         "recommendationDetails": [

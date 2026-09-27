@@ -9,13 +9,13 @@ import { argsValid, call, fixtureHarness, okData } from './_testing';
 describe('maintenance tools', () => {
   it('get_aircraft_status / get_open_defects read M&E; unknown tails fail', async () => {
     const h = await fixtureHarness();
-    const s = okData(await call(h, 'get_aircraft_status', { tail: 'NW-FXA' }));
+    const s = okData(await call(h, 'get_aircraft_status', { tail: 'AX-FXA' }));
     expect(s.aircraft.status).toBe('unserviceable');
     expect(s.defects).toHaveLength(1);
-    expect((await call(h, 'get_aircraft_status', { tail: 'NW-ZZZ' })).ok).toBe(false);
+    expect((await call(h, 'get_aircraft_status', { tail: 'AX-ZZZ' })).ok).toBe(false);
     expect(okData(await call(h, 'get_open_defects', {})).count).toBe(1);
     expect(argsValid('get_aircraft_status', { tail: 'G-ABCD' }).ok).toBe(false);
-    expect(argsValid('get_aircraft_status', { tail: 'NW-FXA', extra: 1 }).ok).toBe(false);
+    expect(argsValid('get_aircraft_status', { tail: 'AX-FXA', extra: 1 }).ok).toBe(false);
   });
 
   it('search_mel returns the MEL chunk with a verbatim citation', async () => {
@@ -37,7 +37,7 @@ describe('maintenance tools', () => {
     const h = await fixtureHarness();
     const wo = okData(
       await call(h, 'create_work_order', {
-        tail: 'NW-FXA',
+        tail: 'AX-FXA',
         defectId: 'DEF-001',
         task: 'sensor_troubleshooting',
         estimatedDurationMin: 20,
@@ -54,7 +54,7 @@ describe('maintenance tools', () => {
     expect(
       (
         await call(h, 'create_work_order', {
-          tail: 'NW-FXA',
+          tail: 'AX-FXA',
           task: 'rewire',
           estimatedDurationMin: 20,
         }).catch((e) => e)
@@ -65,7 +65,7 @@ describe('maintenance tools', () => {
   it('draft_techlog_entry needs an approval; stored AI-drafted and approved', async () => {
     const h = await fixtureHarness();
     const input = {
-      tail: 'NW-FXA',
+      tail: 'AX-FXA',
       defectId: 'DEF-001',
       text: 'FWD CARGO DOOR caution intermittent; door visually closed.',
     };
@@ -77,7 +77,7 @@ describe('maintenance tools', () => {
   it('record_engineering_decision: approver becomes decidedBy; defer_mel needs certifying staff', async () => {
     const h = await fixtureHarness();
     const defer = {
-      tail: 'NW-FXA',
+      tail: 'AX-FXA',
       decision: 'defer_mel',
       melItem: '52-30-04',
       rationale: 'Indication fault only; door verified locked.',
@@ -89,7 +89,7 @@ describe('maintenance tools', () => {
     const ok = okData(await call(h, 'record_engineering_decision', defer, { approvedBy: CERTIFYING }));
     expect(ok.decision).toMatchObject({ decision: 'defer_mel', decidedBy: CERTIFYING });
     expect(h.state.mne.defects['DEF-001']).toMatchObject({ status: 'deferred', melItem: '52-30-04' });
-    expect(h.state.mne.aircraft['NW-FXA'].status).toBe('serviceable');
+    expect(h.state.mne.aircraft['AX-FXA'].status).toBe('serviceable');
   });
 
   it('forbidden defer_defect / release_aircraft refuse an agent even if the runtime let them through', async () => {
@@ -97,7 +97,7 @@ describe('maintenance tools', () => {
     expect(await call(h, 'defer_defect', { defectId: 'DEF-001', melItem: '52-30-04' })).toMatchObject({
       ok: false,
     });
-    expect(await call(h, 'release_aircraft', { tail: 'NW-FXA' })).toMatchObject({ ok: false });
+    expect(await call(h, 'release_aircraft', { tail: 'AX-FXA' })).toMatchObject({ ok: false });
     expect(h.state.mne.defects['DEF-001'].status).toBe('open');
   });
 

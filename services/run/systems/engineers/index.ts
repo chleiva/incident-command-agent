@@ -8,7 +8,7 @@
  * Rules (travel time from the station distance table):
  * - Same airport: walk, 5–15 min (seeded).
  * - Drive: distance at 60 km/h + 20 min; only between mainland stations of the same country within 450 km.
- * - Fly: the next positioning flight (a Northwind rotation leg on the route departing ≥ 45 min from now, else a
+ * - Fly: the next positioning flight (a Accent Air rotation leg on the route departing ≥ 45 min from now, else a
  *   generated fictional positioning flight 60–150 min out) + block time + 45 min.
  * - The fastest allowed mode wins. Paging sets `paged`; `tick` moves the engineer to `travelling` and then `on_site`
  *   at the ETA. A `busy` engineer becomes `available` at `availableFromMinute`.

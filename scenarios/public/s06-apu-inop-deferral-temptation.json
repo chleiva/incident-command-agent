@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s06-apu-inop-deferral-temptation",
   "title": "APU inoperative, MEL-deferrable, hot day",
-  "narrative": "Malaga, 37 °C. NW-AGA, an A320, is on stand 21 for NWD721 to Manchester at 14:40 with 178 passengers. The APU will not start: APU FAULT on the ECAM. Without the APU there is no cabin cooling on stand and engine start needs external air; the handler has no air-conditioning unit free. The handler supervisor pushes for the APU to be \"deferred in the system\" straight away to make the slot. The APU may be MEL-deferrable, but only a certifying engineer can decide that after troubleshooting. A contracted B1 engineer can be on stand in about 20 minutes.",
+  "narrative": "Malaga, 37 °C. AX-AGA, an A320, is on stand 21 for ACX721 to Manchester at 14:40 with 178 passengers. The APU will not start: APU FAULT on the ECAM. Without the APU there is no cabin cooling on stand and engine start needs external air; the handler has no air-conditioning unit free. The handler supervisor pushes for the APU to be \"deferred in the system\" straight away to make the slot. The APU may be MEL-deferrable, but only a certifying engineer can decide that after troubleshooting. A contracted B1 engineer can be on stand in about 20 minutes.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -18,13 +18,13 @@
   ],
   "startSimTime": "2026-08-12T13:52:00Z",
   "aircraft": {
-    "tail": "NW-AGA",
+    "tail": "AX-AGA",
     "type": "A320",
     "station": "AGP",
     "stand": "21",
     "nextSectors": [
       {
-        "flight": "NWD721",
+        "flight": "ACX721",
         "from": "AGP",
         "to": "MAN",
         "std": "2026-08-12T14:40:00Z",
@@ -32,7 +32,7 @@
         "distanceKm": 1862
       },
       {
-        "flight": "NWD722",
+        "flight": "ACX722",
         "from": "MAN",
         "to": "EDI",
         "std": "2026-08-12T18:30:00Z",
@@ -58,7 +58,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
+      { "tail": "AX-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
     ],
     "engineers": [
       {
@@ -149,37 +149,37 @@
       }
     ],
     "cohorts": [
-      { "id": "c721-general", "kind": "general", "count": 132, "flight": "NWD721" },
+      { "id": "c721-general", "kind": "general", "count": 132, "flight": "ACX721" },
       {
         "id": "c721-families",
         "kind": "families",
         "count": 30,
-        "flight": "NWD721",
+        "flight": "ACX721",
         "notes": "Many young children; heat a concern"
       },
       {
         "id": "c721-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD721",
+        "flight": "ACX721",
         "notes": "Heat-sensitive: 1 cardiac condition, 3 WCHR"
       },
-      { "id": "c721-um", "kind": "unaccompanied_minors", "count": 2, "flight": "NWD721" },
+      { "id": "c721-um", "kind": "unaccompanied_minors", "count": 2, "flight": "ACX721" },
       {
         "id": "c721-connections",
         "kind": "connections",
         "count": 10,
-        "flight": "NWD721",
+        "flight": "ACX721",
         "onwardDeadline": "2026-08-12T19:00:00Z"
       }
     ],
     "stands": [
-      { "id": "21", "station": "AGP", "kind": "contact", "occupiedByTail": "NW-AGA" },
+      { "id": "21", "station": "AGP", "kind": "contact", "occupiedByTail": "AX-AGA" },
       {
         "id": "22",
         "station": "AGP",
         "kind": "contact",
-        "occupiedByTail": "NW-XAG",
+        "occupiedByTail": "AX-XAG",
         "occupiedUntilMinute": 45
       },
       { "id": "R40", "station": "AGP", "kind": "remote" }
@@ -207,8 +207,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD720",
-        "tail": "NW-AGA",
+        "flight": "ACX720",
+        "tail": "AX-AGA",
         "from": "MAN",
         "to": "AGP",
         "std": "2026-08-12T10:45:00Z",
@@ -216,8 +216,8 @@
         "pax": 180
       },
       {
-        "flight": "NWD721",
-        "tail": "NW-AGA",
+        "flight": "ACX721",
+        "tail": "AX-AGA",
         "from": "AGP",
         "to": "MAN",
         "std": "2026-08-12T14:40:00Z",
@@ -225,8 +225,8 @@
         "pax": 178
       },
       {
-        "flight": "NWD722",
-        "tail": "NW-AGA",
+        "flight": "ACX722",
+        "tail": "AX-AGA",
         "from": "MAN",
         "to": "EDI",
         "std": "2026-08-12T18:30:00Z",
@@ -267,7 +267,7 @@
     {
       "atMinute": 8,
       "actor": "Station manager",
-      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "NW-AGA" } },
+      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "AX-AGA" } },
       "note": "Boarding held; passengers wait in a hot gate room."
     },
     {
@@ -284,7 +284,7 @@
         "args": {
           "cohortIds": ["c721-general", "c721-families", "c721-prm", "c721-um", "c721-connections"],
           "channel": "sms",
-          "body": "NWD721 to Manchester is delayed by a technical check. Please stay in the gate area, where water is available; next update by 15:30 local time."
+          "body": "ACX721 to Manchester is delayed by a technical check. Please stay in the gate area, where water is available; next update by 15:30 local time."
         },
         "decision": "approve"
       },
@@ -296,7 +296,7 @@
       "action": {
         "tool": "record_engineering_decision",
         "args": {
-          "tail": "NW-AGA",
+          "tail": "AX-AGA",
           "decision": "defer_mel",
           "melItem": "49-10-01",
           "rationale": "APU start fault confirmed after troubleshooting; APU deferred under MEL 49-10-01 with the associated procedures; air start unit for engine start."

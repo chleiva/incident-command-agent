@@ -2,7 +2,7 @@
   "name": "@ica/ui-tokens",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — Design tokens (CSS variables light/dark), Tailwind preset, Tokens Studio JSON.",
+  "description": "Incident Coordination Agent — Design tokens (CSS variables light/dark), Tailwind preset, Tokens Studio JSON.",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {

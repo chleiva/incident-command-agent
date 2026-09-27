@@ -1,4 +1,4 @@
-# Deploying the Ground Incident Coordination Agent to AWS
+# Deploying the Incident Coordination Agent to AWS
 
 This guide takes a clean AWS account to a working, single-user deployment in about 20 minutes (NFR-06). Everything is serverless: nothing runs, and almost nothing is billed, while you are not using it (see [Cost](#cost)).
 

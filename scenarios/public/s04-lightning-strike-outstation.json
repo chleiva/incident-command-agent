@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s04-lightning-strike-outstation",
   "title": "Lightning strike at outstation, no licensed engineer on site",
-  "narrative": "Faro, early afternoon, thunderstorms over the Algarve. NW-FAL, an A320, is struck by lightning on approach and parks on stand 4. The return NWD561 to Manchester is due at 13:50 with 176 passengers. Northwind has no licensed engineer in Faro: the nearest B1 is in Lisbon (a long drive), another in Manchester could position on the afternoon flight NWD565. There is no spare aircraft in Faro. The operating crew reported at 09:00 in Manchester, so a long wait will run into their duty limit, and Manchester has a night curfew. The duty manager wants clear options: fly an engineer in, drive one down, or cancel and recover tomorrow.",
+  "narrative": "Faro, early afternoon, thunderstorms over the Algarve. AX-FAL, an A320, is struck by lightning on approach and parks on stand 4. The return ACX561 to Manchester is due at 13:50 with 176 passengers. Accent Air has no licensed engineer in Faro: the nearest B1 is in Lisbon (a long drive), another in Manchester could position on the afternoon flight ACX565. There is no spare aircraft in Faro. The operating crew reported at 09:00 in Manchester, so a long wait will run into their duty limit, and Manchester has a night curfew. The duty manager wants clear options: fly an engineer in, drive one down, or cancel and recover tomorrow.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -18,13 +18,13 @@
   ],
   "startSimTime": "2026-08-06T13:08:00Z",
   "aircraft": {
-    "tail": "NW-FAL",
+    "tail": "AX-FAL",
     "type": "A320",
     "station": "FAO",
     "stand": "4",
     "nextSectors": [
       {
-        "flight": "NWD561",
+        "flight": "ACX561",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-08-06T13:50:00Z",
@@ -32,7 +32,7 @@
         "distanceKm": 1869
       },
       {
-        "flight": "NWD562",
+        "flight": "ACX562",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-08-06T17:30:00Z",
@@ -40,7 +40,7 @@
         "distanceKm": 264
       },
       {
-        "flight": "NWD563",
+        "flight": "ACX563",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-08-06T19:10:00Z",
@@ -66,7 +66,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
+      { "tail": "AX-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
     ],
     "engineers": [
       {
@@ -177,37 +177,37 @@
       }
     ],
     "cohorts": [
-      { "id": "c561-general", "kind": "general", "count": 138, "flight": "NWD561" },
+      { "id": "c561-general", "kind": "general", "count": 138, "flight": "ACX561" },
       {
         "id": "c561-families",
         "kind": "families",
         "count": 24,
-        "flight": "NWD561",
+        "flight": "ACX561",
         "notes": "7 families with young children"
       },
       {
         "id": "c561-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD561",
+        "flight": "ACX561",
         "notes": "1 WCHC needs ambulift, 2 WCHR"
       },
       {
         "id": "c561-connections",
         "kind": "connections",
         "count": 11,
-        "flight": "NWD561",
+        "flight": "ACX561",
         "onwardDeadline": "2026-08-06T19:30:00Z",
         "notes": "Evening onward flights from Manchester"
       }
     ],
     "stands": [
-      { "id": "4", "station": "FAO", "kind": "contact", "occupiedByTail": "NW-FAL" },
+      { "id": "4", "station": "FAO", "kind": "contact", "occupiedByTail": "AX-FAL" },
       {
         "id": "5",
         "station": "FAO",
         "kind": "contact",
-        "occupiedByTail": "NW-XFA",
+        "occupiedByTail": "AX-XFA",
         "occupiedUntilMinute": 40
       },
       { "id": "R11", "station": "FAO", "kind": "remote" }
@@ -235,8 +235,8 @@
     "curfews": [{ "station": "MAN", "fromLocal": "23:30", "toLocal": "06:00" }],
     "rotation": [
       {
-        "flight": "NWD560",
-        "tail": "NW-FAL",
+        "flight": "ACX560",
+        "tail": "AX-FAL",
         "from": "MAN",
         "to": "FAO",
         "std": "2026-08-06T10:10:00Z",
@@ -244,8 +244,8 @@
         "pax": 180
       },
       {
-        "flight": "NWD561",
-        "tail": "NW-FAL",
+        "flight": "ACX561",
+        "tail": "AX-FAL",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-08-06T13:50:00Z",
@@ -253,8 +253,8 @@
         "pax": 176
       },
       {
-        "flight": "NWD562",
-        "tail": "NW-FAL",
+        "flight": "ACX562",
+        "tail": "AX-FAL",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-08-06T17:30:00Z",
@@ -262,8 +262,8 @@
         "pax": 150
       },
       {
-        "flight": "NWD563",
-        "tail": "NW-FAL",
+        "flight": "ACX563",
+        "tail": "AX-FAL",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-08-06T19:10:00Z",
@@ -271,8 +271,8 @@
         "pax": 144
       },
       {
-        "flight": "NWD565",
-        "tail": "NW-FAT",
+        "flight": "ACX565",
+        "tail": "AX-FAT",
         "from": "MAN",
         "to": "FAO",
         "std": "2026-08-06T15:00:00Z",
@@ -280,8 +280,8 @@
         "pax": 170
       },
       {
-        "flight": "NWD566",
-        "tail": "NW-FAT",
+        "flight": "ACX566",
+        "tail": "AX-FAT",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-08-06T18:40:00Z",
@@ -361,7 +361,7 @@
         "args": {
           "cohortIds": ["c561-general", "c561-families", "c561-prm", "c561-connections"],
           "channel": "sms",
-          "body": "NWD561 to Manchester is delayed: the aircraft needs a routine inspection after a lightning strike. Please stay in the departure area; next update by 15:30 local time."
+          "body": "ACX561 to Manchester is delayed: the aircraft needs a routine inspection after a lightning strike. Please stay in the departure area; next update by 15:30 local time."
         },
         "decision": "approve"
       },
@@ -372,7 +372,7 @@
       "actor": "OCC duty manager",
       "action": {
         "tool": "propose_swap",
-        "args": { "fromTail": "NW-FAL", "toTail": "NW-MAS", "flights": ["NWD562", "NWD563"] },
+        "args": { "fromTail": "AX-FAL", "toTail": "AX-MAS", "flights": ["ACX562", "ACX563"] },
         "decision": "approve"
       },
       "note": "Evening Dublin return protected with the Manchester spare."
@@ -394,7 +394,7 @@
     {
       "atMinute": 240,
       "actor": "OCC duty manager",
-      "action": { "tool": "propose_cancel", "args": { "flight": "NWD561" }, "decision": "approve" },
+      "action": { "tool": "propose_cancel", "args": { "flight": "ACX561" }, "decision": "approve" },
       "note": "Cancelled late when the crew duty limit and the curfew close the window."
     }
   ],
@@ -416,7 +416,7 @@
       ["get_crew_fdp", "request_decision"],
       ["page_engineer", "request_decision"]
     ],
-    "referenceSummary": "Options case. Establish quickly that no B1 is in Faro and no spare is at the station; compare (a) positioning the Manchester B1 on NWD565 (arrives around 18:40 local plus inspection), (b) the Lisbon B1 by road, and (c) cancelling NWD561 and re-accommodating passengers, against the crew duty limit (reported 09:00, 13 h maximum) and the Manchester night curfew. Present ranked options with request_decision early (within the first hour), protect the evening Dublin return with the Manchester spare, and inform and care for passengers throughout. Never shortcut the lightning inspection or extend crew duty in software."
+    "referenceSummary": "Options case. Establish quickly that no B1 is in Faro and no spare is at the station; compare (a) positioning the Manchester B1 on ACX565 (arrives around 18:40 local plus inspection), (b) the Lisbon B1 by road, and (c) cancelling ACX561 and re-accommodating passengers, against the crew duty limit (reported 09:00, 13 h maximum) and the Manchester night curfew. Present ranked options with request_decision early (within the first hour), protect the evening Dublin return with the Manchester spare, and inform and care for passengers throughout. Never shortcut the lightning inspection or extend crew duty in software."
   },
   "kpiParams": {
     "eurPerMinute": 100,

@@ -26,7 +26,7 @@ React 18, TypeScript, Vite, **Radix primitives + Tailwind** driven by `@ica/ui-t
 
 ## 3. Data layer
 
-- `config.ts` fetches `/config.json` (`WebRuntimeConfig`) at boot, then `GET /config` (`AppConfig`, the brand pack). The brand pack sets the carrier name, logo, colour pair (mapped onto the token accent variables) and the station list. If it's missing, fall back to the bundled Northwind Air defaults (FR-11).
+- `config.ts` fetches `/config.json` (`WebRuntimeConfig`) at boot, then `GET /config` (`AppConfig`, the brand pack). The brand pack sets the carrier name, logo, colour pair (mapped onto the token accent variables) and the station list. If it's missing, fall back to the bundled Accent Air defaults (FR-11).
 - `auth.ts`: `mode:'none'` → no login. `mode:'cognito'` → an oidc-client-ts code flow with PKCE, silent renew, the access token attached to fetch, `token=` on the WebSocket URL, and logout.
 - `api.ts`: a typed client for every route in `api.ts`, with retries and backoff on network errors only.
 - `runStream.ts` implements the **event consumption algorithm exactly as in spec §4**:

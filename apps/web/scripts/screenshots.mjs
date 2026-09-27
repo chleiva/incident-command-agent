@@ -35,7 +35,42 @@ const SHOTS = [
     path: '/compare/run-demo-s01/run-demo-s01-baseline?x=1',
     wait: '[aria-label="Deltas versus the baseline"]',
   },
-  { name: 'home', path: '/', wait: '[data-scenario]', themes: ['dark'] },
+  {
+    name: 'home-map',
+    path: '/?at=12:00',
+    wait: '[data-testid="network-map"] canvas',
+    themes: ['dark', 'light'],
+  },
+  {
+    name: 'flight-panel',
+    path: '/?at=12:00',
+    wait: '[data-testid="network-map"] canvas',
+    themes: ['dark'],
+    act: async (page) => {
+      await page.getByRole('button', { name: 'Airborne', exact: true }).click();
+      await page.getByRole('option').first().click();
+      await page.waitForSelector('[data-testid="flight-panel"]');
+    },
+  },
+  {
+    name: 'report-list',
+    path: '/?at=09:00',
+    wait: '[data-testid="network-map"] canvas',
+    themes: ['dark'],
+    act: async (page) => {
+      await page.getByRole('button', { name: 'On ground', exact: true }).click();
+      await page
+        .getByRole('option')
+        .filter({ hasText: /Scheduled/ })
+        .first()
+        .click();
+      await page.getByRole('button', { name: 'Report incident' }).click();
+      await page.waitForSelector('[data-testid="report-dialog"] input[type="radio"]');
+      await page.locator('[data-testid="report-dialog"] input[type="radio"]:not([disabled])').first().check();
+      await page.waitForSelector('[data-testid="preview-trigger"]');
+    },
+  },
+  { name: 'training', path: '/training', wait: '[data-scenario]', themes: ['dark'] },
   { name: 'evals', path: '/evals', wait: '#layers-h', themes: ['dark'] },
 ];
 const VIEWPORTS = [
@@ -64,6 +99,7 @@ for (const shot of SHOTS.filter((s) => !only || s.name === only)) {
       const page = await context.newPage();
       await page.goto(`${base}${shot.path}`);
       await page.waitForSelector(shot.wait, { timeout: 20_000 });
+      if (shot.act) await shot.act(page);
       await page.waitForTimeout(600);
       const file = `${out}/${shot.name}-${vp.w}x${vp.h}-${theme}.png`;
       await page.screenshot({ path: file });

@@ -19,22 +19,22 @@ describe('ground tools', () => {
 
   it('request_stand creates a pending request; occupied stands are rejected at confirmation', async () => {
     const h = await fixtureHarness();
-    const out = await call(h, 'request_stand', { tail: 'NW-FXA', standId: '24' });
+    const out = await call(h, 'request_stand', { tail: 'AX-FXA', standId: '24' });
     const r = okData(out).standRequest;
     expect(out.ok && out.mutations).toHaveLength(1);
     h.advanceTo(r.confirmAtMinute);
     expect(h.state.airport.standRequests[r.id].status).toBe('rejected');
-    expect((await call(h, 'request_stand', { tail: 'NW-FXA', standId: 'NOPE' })).ok).toBe(false);
+    expect((await call(h, 'request_stand', { tail: 'AX-FXA', standId: 'NOPE' })).ok).toBe(false);
   });
 
   it('request_tow takes a tug and can request the destination stand; fails when no tug is left', async () => {
     const h = await fixtureHarness();
-    const t = okData(await call(h, 'request_tow', { tail: 'NW-FXA', toStandId: 'R5' }));
+    const t = okData(await call(h, 'request_tow', { tail: 'AX-FXA', toStandId: 'R5' }));
     expect(t.tow).toMatchObject({ kind: 'tow', status: 'confirmed', station: 'MAN' });
     expect(t.standRequest.standId).toBe('R5');
     expect(h.state.handler.equipment['MAN:tug'].available).toBe(1);
-    okData(await call(h, 'request_tow', { tail: 'NW-FXB' }));
-    expect(await call(h, 'request_tow', { tail: 'NW-FXA' })).toMatchObject({
+    okData(await call(h, 'request_tow', { tail: 'AX-FXB' }));
+    expect(await call(h, 'request_tow', { tail: 'AX-FXA' })).toMatchObject({
       ok: false,
       error: expect.stringMatching(/no tug/),
     });
@@ -49,9 +49,9 @@ describe('ground tools', () => {
   it('notify_handler composes the task note from structured fields (no free text)', async () => {
     const h = await fixtureHarness();
     const t = okData(
-      await call(h, 'notify_handler', { kind: 'hold_boarding', tail: 'NW-FXA', priority: 'urgent' }),
+      await call(h, 'notify_handler', { kind: 'hold_boarding', tail: 'AX-FXA', priority: 'urgent' }),
     ).task;
-    expect(t.note).toBe('Stop boarding and hold passengers at the gate for NW-FXA — URGENT');
+    expect(t.note).toBe('Stop boarding and hold passengers at the gate for AX-FXA — URGENT');
     expect(t.ackAtMinute).toBeGreaterThanOrEqual(1);
     h.advanceTo(t.ackAtMinute);
     expect(h.state.handler.tasks[t.id].status).toBe('acknowledged');

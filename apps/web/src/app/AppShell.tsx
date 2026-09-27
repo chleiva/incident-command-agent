@@ -60,7 +60,10 @@ export function AppShell({
         </span>
         <nav aria-label="Main" className="ml-2 flex items-center gap-1">
           <NavLink to="/" end className={nav}>
-            Scenarios
+            Network
+          </NavLink>
+          <NavLink to="/training" className={nav}>
+            Training scenarios
           </NavLink>
           <NavLink to="/evals" className={nav}>
             Evals

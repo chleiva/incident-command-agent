@@ -23,10 +23,10 @@ const S01 = getPublicScenario('s01-pushback-tug-contact') as Scenario;
 describe('flight delays: occ.tick is the single owner', () => {
   it('KPIs count reactionary minutes once (primary = delayMin − reactionary)', () => {
     let state = seedAll(S01, () => 0.5);
-    state.mne.aircraft['NW-MAB'] = { ...state.mne.aircraft['NW-MAB'], status: 'unserviceable' };
-    // Slip NWD211 by occ.tick until its ETD is well past the turn buffer so NWD212 inherits reactionary delay.
+    state.mne.aircraft['AX-MAB'] = { ...state.mne.aircraft['AX-MAB'], status: 'unserviceable' };
+    // Slip ACX211 by occ.tick until its ETD is well past the turn buffer so ACX212 inherits reactionary delay.
     for (let m = 0; m <= 180; m += 1) state = applyMutations(state, tickOcc(state, m, 1));
-    const flights = Object.values(state.occ.flights).filter((f) => f.tail === 'NW-MAB');
+    const flights = Object.values(state.occ.flights).filter((f) => f.tail === 'AX-MAB');
     const reactionary = flights.filter((f) => f.reactionaryDelayMin > 0);
     expect(reactionary.length).toBeGreaterThan(0);
     for (const f of flights) expect(f.reactionaryDelayMin).toBeLessThanOrEqual(f.delayMin);
@@ -61,12 +61,12 @@ describe('flight delays: occ.tick is the single owner', () => {
 
   it('a delay twist re-times the ETD and propagates reactionary delay like occ does', () => {
     const state = seedAll(S01, () => 0.5);
-    const res = applyTwistEffects(state, [{ op: 'delay', flight: 'NWD211', minutes: 150 }]);
+    const res = applyTwistEffects(state, [{ op: 'delay', flight: 'ACX211', minutes: 150 }]);
     expect(res.errors).toEqual([]);
     const after = applyMutations(state, res.mutations);
-    expect(after.occ.flights.NWD211).toMatchObject({ delayMin: 150, status: 'delayed' });
-    expect(after.occ.flights.NWD211.etd).toBeDefined();
-    const next = after.occ.flights.NWD212;
+    expect(after.occ.flights.ACX211).toMatchObject({ delayMin: 150, status: 'delayed' });
+    expect(after.occ.flights.ACX211.etd).toBeDefined();
+    const next = after.occ.flights.ACX212;
     expect(next.reactionaryDelayMin).toBe(next.delayMin);
     expect(next.delayMin).toBeGreaterThan(0);
   });

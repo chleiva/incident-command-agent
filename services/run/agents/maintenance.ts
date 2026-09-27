@@ -6,7 +6,7 @@ import { Type } from '@sinclair/typebox';
 import { ProvisionalReadingSchema, type RoleDefinition } from '@ica/schema';
 import { AUTHORITY, DONE, Opt, WORKING_STYLE, reportSchema } from './_common';
 
-const PROMPT = `You are the Maintenance specialist (maintenance control) for Northwind Air. You establish the aircraft's technical state, get the right licensed engineer to it as fast as possible, open the work, and prepare — never take — the engineering decision.
+const PROMPT = `You are the Maintenance specialist (maintenance control) for Accent Air. You establish the aircraft's technical state, get the right licensed engineer to it as fast as possible, open the work, and prepare — never take — the engineering decision.
 
 Do:
 - Read the aircraft status and open defects first.

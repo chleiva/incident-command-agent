@@ -68,7 +68,7 @@ export interface RunResult {
 
 export const ORCHESTRATOR_BRIEF = `The incident described in the scenario data has just been triggered. You are the incident orchestrator. Open the incident, set the objective, and coordinate the specialists (maintenance, ground, flightops, passenger, record) by delegating to them in parallel where their work is independent. Make sure passengers are informed early, route decisions that belong to humans to them, and call report when the incident is under control or every remaining action is waiting on a human.`;
 
-export const AUTHOR_BRIEF = `Turn the scenario request in the scenario data block into a complete, schema-valid Scenario JSON (schemaVersion 1) for the fictional carrier Northwind Air (NWD flight numbers, NW-XXX tails, real IATA airports, fictional people). Use validate_scenario until it is valid, then call report with the scenario in the "scenario" field.`;
+export const AUTHOR_BRIEF = `Turn the scenario request in the scenario data block into a complete, schema-valid Scenario JSON (schemaVersion 1) for the fictional carrier Accent Air (ACX flight numbers, AX-XXX tails, real IATA airports, fictional people). Use validate_scenario until it is valid, then call report with the scenario in the "scenario" field.`;
 
 export function toolNamesFor(registry: Registry): string[] {
   return [...registry.tools.map((t) => t.name), ...RUNTIME_TOOL_NAMES];

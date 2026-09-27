@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "id": "s04-lightning-strike-outstation",
   "title": "Lightning strike at outstation, no licensed engineer on site",
-  "narrative": "Northwind Air NW-TQA reports a lightning strike on approach into Faro. The aircraft is on stand 5 with 212 passengers booked on the return NWD518 to Manchester. Northwind has no licensed engineer at Faro; a lightning-strike inspection is required before the next flight.",
+  "narrative": "Accent Air AX-TQA reports a lightning strike on approach into Faro. The aircraft is on stand 5 with 212 passengers booked on the return ACX518 to Manchester. Accent Air has no licensed engineer at Faro; a lightning-strike inspection is required before the next flight.",
   "visibility": "public",
   "inspiredBy": [],
   "startSimTime": "2026-07-03T13:30:00Z",
   "aircraft": {
-    "tail": "NW-TQA",
+    "tail": "AX-TQA",
     "type": "A321",
     "station": "FAO",
     "stand": "5",
     "nextSectors": [
       {
-        "flight": "NWD518",
+        "flight": "ACX518",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -31,12 +31,12 @@
       { "kind": "techlog", "text": "Lightning strike on approach, flash and bang, no abnormal indications." },
       {
         "kind": "report",
-        "text": "Handler: no Northwind engineer on station today; a contract engineer may be available."
+        "text": "Handler: no Accent Air engineer on station today; a contract engineer may be available."
       }
     ]
   },
   "world": {
-    "spares": [{ "tail": "NW-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }],
+    "spares": [{ "tail": "AX-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }],
     "engineers": [
       {
         "id": "eng-m1",
@@ -88,26 +88,26 @@
       }
     ],
     "cohorts": [
-      { "id": "c-general", "kind": "general", "count": 168, "flight": "NWD518" },
+      { "id": "c-general", "kind": "general", "count": 168, "flight": "ACX518" },
       {
         "id": "c-families",
         "kind": "families",
         "count": 18,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "notes": "Six families with young children"
       },
-      { "id": "c-prm", "kind": "prm", "count": 4, "flight": "NWD518", "notes": "Three WCHR, one WCHS" },
+      { "id": "c-prm", "kind": "prm", "count": 4, "flight": "ACX518", "notes": "Three WCHR, one WCHS" },
       {
         "id": "c-connections",
         "kind": "connections",
         "count": 22,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "onwardDeadline": "2026-07-03T19:30:00Z",
         "notes": "Onward domestic connections at MAN"
       }
     ],
     "stands": [
-      { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "NW-TQA" },
+      { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "AX-TQA" },
       { "id": "7", "station": "FAO", "kind": "contact" }
     ],
     "handler": {
@@ -131,8 +131,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD517",
-        "tail": "NW-TQA",
+        "flight": "ACX517",
+        "tail": "AX-TQA",
         "from": "MAN",
         "to": "FAO",
         "std": "2026-07-03T10:05:00Z",
@@ -140,8 +140,8 @@
         "pax": 208
       },
       {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -149,8 +149,8 @@
         "pax": 212
       },
       {
-        "flight": "NWD540",
-        "tail": "NW-TQA",
+        "flight": "ACX540",
+        "tail": "AX-TQA",
         "from": "MAN",
         "to": "AMS",
         "std": "2026-07-03T17:10:00Z",
@@ -166,7 +166,7 @@
       "atMinute": 24,
       "description": "Airport operations close the ramp for 20 minutes while a thunderstorm cell passes overhead.",
       "effects": [
-        { "op": "delay", "flight": "NWD518", "minutes": 20 },
+        { "op": "delay", "flight": "ACX518", "minutes": 20 },
         { "op": "info", "text": "Airport: ramp operations suspended for 20 minutes (lightning within 5 km)." }
       ]
     },
@@ -202,7 +202,7 @@
     {
       "atMinute": 20,
       "actor": "Maintenance control",
-      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-m1", "tail": "NW-TQA" } },
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-m1", "tail": "AX-TQA" } },
       "note": "Home-base engineer called by phone to fly out."
     },
     {

@@ -155,13 +155,18 @@ export class MockBackend {
     const p = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
     await new Promise((r) => setTimeout(r, 30));
     try {
-      return this.route(method, p, url.searchParams, body);
+      return await this.route(method, p, url.searchParams, body);
     } catch (e) {
       return err(500, 'mock_error', e instanceof Error ? e.message : String(e));
     }
   }
 
-  private route(method: string, p: string[], q: URLSearchParams, body: unknown): Response {
+  private route(
+    method: string,
+    p: string[],
+    q: URLSearchParams,
+    body: unknown,
+  ): Response | Promise<Response> {
     const [a, b, c, d] = p;
     if (method === 'GET' && a === 'config') return json(200, this.config());
     if (method === 'GET' && a === 'evals' && b === 'latest')
@@ -184,7 +189,10 @@ export class MockBackend {
           .slice(0, limit);
         return json(200, { items });
       }
-      if (method === 'POST' && !b) return this.createRun(body as CreateRunRequest);
+      if (method === 'POST' && !b) {
+        const r = body as CreateRunRequest;
+        return r.flightContext ? this.createFlightRun(r) : this.createRun(r);
+      }
       const run = b ? this.runs.get(b) : undefined;
       if (!run) return err(404, 'not_found', `Run ${b} not found`);
       if (method === 'GET' && !c) return json(200, run.meta);
@@ -264,7 +272,70 @@ export class MockBackend {
     return { scenario, screening };
   }
 
+  /**
+   * Mock `POST /runs` with a flight context (task 07): the scenario is built in the browser with the same templates the
+   * server uses; the replay is a recorded run (s01 at a base, s04 at an outstation) with its identifiers, stations and
+   * times moved onto the flight by the same remapping. Free text is screened and added to the narrative (no LLM).
+   */
+  private async createFlightRun(req: CreateRunRequest): Promise<Response> {
+    const fc = req.flightContext!;
+    const [{ generateDaySchedule, isBase }, T] = await Promise.all([
+      import('@ica/network'),
+      import('@ica/network/templates'),
+    ]);
+    const schedule = generateDaySchedule(fc.seed, fc.date);
+    const atMs = fc.at ? Date.parse(fc.at) : this.now();
+    const ctx = T.incidentContext(schedule, fc.flightId, atMs);
+    if (!ctx) return err(404, 'flight_not_found', `flight ${fc.flightId} not found`);
+    const typeId = req.incidentType ?? '';
+    if (typeId === T.OTHER_INCIDENT_TYPE && !req.text)
+      return err(400, 'bad_request', "incidentType 'other' needs a text description");
+    const screening = req.text ? screenText(req.text) : undefined;
+    if (screening?.verdict === 'rejected')
+      return err(422, 'input_rejected', 'the text was rejected by input screening');
+    const outstation = !isBase(ctx.station);
+    const rec = recordingFor(outstation ? 's04-lightning-strike-outstation' : 's01-pushback-tug-contact');
+    if (!rec) return err(500, 'mock_error', 'no recording');
+    const recType = outstation ? 'lightning_strike' : 'pushback_tug_contact';
+    let built;
+    let replay;
+    try {
+      built =
+        typeId === T.OTHER_INCIDENT_TYPE
+          ? T.buildScenarioFromFlight(schedule, fc.flightId, recType, { atMs, force: true })
+          : T.buildScenarioFromFlight(schedule, fc.flightId, typeId, { atMs });
+      replay = T.buildScenarioFromFlight(schedule, fc.flightId, recType, {
+        atMs,
+        template: rec.scenario,
+        force: true,
+      });
+    } catch (e) {
+      return err(409, 'not_applicable', e instanceof Error ? e.message : String(e));
+    }
+    const note = req.text
+      ? ` Duty manager's note (screened): «${screening?.neutralisedText ?? req.text}»`
+      : '';
+    const scenario: Scenario = {
+      ...built.scenario,
+      ...(typeId === T.OTHER_INCIDENT_TYPE
+        ? { title: `Reported incident: ${fc.flightId} at ${ctx.station}` }
+        : {}),
+      narrative: `${built.scenario.narrative}${note}`,
+    };
+    const recording: Recording = {
+      scenario,
+      agent: replay.remap(rec.agent),
+      baseline: replay.remap(rec.baseline),
+    };
+    this.scenarios.set(scenario.id, { scenario, recording });
+    const res = this.createRun({ ...req, scenarioId: scenario.id });
+    if (!res.ok) return res;
+    const body = (await res.json()) as { runId: string };
+    return json(200, { runId: body.runId, scenarioId: scenario.id, ...(screening ? { screening } : {}) });
+  }
+
   private createRun(req: CreateRunRequest): Response {
+    if (!req.scenarioId) return err(400, 'bad_request', 'scenarioId or flightContext is required');
     const entry = this.scenarios.get(req.scenarioId);
     if (!entry)
       return err(
@@ -288,7 +359,7 @@ export class MockBackend {
     this.runs.set(runId, run);
     // First event well under 2 s after the trigger (FR-02).
     run.timer = setTimeout(() => this.pump(run), 120);
-    return json(200, { runId });
+    return json(200, { runId, scenarioId: entry.scenario.id });
   }
 
   private decide(run: MockRun, approvalId: string, req: ApprovalDecisionRequest): Response {

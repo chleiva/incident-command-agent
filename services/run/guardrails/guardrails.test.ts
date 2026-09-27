@@ -100,7 +100,7 @@ describe('output screening', () => {
     expect(
       screenOutput(
         'passenger_message',
-        'NWD101 is delayed while engineers check a door sensor. Next update 06:30. Info: https://northwindair.example/status',
+        'ACX101 is delayed while engineers check a door sensor. Next update 06:30. Info: https://accentair.example/status',
       ).ok,
     ).toBe(true);
     expect(screenOutput('report', 'See https://www.gov.uk/aaib-reports for context.').ok).toBe(true);

@@ -53,6 +53,7 @@ import {
 } from '../lib/derive';
 import { downloadBlob, renderEvidencePdf } from '../lib/evidencePdf';
 import { simClockAt } from '../lib/format';
+import { stationsForMap } from '../lib/stations';
 import { latestCaption } from '../lib/narrator';
 import { usePalette } from '../store/palette';
 import { useUi } from '../store/ui';
@@ -130,6 +131,12 @@ export default function Cockpit() {
   const aircraft = Object.values(view.systems.mne.aircraft);
   const spares = Object.values(view.systems.occ.spares);
   const engineers = Object.values(view.systems.engineers.engineers);
+  const mapStations = stationsForMap(app.stations, [
+    ...flights.flatMap((f) => [f.from, f.to]),
+    ...aircraft.map((a) => a.station),
+    ...spares.map((x) => x.station),
+    ...engineers.flatMap((e) => [e.station, ...(e.destination ? [e.destination] : [])]),
+  ]);
   const focus = aircraft[0] ?? null;
   const stand = focus?.stand ? view.systems.airport.stands[focus.stand] : undefined;
   const otherStands = Object.values(view.systems.airport.stands).filter(
@@ -529,7 +536,7 @@ export default function Cockpit() {
         >
           <div className="min-h-48 flex-1">
             <NetworkMap
-              stations={app.stations}
+              stations={mapStations}
               flights={flights}
               aircraft={aircraft}
               spares={spares}

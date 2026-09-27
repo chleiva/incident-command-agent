@@ -75,7 +75,7 @@ The shipped scenario ids are fixed now, so the evals (02) and the UI (05) can re
 | `s09-fuel-spill-at-stand` | Fuel spill during refuelling, fire service attends | ALC | Stand closure extended |
 | `s10-brake-overheat-fdp-squeeze` | Brake overheat on turnaround; crew FDP margin collapsing | TFS | Home-base curfew approaching |
 
-Fictional carrier: **Northwind Air**, ICAO-style prefix `NWD`, flight numbers `NWD1xx`–`NWD9xx`. Tails use the clearly fictional format `NW-XXX` (three letters, e.g. `NW-ABC`). The main base is MAN. Airports are real IATA codes.
+Fictional carrier: **Accent Air**, ICAO-style prefix `ACX`, flight numbers `ACX1xx`–`ACX9xx`. Tails use the clearly fictional format `AX-XXX` (three letters, e.g. `AX-ABC`). The main base is MAN. Airports are real IATA codes.
 
 ### 3.2 Scenario schema (`scenario.ts` → `scenario.schema.json`, `schemaVersion: 1`)
 
@@ -294,7 +294,7 @@ Create these files with the exact exports and empty or trivial content. Task 03 
 - `.gitignore`: `node_modules`, `dist`, `cdk.out`, `.env`, `.env.*` (except `.env.example`), `config/brand.local.json`, `config/private-words.txt`, `scenarios/private/`, `data/raw/`, `data/index/` (the built index is uploaded, not committed), `.local/`, `evals/reports/*.local.*`, `storybook-static`.
 - An empty ledger at `evals/ledger.json`: `{"lifetimeCapGbp": 10, "entries": []}`.
 - `.env.example`, covering every variable listed in CLAUDE.md, with comments.
-- `config/brand.default.json` (Northwind Air, `NWD`, stations `MAN, PMI, EDI, FAO, AGP, DUB, ALC, TFS, LGW, AMS, CDG, BCN`, a neutral colour pair, and the disclaimer "Simulated systems · fictional carrier") and `config/brand.local.example.json`.
+- `config/brand.default.json` (Accent Air, `ACX`, stations `MAN, PMI, EDI, FAO, AGP, DUB, ALC, TFS, LGW, AMS, CDG, BCN`, a neutral colour pair, and the disclaimer "Simulated systems · fictional carrier") and `config/brand.local.example.json`.
 - `config/pricing.json`: per-model USD per million tokens (input, output, cache read, cache write) for `claude-sonnet-5`, `claude-opus-5-5`, `claude-haiku-4-5`, one OpenAI default and one Bedrock default. **Verify current prices** with the `claude-api` skill or the provider docs, and record the date in the file. Tasks 02 and 04 read this for cost accounting and the eval budget guard.
 - `docs/adr/0001-no-agent-framework.md`, `0002-event-sourcing.md`, `0003-direct-provider-apis.md`, `0004-single-table-dynamodb.md`, `0005-npm-workspaces-ts-source-packages.md` and `0006-eval-budget-guard.md` (records the **lifetime** £10 cap, the committed ledger, the record-once/replay-forever approach and the absence of live CI; see CLAUDE.md). Keep each short: context, decision, consequences.
 - `docs/architecture.md`: a mermaid diagram of spec §3, plus the event flow for approvals (API writes `approval.decision` → Run Lambda drains it on its next iteration).

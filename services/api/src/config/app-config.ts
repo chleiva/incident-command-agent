@@ -37,9 +37,9 @@ export const FALLBACK_STATIONS: Station[] = [
 ];
 
 export const DEFAULT_BRAND: BrandPack = {
-  productName: 'Ground Incident Coordination Agent',
-  carrierName: 'Northwind Air',
-  carrierCode: 'NWD',
+  productName: 'Incident Coordination Agent',
+  carrierName: 'Accent Air',
+  carrierCode: 'ACX',
   colours: { primary: '#1F3A5F', accent: '#4F8FBF' },
   stations: FALLBACK_STATIONS.map((s) => s.iata),
   disclaimer: 'Simulated systems · fictional carrier',

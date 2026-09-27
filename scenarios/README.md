@@ -1,6 +1,6 @@
 # Scenarios
 
-Ten shipped scenarios live in `public/` (CC BY 4.0, fictional carrier **Northwind Air**). Each is one JSON file named after its id and validated against `packages/schema/scenario.schema.json` (`schemaVersion: 1`, strict: unknown fields are rejected).
+Ten shipped scenarios live in `public/` (CC BY 4.0, fictional carrier **Accent Air**). Each is one JSON file named after its id and validated against `packages/schema/scenario.schema.json` (`schemaVersion: 1`, strict: unknown fields are rejected).
 
 | id | Station | Key twist |
 |---|---|---|
@@ -21,7 +21,7 @@ npm run scenarios:validate   # validates public/ and private/, regenerates publi
 
 ## Writing a scenario
 
-1. **Identity.** Only fictional data: Northwind Air, flight numbers `NWD100`–`NWD999`, tails `NW-` + three capital letters, main base MAN, fictional people (use invented names such as those in `services/run/systems/names.ts`) and fictional handling companies. Airports are real IATA codes (check them in `data/airports/stations.json`; run `npm run airports:build` if you add a station outside Europe). Never use a real airline, operator, registration, flight number or person.
+1. **Identity.** Only fictional data: Accent Air, flight numbers `ACX100`–`ACX999`, tails `AX-` + three capital letters, main base MAN, fictional people (use invented names such as those in `services/run/systems/names.ts`) and fictional handling companies. Airports are real IATA codes (check them in `data/airports/stations.json`; run `npm run airports:build` if you add a station outside Europe). Never use a real airline, operator, registration, flight number or person.
 2. **Clock.** `startSimTime` is sim minute 0; all ISO times are UTC (`Z`). `trigger.atMinute`, twist `atMinute` and baseline `atMinute` are sim minutes. Rotation legs that departed before minute 0 are treated as already flown.
 3. **Aircraft and trigger.** `aircraft.nextSectors` lists the incident tail's remaining sectors (with great-circle `distanceKm`); the trigger becomes an open defect `DEF-001` in the M&E system. Quote any MEL item in evidence as `MEL 49-10-01` so it is linked to the defect.
 4. **World.** Give every specialist something to do: at least one spare somewhere (none at the station is a valid design choice, as in s04), engineers at different distances with licences (`B1` structures/mechanical, `B2` avionics) and `availableFromMinute`, operating crew with realistic `maxFdpMin` (EASA ORO.FTL.205 table) and standby crew, 3–6 passenger cohorts including PRM and connections (with `onwardDeadline`), stands with occupancy, handler equipment and response time, a weather snapshot, curfews (local `HH:MM` at the station) and the day's `rotation` for the incident tail and any other tail you reference.

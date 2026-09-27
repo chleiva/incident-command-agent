@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s03-bird-strike-inspection",
   "title": "Bird strike on arrival, inspection before next sector",
-  "narrative": "Edinburgh, morning turnaround. NW-EDB, an A320, lands from Manchester and the crew report a bird strike at about 100 ft on short final: a thud on the left side and a smell in the cabin. The next sector, NWD452 back to Manchester, is due out at 08:55 with 158 passengers, 24 of them connecting onto long-haul flights. A contracted B1 engineer is on the airport; the B2 is finishing another job. The aircraft then operates to Malaga and back.",
+  "narrative": "Edinburgh, morning turnaround. AX-EDB, an A320, lands from Manchester and the crew report a bird strike at about 100 ft on short final: a thud on the left side and a smell in the cabin. The next sector, ACX452 back to Manchester, is due out at 08:55 with 158 passengers, 24 of them connecting onto long-haul flights. A contracted B1 engineer is on the airport; the B2 is finishing another job. The aircraft then operates to Malaga and back.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -18,13 +18,13 @@
   ],
   "startSimTime": "2026-07-17T08:12:00Z",
   "aircraft": {
-    "tail": "NW-EDB",
+    "tail": "AX-EDB",
     "type": "A320",
     "station": "EDI",
     "stand": "9",
     "nextSectors": [
       {
-        "flight": "NWD452",
+        "flight": "ACX452",
         "from": "EDI",
         "to": "MAN",
         "std": "2026-07-17T08:55:00Z",
@@ -32,7 +32,7 @@
         "distanceKm": 298
       },
       {
-        "flight": "NWD453",
+        "flight": "ACX453",
         "from": "MAN",
         "to": "AGP",
         "std": "2026-07-17T11:30:00Z",
@@ -40,7 +40,7 @@
         "distanceKm": 1862
       },
       {
-        "flight": "NWD454",
+        "flight": "ACX454",
         "from": "AGP",
         "to": "MAN",
         "std": "2026-07-17T14:55:00Z",
@@ -66,7 +66,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
+      { "tail": "AX-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
     ],
     "engineers": [
       {
@@ -185,27 +185,27 @@
       }
     ],
     "cohorts": [
-      { "id": "c452-general", "kind": "general", "count": 120, "flight": "NWD452" },
+      { "id": "c452-general", "kind": "general", "count": 120, "flight": "ACX452" },
       {
         "id": "c452-connections",
         "kind": "connections",
         "count": 24,
-        "flight": "NWD452",
+        "flight": "ACX452",
         "onwardDeadline": "2026-07-17T11:30:00Z",
         "notes": "Long-haul connections at Manchester"
       },
-      { "id": "c452-prm", "kind": "prm", "count": 2, "flight": "NWD452", "notes": "1 WCHR, 1 WCHS" },
+      { "id": "c452-prm", "kind": "prm", "count": 2, "flight": "ACX452", "notes": "1 WCHR, 1 WCHS" },
       {
         "id": "c452-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD452",
+        "flight": "ACX452",
         "notes": "Two minors travelling to Manchester, escort arranged"
       },
-      { "id": "c452-premium", "kind": "premium", "count": 10, "flight": "NWD452" }
+      { "id": "c452-premium", "kind": "premium", "count": 10, "flight": "ACX452" }
     ],
     "stands": [
-      { "id": "9", "station": "EDI", "kind": "contact", "occupiedByTail": "NW-EDB" },
+      { "id": "9", "station": "EDI", "kind": "contact", "occupiedByTail": "AX-EDB" },
       { "id": "10", "station": "EDI", "kind": "contact" },
       { "id": "R3", "station": "EDI", "kind": "remote" }
     ],
@@ -232,8 +232,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD451",
-        "tail": "NW-EDB",
+        "flight": "ACX451",
+        "tail": "AX-EDB",
         "from": "MAN",
         "to": "EDI",
         "std": "2026-07-17T06:55:00Z",
@@ -241,8 +241,8 @@
         "pax": 150
       },
       {
-        "flight": "NWD452",
-        "tail": "NW-EDB",
+        "flight": "ACX452",
+        "tail": "AX-EDB",
         "from": "EDI",
         "to": "MAN",
         "std": "2026-07-17T08:55:00Z",
@@ -250,8 +250,8 @@
         "pax": 158
       },
       {
-        "flight": "NWD453",
-        "tail": "NW-EDB",
+        "flight": "ACX453",
+        "tail": "AX-EDB",
         "from": "MAN",
         "to": "AGP",
         "std": "2026-07-17T11:30:00Z",
@@ -259,8 +259,8 @@
         "pax": 176
       },
       {
-        "flight": "NWD454",
-        "tail": "NW-EDB",
+        "flight": "ACX454",
+        "tail": "AX-EDB",
         "from": "AGP",
         "to": "MAN",
         "std": "2026-07-17T14:55:00Z",
@@ -282,7 +282,7 @@
           "entity": "defects",
           "record": {
             "id": "DEF-002",
-            "tail": "NW-EDB",
+            "tail": "AX-EDB",
             "description": "Bird remains in No.1 engine intake; fan blade inspection required, borescope may be needed",
             "ata": "72",
             "status": "open",
@@ -317,7 +317,7 @@
       "action": {
         "tool": "create_work_order",
         "args": {
-          "tail": "NW-EDB",
+          "tail": "AX-EDB",
           "defectId": "DEF-001",
           "task": "bird_strike_inspection",
           "estimatedDurationMin": 45,
@@ -334,7 +334,7 @@
         "args": {
           "cohortIds": ["c452-general", "c452-connections", "c452-prm", "c452-um", "c452-premium"],
           "channel": "sms",
-          "body": "NWD452 to Manchester is delayed for an aircraft inspection after a bird strike on arrival. Please stay near gate 9; next update by 09:15."
+          "body": "ACX452 to Manchester is delayed for an aircraft inspection after a bird strike on arrival. Please stay near gate 9; next update by 09:15."
         },
         "decision": "approve"
       },
@@ -351,7 +351,7 @@
       "actor": "OCC duty manager",
       "action": {
         "tool": "propose_swap",
-        "args": { "fromTail": "NW-EDB", "toTail": "NW-MAS", "flights": ["NWD453", "NWD454"] },
+        "args": { "fromTail": "AX-EDB", "toTail": "AX-MAS", "flights": ["ACX453", "ACX454"] },
         "decision": "approve"
       },
       "note": "Spare from Manchester takes the Malaga return."
@@ -359,7 +359,7 @@
     {
       "atMinute": 80,
       "actor": "OCC duty manager",
-      "action": { "tool": "propose_cancel", "args": { "flight": "NWD452" }, "decision": "approve" },
+      "action": { "tool": "propose_cancel", "args": { "flight": "ACX452" }, "decision": "approve" },
       "note": "EDI-MAN cancelled; passengers rebooked on later flights."
     }
   ],
@@ -375,7 +375,7 @@
       ["page_engineer", "propose_cancel"],
       ["get_crew_fdp", "propose_swap"]
     ],
-    "referenceSummary": "Page the on-airport B1 immediately and open a bird-strike inspection; when remains are found in the intake, escalate to a borescope-capable engineer and accept the aircraft is out for hours. Inform passengers early, prioritising the 24 long-haul connections and the unaccompanied minors, and rebook connections where seats exist. Protect the afternoon by swapping NWD453/NWD454 onto the Manchester spare and decide on NWD452 (cancel or long delay) with a human decision. Release only by certifying staff."
+    "referenceSummary": "Page the on-airport B1 immediately and open a bird-strike inspection; when remains are found in the intake, escalate to a borescope-capable engineer and accept the aircraft is out for hours. Inform passengers early, prioritising the 24 long-haul connections and the unaccompanied minors, and rebook connections where seats exist. Protect the afternoon by swapping ACX453/ACX454 onto the Manchester spare and decide on ACX452 (cancel or long delay) with a human decision. Release only by certifying staff."
   },
   "kpiParams": {
     "eurPerMinute": 100,

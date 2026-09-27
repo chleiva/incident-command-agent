@@ -17,7 +17,7 @@ const P = DEFAULT_KPI_PARAMS; // €100/min, factor 1.8, €18,600, €8/pax/h, 
 function flight(id: string, over: Partial<Flight> = {}): Flight {
   return {
     flight: id,
-    tail: 'NW-AAA',
+    tail: 'AX-AAA',
     from: 'MAN',
     to: 'DUB',
     std: '2026-06-12T06:00:00Z',

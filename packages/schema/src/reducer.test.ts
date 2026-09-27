@@ -111,8 +111,8 @@ describe('reducer properties', () => {
     const del = {
       ...events[4],
       seq: 6,
-      payload: { system: 'occ', entity: 'spares', id: 'NW-FXB', op: 'delete' },
+      payload: { system: 'occ', entity: 'spares', id: 'AX-FXB', op: 'delete' },
     } as unknown as RunEvent;
-    expect(applyEvent(s, del).systems.occ.spares['NW-FXB']).toBeUndefined();
+    expect(applyEvent(s, del).systems.occ.spares['AX-FXB']).toBeUndefined();
   });
 });

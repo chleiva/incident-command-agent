@@ -2,7 +2,7 @@
 
 exports[`ApiStack > matches the snapshot 1`] = `
 {
-  "Description": "Ground Incident Coordination Agent: Cognito, HTTP + WebSocket APIs, Lambdas, WAF, budget, alarms",
+  "Description": "Incident Coordination Agent: Cognito, HTTP + WebSocket APIs, Lambdas, WAF, budget, alarms",
   "Outputs": {
     "CognitoDomain": {
       "Value": "ica-test-prefix.auth.eu-west-2.amazoncognito.com",
@@ -65,7 +65,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
   "Resources": {
     "AlarmTopicD01E77F9": {
       "Properties": {
-        "DisplayName": "Ground Incident Coordination Agent alarms",
+        "DisplayName": "Incident Coordination Agent alarms",
         "Tags": [
           {
             "Key": "project",
@@ -1404,7 +1404,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
           ],
           "MaxAge": 3600,
         },
-        "Description": "Ground Incident Coordination Agent HTTP API",
+        "Description": "Incident Coordination Agent HTTP API",
         "Name": "HttpApi",
         "ProtocolType": "HTTP",
         "Tags": {
@@ -2769,7 +2769,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
     },
     "WsApi88D84716": {
       "Properties": {
-        "Description": "Ground Incident Coordination Agent live events",
+        "Description": "Incident Coordination Agent live events",
         "Name": "WsApi",
         "ProtocolType": "WEBSOCKET",
         "RouteSelectionExpression": "$request.body.action",
@@ -3460,7 +3460,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
 
 exports[`DataStack > matches the snapshot 1`] = `
 {
-  "Description": "Ground Incident Coordination Agent: DynamoDB table, S3 buckets, secret placeholders",
+  "Description": "Incident Coordination Agent: DynamoDB table, S3 buckets, secret placeholders",
   "Outputs": {
     "ExportsOutputFnGetAttKnowledgeBucketD7C8B00DArn0E6CDADF": {
       "Export": {
@@ -4085,7 +4085,7 @@ exports[`DataStack > matches the snapshot 1`] = `
 
 exports[`WebStack and WebWafStack > matches the snapshots 1`] = `
 {
-  "Description": "Ground Incident Coordination Agent: CloudFront distribution and SPA deployment",
+  "Description": "Incident Coordination Agent: CloudFront distribution and SPA deployment",
   "Outputs": {
     "DistributionId": {
       "Value": {
@@ -4524,7 +4524,7 @@ exports[`WebStack and WebWafStack > matches the snapshots 1`] = `
               "ViewerProtocolPolicy": "redirect-to-https",
             },
           ],
-          "Comment": "Ground Incident Coordination Agent cockpit",
+          "Comment": "Incident Coordination Agent cockpit",
           "CustomErrorResponses": [
             {
               "ErrorCachingMinTTL": 0,
@@ -4625,7 +4625,7 @@ exports[`WebStack and WebWafStack > matches the snapshots 1`] = `
     "SecurityHeadersE66B69D3": {
       "Properties": {
         "ResponseHeadersPolicyConfig": {
-          "Comment": "Ground Incident Coordination Agent: strict security headers",
+          "Comment": "Incident Coordination Agent: strict security headers",
           "CustomHeadersConfig": {
             "Items": [
               {
@@ -4701,7 +4701,7 @@ exports[`WebStack and WebWafStack > matches the snapshots 1`] = `
 
 exports[`WebStack and WebWafStack > matches the snapshots 2`] = `
 {
-  "Description": "Ground Incident Coordination Agent: CloudFront WAF (us-east-1)",
+  "Description": "Incident Coordination Agent: CloudFront WAF (us-east-1)",
   "Outputs": {
     "CloudFrontWebAclArn": {
       "Value": {

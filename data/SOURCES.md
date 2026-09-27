@@ -35,7 +35,7 @@ Retrieval date for everything below: **2026-09-26** (the build records its own d
 
 ## Scenario references (`inspiredBy`)
 
-The shipped scenarios cite only ASRS accession numbers (ACN) and one AAIB report that were found in the downloaded corpus on the retrieval date; the scenarios themselves are fictional (Northwind Air) and do not reproduce any report. ASRS ACNs have no public per-report URL, so they link to the dataset page.
+The shipped scenarios cite only ASRS accession numbers (ACN) and one AAIB report that were found in the downloaded corpus on the retrieval date; the scenarios themselves are fictional (Accent Air) and do not reproduce any report. ASRS ACNs have no public per-report URL, so they link to the dataset page.
 
 ## Fixture mini-corpus (`data/fixtures/`)
 

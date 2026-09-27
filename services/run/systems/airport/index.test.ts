@@ -10,7 +10,7 @@ import { requestResource, requestStand } from './index';
 describe('airport stands', () => {
   it('confirms a free stand 3–8 minutes after the request and moves the aircraft', () => {
     const h = harness();
-    const r = requestStand(h.state, { standId: 'R5', tail: 'NW-FXA' }, 0, h.rng);
+    const r = requestStand(h.state, { standId: 'R5', tail: 'AX-FXA' }, 0, h.rng);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value.confirmAtMinute).toBeGreaterThanOrEqual(3);
@@ -20,14 +20,14 @@ describe('airport stands', () => {
     expect(h.state.airport.standRequests[r.value.id].status).toBe('requested');
     h.advanceTo(r.value.confirmAtMinute);
     expect(h.state.airport.standRequests[r.value.id].status).toBe('confirmed');
-    expect(h.state.airport.stands.R5.occupiedByTail).toBe('NW-FXA');
+    expect(h.state.airport.stands.R5.occupiedByTail).toBe('AX-FXA');
     expect(h.state.airport.stands['22'].occupiedByTail).toBeUndefined();
-    expect(h.state.mne.aircraft['NW-FXA'].stand).toBe('R5');
+    expect(h.state.mne.aircraft['AX-FXA'].stand).toBe('R5');
   });
 
   it('rejects the request if the stand is still occupied at confirmation', () => {
     const h = harness();
-    const r = requestStand(h.state, { standId: '24', tail: 'NW-FXA' }, 0, h.rng); // NW-FXB until minute 45
+    const r = requestStand(h.state, { standId: '24', tail: 'AX-FXA' }, 0, h.rng); // AX-FXB until minute 45
     if (!r.ok) throw new Error(r.error);
     h.state = applyMutations(h.state, r.mutations);
     h.advanceTo(10);
@@ -42,17 +42,17 @@ describe('airport stands', () => {
 
   it('refuses unknown stands and duplicate pending requests', () => {
     const h = harness();
-    expect(requestStand(h.state, { standId: 'X9', tail: 'NW-FXA' }, 0, h.rng).ok).toBe(false);
-    const r = requestStand(h.state, { standId: 'R5', tail: 'NW-FXA' }, 0, h.rng);
+    expect(requestStand(h.state, { standId: 'X9', tail: 'AX-FXA' }, 0, h.rng).ok).toBe(false);
+    const r = requestStand(h.state, { standId: 'R5', tail: 'AX-FXA' }, 0, h.rng);
     h.state = applyMutations(h.state, r.ok ? r.mutations : []);
-    expect(requestStand(h.state, { standId: '24', tail: 'NW-FXA' }, 0, h.rng).ok).toBe(false);
+    expect(requestStand(h.state, { standId: '24', tail: 'AX-FXA' }, 0, h.rng).ok).toBe(false);
   });
 });
 
 describe('airport resources', () => {
   it('a tow takes a tug from the pool, arrives at its ETA and restores the pool when released', () => {
     const h = harness();
-    const r = requestResource(h.state, { kind: 'tow', station: 'MAN', tail: 'NW-FXA' }, 0, 4, h.rng);
+    const r = requestResource(h.state, { kind: 'tow', station: 'MAN', tail: 'AX-FXA' }, 0, 4, h.rng);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     h.state = applyMutations(h.state, r.mutations);

@@ -37,17 +37,17 @@ export const s04Scenario: Scenario = {
   id: 's04-lightning-strike-outstation',
   title: 'Lightning strike at outstation, no licensed engineer on site',
   narrative:
-    'Northwind Air NW-TQA reports a lightning strike on approach into Faro. The aircraft is on stand 5 with 212 passengers booked on the return NWD518 to Manchester. Northwind has no licensed engineer at Faro; a lightning-strike inspection is required before the next flight.',
+    'Accent Air AX-TQA reports a lightning strike on approach into Faro. The aircraft is on stand 5 with 212 passengers booked on the return ACX518 to Manchester. Accent Air has no licensed engineer at Faro; a lightning-strike inspection is required before the next flight.',
   visibility: 'public',
   inspiredBy: [],
   startSimTime: '2026-07-03T13:30:00Z',
   aircraft: {
-    tail: 'NW-TQA',
+    tail: 'AX-TQA',
     type: 'A321',
     station: 'FAO',
     stand: '5',
     nextSectors: [
-      { flight: 'NWD518', from: 'FAO', to: 'MAN', std: '2026-07-03T14:15:00Z', pax: 212, distanceKm: 1900 },
+      { flight: 'ACX518', from: 'FAO', to: 'MAN', std: '2026-07-03T14:15:00Z', pax: 212, distanceKm: 1900 },
     ],
     // Partial record on purpose: the defect history is not known, so the cockpit shows it as "Unknown".
     maintenance: { lastCheckType: 'A-check', lastCheckDate: '2026-06-21' },
@@ -61,12 +61,12 @@ export const s04Scenario: Scenario = {
       { kind: 'techlog', text: 'Lightning strike on approach, flash and bang, no abnormal indications.' },
       {
         kind: 'report',
-        text: 'Handler: no Northwind engineer on station today; a contract engineer may be available.',
+        text: 'Handler: no Accent Air engineer on station today; a contract engineer may be available.',
       },
     ],
   },
   world: {
-    spares: [{ tail: 'NW-PQT', type: 'A321', station: 'LGW', availableFromMinute: 30 }],
+    spares: [{ tail: 'AX-PQT', type: 'A321', station: 'LGW', availableFromMinute: 30 }],
     engineers: [
       {
         id: 'eng-m1',
@@ -118,26 +118,26 @@ export const s04Scenario: Scenario = {
       },
     ],
     cohorts: [
-      { id: 'c-general', kind: 'general', count: 168, flight: 'NWD518' },
+      { id: 'c-general', kind: 'general', count: 168, flight: 'ACX518' },
       {
         id: 'c-families',
         kind: 'families',
         count: 18,
-        flight: 'NWD518',
+        flight: 'ACX518',
         notes: 'Six families with young children',
       },
-      { id: 'c-prm', kind: 'prm', count: 4, flight: 'NWD518', notes: 'Three WCHR, one WCHS' },
+      { id: 'c-prm', kind: 'prm', count: 4, flight: 'ACX518', notes: 'Three WCHR, one WCHS' },
       {
         id: 'c-connections',
         kind: 'connections',
         count: 22,
-        flight: 'NWD518',
+        flight: 'ACX518',
         onwardDeadline: '2026-07-03T19:30:00Z',
         notes: 'Onward domestic connections at MAN',
       },
     ],
     stands: [
-      { id: '5', station: 'FAO', kind: 'contact', occupiedByTail: 'NW-TQA' },
+      { id: '5', station: 'FAO', kind: 'contact', occupiedByTail: 'AX-TQA' },
       { id: '7', station: 'FAO', kind: 'contact' },
     ],
     handler: {
@@ -161,8 +161,8 @@ export const s04Scenario: Scenario = {
     curfews: [],
     rotation: [
       {
-        flight: 'NWD517',
-        tail: 'NW-TQA',
+        flight: 'ACX517',
+        tail: 'AX-TQA',
         from: 'MAN',
         to: 'FAO',
         std: '2026-07-03T10:05:00Z',
@@ -170,8 +170,8 @@ export const s04Scenario: Scenario = {
         pax: 208,
       },
       {
-        flight: 'NWD518',
-        tail: 'NW-TQA',
+        flight: 'ACX518',
+        tail: 'AX-TQA',
         from: 'FAO',
         to: 'MAN',
         std: '2026-07-03T14:15:00Z',
@@ -179,8 +179,8 @@ export const s04Scenario: Scenario = {
         pax: 212,
       },
       {
-        flight: 'NWD540',
-        tail: 'NW-TQA',
+        flight: 'ACX540',
+        tail: 'AX-TQA',
         from: 'MAN',
         to: 'AMS',
         std: '2026-07-03T17:10:00Z',
@@ -197,7 +197,7 @@ export const s04Scenario: Scenario = {
       description:
         'Airport operations close the ramp for 20 minutes while a thunderstorm cell passes overhead.',
       effects: [
-        { op: 'delay', flight: 'NWD518', minutes: 20 },
+        { op: 'delay', flight: 'ACX518', minutes: 20 },
         { op: 'info', text: 'Airport: ramp operations suspended for 20 minutes (lightning within 5 km).' },
       ],
     },
@@ -231,7 +231,7 @@ export const s04Scenario: Scenario = {
     {
       atMinute: 20,
       actor: 'Maintenance control',
-      action: { tool: 'page_engineer', args: { engineerId: 'eng-m1', tail: 'NW-TQA' } },
+      action: { tool: 'page_engineer', args: { engineerId: 'eng-m1', tail: 'AX-TQA' } },
       note: 'Home-base engineer called by phone to fly out.',
     },
     {
@@ -411,16 +411,16 @@ export function buildS04Agent(): RunEvent[] {
   });
   const trig = r.put(3, WORLD, 'mne', 'defects', 'def-4', {
     id: 'def-4',
-    tail: 'NW-TQA',
+    tail: 'AX-TQA',
     description: 'Lightning strike on approach into FAO: inspection required before next flight',
     ata: '05',
     status: 'open',
     raisedAtMinute: 3,
   });
-  r.patch(3, WORLD, 'mne', 'aircraft', 'NW-TQA', { status: 'unserviceable' });
+  r.patch(3, WORLD, 'mne', 'aircraft', 'AX-TQA', { status: 'unserviceable' });
   k.primaryDelay = 60;
   k.reactionary = 40;
-  r.patch(3, WORLD, 'occ', 'flights', 'NWD518', { status: 'delayed', delayMin: 60 });
+  r.patch(3, WORLD, 'occ', 'flights', 'ACX518', { status: 'delayed', delayMin: 60 });
   k.seqs.cost.push(trig.seq);
 
   r.push(
@@ -438,16 +438,16 @@ export function buildS04Agent(): RunEvent[] {
     'Brief all specialists in parallel and get passengers informed early.',
   );
   let t = call('orch', 3.5, 1, 'open_incident', 'runtime', 'execute', {
-    title: 'NW-TQA lightning strike at FAO',
+    title: 'AX-TQA lightning strike at FAO',
     severity: 'high',
   });
-  timeline(3.5, 'orch', 'Incident opened: NW-TQA lightning strike at FAO (NWD518)');
+  timeline(3.5, 'orch', 'Incident opened: AX-TQA lightning strike at FAO (ACX518)');
   result('orch', 3.5, 1, t, 'open_incident', true, { incidentId: 'inc-s04-1' });
   const briefs: [Id, string][] = [
-    ['mx', 'Establish the inspection requirement and every way to get a licensed engineer to NW-TQA.'],
-    ['ops', 'Assess spare aircraft, crew FDP and the knock-on for NWD540.'],
-    ['pax', 'Inform NWD518 passengers early; PRM and connections first.'],
-    ['gnd', 'Keep NW-TQA on stand 5 and plan the terminal holding for 212 passengers.'],
+    ['mx', 'Establish the inspection requirement and every way to get a licensed engineer to AX-TQA.'],
+    ['ops', 'Assess spare aircraft, crew FDP and the knock-on for ACX540.'],
+    ['pax', 'Inform ACX518 passengers early; PRM and connections first.'],
+    ['gnd', 'Keep AX-TQA on stand 5 and plan the terminal holding for 212 passengers.'],
   ];
   for (const [id, brief] of briefs) {
     const c = call('orch', 3.6, 1, 'delegate', 'runtime', 'execute', { role: role[id], brief });
@@ -473,9 +473,9 @@ export function buildS04Agent(): RunEvent[] {
       'Fixture text: after a reported lightning strike, a licensed engineer inspects entry and exit points before the next flight.',
     ),
   ]);
-  t = call('mx', 4.3, 1, 'get_aircraft_status', 'mne', 'execute', { tail: 'NW-TQA' });
+  t = call('mx', 4.3, 1, 'get_aircraft_status', 'mne', 'execute', { tail: 'AX-TQA' });
   result('mx', 4.3, 1, t, 'get_aircraft_status', true, {
-    tail: 'NW-TQA',
+    tail: 'AX-TQA',
     status: 'unserviceable',
     openDefects: ['def-4'],
   });
@@ -483,15 +483,15 @@ export function buildS04Agent(): RunEvent[] {
     'mx',
     4.6,
     2,
-    'No Northwind B1 at FAO. Options: a contract B1 at FAO from about minute 20, or Callum Brightwater flying from MAN.',
+    'No Accent Air B1 at FAO. Options: a contract B1 at FAO from about minute 20, or Callum Brightwater flying from MAN.',
   );
 
   thought('ops', 4.8, 1, 'Check spares and crew FDP before any option goes to the Duty Manager.');
   t = call('ops', 4.9, 1, 'find_spare_aircraft', 'occ', 'execute', { type: 'A321', near: 'FAO' });
   result('ops', 5.0, 1, t, 'find_spare_aircraft', true, {
-    candidates: [{ tail: 'NW-PQT', station: 'LGW', availableFromMinute: 30 }],
+    candidates: [{ tail: 'AX-PQT', station: 'LGW', availableFromMinute: 30 }],
   });
-  t = call('ops', 5.1, 1, 'get_crew_fdp', 'crew', 'execute', { flight: 'NWD518' });
+  t = call('ops', 5.1, 1, 'get_crew_fdp', 'crew', 'execute', { flight: 'ACX518' });
   result('ops', 5.2, 1, t, 'get_crew_fdp', true, { minRemainingFdpMin: 315, limitingCrew: 'crew-cpt-4' });
 
   thought(
@@ -501,7 +501,7 @@ export function buildS04Agent(): RunEvent[] {
     'Two hundred and twelve passengers are at the gate expecting to board at 13:45; tell them now.',
   );
   const body1 =
-    'NWD518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.';
+    'ACX518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.';
   t = call('pax', 5.6, 1, 'draft_passenger_message', 'pss', 'execute', {
     cohortIds: COHORTS,
     channel: 'sms',
@@ -530,7 +530,7 @@ export function buildS04Agent(): RunEvent[] {
       toolCallId: send1,
       tool: 'send_passenger_message',
       args: { messageId: 'msg-41', cohortIds: COHORTS, channel: 'sms', body: body1, requestId: req(send1) },
-      summary: 'Send the first message to all 212 NWD518 passengers (SMS).',
+      summary: 'Send the first message to all 212 ACX518 passengers (SMS).',
       reasoning:
         'Boarding was due at 13:45. The message explains the inspection in plain words and gives the next update time.',
       expiresAtMinute: 15,
@@ -542,11 +542,11 @@ export function buildS04Agent(): RunEvent[] {
     env('pax', 1),
   );
 
-  thought('gnd', 6.0, 1, 'Keep NW-TQA on stand 5; hold passengers airside with seating near gate 5.');
+  thought('gnd', 6.0, 1, 'Keep AX-TQA on stand 5; hold passengers airside with seating near gate 5.');
   t = call('gnd', 6.1, 1, 'notify_handler', 'handler', 'execute', {
     station: 'FAO',
     kind: 'gate_hold',
-    note: 'Hold NWD518 passengers at gate 5; PRM seating',
+    note: 'Hold ACX518 passengers at gate 5; PRM seating',
   });
   r.put(6.1, agent('ground'), 'handler', 'tasks', 'ht-41', {
     id: 'ht-41',
@@ -554,7 +554,7 @@ export function buildS04Agent(): RunEvent[] {
     kind: 'gate_hold',
     status: 'queued',
     ackAtMinute: 11,
-    note: 'Hold NWD518 passengers at gate 5; PRM seating',
+    note: 'Hold ACX518 passengers at gate 5; PRM seating',
   });
   result('gnd', 6.1, 1, t, 'notify_handler', true, { taskId: 'ht-41' });
 
@@ -635,7 +635,7 @@ export function buildS04Agent(): RunEvent[] {
     'Four alternatives are ready; the contract engineer is fastest and keeps the evening rotation.',
   );
   const decTc = call('orch', 14.2, 2, 'request_decision', 'runtime', 'propose', {
-    question: 'How do we get NW-TQA inspected and NWD518 away?',
+    question: 'How do we get AX-TQA inspected and ACX518 away?',
   });
   r.push(
     'agent.proposal',
@@ -645,9 +645,9 @@ export function buildS04Agent(): RunEvent[] {
       approvalId: 'ap4-decision-1',
       toolCallId: decTc,
       tool: 'request_decision',
-      args: { question: 'How do we get NW-TQA inspected and NWD518 away?', flight: 'NWD518' },
+      args: { question: 'How do we get AX-TQA inspected and ACX518 away?', flight: 'ACX518' },
       summary:
-        'Choose how to recover NWD518: contract a local B1 (recommended), fly a B1 from MAN, ferry a spare from LGW, or cancel.',
+        'Choose how to recover ACX518: contract a local B1 (recommended), fly a B1 from MAN, ferry a spare from LGW, or cancel.',
       reasoning:
         'A licensed inspection is mandatory. The contract B1 at FAO is available from minute 20 and needs a carrier authorisation. Flying an engineer or a spare crosses the 3-hour threshold for 212 passengers and needs fresh crew (FDP cannot be extended by software).',
       options: [
@@ -677,7 +677,7 @@ export function buildS04Agent(): RunEvent[] {
         },
         {
           id: 'opt-spare',
-          label: 'Ferry spare NW-PQT from LGW',
+          label: 'Ferry spare AX-PQT from LGW',
           metrics: {
             timeToDepartureMin: 225,
             costEur: 118900,
@@ -689,7 +689,7 @@ export function buildS04Agent(): RunEvent[] {
         },
         {
           id: 'opt-cancel',
-          label: 'Cancel NWD518; rebook on NWD516 tomorrow',
+          label: 'Cancel ACX518; rebook on ACX516 tomorrow',
           metrics: {
             timeToDepartureMin: 1200,
             costEur: 145700,
@@ -731,7 +731,7 @@ export function buildS04Agent(): RunEvent[] {
   result('orch', 19.5, 2, decTc, 'request_decision', true, { selectedOptionId: 'opt-contract' });
   timeline(19.6, 'orch', 'Duty Manager chose the contract B1 engineer at FAO');
   thought('mx', 19.8, 3, 'Page the contract engineer Rui Almada and open the inspection work order.');
-  t = call('mx', 20.0, 3, 'page_engineer', 'engineers', 'execute', { engineerId: 'eng-f1', tail: 'NW-TQA' });
+  t = call('mx', 20.0, 3, 'page_engineer', 'engineers', 'execute', { engineerId: 'eng-f1', tail: 'AX-TQA' });
   const pg = r.patch(
     20.0,
     agent('maintenance'),
@@ -750,7 +750,7 @@ export function buildS04Agent(): RunEvent[] {
     'wo-41',
     {
       id: 'wo-41',
-      tail: 'NW-TQA',
+      tail: 'AX-TQA',
       defectId: 'def-4',
       task: 'Lightning strike inspection (entry/exit points)',
       status: 'assigned',
@@ -763,7 +763,7 @@ export function buildS04Agent(): RunEvent[] {
   );
   k.primaryDelay = 80;
   k.reactionary = 50;
-  const f1 = r.patch(20.3, WORLD, 'occ', 'flights', 'NWD518', { delayMin: 80 }, { causedBySeq: d2.seq });
+  const f1 = r.patch(20.3, WORLD, 'occ', 'flights', 'ACX518', { delayMin: 80 }, { causedBySeq: d2.seq });
   k.seqs.cost.push(d2.seq, pg.seq, f1.seq);
   r.kpiUpdate(20.4);
 
@@ -775,7 +775,7 @@ export function buildS04Agent(): RunEvent[] {
     'The contract engineer arrives at about 14:20; tell passengers and set the next update.',
   );
   const body2 =
-    'NWD518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.';
+    'ACX518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.';
   const send2 = call('pax', 20.8, 2, 'send_passenger_message', 'pss', 'propose', {
     cohortIds: COHORTS,
     channel: 'sms',
@@ -837,7 +837,7 @@ export function buildS04Agent(): RunEvent[] {
   });
   k.primaryDelay = 100;
   k.reactionary = 65;
-  const f2 = r.patch(24, WORLD, 'occ', 'flights', 'NWD518', { delayMin: 100 }, { causedBySeq: tw.seq });
+  const f2 = r.patch(24, WORLD, 'occ', 'flights', 'ACX518', { delayMin: 100 }, { causedBySeq: tw.seq });
   k.seqs.cost.push(tw.seq, f2.seq);
   thought(
     'orch',
@@ -866,7 +866,7 @@ export function buildS04Agent(): RunEvent[] {
   );
   k.primaryDelay = 130;
   k.reactionary = 85;
-  const f3 = r.patch(25, WORLD, 'occ', 'flights', 'NWD518', { delayMin: 130 }, { causedBySeq: twEta.seq });
+  const f3 = r.patch(25, WORLD, 'occ', 'flights', 'ACX518', { delayMin: 130 }, { causedBySeq: twEta.seq });
   k.seqs.cost.push(twEta.seq, f3.seq);
   r.push('approval.invalidated', 25.05, WORLD, {
     approvalId: 'ap4-msg-2',
@@ -894,15 +894,15 @@ export function buildS04Agent(): RunEvent[] {
     1,
     'The engineer now arrives about 15:00 local; the 14:20 message is wrong. Re-check the manifest and the exposure first.',
   );
-  t = call('rev', 25.4, 1, 'get_manifest_summary', 'pss', 'execute', { flight: 'NWD518' });
+  t = call('rev', 25.4, 1, 'get_manifest_summary', 'pss', 'execute', { flight: 'ACX518' });
   result('rev', 25.5, 1, t, 'get_manifest_summary', true, {
-    flight: 'NWD518',
+    flight: 'ACX518',
     pax: 212,
     prm: 4,
     connections: 21,
   });
   t = call('rev', 25.6, 1, 'estimate_eu261_exposure', 'pss', 'execute', {
-    flight: 'NWD518',
+    flight: 'ACX518',
     projectedDelayMin: 130,
   });
   result('rev', 25.7, 1, t, 'estimate_eu261_exposure', true, {
@@ -910,7 +910,7 @@ export function buildS04Agent(): RunEvent[] {
     threeHourRisk: 'rising',
   });
   const body3 =
-    'NWD518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.';
+    'ACX518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.';
   const send3 = call('rev', 26.0, 2, 'send_passenger_message', 'pss', 'propose', {
     cohortIds: COHORTS,
     channel: 'sms',
@@ -1095,14 +1095,14 @@ export function buildS04Agent(): RunEvent[] {
     system: 'engineers',
     entity: 'engineers',
     id: 'eng-f1',
-    change: 'Contract engineer on site at NW-TQA',
+    change: 'Contract engineer on site at AX-TQA',
   });
   r.patch(78, WORLD, 'engineers', 'engineers', 'eng-f1', { status: 'on_site', location: 'FAO' });
   r.patch(78, WORLD, 'mne', 'workOrders', 'wo-41', { status: 'in_progress', progressPct: 10 });
   r.put(80, agent('record'), 'record', 'reports', 'rep-41', {
     id: 'rep-41',
     kind: 'occurrence',
-    body: 'DRAFT for a named reporter. NW-TQA (NWD517) reported a lightning strike on approach into FAO on 3 July. No abnormal indications. Inspection by a contract B1 engineer arranged; passengers held at the gate with meal vouchers.',
+    body: 'DRAFT for a named reporter. AX-TQA (ACX517) reported a lightning strike on approach into FAO on 3 July. No abnormal indications. Inspection by a contract B1 engineer arranged; passengers held at the gate with meal vouchers.',
     status: 'draft',
     forHumanReporter: true,
     aiDrafted: true,
@@ -1124,7 +1124,7 @@ export function buildS04Agent(): RunEvent[] {
     'Inspection complete and within limits; the release is the certifying engineer’s decision, to be recorded against his name.',
   );
   const engTc = call('mx', 100.6, 4, 'record_engineering_decision', 'mne', 'propose', {
-    tail: 'NW-TQA',
+    tail: 'AX-TQA',
     decision: 'release',
   });
   r.push(
@@ -1136,11 +1136,11 @@ export function buildS04Agent(): RunEvent[] {
       toolCallId: engTc,
       tool: 'record_engineering_decision',
       args: {
-        tail: 'NW-TQA',
+        tail: 'AX-TQA',
         decision: 'release',
         rationale: 'Lightning strike inspection complete; exit marks within limits.',
       },
-      summary: 'Record Rui Almada’s release of NW-TQA after the lightning-strike inspection.',
+      summary: 'Record Rui Almada’s release of AX-TQA after the lightning-strike inspection.',
       reasoning: 'Release is reserved to certifying staff; this captures his decision so boarding can start.',
       tier: 'propose',
       unresolvedChecks: ['Certificate of release signed by the certifying engineer'],
@@ -1172,7 +1172,7 @@ export function buildS04Agent(): RunEvent[] {
     'ed-41',
     {
       id: 'ed-41',
-      tail: 'NW-TQA',
+      tail: 'AX-TQA',
       decision: 'release',
       decidedBy: CERT,
       atMinute: 103,
@@ -1185,7 +1185,7 @@ export function buildS04Agent(): RunEvent[] {
     agent('maintenance'),
     'mne',
     'aircraft',
-    'NW-TQA',
+    'AX-TQA',
     { status: 'released' },
     { causedBySeq: d5.seq },
   );
@@ -1193,23 +1193,23 @@ export function buildS04Agent(): RunEvent[] {
   r.push('world.process', 108, WORLD, {
     system: 'occ',
     entity: 'flights',
-    id: 'NWD518',
-    change: 'Boarding NWD518',
+    id: 'ACX518',
+    change: 'Boarding ACX518',
   });
-  r.patch(108, WORLD, 'occ', 'flights', 'NWD518', { status: 'boarding' });
+  r.patch(108, WORLD, 'occ', 'flights', 'ACX518', { status: 'boarding' });
   r.push('world.process', 122, WORLD, {
     system: 'occ',
     entity: 'flights',
-    id: 'NWD518',
-    change: 'NWD518 departed',
+    id: 'ACX518',
+    change: 'ACX518 departed',
   });
   k.primaryDelay = 77;
   k.reactionary = 30;
   k.resolved = true;
-  const dep = r.patch(122, WORLD, 'occ', 'flights', 'NWD518', { status: 'departed', delayMin: 77 });
+  const dep = r.patch(122, WORLD, 'occ', 'flights', 'ACX518', { status: 'departed', delayMin: 77 });
   k.seqs.cost.push(dep.seq);
   k.seqs.compliance.push(dep.seq);
-  timeline(122.2, 'orch', 'NWD518 departed 77 minutes late after the contract engineer’s release');
+  timeline(122.2, 'orch', 'ACX518 departed 77 minutes late after the contract engineer’s release');
   for (const id of ['mx', 'ops', 'pax', 'gnd'] as Id[]) {
     r.push(
       'agent.report',
@@ -1218,7 +1218,7 @@ export function buildS04Agent(): RunEvent[] {
       {
         role: role[id],
         report: {
-          summary: `${role[id]} work complete for NW-TQA.`,
+          summary: `${role[id]} work complete for AX-TQA.`,
           actionsTaken: [],
           openIssues: [],
           recommendations: [],
@@ -1246,7 +1246,7 @@ export function buildS04Agent(): RunEvent[] {
       role: 'orchestrator',
       report: {
         summary:
-          'NWD518 departed 77 minutes late after a contract B1 inspection chosen by the Duty Manager from four options. An FDP extension attempt was blocked.',
+          'ACX518 departed 77 minutes late after a contract B1 inspection chosen by the Duty Manager from four options. An FDP extension attempt was blocked.',
         actionsTaken: [
           'Options decision',
           'Meal vouchers after a rejected refreshment proposal',
@@ -1299,7 +1299,7 @@ export function buildS04Baseline(): RunEvent[] {
   r.kpiUpdate(0);
   r.put(3, WORLD, 'mne', 'defects', 'def-4', {
     id: 'def-4',
-    tail: 'NW-TQA',
+    tail: 'AX-TQA',
     description: 'Lightning strike on approach into FAO: inspection required before next flight',
     ata: '05',
     status: 'open',
@@ -1307,12 +1307,12 @@ export function buildS04Baseline(): RunEvent[] {
   });
   k.primaryDelay = 60;
   k.reactionary = 40;
-  r.patch(3, WORLD, 'occ', 'flights', 'NWD518', { status: 'delayed', delayMin: 60 });
+  r.patch(3, WORLD, 'occ', 'flights', 'ACX518', { status: 'delayed', delayMin: 60 });
   const pg = act(
     20,
     'Maintenance control',
     'page_engineer',
-    { engineerId: 'eng-m1', tail: 'NW-TQA' },
+    { engineerId: 'eng-m1', tail: 'AX-TQA' },
     'Home-base engineer called by phone to fly out.',
   );
   r.patch(
@@ -1351,7 +1351,7 @@ export function buildS04Baseline(): RunEvent[] {
       id: 'msg-b41',
       cohortIds: COHORTS,
       channel: 'sms',
-      body: 'NWD518 is delayed for technical reasons. We apologise for the inconvenience.',
+      body: 'ACX518 is delayed for technical reasons. We apologise for the inconvenience.',
       status: 'sent',
       aiDrafted: true,
       sentAtMinute: 38,

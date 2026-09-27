@@ -2,7 +2,7 @@
   "name": "@ica/evals",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — Evaluation harness, cases, rubrics, recorded fixtures, reports and the lifetime-budget ledger. Owned by task 02.",
+  "description": "Incident Coordination Agent — Evaluation harness, cases, rubrics, recorded fixtures, reports and the lifetime-budget ledger. Owned by task 02.",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {

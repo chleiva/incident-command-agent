@@ -136,7 +136,7 @@ export function caseJsonSchema(): Record<string, unknown> {
   return {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     $id: 'urn:incident-command-agent:schema:eval-case:1',
-    title: 'Ground Incident Coordination Agent eval case',
+    title: 'Incident Coordination Agent eval case',
     ...(JSON.parse(JSON.stringify(EvalCaseSchema)) as Record<string, unknown>),
   };
 }

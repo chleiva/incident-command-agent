@@ -129,7 +129,7 @@ describe('format', () => {
 describe('evidence pack', () => {
   const view = foldEvents(S01.agent);
   const input = {
-    carrierName: 'Northwind Air',
+    carrierName: 'Accent Air',
     disclaimer: 'Simulated systems · fictional carrier',
     scenarioTitle: S01.scenario.title,
     runId: 'run-demo-s01',

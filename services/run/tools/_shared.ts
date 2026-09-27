@@ -20,8 +20,8 @@ import type { Result } from '../systems/util';
 
 // ---------------------------------------------------------------- schema fragments (strict, bounded)
 export const S = {
-  tail: { type: 'string', pattern: TAIL_PATTERN, description: 'Tail, e.g. NW-ABC' },
-  flight: { type: 'string', pattern: FLIGHT_NUMBER_PATTERN, description: 'Flight number, e.g. NWD123' },
+  tail: { type: 'string', pattern: TAIL_PATTERN, description: 'Tail, e.g. AX-ABC' },
+  flight: { type: 'string', pattern: FLIGHT_NUMBER_PATTERN, description: 'Flight number, e.g. ACX123' },
   station: { type: 'string', pattern: IATA_PATTERN, description: 'IATA station code, e.g. MAN' },
   id: { type: 'string', minLength: 1, maxLength: 48, pattern: '^[A-Za-z0-9:_.#-]+$' },
   melItem: {

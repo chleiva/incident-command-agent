@@ -3,84 +3,123 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * Home: the scenario picker, the AuthorBox and recent runs. The evaluation report is not fetched here: it is an
- * offline QA artefact, loaded only on the /evals page (owner decision: keep evals out of the operational flow).
+ * Home: Accent Air's live network. The fictional day schedule is replayed against the real UTC wall clock and
+ * computed entirely in the browser (zero backend cost while idle). Pick a flight on the map or in the list to open
+ * its panel; "Report incident" starts a coordinated response from the flight's context.
  */
-import type { RunMeta, ScenarioSummary } from '@ica/schema/browser';
-import { useEffect, useState } from 'react';
+import { findFlight } from '@ica/network';
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useRunActions } from '../app/actions';
 import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
-import { AuthorBox } from '../components/presenter/AuthorBox';
-import { ScenarioPicker } from '../components/presenter/ScenarioPicker';
-import { RecentRuns } from '../components/home/HomePanels';
-import { Skeleton, type LoadStatus } from '../components/ui/primitives';
+import { FlightList } from '../components/network/FlightList';
+import { FlightPanel } from '../components/network/FlightPanel';
+import { LiveNetworkMap } from '../components/network/LiveNetworkMap';
+import { NetworkClockBar } from '../components/network/NetworkClockBar';
+import { ReportIncidentDialog } from '../components/network/ReportIncidentDialog';
+import { useNetworkClock, useNetworkSchedule, useNetworkTime } from '../lib/networkClock';
 
-function useLoad<T>(
-  load: () => Promise<T>,
-  deps: unknown[] = [],
-): { data: T | null; status: LoadStatus; error: string | null } {
-  const [state, setState] = useState<{ data: T | null; status: LoadStatus; error: string | null }>({
-    data: null,
-    status: 'loading',
-    error: null,
-  });
-  useEffect(() => {
-    let alive = true;
-    load().then(
-      (data) => alive && setState({ data, status: 'ready', error: null }),
-      (e: unknown) =>
-        alive && setState({ data: null, status: 'error', error: e instanceof Error ? e.message : String(e) }),
-    );
-    return () => {
-      alive = false;
-    };
-  }, deps);
-  return state;
-}
+const LIST_W = 360;
+const PANEL_W = 420;
 
 export default function Home() {
-  const { api, canRun } = useServices();
+  const t = useNetworkTime(1000);
+  const schedule = useNetworkSchedule(t);
+  const [params, setParams] = useSearchParams();
+  const selected = params.get('flight');
+  const [hovered, setHovered] = useState<string | null>(null);
+  const flight = selected ? findFlight(schedule, selected) : undefined;
+  const [reporting, setReporting] = useState<number | null>(null);
+  const seed = useNetworkClock((s) => s.seed);
+  const { mode } = useServices();
   const actions = useRunActions();
-  const scenarios = useLoad<ScenarioSummary[]>(() => api.listScenarios().then((r) => r.items));
-  const runs = useLoad<RunMeta[]>(() => api.listRuns(12).then((r) => r.items));
-  const [starting, setStarting] = useState<string | null>(null);
+
+  const select = useCallback(
+    (f: string | null) => {
+      const next = new URLSearchParams(params);
+      if (f) next.set('flight', f);
+      else next.delete('flight');
+      setParams(next, { replace: true });
+    },
+    [params, setParams],
+  );
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selected && !document.querySelector('[role="dialog"]')) select(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selected, select]);
 
   return (
     <AppShell>
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-6 py-6">
-        <div>
-          <h1 className="text-display text-fg">Ground incident coordination</h1>
-          <p className="mt-1 max-w-[70ch] text-body-lg text-fg-muted">
-            Pick an incident. Specialist agents coordinate the response on simulated airline systems; anything
-            that affects people or airworthiness waits for a human decision.
+      <div className="relative h-[calc(100vh-3rem)] min-h-[520px] overflow-hidden bg-bg">
+        <h1 className="sr-only">Live network</h1>
+        <LiveNetworkMap
+          schedule={schedule}
+          selected={selected}
+          hovered={hovered}
+          onSelect={select}
+          onHover={setHovered}
+          insetLeft={LIST_W + 16}
+          insetRight={flight ? PANEL_W + 16 : 0}
+        />
+        <div className="absolute bottom-3 left-3 top-3 z-10 hidden md:block" style={{ width: LIST_W }}>
+          <FlightList schedule={schedule} t={t} selected={selected} onSelect={select} onHover={setHovered} />
+        </div>
+        <div
+          className="pointer-events-none absolute top-3 z-10 flex flex-col items-center gap-1"
+          style={{ left: LIST_W + 24, right: flight ? PANEL_W + 24 : 12 }}
+        >
+          <div className="pointer-events-auto">
+            <NetworkClockBar t={t} />
+          </div>
+          <p className="max-w-[70ch] text-center text-micro text-fg-subtle">
+            {schedule.carrier.name} · fictional day schedule on the real UTC clock, computed in your browser.
+            Airports are real; flights, aircraft and people are fictional.
           </p>
         </div>
-        <ScenarioPicker
-          scenarios={scenarios.data ?? []}
-          status={scenarios.status}
-          error={scenarios.error}
-          starting={starting}
-          unavailableReason={(id) => (canRun && !canRun(id) ? 'Mock mode: needs the local dev server' : null)}
-          onStart={async (id, opts) => {
-            setStarting(id);
-            await actions.start(id, opts);
-            setStarting(null);
-          }}
-        />
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <AuthorBox
-            onAuthor={(text) => api.authorScenario(text)}
-            onStart={(id) => void actions.start(id, { withBaseline: false, speed: 6 })}
-          />
-          <div className="flex flex-col gap-4">
-            {runs.status === 'loading' ? (
-              <Skeleton className="h-40" />
-            ) : (
-              <RecentRuns runs={runs.data ?? []} status={runs.status} error={runs.error} />
-            )}
+        {flight && (
+          <div
+            className="absolute bottom-3 right-3 top-3 z-20"
+            style={{ width: PANEL_W, maxWidth: 'calc(100% - 24px)' }}
+          >
+            <FlightPanel
+              schedule={schedule}
+              flight={flight}
+              t={t}
+              onClose={() => select(null)}
+              onReport={() => setReporting(t)}
+            />
           </div>
-        </div>
+        )}
+        {flight && (
+          <ReportIncidentDialog
+            open={reporting !== null}
+            onOpenChange={(o) => !o && setReporting(null)}
+            schedule={schedule}
+            flight={flight}
+            t={reporting ?? t}
+            mode={mode === 'mock' ? 'mock' : 'live'}
+            onStart={(r) =>
+              actions.startFromFlight(
+                {
+                  flightContext: {
+                    seed,
+                    date: schedule.date,
+                    flightId: flight.flight,
+                    at: new Date(reporting ?? t).toISOString(),
+                  },
+                  incidentType: r.incidentType,
+                  ...(r.text ? { text: r.text } : {}),
+                },
+                { withBaseline: r.withBaseline, speed: r.speed },
+              )
+            }
+          />
+        )}
       </div>
     </AppShell>
   );

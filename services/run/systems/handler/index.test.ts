@@ -28,14 +28,14 @@ describe('handler', () => {
     const h = harness();
     const r = createHandlerTask(
       h.state,
-      { station: 'MAN', kind: 'stairs', tail: 'NW-FXA', equipmentKind: 'stairs' },
+      { station: 'MAN', kind: 'stairs', tail: 'AX-FXA', equipmentKind: 'stairs' },
       0,
       4,
       h.rng,
     );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.note).toBe('Position passenger stairs for NW-FXA (1 × stairs reserved)');
+    expect(r.value.note).toBe('Position passenger stairs for AX-FXA (1 × stairs reserved)');
     h.state = applyMutations(h.state, r.mutations);
     expect(h.state.handler.equipment['MAN:stairs'].available).toBe(2);
     const t = r.value;

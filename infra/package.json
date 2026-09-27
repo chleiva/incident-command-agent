@@ -2,7 +2,7 @@
   "name": "@ica/infra",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — AWS CDK v2 app: DataStack, ApiStack, WebStack and the us-east-1 WebWafStack. Owned by task 04.",
+  "description": "Incident Coordination Agent — AWS CDK v2 app: DataStack, ApiStack, WebStack and the us-east-1 WebWafStack. Owned by task 04.",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {

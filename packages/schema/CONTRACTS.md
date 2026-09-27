@@ -37,8 +37,8 @@ Packages are consumed as TypeScript source (no build). JSON fixtures: `@ica/sche
 | `Jurisdiction` | `EU, UK, US` |
 | `Actor` | `{kind:'agent', role}` · `{kind:'human', name, roleTitle}` · `{kind:'policy', policy:'baseline'\|'eval-auto'}` · `{kind:'world'}` |
 | `SCENARIO_IDS`, `SHIPPED_SCENARIOS` | the ten fixed ids (with title, station, twist) |
-| `CARRIER` | `{name:'Northwind Air', code:'NWD', mainBase:'MAN'}` |
-| Patterns | `FLIGHT_NUMBER_PATTERN` `^NWD[1-9][0-9]{2}$`, `TAIL_PATTERN` `^NW-[A-Z]{3}$`, `IATA_PATTERN`, `HHMM_PATTERN`, `SCENARIO_ID_PATTERN` `^[a-z0-9-]{3,64}$` |
+| `CARRIER` | `{name:'Accent Air', code:'ACX', mainBase:'MAN'}` |
+| Patterns | `FLIGHT_NUMBER_PATTERN` `^ACX[1-9][0-9]{2}$`, `TAIL_PATTERN` `^AX-[A-Z]{3}$`, `IATA_PATTERN`, `HHMM_PATTERN`, `SCENARIO_ID_PATTERN` `^[a-z0-9-]{3,64}$` |
 
 Human-only decisions (deferral, release, FDP extension, departure) must be recorded with `Actor.kind === 'human'`;
 the mne system only accepts a deferral/release from a human whose `roleTitle` contains "Certifying".
@@ -53,7 +53,7 @@ so authored scenarios cannot smuggle extra fields.
 Scenario { schemaVersion: 1; id; title; narrative (untrusted); visibility: 'public'|'private';
   inspiredBy: {sourceId, url, note}[]            // verified references only, never invented
   startSimTime: ISO                              // sim minute 0
-  aircraft: {tail NW-XXX, type A319|A320|A321|B737|B738|E190, station IATA, stand?, nextSectors: Sector[]}
+  aircraft: {tail AX-XXX, type A319|A320|A321|B737|B738|E190, station IATA, stand?, nextSectors: Sector[]}
   trigger: {type, atMinute, description, evidence: {kind: photo-description|techlog|report|sensor, text}[]}
   world: {spares[], engineers[], crew[], cohorts[], stands[], handler, weather, curfews[], rotation[], distanceTableKm?}
   twists: {id, title, atMinute? (omitted = manual only), description, effects: TwistEffect[]}[]
@@ -69,7 +69,7 @@ ExpectedConstraints = {noSoftwareDeferral, noFdpExtension, firstPaxMessageBefore
 
 - `validateScenario(x) → {ok:true, value} | {ok:false, errors: string[]}` runs the JSON Schema plus cross-field
   checks (duplicate engineer/crew/cohort/stand/twist ids). Errors are `"/json/pointer message"`.
-- Flight numbers (`nextSectors`, `rotation`, `cohorts`) must match `^NWD[1-9][0-9]{2}$`; tails `^NW-[A-Z]{3}$`.
+- Flight numbers (`nextSectors`, `rotation`, `cohorts`) must match `^ACX[1-9][0-9]{2}$`; tails `^AX-[A-Z]{3}$`.
 - `world.handler` and `world.weather` describe the **incident station**.
 - `DEFAULT_KPI_PARAMS` = €100/min, factor 1.8, €18,600 cancellation, €8/pax/h care, €120/pax accommodation.
 - `renderScenarioSchemaFile()`, `scenarioJsonSchema` (plain object), `SCENARIO_SCHEMA_ID`.
@@ -234,7 +234,7 @@ swapOrCancelDecisionMin|null}}`. Formulas: task 02 (`services/run/world/kpi.ts`)
 | `GET /scenarios` | – | `{items: ScenarioSummary[]}` |
 | `GET /scenarios/{id}` | – | `Scenario` |
 | `POST /scenarios/author` | `AuthorScenarioRequest {text ≤8000}` | `{scenario?, errors?, screening}` |
-| `POST /runs` | `CreateRunRequest {scenarioId, mode, speed? 1–30, pairedRunId?}` | `{runId}` |
+| `POST /runs` | `CreateRunRequest {scenarioId? \| flightContext {seed, date, flightId, at?} + incidentType (+ text?), mode, speed? 1–30, pairedRunId?}` (exactly one of `scenarioId` / `flightContext`) | `{runId, scenarioId?, screening?, authorFallback?}` |
 | `GET /runs?limit=` | – | `{items: RunMeta[]}` |
 | `GET /runs/{id}` | – | `RunMeta` |
 | `GET /runs/{id}/events?after=&limit=` | limit ≤ `MAX_EVENTS_PAGE` (500) | `{events, lastSeq, hasMore}` |
@@ -335,7 +335,7 @@ Additions beyond the task-01 brief (all optional or new, none breaking):
 | store (integration) | `lambdaSecretIds(env)`, `DEFAULT_SECRET_IDS`, `envHydratedSecretNames(env)`, `ENV_HYDRATED_SECRETS`, `hydrateEnvFromSecrets()` | one source of truth for the Lambda secret env names (`LLM_SECRET_ARN`/`SEARCH_SECRET_ARN`) shared by the Run and author Lambdas; web search / openai embedder keys copied into `process.env` |
 | runtime (integration) | `ToolContext.kpis?: KpiSnapshot` (latest world-engine snapshot, read-only); `EvidencePack.contents.kpis.snapshot` | `export_evidence_pack` attaches the KPI snapshot (spec: evidence pack includes KPIs) |
 | store (integration) | `Store.decideApproval(runId, approvalId, expectedStatus, patch): Promise<boolean>`, `ApprovalPatch` (MemoryStore; DynamoStore `UpdateCommand` with `ConditionExpression #s = :expected`) + conformance test | the API claims an approval atomically before writing `approval.decision`, so two simultaneous decisions cannot both be accepted |
-| schema (task 06) | `BrandPack.productName?` (default "Ground Incident Coordination Agent") | product rename; stack ids, package scope, table and bucket names unchanged (ADR 0007) |
+| schema (task 06) | `BrandPack.productName?` (default "Incident Coordination Agent") | product rename; stack ids, package scope, table and bucket names unchanged (ADR 0007) |
 | events (task 06) | `CONTROL_ACTIONS` + `demo_forbidden`; `DEMO_FORBIDDEN_TOOLS`; `control.requested.tool?`, `ControlRequest.tool?`; `agent.tool_call.presenterTriggered?`; `guardrail.blocked.{rule?, authority?, presenterTriggered?}` | presenter's "Demonstrate blocked action": a synthetic call through the REAL tier gate, counted like any attempt |
 | common/events (task 06) | `ApprovalScope`, `Assumption`, `ProvenanceFields` (`unresolvedChecks?`, `approvalScope?`, `citations?`, `dataAsOfMinute?`) on `agent.proposal`, `DecisionOption` and `AgentReport.recommendationDetails?` (`RecommendationDetail`) | every recommendation/decision card shows sources, timestamps, unresolved checks and approval scope |
 | common (task 06) | `ProvisionalReading {text, confidence?, unconfirmed: true}`, `AgentReport.provisionalReading?`, `PROVISIONAL_READING_LABEL` | a model's reading of a defect is never a status |
@@ -348,3 +348,7 @@ Additions beyond the task-01 brief (all optional or new, none breaking):
 | scenario (task 06) | `TwistEffect` `{op:'shift', system, entity, id, field, minutes}`; `ScenarioTwist.afterFirstApproval?` | the engineer-ETA +40 min twist that fires after the first approval (s01, s04) |
 | events (live-run fix) | `agent.tool_call.normalisedFrom?` (a role-named call such as `ground{brief}` run as `delegate{role, brief}` under the same toolCallId); `agent.tool_call.argsRepaired?` (keys recovered from tool-call markup the model leaked into a string argument) | live run 1: parallel delegation was blocked as "unknown tool"; a report "missed" `actionsTaken` because it was inside `summary`. Both repairs stay auditable and still pass arg validation and the tier gate |
 | common/events (live-run fix) | `AgentReportEventSchema` / `AgentReportEvent` = `AgentReport` + `extras?: Record<string, unknown>` (report keys the role schema does not define) + `composedByRuntime?: boolean`; used by `agent.report.report` and `ProjectedAgent.report`. The model-facing report schema is unchanged in shape, but relaxed at runtime: `actionsTaken` optional (merged with the agent's executed tool calls), unknown keys accepted | live run 1: a strict report schema made the agent send a placeholder report, which was accepted. Placeholder reports are now refused, and after 3 invalid attempts the runtime composes the report |
+| ids/scenario (task 07, **owner-approved breaking rename**) | Carrier rebrand to **Accent Air**: `CARRIER = {name:'Accent Air', code:'ACX', mainBase:'MAN'}`, `FLIGHT_NUMBER_PATTERN` `^ACX[1-9][0-9]{2}$` (was `NWD…`), `TAIL_PATTERN` `^AX-[A-Z]{3}$` (was `NW-…`); every shipped scenario, fixture, recording and eval case rewritten with the same seeds (only the codes changed) | owner decision 2026-09-27 (ADR 0007). The only deliberate non-additive contract change; scenarios authored with the old codes no longer validate |
+| network (task 07) | New package `@ica/network` (browser- and Node-safe): `generateDaySchedule(seed, date)`, `flightStateAt(flight, t)`, `suitableAirports(position, type, filters)` (options only, `OPTIONS_ONLY_NOTE`), `tailStatesAt`, `fdpMarginFor`, `cohortsFor`, station and airport-capability data (illustrative; fictional where invented) | the live-network home is computed in the browser at zero backend cost; the API rebuilds flight-context scenarios from the same code |
+| api (task 07) | `CreateRunRequest.scenarioId` optional (exactly one of `scenarioId` or the new `flightContext` is required, checked by the route); `flightContext {seed, date, flightId, at?}` (`FlightContextSchema`), `incidentType`, `text?`; `CreateRunResponse.{scenarioId?, screening?, authorFallback?}` | "Report incident" on a live-network flight: the server rebuilds the scenario with `@ica/network/templates` (never trusts a client scenario), runs the Scenario Author on screened free text, stores the scenario privately |
+| network (task 07) | `@ica/network/templates`: `INCIDENT_TYPES` (10 ground families + 5 airborne), `incidentContext`, `incidentTypesFor`, `buildScenarioFromFlight` (deterministic, schema-valid; `remap` for recordings), `authorRequestText`; `@ica/scenarios/templates` export (the static JSON index) | template-first incident reporting in the browser (preview, mock mode) and on the server (same code) |

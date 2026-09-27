@@ -9,6 +9,6 @@ import { create } from 'storybook/theming';
 addons.setConfig({
   theme: create({
     base: 'dark',
-    brandTitle: 'Ground Incident Coordination Agent · design system',
+    brandTitle: 'Incident Coordination Agent · design system',
   }),
 });

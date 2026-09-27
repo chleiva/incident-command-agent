@@ -1,0 +1,20 @@
+{
+  "name": "@ica/network",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Incident Coordination Agent — Accent Air's fictional day schedule, flight state at any time, diversion-airport options and flight-to-scenario templates. Browser- and Node-safe.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./templates": "./src/templates/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ica/schema": "*",
+    "@ica/scenarios": "*"
+  }
+}

@@ -170,22 +170,22 @@ push('run.created', 0, DUTY, {
 push('run.started', 0, WORLD, { speed: 6 });
 
 // seed mutations
-const aircraft = { tail: 'NW-FXA', type: 'A320', station: 'MAN', status: 'serviceable', stand: '22' };
+const aircraft = { tail: 'AX-FXA', type: 'A320', station: 'MAN', status: 'serviceable', stand: '22' };
 push('system.mutation', 0, WORLD, {
   system: 'mne',
   entity: 'aircraft',
-  id: 'NW-FXA',
+  id: 'AX-FXA',
   op: 'create',
   after: aircraft,
 });
 push('system.mutation', 0, WORLD, {
   system: 'occ',
   entity: 'flights',
-  id: 'NWD101',
+  id: 'ACX101',
   op: 'create',
   after: {
-    flight: 'NWD101',
-    tail: 'NW-FXA',
+    flight: 'ACX101',
+    tail: 'AX-FXA',
     from: 'MAN',
     to: 'DUB',
     std: '2026-06-12T06:10:00Z',
@@ -199,9 +199,9 @@ push('system.mutation', 0, WORLD, {
 push('system.mutation', 0, WORLD, {
   system: 'occ',
   entity: 'spares',
-  id: 'NW-FXB',
+  id: 'AX-FXB',
   op: 'create',
-  after: { tail: 'NW-FXB', type: 'A320', station: 'MAN', availableFromMinute: 45 },
+  after: { tail: 'AX-FXB', type: 'A320', station: 'MAN', availableFromMinute: 45 },
 });
 push('system.mutation', 0, WORLD, {
   system: 'pss',
@@ -212,7 +212,7 @@ push('system.mutation', 0, WORLD, {
     id: 'c-connections',
     kind: 'connections',
     count: 18,
-    flight: 'NWD101',
+    flight: 'ACX101',
     status: 'uninformed',
     careIssued: 0,
     onwardDeadline: '2026-06-12T08:30:00Z',
@@ -223,7 +223,7 @@ push('system.mutation', 0, WORLD, {
   entity: 'cohorts',
   id: 'c-prm',
   op: 'create',
-  after: { id: 'c-prm', kind: 'prm', count: 4, flight: 'NWD101', status: 'uninformed', careIssued: 0 },
+  after: { id: 'c-prm', kind: 'prm', count: 4, flight: 'ACX101', status: 'uninformed', careIssued: 0 },
 });
 const eng1 = {
   id: 'eng-1',
@@ -277,7 +277,7 @@ push('system.mutation', 2, WORLD, {
   op: 'create',
   after: {
     id: 'def-1',
-    tail: 'NW-FXA',
+    tail: 'AX-FXA',
     description: 'Intermittent FWD CARGO DOOR caution',
     ata: '52',
     status: 'open',
@@ -312,7 +312,7 @@ push(
     tool: 'open_incident',
     system: 'runtime',
     tier: 'execute',
-    args: { title: 'NW-FXA FWD cargo door caution', severity: 'medium' },
+    args: { title: 'AX-FXA FWD cargo door caution', severity: 'medium' },
   },
   { agentRunId: ORCH, iteration: 1 },
 );
@@ -324,7 +324,7 @@ push('system.mutation', 2.3, agent('orchestrator'), {
   after: {
     id: 'tl-1',
     atMinute: 2.3,
-    text: 'Incident opened: NW-FXA FWD cargo door caution',
+    text: 'Incident opened: AX-FXA FWD cargo door caution',
     source: 'orchestrator',
   },
 });
@@ -346,7 +346,7 @@ push(
     tier: 'execute',
     args: {
       role: 'maintenance',
-      brief: 'Assess the FWD cargo door caution on NW-FXA and get an engineer to the aircraft.',
+      brief: 'Assess the FWD cargo door caution on AX-FXA and get an engineer to the aircraft.',
     },
   },
   { agentRunId: ORCH, iteration: 1 },
@@ -360,7 +360,7 @@ push(
     tool: 'delegate',
     system: 'runtime',
     tier: 'execute',
-    args: { role: 'passenger', brief: 'Inform NWD101 passengers early; PRM and connections first.' },
+    args: { role: 'passenger', brief: 'Inform ACX101 passengers early; PRM and connections first.' },
   },
   { agentRunId: ORCH, iteration: 1 },
 );
@@ -372,7 +372,7 @@ push(
   agent('maintenance'),
   {
     role: 'maintenance',
-    brief: 'Assess the FWD cargo door caution on NW-FXA and get an engineer to the aircraft.',
+    brief: 'Assess the FWD cargo door caution on AX-FXA and get an engineer to the aircraft.',
     parentAgentRunId: ORCH,
   },
   { agentRunId: MX, parentAgentRunId: ORCH },
@@ -383,7 +383,7 @@ push(
   agent('passenger'),
   {
     role: 'passenger',
-    brief: 'Inform NWD101 passengers early; PRM and connections first.',
+    brief: 'Inform ACX101 passengers early; PRM and connections first.',
     parentAgentRunId: ORCH,
   },
   { agentRunId: PAX, parentAgentRunId: ORCH },
@@ -407,7 +407,7 @@ push(
     tool: 'get_aircraft_status',
     system: 'mne',
     tier: 'execute',
-    args: { tail: 'NW-FXA' },
+    args: { tail: 'AX-FXA' },
   },
   { agentRunId: MX, parentAgentRunId: ORCH, iteration: 1 },
 );
@@ -419,8 +419,8 @@ push(
     toolCallId: 'tc-4',
     tool: 'get_aircraft_status',
     ok: true,
-    resultPreview: '{"tail":"NW-FXA","status":"serviceable","openDefects":["def-1"]}',
-    result: { tail: 'NW-FXA', status: 'serviceable', openDefects: ['def-1'] },
+    resultPreview: '{"tail":"AX-FXA","status":"serviceable","openDefects":["def-1"]}',
+    result: { tail: 'AX-FXA', status: 'serviceable', openDefects: ['def-1'] },
   },
   { agentRunId: MX, parentAgentRunId: ORCH, iteration: 1 },
 );
@@ -467,7 +467,7 @@ push(
     tool: 'page_engineer',
     system: 'engineers',
     tier: 'execute',
-    args: { engineerId: 'eng-1', tail: 'NW-FXA' },
+    args: { engineerId: 'eng-1', tail: 'AX-FXA' },
   },
   { agentRunId: MX, parentAgentRunId: ORCH, iteration: 2 },
 );
@@ -508,7 +508,7 @@ const msgDraft = {
   id: 'msg-1',
   cohortIds: ['c-connections', 'c-prm'],
   channel: 'sms',
-  body: 'NWD101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.',
+  body: 'ACX101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.',
   status: 'draft',
   aiDrafted: true,
 };
@@ -606,7 +606,7 @@ push(
       id: 'c-connections',
       kind: 'connections',
       count: 18,
-      flight: 'NWD101',
+      flight: 'ACX101',
       status: 'informed',
       firstInformedAtMinute: 6.1,
       careIssued: 0,
@@ -725,7 +725,7 @@ push(
       summary: 'B1 engineer on site; door inspection under way. Deferral is a human decision.',
       actionsTaken: ['Paged eng-1 (on site at minute 11)', 'Checked the MEL'],
       openIssues: ['Rectify or swap decision by the certifying engineer'],
-      recommendations: ['Keep NW-FXB ready as a spare from minute 45'],
+      recommendations: ['Keep AX-FXB ready as a spare from minute 45'],
       citations: [
         {
           sourceId: 'fixture-mel',
@@ -786,8 +786,8 @@ push(
   14,
   agent('orchestrator'),
   {
-    text: 'There are real alternatives: wait for rectification or swap to NW-FXB. I will ask the duty manager.',
-    summary: 'There are real alternatives: wait for rectification or swap to NW-FXB.',
+    text: 'There are real alternatives: wait for rectification or swap to AX-FXB. I will ask the duty manager.',
+    summary: 'There are real alternatives: wait for rectification or swap to AX-FXB.',
   },
   { agentRunId: ORCH, iteration: 2, usage: usage(9800, 640, 7400), latencyMs: 3100 },
 );
@@ -800,7 +800,7 @@ push(
     tool: 'request_decision',
     system: 'runtime',
     tier: 'propose',
-    args: { question: 'Rectify on NW-FXA or swap to NW-FXB?', recommendedOptionId: 'opt-rectify' },
+    args: { question: 'Rectify on AX-FXA or swap to AX-FXB?', recommendedOptionId: 'opt-rectify' },
   },
   { agentRunId: ORCH, iteration: 2 },
 );
@@ -812,13 +812,13 @@ push(
     approvalId: 'apr-2',
     toolCallId: 'tc-10',
     tool: 'request_decision',
-    args: { question: 'Rectify on NW-FXA or swap to NW-FXB?' },
-    summary: 'Choose how NWD101 departs.',
+    args: { question: 'Rectify on AX-FXA or swap to AX-FXB?' },
+    summary: 'Choose how ACX101 departs.',
     reasoning: 'Rectification is likely quick if the sensor is at fault; the spare frees up at minute 45.',
     options: [
       {
         id: 'opt-rectify',
-        label: 'Rectify on NW-FXA',
+        label: 'Rectify on AX-FXA',
         metrics: {
           timeToDepartureMin: 35,
           costEur: 6650,
@@ -830,7 +830,7 @@ push(
       },
       {
         id: 'opt-swap',
-        label: 'Swap to NW-FXB',
+        label: 'Swap to AX-FXB',
         metrics: {
           timeToDepartureMin: 55,
           costEur: 9800,
@@ -842,7 +842,7 @@ push(
       },
       {
         id: 'opt-cancel',
-        label: 'Cancel NWD101',
+        label: 'Cancel ACX101',
         metrics: {
           timeToDepartureMin: -1,
           costEur: 18600,
@@ -886,7 +886,7 @@ push(
     entity: 'timeline',
     id: 'tl-2',
     op: 'create',
-    after: { id: 'tl-2', atMinute: 17.1, text: 'Duty Manager chose: rectify on NW-FXA', source: 'human' },
+    after: { id: 'tl-2', atMinute: 17.1, text: 'Duty Manager chose: rectify on AX-FXA', source: 'human' },
   },
   { agentRunId: ORCH },
 );

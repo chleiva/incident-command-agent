@@ -50,13 +50,13 @@ describe('systems registry', () => {
     }
     assertValid(s as never);
     // the unserviceable aircraft has kept slipping its first flight
-    expect(s.occ.flights.NWD101.delayMin).toBeGreaterThan(100);
+    expect(s.occ.flights.ACX101.delayMin).toBeGreaterThan(100);
   });
 
   it('knownRefs lists every referenceable id', () => {
     const refs = knownRefs(harness().state);
-    expect(refs.tail).toEqual(expect.arrayContaining(['NW-FXA', 'NW-FXB']));
-    expect(refs.flight).toEqual(expect.arrayContaining(['NWD101', 'NWD102']));
+    expect(refs.tail).toEqual(expect.arrayContaining(['AX-FXA', 'AX-FXB']));
+    expect(refs.flight).toEqual(expect.arrayContaining(['ACX101', 'ACX102']));
     expect(refs.cohort).toEqual(['c-connections', 'c-general', 'c-prm']);
     expect(refs.engineer).toEqual(['eng-1', 'eng-2']);
     expect(refs.stand).toEqual(['22', '24', 'R5']);

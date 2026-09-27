@@ -18,9 +18,9 @@
         "limits": {
           "maxIterationsPerAgent": 25,
           "maxToolCallsPerRun": 60,
-          "maxInputTokensPerRun": 200000,
+          "maxInputTokensPerRun": 0,
           "wallClockMs": 480000,
-          "budgetUsd": 2,
+          "budgetUsd": 0,
           "horizonMin": 180
         }
       }
@@ -47,9 +47,9 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-KES",
+      "id": "AX-KES",
       "op": "create",
-      "after": { "tail": "NW-KES", "type": "A320", "station": "MAN", "status": "serviceable", "stand": "32" }
+      "after": { "tail": "AX-KES", "type": "A320", "station": "MAN", "status": "serviceable", "stand": "32" }
     }
   },
   {
@@ -63,11 +63,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "create",
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -90,11 +90,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD215",
+      "id": "ACX215",
       "op": "create",
       "after": {
-        "flight": "NWD215",
-        "tail": "NW-KES",
+        "flight": "ACX215",
+        "tail": "AX-KES",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -117,11 +117,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD230",
+      "id": "ACX230",
       "op": "create",
       "after": {
-        "flight": "NWD230",
-        "tail": "NW-KES",
+        "flight": "ACX230",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-14T13:10:00Z",
@@ -144,11 +144,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD231",
+      "id": "ACX231",
       "op": "create",
       "after": {
-        "flight": "NWD231",
-        "tail": "NW-KES",
+        "flight": "ACX231",
+        "tail": "AX-KES",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-14T14:50:00Z",
@@ -171,9 +171,9 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-LRM",
+      "id": "AX-LRM",
       "op": "create",
-      "after": { "tail": "NW-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35 }
+      "after": { "tail": "AX-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35 }
     }
   },
   {
@@ -187,9 +187,9 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-PQT",
+      "id": "AX-PQT",
       "op": "create",
-      "after": { "tail": "NW-PQT", "type": "A320", "station": "LGW", "availableFromMinute": 90 }
+      "after": { "tail": "AX-PQT", "type": "A320", "station": "LGW", "availableFromMinute": 90 }
     }
   },
   {
@@ -216,7 +216,7 @@
         "maxFdpMin": 660,
         "fdpUsedMin": 55,
         "fdpRemainingMin": 605,
-        "assignedFlight": "NWD214"
+        "assignedFlight": "ACX214"
       }
     }
   },
@@ -244,7 +244,7 @@
         "maxFdpMin": 660,
         "fdpUsedMin": 55,
         "fdpRemainingMin": 605,
-        "assignedFlight": "NWD214"
+        "assignedFlight": "ACX214"
       }
     }
   },
@@ -272,7 +272,7 @@
         "maxFdpMin": 660,
         "fdpUsedMin": 55,
         "fdpRemainingMin": 605,
-        "assignedFlight": "NWD214"
+        "assignedFlight": "ACX214"
       }
     }
   },
@@ -320,7 +320,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 144,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0
       }
@@ -343,7 +343,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Four families with young children"
@@ -367,7 +367,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Two WCHR, one WCHC"
@@ -391,7 +391,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Escorted by cabin crew"
@@ -415,7 +415,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-06-14T12:30:00Z",
@@ -436,7 +436,7 @@
       "entity": "stands",
       "id": "32",
       "op": "create",
-      "after": { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-KES" }
+      "after": { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "AX-KES" }
     }
   },
   {
@@ -456,7 +456,7 @@
         "id": "34",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-LRM",
+        "occupiedByTail": "AX-LRM",
         "occupiedUntilMinute": 35
       }
     }
@@ -783,7 +783,7 @@
       "op": "create",
       "after": {
         "id": "def-1",
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "description": "Tug contact with nose landing gear during pushback (towbar shear pin failure)",
         "ata": "32",
         "status": "open",
@@ -802,17 +802,17 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-KES",
+      "id": "AX-KES",
       "op": "update",
       "before": {
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "type": "A320",
         "station": "MAN",
         "status": "serviceable",
         "stand": "32"
       },
       "after": {
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "type": "A320",
         "station": "MAN",
         "status": "unserviceable",
@@ -831,11 +831,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -846,8 +846,8 @@
         "pax": 174
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -1215,7 +1215,7 @@
     "payload": {
       "actor": "Maintenance control",
       "tool": "page_engineer",
-      "args": { "engineerId": "eng-1", "tail": "NW-KES" },
+      "args": { "engineerId": "eng-1", "tail": "AX-KES" },
       "note": "Engineer called by phone after the ramp report."
     }
   },
@@ -1396,7 +1396,7 @@
     "payload": {
       "actor": "Ramp supervisor",
       "tool": "request_tow",
-      "args": { "tail": "NW-KES", "standId": "32" },
+      "args": { "tail": "AX-KES", "standId": "32" },
       "note": "Tow requested by radio."
     }
   },
@@ -1653,7 +1653,7 @@
           "id": "MAN:tug",
           "patch": { "available": 0 }
         },
-        { "op": "info", "text": "Handler: no tug available for NW-KES before 07:50Z." }
+        { "op": "info", "text": "Handler: no tug available for AX-KES before 07:50Z." }
       ]
     }
   },
@@ -1686,11 +1686,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -1701,8 +1701,8 @@
         "pax": 174
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -1747,7 +1747,7 @@
       "system": "engineers",
       "entity": "engineers",
       "id": "eng-1",
-      "change": "Engineer on site at NW-KES"
+      "change": "Engineer on site at AX-KES"
     }
   },
   {
@@ -2169,7 +2169,7 @@
         "id": "msg-b1",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-um", "c-connections"],
         "channel": "sms",
-        "body": "NWD214 is delayed due to a technical issue. Further information to follow.",
+        "body": "ACX214 is delayed due to a technical issue. Further information to follow.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 28,
@@ -2195,7 +2195,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 144,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0
       },
@@ -2203,7 +2203,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 144,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "firstInformedAtMinute": 28
@@ -2228,7 +2228,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Four families with young children"
@@ -2237,7 +2237,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Four families with young children",
@@ -2263,7 +2263,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Two WCHR, one WCHC"
@@ -2272,7 +2272,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Two WCHR, one WCHC",
@@ -2298,7 +2298,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Escorted by cabin crew"
@@ -2307,7 +2307,7 @@
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "notes": "Escorted by cabin crew",
@@ -2333,7 +2333,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-06-14T12:30:00Z",
@@ -2343,7 +2343,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "status": "informed",
         "careIssued": 0,
         "onwardDeadline": "2026-06-14T12:30:00Z",
@@ -2831,16 +2831,16 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-KES",
+      "id": "AX-KES",
       "op": "update",
       "before": {
-        "tail": "NW-KES",
+        "tail": "AX-KES",
         "type": "A320",
         "station": "MAN",
         "status": "unserviceable",
         "stand": "32"
       },
-      "after": { "tail": "NW-KES", "type": "A320", "station": "MAN", "status": "aog", "stand": "32" }
+      "after": { "tail": "AX-KES", "type": "A320", "station": "MAN", "status": "aog", "stand": "32" }
     }
   },
   {
@@ -2854,11 +2854,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -2869,8 +2869,8 @@
         "pax": 174
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -3454,7 +3454,7 @@
     "payload": {
       "actor": "OCC controller",
       "tool": "propose_swap",
-      "args": { "fromTail": "NW-KES", "toTail": "NW-LRM", "flights": ["NWD214", "NWD215"] },
+      "args": { "fromTail": "AX-KES", "toTail": "AX-LRM", "flights": ["ACX214", "ACX215"] },
       "note": "Swap agreed once engineering gave an estimate."
     }
   },
@@ -3473,9 +3473,9 @@
       "op": "create",
       "after": {
         "id": "swap-b1",
-        "fromTail": "NW-KES",
-        "toTail": "NW-LRM",
-        "flights": ["NWD214", "NWD215"],
+        "fromTail": "AX-KES",
+        "toTail": "AX-LRM",
+        "flights": ["ACX214", "ACX215"],
         "status": "approved",
         "approvedBy": { "kind": "human", "name": "OCC controller", "roleTitle": "OCC controller" }
       },
@@ -3493,11 +3493,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -3508,8 +3508,8 @@
         "pax": 174
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -3533,11 +3533,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD215",
+      "id": "ACX215",
       "op": "update",
       "before": {
-        "flight": "NWD215",
-        "tail": "NW-KES",
+        "flight": "ACX215",
+        "tail": "AX-KES",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -3548,8 +3548,8 @@
         "pax": 168
       },
       "after": {
-        "flight": "NWD215",
-        "tail": "NW-LRM",
+        "flight": "ACX215",
+        "tail": "AX-LRM",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -4494,7 +4494,7 @@
     "payload": {
       "actor": "Duty engineer",
       "tool": "record_engineering_decision",
-      "args": { "tail": "NW-KES", "decision": "rectify" },
+      "args": { "tail": "AX-KES", "decision": "rectify" },
       "note": "Rectification logged after the swap."
     }
   },
@@ -5089,8 +5089,8 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
-      "change": "NWD214 pushed back on NW-LRM"
+      "id": "ACX214",
+      "change": "ACX214 pushed back on AX-LRM"
     }
   },
   {
@@ -5104,11 +5104,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD214",
+      "id": "ACX214",
       "op": "update",
       "before": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -5119,8 +5119,8 @@
         "pax": 174
       },
       "after": {
-        "flight": "NWD214",
-        "tail": "NW-LRM",
+        "flight": "ACX214",
+        "tail": "AX-LRM",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",

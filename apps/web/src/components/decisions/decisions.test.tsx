@@ -123,7 +123,7 @@ describe('OptionsMatrix', () => {
     expect(within(rows[0]!).getByText('Recommended')).toBeInTheDocument();
     // No plain Approve when there are options: choosing a row approves with selectedOptionId.
     expect(screen.queryByRole('button', { name: /^Approve/ })).toBeNull();
-    await userEvent.click(screen.getByRole('button', { name: 'Choose: Hold NW-KES for rectification' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Choose: Hold AX-KES for rectification' }));
     expect(onDecide).toHaveBeenCalledWith({
       decision: 'approve',
       selectedOptionId: 'opt-hold',

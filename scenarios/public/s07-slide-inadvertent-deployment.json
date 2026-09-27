@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s07-slide-inadvertent-deployment",
   "title": "Inadvertent slide deployment during boarding",
-  "narrative": "Dublin, morning. During boarding of NWD811 to Manchester (162 passengers, A320 NW-DUS), door 1R is opened for the catering truck while still armed and the escape slide inflates onto the apron. Nobody is hurt, but boarding stops and the aircraft cannot fly with the slide deployed. A contracted B1 engineer in Dublin is finishing another job; a replacement slide would have to come from Manchester. A passenger with reduced mobility is already seated on board. The stand is needed later in the morning.",
+  "narrative": "Dublin, morning. During boarding of ACX811 to Manchester (162 passengers, A320 AX-DUS), door 1R is opened for the catering truck while still armed and the escape slide inflates onto the apron. Nobody is hurt, but boarding stops and the aircraft cannot fly with the slide deployed. A contracted B1 engineer in Dublin is finishing another job; a replacement slide would have to come from Manchester. A passenger with reduced mobility is already seated on board. The stand is needed later in the morning.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -18,13 +18,13 @@
   ],
   "startSimTime": "2026-07-26T09:18:00Z",
   "aircraft": {
-    "tail": "NW-DUS",
+    "tail": "AX-DUS",
     "type": "A320",
     "station": "DUB",
     "stand": "305",
     "nextSectors": [
       {
-        "flight": "NWD811",
+        "flight": "ACX811",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-07-26T09:45:00Z",
@@ -32,7 +32,7 @@
         "distanceKm": 264
       },
       {
-        "flight": "NWD812",
+        "flight": "ACX812",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-07-26T11:30:00Z",
@@ -40,7 +40,7 @@
         "distanceKm": 264
       },
       {
-        "flight": "NWD813",
+        "flight": "ACX813",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-07-26T13:15:00Z",
@@ -48,7 +48,7 @@
         "distanceKm": 264
       },
       {
-        "flight": "NWD814",
+        "flight": "ACX814",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-07-26T15:00:00Z",
@@ -74,7 +74,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
+      { "tail": "AX-MAS", "type": "A320", "station": "MAN", "availableFromMinute": 0, "stand": "44" }
     ],
     "engineers": [
       {
@@ -167,32 +167,32 @@
       }
     ],
     "cohorts": [
-      { "id": "c811-general", "kind": "general", "count": 118, "flight": "NWD811" },
-      { "id": "c811-families", "kind": "families", "count": 22, "flight": "NWD811" },
+      { "id": "c811-general", "kind": "general", "count": 118, "flight": "ACX811" },
+      { "id": "c811-families", "kind": "families", "count": 22, "flight": "ACX811" },
       {
         "id": "c811-prm",
         "kind": "prm",
         "count": 3,
-        "flight": "NWD811",
+        "flight": "ACX811",
         "notes": "1 WCHC already seated in row 2 (needs ambulift), 2 WCHR at the gate"
       },
       {
         "id": "c811-connections",
         "kind": "connections",
         "count": 15,
-        "flight": "NWD811",
+        "flight": "ACX811",
         "onwardDeadline": "2026-07-26T13:00:00Z",
         "notes": "Onward flights from Manchester"
       },
-      { "id": "c811-premium", "kind": "premium", "count": 4, "flight": "NWD811" }
+      { "id": "c811-premium", "kind": "premium", "count": 4, "flight": "ACX811" }
     ],
     "stands": [
-      { "id": "305", "station": "DUB", "kind": "contact", "occupiedByTail": "NW-DUS" },
+      { "id": "305", "station": "DUB", "kind": "contact", "occupiedByTail": "AX-DUS" },
       {
         "id": "306",
         "station": "DUB",
         "kind": "contact",
-        "occupiedByTail": "NW-XDB",
+        "occupiedByTail": "AX-XDB",
         "occupiedUntilMinute": 30
       },
       { "id": "R12", "station": "DUB", "kind": "remote" }
@@ -221,8 +221,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD811",
-        "tail": "NW-DUS",
+        "flight": "ACX811",
+        "tail": "AX-DUS",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-07-26T09:45:00Z",
@@ -230,8 +230,8 @@
         "pax": 162
       },
       {
-        "flight": "NWD812",
-        "tail": "NW-DUS",
+        "flight": "ACX812",
+        "tail": "AX-DUS",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-07-26T11:30:00Z",
@@ -239,8 +239,8 @@
         "pax": 155
       },
       {
-        "flight": "NWD813",
-        "tail": "NW-DUS",
+        "flight": "ACX813",
+        "tail": "AX-DUS",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-07-26T13:15:00Z",
@@ -248,8 +248,8 @@
         "pax": 149
       },
       {
-        "flight": "NWD814",
-        "tail": "NW-DUS",
+        "flight": "ACX814",
+        "tail": "AX-DUS",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-07-26T15:00:00Z",
@@ -287,7 +287,7 @@
     {
       "atMinute": 8,
       "actor": "Station manager",
-      "action": { "tool": "notify_handler", "args": { "kind": "hold_loading", "tail": "NW-DUS" } },
+      "action": { "tool": "notify_handler", "args": { "kind": "hold_loading", "tail": "AX-DUS" } },
       "note": "Catering and loading stopped."
     },
     {
@@ -304,7 +304,7 @@
         "args": {
           "cohortIds": ["c811-general", "c811-families", "c811-prm", "c811-connections", "c811-premium"],
           "channel": "sms",
-          "body": "NWD811 to Manchester is delayed after an aircraft door issue during boarding. Please stay at gate 305; next update by 10:15."
+          "body": "ACX811 to Manchester is delayed after an aircraft door issue during boarding. Please stay at gate 305; next update by 10:15."
         },
         "decision": "approve"
       },
@@ -315,14 +315,14 @@
       "actor": "Ground coordinator",
       "action": {
         "tool": "notify_handler",
-        "args": { "kind": "prm_assistance", "tail": "NW-DUS", "priority": "urgent" }
+        "args": { "kind": "prm_assistance", "tail": "AX-DUS", "priority": "urgent" }
       },
       "note": "Ambulift ordered for the seated WCHC passenger."
     },
     {
       "atMinute": 60,
       "actor": "OCC duty manager",
-      "action": { "tool": "propose_cancel", "args": { "flight": "NWD811" }, "decision": "approve" },
+      "action": { "tool": "propose_cancel", "args": { "flight": "ACX811" }, "decision": "approve" },
       "note": "Morning Dublin return cancelled; afternoon rotation re-planned."
     }
   ],
@@ -335,7 +335,7 @@
     "decisionBeforeMin": 60,
     "requiredTools": ["page_engineer", "send_passenger_message", "notify_handler", "search_mel"],
     "orderedPairs": [["notify_handler", "send_passenger_message"]],
-    "referenceSummary": "Make the area safe and stop servicing; arrange PRM assistance for the WCHC passenger on board first. Page the Dublin B1 and check the MEL door/slide relief (quote it; certifying staff decide whether any dispatch with the slide inoperative is possible and what seating limits apply). Inform passengers early, prioritise connections, decide on NWD811 (wait, dispatch under MEL restrictions if a certifying engineer allows, or cancel) with a human, and plan the stand move. Occurrence report drafted for a human."
+    "referenceSummary": "Make the area safe and stop servicing; arrange PRM assistance for the WCHC passenger on board first. Page the Dublin B1 and check the MEL door/slide relief (quote it; certifying staff decide whether any dispatch with the slide inoperative is possible and what seating limits apply). Inform passengers early, prioritise connections, decide on ACX811 (wait, dispatch under MEL restrictions if a certifying engineer allows, or cancel) with a human, and plan the stand move. Occurrence report drafted for a human."
   },
   "kpiParams": {
     "eurPerMinute": 100,

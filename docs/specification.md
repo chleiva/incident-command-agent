@@ -1,4 +1,4 @@
-# Ground Incident Coordination Agent — Solution Specification
+# Incident Coordination Agent — Solution Specification
 
 26 Sept 2026 · Christian Leiva Beltran
 
@@ -16,7 +16,7 @@ Build a working, deployable MVP of an agentic incident-coordination system: a th
 
 **Non-goals:** integration with any real airline system; multi-tenant or multi-user operation; production-grade HA or DR; mobile UI; fine-tuning models; any content copied from proprietary manuals (IATA IGOM, ICAO Doc 10121, OEM AMM/FCOM); real passenger or employee personal data.
 
-**Fictional identity by default:** the shipped carrier is "Northwind Air" with fictional tails and real airport codes; client and consultancy branding load from a git-ignored local pack (see section 13).
+**Fictional identity by default:** the shipped carrier is "Accent Air" with fictional tails and real airport codes; client and consultancy branding load from a git-ignored local pack (see section 13).
 
 ## 2. Requirements
 
@@ -32,7 +32,7 @@ Build a working, deployable MVP of an agentic incident-coordination system: a th
 | FR-08 | Baseline replay of the same scenario at scripted human pace, shown side by side | Cost, customer, compliance values for both runs on one screen |
 | FR-09 | Knowledge tool answers MEL, procedure, passenger-rights and precedent questions from an open-data corpus with citations | Every knowledge answer carries a source id and quote |
 | FR-10 | Evaluation harness runs the scenario set headless and reports scores | `npm run eval` produces a JSON and Markdown report |
-| FR-11 | Branding pack switches airline and consultancy identity without code change | Public build shows Northwind Air; local pack shows client identity |
+| FR-11 | Branding pack switches airline and consultancy identity without code change | Public build shows Accent Air; local pack shows client identity |
 
 | ID | Non-functional requirement | Target |
 |---|---|---|
@@ -111,7 +111,7 @@ The UI is the product. It must let a person with no aviation background understa
 |---|---|---|
 | `GET /scenarios` · `GET /scenarios/{id}` | api | List and read library and private scenarios |
 | `POST /scenarios/author` | api → author | Free text → Scenario Author agent → validated scenario |
-| `POST /runs` | api | Create run from scenario id and mode (agent or baseline); invokes Run Lambda asynchronously |
+| `POST /runs` | api | Create run from scenario id and mode (agent or baseline), or from a live-network flight (`flightContext` + `incidentType` + optional free text: the server rebuilds the scenario from the flight with the shared templates); invokes Run Lambda asynchronously |
 | `GET /runs/{id}` · `GET /runs/{id}/events?after=` | api | Run status; ordered event page for hydration |
 | `POST /runs/{id}/approvals/{approvalId}` | api | approve / edit / reject with optional edited payload; written as an event the Run Lambda polls |
 | `POST /runs/{id}/twists` | api | Inject a twist by id or free text |
@@ -291,7 +291,7 @@ incident-command-agent/
 ├─ packages/schema/     scenario and event JSON schemas, shared types
 ├─ scenarios/public/    10 shipped scenarios (fictional carrier)
 ├─ scenarios/private/   git-ignored client scenarios
-├─ config/brand.default.json   Northwind Air
+├─ config/brand.default.json   Accent Air
 ├─ config/brand.local.json     git-ignored client branding
 ├─ data/                kb:build pipeline, SOURCES.md, raw downloads (git-ignored)
 ├─ evals/               cases, rubrics, harness, reports

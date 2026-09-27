@@ -83,5 +83,45 @@
     "definition": "the contractor providing stairs, buses, loading and pushback",
     "inline": "ground services contractor",
     "aliases": ["ground handler", "handler"]
+  },
+  "Diversion": {
+    "definition": "landing at an airport other than the planned destination; the commander decides whether and where",
+    "inline": "landing somewhere else",
+    "aliases": ["diversion", "diversions", "divert", "diverted", "diverting"]
+  },
+  "Air turnback": {
+    "definition": "returning to the departure airport after take-off, decided by the commander",
+    "inline": "return to the departure airport",
+    "aliases": ["air turnback", "air turn-back", "turnback", "turn-back"]
+  },
+  "PAN / MAYDAY": {
+    "definition": "radio calls the crew make: PAN means urgency, MAYDAY means distress (grave and imminent danger)",
+    "inline": "urgency or distress call",
+    "aliases": ["PAN", "PAN PAN", "MAYDAY", "PAN-PAN"]
+  },
+  "Overweight landing": {
+    "definition": "landing above the maximum landing weight; allowed when the commander judges it necessary, followed by an engineering inspection",
+    "inline": "landing heavier than normal",
+    "aliases": ["overweight landing", "overweight-landing"]
+  },
+  "ETOPS": {
+    "definition": "rules for twin-engine aircraft flying far from diversion airports (not relevant to this short-haul network)",
+    "inline": "long-range twin-engine rules",
+    "aliases": ["ETOPS"]
+  },
+  "RFFS category": {
+    "definition": "the airport rescue and fire-fighting cover level, on a scale of 1 to 10",
+    "inline": "airport fire cover level",
+    "aliases": ["RFFS", "RFFS category", "fire category"]
+  },
+  "Squawk": {
+    "definition": "the four-digit transponder code; special codes signal an emergency or a radio failure",
+    "inline": "transponder code",
+    "aliases": ["squawk", "squawking"]
+  },
+  "ETA / STA / STD": {
+    "definition": "estimated time of arrival / scheduled time of arrival / scheduled time of departure",
+    "inline": "arrival and departure times",
+    "aliases": ["ETA", "STA", "STD", "ETAs"]
   }
 }

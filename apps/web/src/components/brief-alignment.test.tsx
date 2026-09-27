@@ -55,8 +55,8 @@ describe('provenance and scope on decision cards (§1.5)', () => {
     const { approval } = pendingApproval(S01.agent, 'ap-decision-1');
     render(<DecisionCard approval={approval} nowMinute={31} onDecide={() => {}} />);
     const swapOption = document.querySelector('[data-option-provenance="opt-swap"]')!;
-    expect(swapOption.textContent).toMatch(/Crew for NW-LRM confirmed by crew control/);
-    expect(swapOption.textContent).toMatch(/Choosing “Swap NWD214\/215/);
+    expect(swapOption.textContent).toMatch(/Crew for AX-LRM confirmed by crew control/);
+    expect(swapOption.textContent).toMatch(/Choosing “Swap ACX214\/215/);
   });
 });
 
@@ -135,12 +135,12 @@ describe('approval invalidation (§1.7)', () => {
 describe('provisional reading and Decided by (§1.2), Unknown maintenance data (§1.6)', () => {
   it('Decided by is empty until the human decision is recorded; missing record fields are Unknown', () => {
     const before = viewAt(S01.agent, 40).view;
-    const aircraft = before.systems.mne.aircraft['NW-KES']!;
+    const aircraft = before.systems.mne.aircraft['AX-KES']!;
     const { rerender } = render(
       <AirworthinessPanel
         aircraft={aircraft}
         reading={latestProvisionalReading(before)?.reading ?? null}
-        decision={latestEngineeringDecision(before, 'NW-KES')}
+        decision={latestEngineeringDecision(before, 'AX-KES')}
         workOrders={Object.values(before.systems.mne.workOrders)}
       />,
     );
@@ -154,9 +154,9 @@ describe('provisional reading and Decided by (§1.2), Unknown maintenance data (
     const after = viewAt(S01.agent, 56).view;
     rerender(
       <AirworthinessPanel
-        aircraft={after.systems.mne.aircraft['NW-KES']!}
+        aircraft={after.systems.mne.aircraft['AX-KES']!}
         reading={latestProvisionalReading(after)?.reading ?? null}
-        decision={latestEngineeringDecision(after, 'NW-KES')}
+        decision={latestEngineeringDecision(after, 'AX-KES')}
         workOrders={Object.values(after.systems.mne.workOrders)}
       />,
     );
@@ -168,7 +168,7 @@ describe('provisional reading and Decided by (§1.2), Unknown maintenance data (
     const { view } = viewAt(S04.agent, 10);
     render(
       <AirworthinessPanel
-        aircraft={view.systems.mne.aircraft['NW-TQA']!}
+        aircraft={view.systems.mne.aircraft['AX-TQA']!}
         reading={null}
         decision={null}
         workOrders={[]}

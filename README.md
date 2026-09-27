@@ -1,10 +1,12 @@
-# Ground Incident Coordination Agent
+# Incident Coordination Agent
 
 An open-source, serverless MVP of an **agentic airline incident-coordination system** on AWS.
 
 A scenario describes a ground or pre-departure event (pushback damage, bird strike, APU inoperative…). An orchestrator and five specialist LLM agents (maintenance, ground, flight ops, passenger, incident record) coordinate the response through a hand-written ReAct loop, acting on **stateful mocked airline systems** under an **autonomy matrix enforced in code**. A React cockpit shows every effect live, a baseline replay shows how a human team would do it today, and an evaluation harness scores the agents.
 
-> **Simulated systems · fictional carrier.** The only airline in this repository is the fictional **Northwind Air** (`NWD` flights, `NW-XXX` tails). Nothing here is operational guidance.
+The home page is Accent Air's **live network**: a fictional day schedule replayed on the real UTC clock and computed entirely in the browser (zero backend cost while idle). Pick a flight, press **Report incident**, choose from a short list of incident types for the flight's phase (or describe it in your own words) and the response starts, built from that flight's real context. The shipped scenarios remain available under **Training scenarios**.
+
+> **Simulated systems · fictional carrier.** The only airline in this repository is the fictional **Accent Air** (`ACX` flights, `AX-XXX` tails). Nothing here is operational guidance.
 
 <!-- 90-second demo GIF goes here (docs/demo-script.md) -->
 
@@ -45,6 +47,7 @@ Full steps, costs and teardown: `docs/deploy.md`.
 | `packages/schema` | `@ica/schema` | shared types, JSON Schemas, validators, event reducer, fixtures |
 | `packages/store` | `@ica/store` | persistence: memory, DynamoDB, S3, Secrets Manager |
 | `packages/ui-tokens` | `@ica/ui-tokens` | design tokens |
+| `packages/network` | `@ica/network` | the live network: fictional day schedule, flight state, diversion options, flight-to-scenario templates |
 | `services/run` | `@ica/run` | Run Lambda: world engine, agents, tools, mocked systems, knowledge |
 | `services/api` | `@ica/api` | HTTP + WebSocket API, local dev server |
 | `scenarios` | `@ica/scenarios` | ten shipped scenarios (CC BY 4.0) |

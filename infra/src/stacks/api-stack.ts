@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Ground Incident Coordination Agent contributors
+ * Copyright 2026 Incident Command Agent contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
@@ -308,7 +308,7 @@ export class ApiStack extends Stack {
     const accessLogs = (id: string) =>
       new LogGroup(this, id, { retention: RetentionDays.ONE_MONTH, removalPolicy });
     this.httpApi = new HttpApi(this, 'HttpApi', {
-      description: 'Ground Incident Coordination Agent HTTP API',
+      description: 'Incident Coordination Agent HTTP API',
       createDefaultStage: false,
       corsPreflight: {
         allowOrigins: [siteUrl, LOCAL_DEV_ORIGIN],
@@ -356,7 +356,7 @@ export class ApiStack extends Stack {
 
     // ------------------------------------------------------------------ WebSocket API
     const wsApi = new WebSocketApi(this, 'WsApi', {
-      description: 'Ground Incident Coordination Agent live events',
+      description: 'Incident Coordination Agent live events',
       connectRouteOptions: { integration: new WebSocketLambdaIntegration('WsConnect', wsConnectFn) },
       disconnectRouteOptions: { integration: new WebSocketLambdaIntegration('WsDisconnect', wsDisconnectFn) },
       defaultRouteOptions: {
@@ -424,7 +424,7 @@ export class ApiStack extends Stack {
       });
 
       const topic = new Topic(this, 'AlarmTopic', {
-        displayName: 'Ground Incident Coordination Agent alarms',
+        displayName: 'Incident Coordination Agent alarms',
         enforceSSL: true,
       });
       topic.addSubscription(new EmailSubscription(config.alertEmail));

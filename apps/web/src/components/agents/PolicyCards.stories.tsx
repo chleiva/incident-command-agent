@@ -79,7 +79,7 @@ export const Airworthiness: Story = {
     <div className="flex gap-4">
       <Frame title="Ground (before the decision)" width={380}>
         <AirworthinessPanel
-          aircraft={early.systems.mne.aircraft['NW-KES']!}
+          aircraft={early.systems.mne.aircraft['AX-KES']!}
           reading={null}
           decision={latestEngineeringDecision(early)}
           workOrders={Object.values(early.systems.mne.workOrders)}
@@ -87,7 +87,7 @@ export const Airworthiness: Story = {
       </Frame>
       <Frame title="Ground (decided)" width={380}>
         <AirworthinessPanel
-          aircraft={end.systems.mne.aircraft['NW-KES']!}
+          aircraft={end.systems.mne.aircraft['AX-KES']!}
           reading={latestProvisionalReading(end)?.reading ?? null}
           decision={latestEngineeringDecision(end)}
           workOrders={Object.values(end.systems.mne.workOrders)}

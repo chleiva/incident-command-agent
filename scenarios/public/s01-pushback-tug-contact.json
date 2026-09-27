@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s01-pushback-tug-contact",
   "title": "Towbar shear and nose-gear contact on pushback",
-  "narrative": "Manchester, early departure bank. Northwind Air NWD211 to Palma, an A320 (NW-MAB) with 174 passengers, is being pushed back from stand 32 when the towbar shear pin fails. The tug brakes, rolls on and makes contact with the nose landing gear before the aircraft stops just clear of the stand. No one is hurt. The captain sets the parking brake, shuts down and asks for engineering. The aircraft has three more sectors today (Palma back to Manchester, then a Dublin return). A spare A320 is due to finish a check at minute 50. The handler is short of tugs this morning.",
+  "narrative": "Manchester, early departure bank. Accent Air ACX211 to Palma, an A320 (AX-MAB) with 174 passengers, is being pushed back from stand 32 when the towbar shear pin fails. The tug brakes, rolls on and makes contact with the nose landing gear before the aircraft stops just clear of the stand. No one is hurt. The captain sets the parking brake, shuts down and asks for engineering. The aircraft has three more sectors today (Palma back to Manchester, then a Dublin return). A spare A320 is due to finish a check at minute 50. The handler is short of tugs this morning.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -23,13 +23,13 @@
   ],
   "startSimTime": "2026-07-03T06:55:00Z",
   "aircraft": {
-    "tail": "NW-MAB",
+    "tail": "AX-MAB",
     "type": "A320",
     "station": "MAN",
     "stand": "32",
     "nextSectors": [
       {
-        "flight": "NWD211",
+        "flight": "ACX211",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-07-03T07:00:00Z",
@@ -37,7 +37,7 @@
         "distanceKm": 1581
       },
       {
-        "flight": "NWD212",
+        "flight": "ACX212",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-07-03T10:10:00Z",
@@ -45,7 +45,7 @@
         "distanceKm": 1581
       },
       {
-        "flight": "NWD213",
+        "flight": "ACX213",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-07-03T13:40:00Z",
@@ -53,7 +53,7 @@
         "distanceKm": 264
       },
       {
-        "flight": "NWD214",
+        "flight": "ACX214",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-07-03T15:20:00Z",
@@ -83,7 +83,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAK", "type": "A320", "station": "MAN", "availableFromMinute": 50, "stand": "40" }
+      { "tail": "AX-MAK", "type": "A320", "station": "MAN", "availableFromMinute": 50, "stand": "40" }
     ],
     "engineers": [
       {
@@ -202,45 +202,45 @@
       }
     ],
     "cohorts": [
-      { "id": "c211-general", "kind": "general", "count": 128, "flight": "NWD211" },
+      { "id": "c211-general", "kind": "general", "count": 128, "flight": "ACX211" },
       {
         "id": "c211-families",
         "kind": "families",
         "count": 32,
-        "flight": "NWD211",
+        "flight": "ACX211",
         "notes": "9 families with infants"
       },
       {
         "id": "c211-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD211",
+        "flight": "ACX211",
         "notes": "2 WCHR, 1 WCHC, 1 visually impaired"
       },
-      { "id": "c211-premium", "kind": "premium", "count": 10, "flight": "NWD211" },
+      { "id": "c211-premium", "kind": "premium", "count": 10, "flight": "ACX211" },
       {
         "id": "c212-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD212",
+        "flight": "ACX212",
         "onwardDeadline": "2026-07-03T14:30:00Z",
         "notes": "Onward long-haul departures from Manchester"
       }
     ],
     "stands": [
-      { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-MAB" },
+      { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "AX-MAB" },
       {
         "id": "40",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-MAK",
+        "occupiedByTail": "AX-MAK",
         "occupiedUntilMinute": 50
       },
       {
         "id": "33",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-XQA",
+        "occupiedByTail": "AX-XQA",
         "occupiedUntilMinute": 35
       },
       { "id": "R7", "station": "MAN", "kind": "remote" }
@@ -268,8 +268,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD211",
-        "tail": "NW-MAB",
+        "flight": "ACX211",
+        "tail": "AX-MAB",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-07-03T07:00:00Z",
@@ -277,8 +277,8 @@
         "pax": 174
       },
       {
-        "flight": "NWD212",
-        "tail": "NW-MAB",
+        "flight": "ACX212",
+        "tail": "AX-MAB",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-07-03T10:10:00Z",
@@ -286,8 +286,8 @@
         "pax": 168
       },
       {
-        "flight": "NWD213",
-        "tail": "NW-MAB",
+        "flight": "ACX213",
+        "tail": "AX-MAB",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-07-03T13:40:00Z",
@@ -295,8 +295,8 @@
         "pax": 150
       },
       {
-        "flight": "NWD214",
-        "tail": "NW-MAB",
+        "flight": "ACX214",
+        "tail": "AX-MAB",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-07-03T15:20:00Z",
@@ -358,7 +358,7 @@
     {
       "atMinute": 6,
       "actor": "Ramp dispatcher",
-      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "NW-MAB" } },
+      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "AX-MAB" } },
       "note": "Dispatcher radios the handler; passengers stay on board."
     },
     {
@@ -373,7 +373,7 @@
       "action": {
         "tool": "create_work_order",
         "args": {
-          "tail": "NW-MAB",
+          "tail": "AX-MAB",
           "defectId": "DEF-001",
           "task": "damage_assessment",
           "estimatedDurationMin": 60,
@@ -390,7 +390,7 @@
         "args": {
           "cohortIds": ["c211-general", "c211-families", "c211-prm", "c211-premium"],
           "channel": "sms",
-          "body": "NWD211 to Palma is delayed while engineers inspect the aircraft after a ground-equipment problem. Please stay seated; we will update you by 08:00."
+          "body": "ACX211 to Palma is delayed while engineers inspect the aircraft after a ground-equipment problem. Please stay seated; we will update you by 08:00."
         },
         "decision": "approve"
       },
@@ -402,9 +402,9 @@
       "action": {
         "tool": "propose_swap",
         "args": {
-          "fromTail": "NW-MAB",
-          "toTail": "NW-MAK",
-          "flights": ["NWD211", "NWD212", "NWD213", "NWD214"]
+          "fromTail": "AX-MAB",
+          "toTail": "AX-MAK",
+          "flights": ["ACX211", "ACX212", "ACX213", "ACX214"]
         },
         "decision": "approve"
       },
@@ -413,7 +413,7 @@
     {
       "atMinute": 70,
       "actor": "Ground coordinator",
-      "action": { "tool": "request_bus", "args": { "count": 2, "tail": "NW-MAB" } },
+      "action": { "tool": "request_bus", "args": { "count": 2, "tail": "AX-MAB" } },
       "note": "Buses to move passengers to the spare on stand 40."
     },
     {
@@ -422,7 +422,7 @@
       "action": {
         "tool": "draft_occurrence_report",
         "args": {
-          "body": "Towbar shear pin failure during pushback of NW-MAB from stand 32 at Manchester; the tug contacted the nose landing gear. No injuries. Aircraft withdrawn for inspection; flights operated by NW-MAK."
+          "body": "Towbar shear pin failure during pushback of AX-MAB from stand 32 at Manchester; the tug contacted the nose landing gear. No injuries. Aircraft withdrawn for inspection; flights operated by AX-MAK."
         }
       },
       "note": "Occurrence report written up the same day."
@@ -440,7 +440,7 @@
       ["page_engineer", "propose_swap"],
       ["get_rotation", "propose_swap"]
     ],
-    "referenceSummary": "Stop the operation and keep passengers informed within minutes; page the on-airport B1 engineer at once and open a damage-assessment work order; let certifying staff decide on the nose gear (NDT if a crack is suspected). In parallel flight ops prepares the spare NW-MAK (available from minute 50) for the whole rotation, accepting a delay rather than rushing the inspection; ground plans buses to stand 40 given the tug shortage. Record drafts an occurrence report for a human reporter."
+    "referenceSummary": "Stop the operation and keep passengers informed within minutes; page the on-airport B1 engineer at once and open a damage-assessment work order; let certifying staff decide on the nose gear (NDT if a crack is suspected). In parallel flight ops prepares the spare AX-MAK (available from minute 50) for the whole rotation, accepting a delay rather than rushing the inspection; ground plans buses to stand 40 given the tug shortage. Record drafts an occurrence report for a human reporter."
   },
   "kpiParams": {
     "eurPerMinute": 100,

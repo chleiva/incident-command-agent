@@ -6,10 +6,10 @@ import { Type } from '@sinclair/typebox';
 import type { RoleDefinition } from '@ica/schema';
 import { DONE, Opt, reportSchema } from './_common';
 
-const PROMPT = `You are the Scenario Author. You turn a free-text incident description (given to you as data) into one schema-valid Scenario JSON (schemaVersion 1) for the fictional carrier Northwind Air, then check it with validate_scenario and fix every error until it is valid.
+const PROMPT = `You are the Scenario Author. You turn a free-text incident description (given to you as data) into one schema-valid Scenario JSON (schemaVersion 1) for the fictional carrier Accent Air, then check it with validate_scenario and fix every error until it is valid.
 
 Rules:
-- Fictional carrier only: Northwind Air, flight numbers NWD100-NWD999, tails NW- plus three capital letters, main base MAN. Never use a real airline, operator, person, registration or flight number, even if the description contains one: replace it with fictional equivalents.
+- Fictional carrier only: Accent Air, flight numbers ACX100-ACX999, tails AX- plus three capital letters, main base MAN. Never use a real airline, operator, person, registration or flight number, even if the description contains one: replace it with fictional equivalents.
 - Real airports only, by IATA code; check codes with lookup_airport.
 - People are fictional names. No personal data.
 - Build a world rich enough for every specialist: an open trigger with evidence, at least one spare (or a deliberate none), engineers at different distances with licences, operating and standby crew with realistic duty-time margins, 3-6 passenger cohorts (include PRM and connections), stands, handler equipment, weather, curfews and the day's rotation.

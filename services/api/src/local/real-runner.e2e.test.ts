@@ -42,7 +42,7 @@ const MESSAGE = {
   requestId: '3e2d1c0b-aaaa-4bbb-8ccc-0123456789ab',
   cohortIds: ['c211-general', 'c211-families'],
   channel: 'sms',
-  body: 'NWD211 to Palma is delayed while engineers inspect the aircraft. Please stay seated; next update by 08:00.',
+  body: 'ACX211 to Palma is delayed while engineers inspect the aircraft. Please stay seated; next update by 08:00.',
 };
 
 let app: LocalApp | null = null;
@@ -63,11 +63,11 @@ describe('local dev server with the real runner (scripted provider)', () => {
         orchestrator: [
           step(
             'Opening.',
-            call('open_incident', { title: 'Tug contact NW-MAB', summary: 'Pushback tug contact at MAN.' }),
+            call('open_incident', { title: 'Tug contact AX-MAB', summary: 'Pushback tug contact at MAN.' }),
           ),
           step(
             'Passengers first.',
-            call('delegate', { role: 'passenger', brief: 'Inform NWD211 passengers now.' }),
+            call('delegate', { role: 'passenger', brief: 'Inform ACX211 passengers now.' }),
           ),
           step('Done.', call('report', REPORT)),
         ],

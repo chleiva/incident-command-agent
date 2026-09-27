@@ -2,12 +2,13 @@
   "name": "@ica/scenarios",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — Shipped public scenarios (CC BY 4.0) and the generated static index. private/ is git-ignored.",
+  "description": "Incident Coordination Agent — Shipped public scenarios (CC BY 4.0) and the generated static index. private/ is git-ignored.",
   "license": "CC-BY-4.0 AND Apache-2.0",
   "type": "module",
   "exports": {
     ".": "./index.ts",
-    "./public/*": "./public/*"
+    "./public/*": "./public/*",
+    "./templates": "./public/index.gen.ts"
   },
   "scripts": {
     "validate": "tsx scripts/validate.ts",

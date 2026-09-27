@@ -9,7 +9,7 @@ import { PhoneMock } from './PhoneMock';
 const meta: Meta<typeof PhoneMock> = {
   title: 'Zones/Passengers/PhoneMock',
   component: PhoneMock,
-  args: { senderId: 'NORTHWIND AIR' },
+  args: { senderId: 'ACCENT AIR' },
   decorators: [
     (Story) => (
       <div className="h-80">

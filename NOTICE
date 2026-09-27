@@ -1,11 +1,11 @@
-Ground Incident Coordination Agent
+Incident Coordination Agent
 Copyright 2026 Incident Command Agent contributors
 
 Source code is licensed under the Apache License, Version 2.0 (see LICENSE).
 Scenario files and documentation are licensed under CC BY 4.0 (see LICENSE-content).
 
 All airline identities, tails, flights and people in this repository are fictional
-("Northwind Air"). Airline systems are simulated. Nothing here is operational guidance.
+("Accent Air"). Airline systems are simulated. Nothing here is operational guidance.
 
 This product includes or is derived from the following third-party open data.
 Each source keeps its own licence; per-file details (URL, retrieval date, licence,

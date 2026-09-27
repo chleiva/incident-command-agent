@@ -400,7 +400,7 @@ describe('system state and export', () => {
   async function runWithState(h: ReturnType<typeof makeDeps>) {
     const runId = await createRun(h);
     const env = { actor: { kind: 'world' as const }, simMinute: 1, simTime: SCENARIO.startSimTime };
-    const wo = { id: 'wo-1', tail: 'NW-FXA', task: 'inspect', status: 'created' };
+    const wo = { id: 'wo-1', tail: 'AX-FXA', task: 'inspect', status: 'created' };
     const pack = { id: 'ep-1', createdAtMinute: 5, contents: { timeline: [] } };
     await h.store.append(
       runId,
@@ -461,7 +461,7 @@ describe('config and evals', () => {
   it('serves AppConfig with brand, features, stations (brand + scenario stations) and limits', async () => {
     const h = makeDeps({ env: { FEATURE_WEB_SEARCH: 'true', RUN_BUDGET_USD: '0.5' } });
     const cfg = json(await h.handler(req('GET', '/config')));
-    expect(cfg.brand.carrierName).toBe('Northwind Air');
+    expect(cfg.brand.carrierName).toBe('Accent Air');
     expect(cfg.features).toEqual({ webSearch: true, liveWeather: false, narrator: false, sideBySide: true });
     expect(cfg.stations[0].iata).toBe('MAN');
     expect(cfg.limits).toEqual({

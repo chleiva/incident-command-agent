@@ -9,7 +9,7 @@ import { argsValid, call, fixtureHarness, okData } from './_testing';
 describe('passenger tools', () => {
   it('get_manifest_summary summarises cohorts without personal data', async () => {
     const h = await fixtureHarness();
-    const m = okData(await call(h, 'get_manifest_summary', { flight: 'NWD101' }));
+    const m = okData(await call(h, 'get_manifest_summary', { flight: 'ACX101' }));
     expect(m).toMatchObject({ totalPassengers: 162, uninformed: 162 });
     expect(m.rebookingOptions.length).toBeGreaterThan(0);
   });
@@ -37,7 +37,7 @@ describe('passenger tools', () => {
   it('draft → send (after approval) informs cohorts and records sentAtMinute', async () => {
     const h = await fixtureHarness();
     const body =
-      'NWD101 to Dublin is delayed while engineers check a door sensor. Please stay near gate 22; next update by 06:30.';
+      'ACX101 to Dublin is delayed while engineers check a door sensor. Please stay near gate 22; next update by 06:30.';
     const d = okData(
       await call(h, 'draft_passenger_message', { cohortIds: ['c-general', 'c-prm'], channel: 'sms', body }),
     );

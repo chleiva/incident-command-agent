@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s02-catering-truck-door-strike",
   "title": "Catering truck strikes forward service door",
-  "narrative": "Palma, late morning. While catering NW-PMC, an A321 due out as NWD341 to Manchester at 11:30 with 212 passengers, the high-loader platform of the catering truck contacts the lower frame of forward service door 1R. The door will not close flush. Palma is an outstation: the contracted local engineer holds a B2 licence only, and the nearest B1 engineers are in Manchester and Malaga. The aircraft is planned to fly two more sectors after Manchester. A spare A321 is available in Manchester, not in Palma.",
+  "narrative": "Palma, late morning. While catering AX-PMC, an A321 due out as ACX341 to Manchester at 11:30 with 212 passengers, the high-loader platform of the catering truck contacts the lower frame of forward service door 1R. The door will not close flush. Palma is an outstation: the contracted local engineer holds a B2 licence only, and the nearest B1 engineers are in Manchester and Malaga. The aircraft is planned to fly two more sectors after Manchester. A spare A321 is available in Manchester, not in Palma.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -18,13 +18,13 @@
   ],
   "startSimTime": "2026-07-11T10:35:00Z",
   "aircraft": {
-    "tail": "NW-PMC",
+    "tail": "AX-PMC",
     "type": "A321",
     "station": "PMI",
     "stand": "14",
     "nextSectors": [
       {
-        "flight": "NWD341",
+        "flight": "ACX341",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-07-11T11:30:00Z",
@@ -32,7 +32,7 @@
         "distanceKm": 1581
       },
       {
-        "flight": "NWD342",
+        "flight": "ACX342",
         "from": "MAN",
         "to": "ALC",
         "std": "2026-07-11T15:00:00Z",
@@ -40,7 +40,7 @@
         "distanceKm": 1681
       },
       {
-        "flight": "NWD343",
+        "flight": "ACX343",
         "from": "ALC",
         "to": "MAN",
         "std": "2026-07-11T18:10:00Z",
@@ -67,7 +67,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
+      { "tail": "AX-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
     ],
     "engineers": [
       {
@@ -188,31 +188,31 @@
       }
     ],
     "cohorts": [
-      { "id": "c341-general", "kind": "general", "count": 166, "flight": "NWD341" },
+      { "id": "c341-general", "kind": "general", "count": 166, "flight": "ACX341" },
       {
         "id": "c341-families",
         "kind": "families",
         "count": 28,
-        "flight": "NWD341",
+        "flight": "ACX341",
         "notes": "School-holiday families, 11 infants"
       },
-      { "id": "c341-prm", "kind": "prm", "count": 3, "flight": "NWD341", "notes": "2 WCHR, 1 WCHC" },
+      { "id": "c341-prm", "kind": "prm", "count": 3, "flight": "ACX341", "notes": "2 WCHR, 1 WCHC" },
       {
         "id": "c341-connections",
         "kind": "connections",
         "count": 15,
-        "flight": "NWD341",
+        "flight": "ACX341",
         "onwardDeadline": "2026-07-11T16:00:00Z",
         "notes": "Onward flights from Manchester"
       }
     ],
     "stands": [
-      { "id": "14", "station": "PMI", "kind": "contact", "occupiedByTail": "NW-PMC" },
+      { "id": "14", "station": "PMI", "kind": "contact", "occupiedByTail": "AX-PMC" },
       {
         "id": "15",
         "station": "PMI",
         "kind": "contact",
-        "occupiedByTail": "NW-XPB",
+        "occupiedByTail": "AX-XPB",
         "occupiedUntilMinute": 60
       },
       { "id": "R22", "station": "PMI", "kind": "remote" }
@@ -241,8 +241,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD341",
-        "tail": "NW-PMC",
+        "flight": "ACX341",
+        "tail": "AX-PMC",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-07-11T11:30:00Z",
@@ -250,8 +250,8 @@
         "pax": 212
       },
       {
-        "flight": "NWD342",
-        "tail": "NW-PMC",
+        "flight": "ACX342",
+        "tail": "AX-PMC",
         "from": "MAN",
         "to": "ALC",
         "std": "2026-07-11T15:00:00Z",
@@ -259,8 +259,8 @@
         "pax": 205
       },
       {
-        "flight": "NWD343",
-        "tail": "NW-PMC",
+        "flight": "ACX343",
+        "tail": "AX-PMC",
         "from": "ALC",
         "to": "MAN",
         "std": "2026-07-11T18:10:00Z",
@@ -268,8 +268,8 @@
         "pax": 199
       },
       {
-        "flight": "NWD345",
-        "tail": "NW-MAX",
+        "flight": "ACX345",
+        "tail": "AX-MAX",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-07-11T12:00:00Z",
@@ -277,8 +277,8 @@
         "pax": 189
       },
       {
-        "flight": "NWD346",
-        "tail": "NW-MAX",
+        "flight": "ACX346",
+        "tail": "AX-MAX",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-07-11T15:10:00Z",
@@ -292,12 +292,12 @@
       "id": "tw-engineer-flight-delayed",
       "title": "Engineer flight delayed",
       "atMinute": 60,
-      "description": "The positioning flight NWD345 from Manchester is delayed by 50 minutes (air traffic flow restriction).",
+      "description": "The positioning flight ACX345 from Manchester is delayed by 50 minutes (air traffic flow restriction).",
       "effects": [
-        { "op": "delay", "flight": "NWD345", "minutes": 50 },
+        { "op": "delay", "flight": "ACX345", "minutes": 50 },
         {
           "op": "info",
-          "text": "OCC: NWD345 MAN-PMI now delayed 50 minutes; any engineer on board arrives later."
+          "text": "OCC: ACX345 MAN-PMI now delayed 50 minutes; any engineer on board arrives later."
         }
       ]
     },
@@ -317,7 +317,7 @@
     {
       "atMinute": 12,
       "actor": "Station manager",
-      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "NW-PMC" } },
+      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "AX-PMC" } },
       "note": "Boarding held once the dispatcher reports the door."
     },
     {
@@ -334,7 +334,7 @@
         "args": {
           "cohortIds": ["c341-general", "c341-families", "c341-prm", "c341-connections"],
           "channel": "sms",
-          "body": "NWD341 to Manchester is delayed while a door is inspected after damage by ground equipment. Please remain near gate 14; next update by 12:30 local time."
+          "body": "ACX341 to Manchester is delayed while a door is inspected after damage by ground equipment. Please remain near gate 14; next update by 12:30 local time."
         },
         "decision": "approve"
       },
@@ -345,7 +345,7 @@
       "actor": "OCC duty manager",
       "action": {
         "tool": "propose_swap",
-        "args": { "fromTail": "NW-PMC", "toTail": "NW-MAT", "flights": ["NWD342", "NWD343"] },
+        "args": { "fromTail": "AX-PMC", "toTail": "AX-MAT", "flights": ["ACX342", "ACX343"] },
         "decision": "approve"
       },
       "note": "Later rotation protected with the Manchester spare."
@@ -377,7 +377,7 @@
       ["get_aircraft_status", "page_engineer"],
       ["find_spare_aircraft", "propose_swap"]
     ],
-    "referenceSummary": "Recognise that door-frame damage needs a B1 structural assessment the local B2 cannot give; page the Manchester B1 early and position them on the first flight, knowing that the ETA is hours away and may slip. Protect the rest of the rotation by swapping NWD342/NWD343 onto the Manchester spare rather than waiting; keep NWD341 passengers informed early and give care; prioritise connections and PRM passengers. No software deferral of the door."
+    "referenceSummary": "Recognise that door-frame damage needs a B1 structural assessment the local B2 cannot give; page the Manchester B1 early and position them on the first flight, knowing that the ETA is hours away and may slip. Protect the rest of the rotation by swapping ACX342/ACX343 onto the Manchester spare rather than waiting; keep ACX341 passengers informed early and give care; prioritise connections and PRM passengers. No software deferral of the door."
   },
   "kpiParams": {
     "eurPerMinute": 100,

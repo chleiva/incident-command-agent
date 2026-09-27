@@ -14,7 +14,7 @@ Optional: install [gitleaks](https://github.com/gitleaks/gitleaks) so the pre-co
 
 ## Ground rules
 
-- **Anonymity.** The fictional carrier Northwind Air (`NWD` flights, `NW-XXX` tails) is the only identity in the tree. No client, airline or consultancy names, no real personal data, no proprietary manual text (IATA IGOM/AHM, ICAO Doc 10121, OEM manuals, SKYbrary text). Never invent report ids such as ASRS ACNs.
+- **Anonymity.** The fictional carrier Accent Air (`ACX` flights, `AX-XXX` tails) is the only identity in the tree. No client, airline or consultancy names, no real personal data, no proprietary manual text (IATA IGOM/AHM, ICAO Doc 10121, OEM manuals, SKYbrary text). Never invent report ids such as ASRS ACNs.
 - **Authority lives in code.** Tool tiers (`execute` / `propose` / `forbidden`) are enforced by the runtime. Changing the autonomy matrix is a deliberate change: update the evals too.
 - **Untrusted content is data.** Never interpolate scenario, user or tool text into a system prompt.
 - **Costs.** `npm test` makes zero live LLM calls. Live evaluation has a lifetime £10 cap (ADR 0006) and needs the owner's explicit go-ahead.

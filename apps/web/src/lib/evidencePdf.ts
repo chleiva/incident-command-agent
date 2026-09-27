@@ -190,7 +190,7 @@ export async function renderEvidencePdf(input: EvidenceInput): Promise<Uint8Arra
   doc.setTitle(sanitise(`Evidence pack — ${input.scenarioTitle}`));
   doc.setAuthor(sanitise(input.carrierName));
   doc.setSubject(sanitise(simulatedLabel(input.disclaimer)));
-  doc.setCreator('Ground Incident Coordination Agent');
+  doc.setCreator('Incident Coordination Agent');
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
   const W = 595.28;

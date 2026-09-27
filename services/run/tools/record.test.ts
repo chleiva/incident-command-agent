@@ -7,7 +7,7 @@ import { DUTY_MANAGER } from '../systems/testing';
 import { call, fixtureHarness, okData } from './_testing';
 
 const BODY =
-  'At 05:32 UTC on stand 22 at MAN, NW-FXA showed an intermittent FWD CARGO DOOR caution during boarding of NWD101. Engineers were paged; passengers were informed at 05:41.';
+  'At 05:32 UTC on stand 22 at MAN, AX-FXA showed an intermittent FWD CARGO DOOR caution during boarding of ACX101. Engineers were paged; passengers were informed at 05:41.';
 
 describe('record tools', () => {
   it('append_timeline defaults to now and source record', async () => {
@@ -36,7 +36,7 @@ describe('record tools', () => {
     await call(
       h,
       'propose_swap',
-      { fromTail: 'NW-FXA', toTail: 'NW-FXB', flights: ['NWD101'] },
+      { fromTail: 'AX-FXA', toTail: 'AX-FXB', flights: ['ACX101'] },
       { approvedBy: DUTY_MANAGER },
     );
     await call(

@@ -35,11 +35,11 @@ describe('engineers travel rules', () => {
     expect(d.etaMinute).toBeLessThanOrEqual(155 + block + 45);
   });
 
-  it('uses a Northwind rotation leg as the positioning flight when one departs ≥ 45 min out', () => {
+  it('uses a Accent Air rotation leg as the positioning flight when one departs ≥ 45 min out', () => {
     const s = fixtureScenario();
     s.world.rotation.push({
-      flight: 'NWD105',
-      tail: 'NW-FXB',
+      flight: 'ACX105',
+      tail: 'AX-FXB',
       from: 'MAN',
       to: 'DUB',
       std: '2026-06-12T08:00:00Z',
@@ -47,10 +47,10 @@ describe('engineers travel rules', () => {
       pax: 150,
     });
     const h = harness(s);
-    // NWD101 leaves at minute 40 (< now + 45), so the next one is NWD105 (arrives 210).
+    // ACX101 leaves at minute 40 (< now + 45), so the next one is ACX105 (arrives 210).
     const p = travelPlan(h.scenario, 'MAN', 'DUB', 0, h.rng);
     expect(p).toMatchObject({ mode: 'fly', etaMinute: 210 + 45 });
-    expect(p.detail).toMatch(/NWD105/);
+    expect(p.detail).toMatch(/ACX105/);
   });
 });
 

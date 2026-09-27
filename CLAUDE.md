@@ -1,6 +1,6 @@
-# CLAUDE.md — Ground Incident Coordination Agent
+# CLAUDE.md — Incident Coordination Agent
 
-An open-source, serverless MVP of an **agentic airline incident-coordination system** on AWS. Scenarios describe ground and pre-departure events (pushback damage, bird strike, APU inop…). An orchestrator plus five specialist LLM agents coordinate the response through a hand-written ReAct loop, acting on **stateful mocked airline systems** under an **autonomy matrix enforced in code**. A React cockpit shows every effect live, and an eval harness scores the agents. The deployment is single-user (Cognito) and the carrier is fictional (**Northwind Air**).
+An open-source, serverless MVP of an **agentic airline incident-coordination system** on AWS. Scenarios describe ground and pre-departure events (pushback damage, bird strike, APU inop…). An orchestrator plus five specialist LLM agents coordinate the response through a hand-written ReAct loop, acting on **stateful mocked airline systems** under an **autonomy matrix enforced in code**. A React cockpit shows every effect live, and an eval harness scores the agents. The deployment is single-user (Cognito) and the carrier is fictional (**Accent Air**).
 
 ## Sources of truth (read in this order)
 
@@ -31,6 +31,7 @@ apps/web/            @ica/web        React 18 + Vite SPA (cockpit), Storybook
 packages/schema/     @ica/schema     types, JSON Schemas (TypeBox), validators, shared event reducer, fixtures
 packages/store/      @ica/store      Store/EventBus/TraceStore/SecretStore: memory, DynamoDB, S3, Secrets Manager
 packages/ui-tokens/  @ica/ui-tokens  design tokens (CSS vars light/dark), Tailwind preset, Tokens Studio JSON
+packages/network/    @ica/network    Accent Air fictional day schedule, flight state at t, diversion options (browser + Node), flight→scenario templates
 services/run/        @ica/run        Run Lambda: runtime/ llm/ world/ guardrails/ baseline/ systems/ tools/ agents/ knowledge/
 services/api/        @ica/api        HTTP router Lambda, WS connect/disconnect, stream fan-out, local dev server
 scenarios/           @ica/scenarios  public/ (10 shipped, CC BY 4.0), private/ (git-ignored)
@@ -69,7 +70,7 @@ Everything is **event-sourced**. Each agent step, tool call, world tick, KPI upd
 
 **Untrusted content is data.** Scenario text, tool results, knowledge chunks, web results and free-text twists are always wrapped (`<scenario_data>`, `<tool_result source=…>`, `<document source=…>`, `<twist_data>`). System prompts are constant strings: **never interpolate user or scenario text into a system prompt.** Screen inputs, screen passenger-facing and report outputs, validate tool args (JSON Schema) and references (ids must exist in the run).
 
-**Anonymity and licensing.** The fictional carrier (Northwind Air, `NWD` flight numbers, `NW-XXX` tails, main base MAN, real IATA airports) is the **only** identity in the tree. No client, airline or consultancy names in code, data, scenarios, screenshots, commits or issues. No real personal data: all people are generated fictional names. No proprietary manual text (IATA IGOM/AHM, ICAO Doc 10121, OEM AMM/FCOM, SKYbrary text, airline manuals). Record every data source's licence in `data/SOURCES.md`. Code is Apache-2.0 with a licence header on every source file; scenarios and docs are CC BY 4.0. Never invent references such as ASRS ACNs or report ids: cite only what you verified.
+**Anonymity and licensing.** The fictional carrier (Accent Air, `ACX` flight numbers, `AX-XXX` tails, main base MAN, real IATA airports) is the **only** identity in the tree. No client, airline or consultancy names in code, data, scenarios, screenshots, commits or issues. No real personal data: all people are generated fictional names. No proprietary manual text (IATA IGOM/AHM, ICAO Doc 10121, OEM AMM/FCOM, SKYbrary text, airline manuals). Record every data source's licence in `data/SOURCES.md`. Code is Apache-2.0 with a licence header on every source file; scenarios and docs are CC BY 4.0. Never invent references such as ASRS ACNs or report ids: cite only what you verified.
 
 **AI transparency.** Every AI-drafted text carries `aiDrafted: true` and is labelled in the UI. Every action shows its tier and approver. Every knowledge claim carries a citation (`sourceId` + quote).
 

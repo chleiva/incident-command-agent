@@ -21,9 +21,9 @@
         "limits": {
           "maxIterationsPerAgent": 25,
           "maxToolCallsPerRun": 60,
-          "maxInputTokensPerRun": 200000,
+          "maxInputTokensPerRun": 0,
           "wallClockMs": 480000,
-          "budgetUsd": 2,
+          "budgetUsd": 0,
           "horizonMin": 180
         }
       }
@@ -56,10 +56,10 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-FXA",
+      "id": "AX-FXA",
       "op": "create",
       "after": {
-        "tail": "NW-FXA",
+        "tail": "AX-FXA",
         "type": "A320",
         "station": "MAN",
         "status": "serviceable",
@@ -80,11 +80,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD101",
+      "id": "ACX101",
       "op": "create",
       "after": {
-        "flight": "NWD101",
-        "tail": "NW-FXA",
+        "flight": "ACX101",
+        "tail": "AX-FXA",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-12T06:10:00Z",
@@ -109,10 +109,10 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-FXB",
+      "id": "AX-FXB",
       "op": "create",
       "after": {
-        "tail": "NW-FXB",
+        "tail": "AX-FXB",
         "type": "A320",
         "station": "MAN",
         "availableFromMinute": 45
@@ -138,7 +138,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 18,
-        "flight": "NWD101",
+        "flight": "ACX101",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-06-12T08:30:00Z"
@@ -164,7 +164,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD101",
+        "flight": "ACX101",
         "status": "uninformed",
         "careIssued": 0
       }
@@ -360,7 +360,7 @@
       "op": "create",
       "after": {
         "id": "def-1",
-        "tail": "NW-FXA",
+        "tail": "AX-FXA",
         "description": "Intermittent FWD CARGO DOOR caution",
         "ata": "52",
         "status": "open",
@@ -433,7 +433,7 @@
       "system": "runtime",
       "tier": "execute",
       "args": {
-        "title": "NW-FXA FWD cargo door caution",
+        "title": "AX-FXA FWD cargo door caution",
         "severity": "medium"
       }
     }
@@ -457,7 +457,7 @@
       "after": {
         "id": "tl-1",
         "atMinute": 2.3,
-        "text": "Incident opened: NW-FXA FWD cargo door caution",
+        "text": "Incident opened: AX-FXA FWD cargo door caution",
         "source": "orchestrator"
       }
     }
@@ -502,7 +502,7 @@
       "tier": "execute",
       "args": {
         "role": "maintenance",
-        "brief": "Assess the FWD cargo door caution on NW-FXA and get an engineer to the aircraft."
+        "brief": "Assess the FWD cargo door caution on AX-FXA and get an engineer to the aircraft."
       }
     }
   },
@@ -526,7 +526,7 @@
       "tier": "execute",
       "args": {
         "role": "passenger",
-        "brief": "Inform NWD101 passengers early; PRM and connections first."
+        "brief": "Inform ACX101 passengers early; PRM and connections first."
       }
     }
   },
@@ -545,7 +545,7 @@
     "wallTime": "2026-06-01T09:00:40.000Z",
     "payload": {
       "role": "maintenance",
-      "brief": "Assess the FWD cargo door caution on NW-FXA and get an engineer to the aircraft.",
+      "brief": "Assess the FWD cargo door caution on AX-FXA and get an engineer to the aircraft.",
       "parentAgentRunId": "ar-orch-1"
     }
   },
@@ -564,7 +564,7 @@
     "wallTime": "2026-06-01T09:00:42.000Z",
     "payload": {
       "role": "passenger",
-      "brief": "Inform NWD101 passengers early; PRM and connections first.",
+      "brief": "Inform ACX101 passengers early; PRM and connections first.",
       "parentAgentRunId": "ar-orch-1"
     }
   },
@@ -618,7 +618,7 @@
       "system": "mne",
       "tier": "execute",
       "args": {
-        "tail": "NW-FXA"
+        "tail": "AX-FXA"
       }
     }
   },
@@ -640,9 +640,9 @@
       "toolCallId": "tc-4",
       "tool": "get_aircraft_status",
       "ok": true,
-      "resultPreview": "{\"tail\":\"NW-FXA\",\"status\":\"serviceable\",\"openDefects\":[\"def-1\"]}",
+      "resultPreview": "{\"tail\":\"AX-FXA\",\"status\":\"serviceable\",\"openDefects\":[\"def-1\"]}",
       "result": {
-        "tail": "NW-FXA",
+        "tail": "AX-FXA",
         "status": "serviceable",
         "openDefects": [
           "def-1"
@@ -725,7 +725,7 @@
       "tier": "execute",
       "args": {
         "engineerId": "eng-1",
-        "tail": "NW-FXA"
+        "tail": "AX-FXA"
       }
     }
   },
@@ -864,7 +864,7 @@
           "c-prm"
         ],
         "channel": "sms",
-        "body": "NWD101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times."
+        "body": "ACX101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times."
       }
     }
   },
@@ -891,7 +891,7 @@
           "c-prm"
         ],
         "channel": "sms",
-        "body": "NWD101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.",
+        "body": "ACX101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.",
         "status": "draft",
         "aiDrafted": true
       }
@@ -1016,7 +1016,7 @@
           "c-prm"
         ],
         "channel": "sms",
-        "body": "NWD101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.",
+        "body": "ACX101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.",
         "status": "draft",
         "aiDrafted": true
       },
@@ -1027,7 +1027,7 @@
           "c-prm"
         ],
         "channel": "sms",
-        "body": "NWD101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.",
+        "body": "ACX101 to Dublin: engineers are checking a door sensor. We will update you by 06:25. Connecting passengers: our team is watching your onward times.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 6.1,
@@ -1061,7 +1061,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 18,
-        "flight": "NWD101",
+        "flight": "ACX101",
         "status": "informed",
         "firstInformedAtMinute": 6.1,
         "careIssued": 0,
@@ -1433,7 +1433,7 @@
           "Rectify or swap decision by the certifying engineer"
         ],
         "recommendations": [
-          "Keep NW-FXB ready as a spare from minute 45"
+          "Keep AX-FXB ready as a spare from minute 45"
         ],
         "citations": [
           {
@@ -1553,8 +1553,8 @@
     "wallTime": "2026-06-01T09:01:48.000Z",
     "traceKey": "traces/run-fixture-0001/54.json",
     "payload": {
-      "text": "There are real alternatives: wait for rectification or swap to NW-FXB. I will ask the duty manager.",
-      "summary": "There are real alternatives: wait for rectification or swap to NW-FXB."
+      "text": "There are real alternatives: wait for rectification or swap to AX-FXB. I will ask the duty manager.",
+      "summary": "There are real alternatives: wait for rectification or swap to AX-FXB."
     }
   },
   {
@@ -1576,7 +1576,7 @@
       "system": "runtime",
       "tier": "propose",
       "args": {
-        "question": "Rectify on NW-FXA or swap to NW-FXB?",
+        "question": "Rectify on AX-FXA or swap to AX-FXB?",
         "recommendedOptionId": "opt-rectify"
       }
     }
@@ -1599,14 +1599,14 @@
       "toolCallId": "tc-10",
       "tool": "request_decision",
       "args": {
-        "question": "Rectify on NW-FXA or swap to NW-FXB?"
+        "question": "Rectify on AX-FXA or swap to AX-FXB?"
       },
-      "summary": "Choose how NWD101 departs.",
+      "summary": "Choose how ACX101 departs.",
       "reasoning": "Rectification is likely quick if the sensor is at fault; the spare frees up at minute 45.",
       "options": [
         {
           "id": "opt-rectify",
-          "label": "Rectify on NW-FXA",
+          "label": "Rectify on AX-FXA",
           "metrics": {
             "timeToDepartureMin": 35,
             "costEur": 6650,
@@ -1620,7 +1620,7 @@
         },
         {
           "id": "opt-swap",
-          "label": "Swap to NW-FXB",
+          "label": "Swap to AX-FXB",
           "metrics": {
             "timeToDepartureMin": 55,
             "costEur": 9800,
@@ -1635,7 +1635,7 @@
         },
         {
           "id": "opt-cancel",
-          "label": "Cancel NWD101",
+          "label": "Cancel ACX101",
           "metrics": {
             "timeToDepartureMin": -1,
             "costEur": 18600,
@@ -1716,7 +1716,7 @@
       "after": {
         "id": "tl-2",
         "atMinute": 17.1,
-        "text": "Duty Manager chose: rectify on NW-FXA",
+        "text": "Duty Manager chose: rectify on AX-FXA",
         "source": "human"
       }
     }

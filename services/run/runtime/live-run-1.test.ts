@@ -215,7 +215,7 @@ describe('live run 1, bug 2: robust report', () => {
 
     const report = ofType(events, 'agent.report').find((e) => e.payload.role === 'maintenance')!;
     expect(report.payload.report.composedByRuntime).toBeUndefined();
-    expect(report.payload.report.summary).toMatch(/^NW-PMC/);
+    expect(report.payload.report.summary).toMatch(/^AX-PMC/);
     expect(report.payload.report.summary).not.toMatch(/parameter/);
     expect(report.payload.report.actionsTaken[0]).toBe('Checked aircraft status and open defects');
     expect(report.payload.report.extras).toBeUndefined();
@@ -280,7 +280,7 @@ describe('live run 1, bug 2: robust report', () => {
     const res = ofType(events, 'agent.tool_result').find((e) => e.payload.toolCallId === PLACEHOLDER.id)!;
     expect(res.payload.ok).toBe(false);
     const report = ofType(events, 'agent.report').find((e) => e.payload.role === 'maintenance')!;
-    expect(report.payload.report.summary).toMatch(/^NW-PMC/);
+    expect(report.payload.report.summary).toMatch(/^AX-PMC/);
     expect(report.payload.report.actionsTaken).toContain('Paged B1 Tamsin Pennick MAN, ETA 275');
   });
 

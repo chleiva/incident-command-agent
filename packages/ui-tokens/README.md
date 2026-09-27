@@ -1,6 +1,6 @@
 # @ica/ui-tokens
 
-Design tokens for the Ground Incident Coordination Agent cockpit: one source of truth (`src/tokens.ts`) for colour, type, spacing,
+Design tokens for the Incident Coordination Agent cockpit: one source of truth (`src/tokens.ts`) for colour, type, spacing,
 radii, elevation and motion, in two themes: **dark** (the default "ops room") and **light**.
 
 ## Rules the tokens encode

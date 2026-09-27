@@ -20,7 +20,7 @@ async function runCommand(page: Page, search: string, option: RegExp) {
 }
 
 test('start a run, approve a decision, scrub back in time', async ({ page }) => {
-  await page.goto('/?timescale=4');
+  await page.goto('/training?timescale=4');
   await expect(page.getByText('Simulated systems · fictional carrier').first()).toBeVisible();
 
   await page.getByLabel('Speed').selectOption('30');

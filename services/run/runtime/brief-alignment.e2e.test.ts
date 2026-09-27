@@ -34,7 +34,7 @@ const REPORT = {
 const MESSAGE = {
   cohortIds: ['c211-general', 'c211-families'],
   channel: 'sms',
-  body: 'NWD211 to Palma is delayed while engineers inspect the aircraft. Please stay seated; next update by 08:00.',
+  body: 'ACX211 to Palma is delayed while engineers inspect the aircraft. Please stay seated; next update by 08:00.',
 };
 const PAGE = { engineerId: 'eng-man-b1a', station: 'MAN', requestId: '0b8f5c1e-9a1d-4f3e-8c2b-6d7e8f9a0b1c' };
 
@@ -55,7 +55,7 @@ describe('task 06: brief alignment (runtime)', () => {
         ],
         maintenance: [
           step('Paging.', call('page_engineer', PAGE, 'tu_page')),
-          step('Checking status.', call('get_aircraft_status', { tail: 'NW-MAB' }, 'tu_status')),
+          step('Checking status.', call('get_aircraft_status', { tail: 'AX-MAB' }, 'tu_status')),
           step('Reporting.', call('report', REPORT)),
         ],
       }),
@@ -120,7 +120,7 @@ describe('task 06: brief alignment (runtime)', () => {
       script: scriptByAgent({
         orchestrator: [
           step('Engineer first.', call('delegate', { role: 'maintenance', brief: 'Page the B1 on base.' })),
-          step('Now passengers.', call('delegate', { role: 'passenger', brief: 'First update to NWD211.' })),
+          step('Now passengers.', call('delegate', { role: 'passenger', brief: 'First update to ACX211.' })),
           step('Done.', call('report', REPORT)),
         ],
         maintenance: [
@@ -143,14 +143,14 @@ describe('task 06: brief alignment (runtime)', () => {
           step('Reporting.', call('report', REPORT)),
         ],
         'revise/passenger.1': [
-          step('Re-gathering.', call('get_manifest_summary', { flight: 'NWD211' }, 'tu_regather')),
+          step('Re-gathering.', call('get_manifest_summary', { flight: 'ACX211' }, 'tu_regather')),
           step(
             'Revised update.',
             call(
               'send_passenger_message',
               {
                 ...MESSAGE,
-                body: 'NWD211 to Palma: the engineer will reach the aircraft later than planned. Please stay seated; next update by 08:30.',
+                body: 'ACX211 to Palma: the engineer will reach the aircraft later than planned. Please stay seated; next update by 08:30.',
                 requestId: 'a1b2c3d4-0000-4000-8000-000000000002',
               },
               'tu_msg2',
@@ -224,7 +224,7 @@ describe('task 06: brief alignment (runtime)', () => {
             call(
               'create_work_order',
               {
-                tail: 'NW-MAB',
+                tail: 'AX-MAB',
                 task: 'damage_assessment',
                 estimatedDurationMin: 60,
                 requestId: 'wo-req-00000001',
@@ -234,7 +234,7 @@ describe('task 06: brief alignment (runtime)', () => {
             call(
               'create_work_order',
               {
-                tail: 'NW-MAB',
+                tail: 'AX-MAB',
                 task: 'damage_assessment',
                 estimatedDurationMin: 60,
                 requestId: 'wo-req-00000001',

@@ -79,7 +79,7 @@ export const StationSchema = Type.Object({
 export type Station = Static<typeof StationSchema>;
 
 export const BrandPackSchema = Type.Object({
-  /** Addition (task 06): the product name shown in the title bar (default "Ground Incident Coordination Agent"). */
+  /** Addition (task 06): the product name shown in the title bar (default "Incident Coordination Agent"). */
   productName: Opt(Str),
   carrierName: Str,
   carrierCode: Str,
@@ -171,12 +171,35 @@ export const AuthorScenarioRequestSchema = Type.Object(
 );
 export type AuthorScenarioRequest = Static<typeof AuthorScenarioRequestSchema>;
 
+/**
+ * Addition (task 07): a flight from the live network. The server regenerates the day schedule from `seed` and
+ * `date`, finds `flightId`, and rebuilds the scenario itself (the client never sends a scenario).
+ */
+export const FlightContextSchema = Type.Object(
+  {
+    seed: Type.String({ pattern: '^[a-z0-9-]{1,32}$' }),
+    date: Type.String({ pattern: '^\\d{4}-\\d{2}-\\d{2}$' }),
+    flightId: Type.String({ pattern: '^ACX[1-9][0-9]{2}$' }),
+    /** Network time of the report (ISO); decides the flight's phase. Default: now. */
+    at: Opt(Type.String({ format: 'date-time' })),
+  },
+  { additionalProperties: false },
+);
+export type FlightContext = Static<typeof FlightContextSchema>;
+
 export const CreateRunRequestSchema = Type.Object(
   {
-    scenarioId: Type.String({ minLength: 1 }),
+    /** A shipped or stored scenario. Required unless `flightContext` is given (exactly one of the two). */
+    scenarioId: Opt(Type.String({ minLength: 1 })),
     mode: RunModeSchema,
     speed: Opt(Type.Number({ minimum: 1, maximum: 30 })),
     pairedRunId: Opt(Str),
+    /** Addition (task 07): report an incident on a live-network flight. */
+    flightContext: Opt(FlightContextSchema),
+    /** Addition (task 07): an incident type id from `@ica/network/templates`, or 'other' (free text only). */
+    incidentType: Opt(Type.String({ pattern: '^[a-z_]{2,48}$' })),
+    /** Addition (task 07): optional free text; screened, then the Scenario Author adds the detail (one LLM call). */
+    text: Opt(Type.String({ minLength: 1, maxLength: 4000 })),
   },
   { additionalProperties: false },
 );
@@ -224,6 +247,13 @@ export interface AuthorScenarioResponse {
 }
 export interface CreateRunResponse {
   runId: string;
+  /** Addition (task 07): the scenario the run uses (a flight-context run creates a private scenario; start the paired
+   * baseline with it). */
+  scenarioId?: string;
+  /** Addition (task 07): screening of the free text, when any. */
+  screening?: ScreeningResult;
+  /** Addition (task 07): true when the Scenario Author was unavailable or failed and the template scenario was used. */
+  authorFallback?: boolean;
 }
 export interface ListRunsResponse {
   items: RunMeta[];

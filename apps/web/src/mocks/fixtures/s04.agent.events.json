@@ -18,9 +18,9 @@
         "limits": {
           "maxIterationsPerAgent": 25,
           "maxToolCallsPerRun": 60,
-          "maxInputTokensPerRun": 200000,
+          "maxInputTokensPerRun": 0,
           "wallClockMs": 480000,
-          "budgetUsd": 2,
+          "budgetUsd": 0,
           "horizonMin": 180
         }
       }
@@ -47,10 +47,10 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-TQA",
+      "id": "AX-TQA",
       "op": "create",
       "after": {
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "type": "A321",
         "station": "FAO",
         "status": "serviceable",
@@ -70,11 +70,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD517",
+      "id": "ACX517",
       "op": "create",
       "after": {
-        "flight": "NWD517",
-        "tail": "NW-TQA",
+        "flight": "ACX517",
+        "tail": "AX-TQA",
         "from": "MAN",
         "to": "FAO",
         "std": "2026-07-03T10:05:00Z",
@@ -97,11 +97,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "create",
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -124,11 +124,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD540",
+      "id": "ACX540",
       "op": "create",
       "after": {
-        "flight": "NWD540",
-        "tail": "NW-TQA",
+        "flight": "ACX540",
+        "tail": "AX-TQA",
         "from": "MAN",
         "to": "AMS",
         "std": "2026-07-03T17:10:00Z",
@@ -151,9 +151,9 @@
     "payload": {
       "system": "occ",
       "entity": "spares",
-      "id": "NW-PQT",
+      "id": "AX-PQT",
       "op": "create",
-      "after": { "tail": "NW-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }
+      "after": { "tail": "AX-PQT", "type": "A321", "station": "LGW", "availableFromMinute": 30 }
     }
   },
   {
@@ -180,7 +180,7 @@
         "maxFdpMin": 600,
         "fdpUsedMin": 285,
         "fdpRemainingMin": 315,
-        "assignedFlight": "NWD518"
+        "assignedFlight": "ACX518"
       }
     }
   },
@@ -208,7 +208,7 @@
         "maxFdpMin": 600,
         "fdpUsedMin": 285,
         "fdpRemainingMin": 315,
-        "assignedFlight": "NWD518"
+        "assignedFlight": "ACX518"
       }
     }
   },
@@ -236,7 +236,7 @@
         "maxFdpMin": 600,
         "fdpUsedMin": 285,
         "fdpRemainingMin": 315,
-        "assignedFlight": "NWD518"
+        "assignedFlight": "ACX518"
       }
     }
   },
@@ -257,7 +257,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 168,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0
       }
@@ -280,7 +280,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 18,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Six families with young children"
@@ -304,7 +304,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Three WCHR, one WCHS"
@@ -328,7 +328,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 22,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-07-03T19:30:00Z",
@@ -349,7 +349,7 @@
       "entity": "stands",
       "id": "5",
       "op": "create",
-      "after": { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "NW-TQA" }
+      "after": { "id": "5", "station": "FAO", "kind": "contact", "occupiedByTail": "AX-TQA" }
     }
   },
   {
@@ -737,7 +737,7 @@
       "op": "create",
       "after": {
         "id": "def-4",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "description": "Lightning strike on approach into FAO: inspection required before next flight",
         "ata": "05",
         "status": "open",
@@ -756,10 +756,10 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-TQA",
+      "id": "AX-TQA",
       "op": "update",
       "before": {
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "type": "A321",
         "station": "FAO",
         "status": "serviceable",
@@ -767,7 +767,7 @@
         "maintenance": { "lastCheckType": "A-check", "lastCheckDate": "2026-06-21" }
       },
       "after": {
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "type": "A321",
         "station": "FAO",
         "status": "unserviceable",
@@ -787,11 +787,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "update",
       "before": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -802,8 +802,8 @@
         "pax": 212
       },
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -867,7 +867,7 @@
       "tool": "open_incident",
       "system": "runtime",
       "tier": "execute",
-      "args": { "title": "NW-TQA lightning strike at FAO", "severity": "high" }
+      "args": { "title": "AX-TQA lightning strike at FAO", "severity": "high" }
     }
   },
   {
@@ -886,7 +886,7 @@
       "after": {
         "id": "tl-1",
         "atMinute": 3.5,
-        "text": "Incident opened: NW-TQA lightning strike at FAO (NWD518)",
+        "text": "Incident opened: AX-TQA lightning strike at FAO (ACX518)",
         "source": "orchestrator"
       }
     }
@@ -927,7 +927,7 @@
       "tier": "execute",
       "args": {
         "role": "maintenance",
-        "brief": "Establish the inspection requirement and every way to get a licensed engineer to NW-TQA."
+        "brief": "Establish the inspection requirement and every way to get a licensed engineer to AX-TQA."
       }
     }
   },
@@ -965,7 +965,7 @@
       "tool": "delegate",
       "system": "runtime",
       "tier": "execute",
-      "args": { "role": "flightops", "brief": "Assess spare aircraft, crew FDP and the knock-on for NWD540." }
+      "args": { "role": "flightops", "brief": "Assess spare aircraft, crew FDP and the knock-on for ACX540." }
     }
   },
   {
@@ -1002,7 +1002,7 @@
       "tool": "delegate",
       "system": "runtime",
       "tier": "execute",
-      "args": { "role": "passenger", "brief": "Inform NWD518 passengers early; PRM and connections first." }
+      "args": { "role": "passenger", "brief": "Inform ACX518 passengers early; PRM and connections first." }
     }
   },
   {
@@ -1041,7 +1041,7 @@
       "tier": "execute",
       "args": {
         "role": "ground",
-        "brief": "Keep NW-TQA on stand 5 and plan the terminal holding for 212 passengers."
+        "brief": "Keep AX-TQA on stand 5 and plan the terminal holding for 212 passengers."
       }
     }
   },
@@ -1076,7 +1076,7 @@
     "wallTime": "2026-07-03T15:00:37.360Z",
     "payload": {
       "role": "maintenance",
-      "brief": "Establish the inspection requirement and every way to get a licensed engineer to NW-TQA.",
+      "brief": "Establish the inspection requirement and every way to get a licensed engineer to AX-TQA.",
       "parentAgentRunId": "ar-orch-4"
     }
   },
@@ -1092,7 +1092,7 @@
     "wallTime": "2026-07-03T15:00:37.450Z",
     "payload": {
       "role": "flightops",
-      "brief": "Assess spare aircraft, crew FDP and the knock-on for NWD540.",
+      "brief": "Assess spare aircraft, crew FDP and the knock-on for ACX540.",
       "parentAgentRunId": "ar-orch-4"
     }
   },
@@ -1108,7 +1108,7 @@
     "wallTime": "2026-07-03T15:00:37.540Z",
     "payload": {
       "role": "passenger",
-      "brief": "Inform NWD518 passengers early; PRM and connections first.",
+      "brief": "Inform ACX518 passengers early; PRM and connections first.",
       "parentAgentRunId": "ar-orch-4"
     }
   },
@@ -1124,7 +1124,7 @@
     "wallTime": "2026-07-03T15:00:37.000Z",
     "payload": {
       "role": "ground",
-      "brief": "Keep NW-TQA on stand 5 and plan the terminal holding for 212 passengers.",
+      "brief": "Keep AX-TQA on stand 5 and plan the terminal holding for 212 passengers.",
       "parentAgentRunId": "ar-orch-4"
     }
   },
@@ -1317,7 +1317,7 @@
       "tool": "get_aircraft_status",
       "system": "mne",
       "tier": "execute",
-      "args": { "tail": "NW-TQA" }
+      "args": { "tail": "AX-TQA" }
     }
   },
   {
@@ -1336,8 +1336,8 @@
       "toolCallId": "tc-107",
       "tool": "get_aircraft_status",
       "ok": true,
-      "resultPreview": "{\"tail\":\"NW-TQA\",\"status\":\"unserviceable\",\"openDefects\":[\"def-4\"]}",
-      "result": { "tail": "NW-TQA", "status": "unserviceable", "openDefects": ["def-4"] }
+      "resultPreview": "{\"tail\":\"AX-TQA\",\"status\":\"unserviceable\",\"openDefects\":[\"def-4\"]}",
+      "result": { "tail": "AX-TQA", "status": "unserviceable", "openDefects": ["def-4"] }
     }
   },
   {
@@ -1350,10 +1350,10 @@
     "iteration": 2,
     "usage": {
       "inputTokens": 5200,
-      "outputTokens": 314,
+      "outputTokens": 315,
       "cacheReadTokens": 3800,
       "cacheWriteTokens": 0,
-      "costUsd": 0.02145,
+      "costUsd": 0.021465,
       "model": "claude-sonnet-5",
       "provider": "anthropic"
     },
@@ -1363,8 +1363,8 @@
     "wallTime": "2026-07-03T15:00:46.090Z",
     "traceKey": "traces/run-demo-s04/57.json",
     "payload": {
-      "text": "No Northwind B1 at FAO. Options: a contract B1 at FAO from about minute 20, or Callum Brightwater flying from MAN.",
-      "summary": "No Northwind B1 at FAO. Options: a contract B1 at FAO from about minute 20, or Callum Brightwater flying from MAN."
+      "text": "No Accent Air B1 at FAO. Options: a contract B1 at FAO from about minute 20, or Callum Brightwater flying from MAN.",
+      "summary": "No Accent Air B1 at FAO. Options: a contract B1 at FAO from about minute 20, or Callum Brightwater flying from MAN."
     }
   },
   {
@@ -1439,8 +1439,8 @@
       "toolCallId": "tc-108",
       "tool": "find_spare_aircraft",
       "ok": true,
-      "resultPreview": "{\"candidates\":[{\"tail\":\"NW-PQT\",\"station\":\"LGW\",\"availableFromMinute\":30}]}",
-      "result": { "candidates": [{ "tail": "NW-PQT", "station": "LGW", "availableFromMinute": 30 }] }
+      "resultPreview": "{\"candidates\":[{\"tail\":\"AX-PQT\",\"station\":\"LGW\",\"availableFromMinute\":30}]}",
+      "result": { "candidates": [{ "tail": "AX-PQT", "station": "LGW", "availableFromMinute": 30 }] }
     }
   },
   {
@@ -1459,7 +1459,7 @@
       "tool": "get_crew_fdp",
       "system": "crew",
       "tier": "execute",
-      "args": { "flight": "NWD518" }
+      "args": { "flight": "ACX518" }
     }
   },
   {
@@ -1545,7 +1545,7 @@
         "id": "msg-41",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
+        "body": "ACX518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
         "status": "draft",
         "aiDrafted": true
       }
@@ -1612,7 +1612,7 @@
         "id": "msg-41",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
+        "body": "ACX518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
         "status": "draft",
         "aiDrafted": true
       },
@@ -1620,7 +1620,7 @@
         "id": "msg-41",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
+        "body": "ACX518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
         "status": "pending_approval",
         "aiDrafted": true
       }
@@ -1645,10 +1645,10 @@
         "messageId": "msg-41",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
+        "body": "ACX518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
         "requestId": "c307b057-0000-4000-8000-000000000111"
       },
-      "summary": "Send the first message to all 212 NWD518 passengers (SMS).",
+      "summary": "Send the first message to all 212 ACX518 passengers (SMS).",
       "reasoning": "Boarding was due at 13:45. The message explains the inspection in plain words and gives the next update time.",
       "expiresAtMinute": 15,
       "tier": "propose",
@@ -1784,8 +1784,8 @@
     "wallTime": "2026-07-03T15:01:00.270Z",
     "traceKey": "traces/run-demo-s04/73.json",
     "payload": {
-      "text": "Keep NW-TQA on stand 5; hold passengers airside with seating near gate 5.",
-      "summary": "Keep NW-TQA on stand 5; hold passengers airside with seating near gate 5."
+      "text": "Keep AX-TQA on stand 5; hold passengers airside with seating near gate 5.",
+      "summary": "Keep AX-TQA on stand 5; hold passengers airside with seating near gate 5."
     }
   },
   {
@@ -1807,7 +1807,7 @@
       "args": {
         "station": "FAO",
         "kind": "gate_hold",
-        "note": "Hold NWD518 passengers at gate 5; PRM seating",
+        "note": "Hold ACX518 passengers at gate 5; PRM seating",
         "requestId": "c307b058-0000-4000-8000-000000000112"
       }
     }
@@ -1831,7 +1831,7 @@
         "kind": "gate_hold",
         "status": "queued",
         "ackAtMinute": 11,
-        "note": "Hold NWD518 passengers at gate 5; PRM seating"
+        "note": "Hold ACX518 passengers at gate 5; PRM seating"
       }
     }
   },
@@ -1896,7 +1896,7 @@
         "id": "msg-41",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
+        "body": "ACX518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
         "status": "pending_approval",
         "aiDrafted": true
       },
@@ -1904,7 +1904,7 @@
         "id": "msg-41",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
+        "body": "ACX518 to Manchester: the aircraft needs a routine safety inspection after a lightning strike on its way in. We are arranging an engineer now. Please stay near gate 5; next update by 14:15.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 7.6,
@@ -1930,7 +1930,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 168,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0
       },
@@ -1938,7 +1938,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 168,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "firstInformedAtMinute": 7.6
@@ -1963,7 +1963,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 18,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Six families with young children"
@@ -1972,7 +1972,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 18,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "notes": "Six families with young children",
@@ -1998,7 +1998,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "notes": "Three WCHR, one WCHS"
@@ -2007,7 +2007,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "notes": "Three WCHR, one WCHS",
@@ -2033,7 +2033,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 22,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "uninformed",
         "careIssued": 0,
         "onwardDeadline": "2026-07-03T19:30:00Z",
@@ -2043,7 +2043,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 22,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "onwardDeadline": "2026-07-03T19:30:00Z",
@@ -2825,7 +2825,7 @@
       "tool": "request_decision",
       "system": "runtime",
       "tier": "propose",
-      "args": { "question": "How do we get NW-TQA inspected and NWD518 away?" }
+      "args": { "question": "How do we get AX-TQA inspected and ACX518 away?" }
     }
   },
   {
@@ -2842,8 +2842,8 @@
       "approvalId": "ap4-decision-1",
       "toolCallId": "tc-114",
       "tool": "request_decision",
-      "args": { "question": "How do we get NW-TQA inspected and NWD518 away?", "flight": "NWD518" },
-      "summary": "Choose how to recover NWD518: contract a local B1 (recommended), fly a B1 from MAN, ferry a spare from LGW, or cancel.",
+      "args": { "question": "How do we get AX-TQA inspected and ACX518 away?", "flight": "ACX518" },
+      "summary": "Choose how to recover ACX518: contract a local B1 (recommended), fly a B1 from MAN, ferry a spare from LGW, or cancel.",
       "reasoning": "A licensed inspection is mandatory. The contract B1 at FAO is available from minute 20 and needs a carrier authorisation. Flying an engineer or a spare crosses the 3-hour threshold for 212 passengers and needs fresh crew (FDP cannot be extended by software).",
       "options": [
         {
@@ -2872,7 +2872,7 @@
         },
         {
           "id": "opt-spare",
-          "label": "Ferry spare NW-PQT from LGW",
+          "label": "Ferry spare AX-PQT from LGW",
           "metrics": {
             "timeToDepartureMin": 225,
             "costEur": 118900,
@@ -2884,7 +2884,7 @@
         },
         {
           "id": "opt-cancel",
-          "label": "Cancel NWD518; rebook on NWD516 tomorrow",
+          "label": "Cancel ACX518; rebook on ACX516 tomorrow",
           "metrics": {
             "timeToDepartureMin": 1200,
             "costEur": 145700,
@@ -3344,7 +3344,7 @@
       "tier": "execute",
       "args": {
         "engineerId": "eng-f1",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "requestId": "c307b05b-0000-4000-8000-000000000115"
       }
     }
@@ -3421,7 +3421,7 @@
       "op": "create",
       "after": {
         "id": "wo-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "defectId": "def-4",
         "task": "Lightning strike inspection (entry/exit points)",
         "status": "assigned",
@@ -3444,11 +3444,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "update",
       "before": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -3459,8 +3459,8 @@
         "pax": 212
       },
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -3607,7 +3607,7 @@
       "args": {
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
+        "body": "ACX518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
         "requestId": "c307b05c-0000-4000-8000-000000000116"
       }
     }
@@ -3629,7 +3629,7 @@
         "id": "msg-42",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
+        "body": "ACX518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
         "status": "pending_approval",
         "aiDrafted": true
       }
@@ -3653,7 +3653,7 @@
       "args": {
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
+        "body": "ACX518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
         "requestId": "c307b05c-0000-4000-8000-000000000116"
       },
       "summary": "Update all 212 passengers: engineer on site about 14:20 local, next update 14:45.",
@@ -3813,7 +3813,7 @@
         "id": "msg-42",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
+        "body": "ACX518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
         "status": "pending_approval",
         "aiDrafted": true
       },
@@ -3821,7 +3821,7 @@
         "id": "msg-42",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
+        "body": "ACX518 to Manchester: a licensed engineer arrives at the aircraft at about 14:20 local to carry out the inspection. Please stay near gate 5; next update by 14:45.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 22,
@@ -3972,7 +3972,7 @@
       "description": "Airport operations close the ramp for 20 minutes while a thunderstorm cell passes overhead.",
       "source": "scheduled",
       "effects": [
-        { "op": "delay", "flight": "NWD518", "minutes": 20 },
+        { "op": "delay", "flight": "ACX518", "minutes": 20 },
         { "op": "info", "text": "Airport: ramp operations suspended for 20 minutes (lightning within 5 km)." }
       ]
     }
@@ -3988,11 +3988,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "update",
       "before": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -4003,8 +4003,8 @@
         "pax": 212
       },
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -4221,11 +4221,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "update",
       "before": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -4236,8 +4236,8 @@
         "pax": 212
       },
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -4414,7 +4414,7 @@
       "tool": "get_manifest_summary",
       "system": "pss",
       "tier": "execute",
-      "args": { "flight": "NWD518" }
+      "args": { "flight": "ACX518" }
     }
   },
   {
@@ -4433,8 +4433,8 @@
       "toolCallId": "tc-117",
       "tool": "get_manifest_summary",
       "ok": true,
-      "resultPreview": "{\"flight\":\"NWD518\",\"pax\":212,\"prm\":4,\"connections\":21}",
-      "result": { "flight": "NWD518", "pax": 212, "prm": 4, "connections": 21 }
+      "resultPreview": "{\"flight\":\"ACX518\",\"pax\":212,\"prm\":4,\"connections\":21}",
+      "result": { "flight": "ACX518", "pax": 212, "prm": 4, "connections": 21 }
     }
   },
   {
@@ -4453,7 +4453,7 @@
       "tool": "estimate_eu261_exposure",
       "system": "pss",
       "tier": "execute",
-      "args": { "flight": "NWD518", "projectedDelayMin": 130 }
+      "args": { "flight": "ACX518", "projectedDelayMin": 130 }
     }
   },
   {
@@ -4593,7 +4593,7 @@
       "args": {
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
+        "body": "ACX518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
         "requestId": "c307b05f-0000-4000-8000-000000000119"
       }
     }
@@ -4615,7 +4615,7 @@
         "id": "msg-43",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
+        "body": "ACX518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
         "status": "pending_approval",
         "aiDrafted": true
       }
@@ -4639,7 +4639,7 @@
       "args": {
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
+        "body": "ACX518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
         "requestId": "c307b05f-0000-4000-8000-000000000119"
       },
       "summary": "Revised update: the engineer is now expected about 15:00 local; next update 15:15.",
@@ -4702,7 +4702,7 @@
         "id": "msg-43",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
+        "body": "ACX518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
         "status": "pending_approval",
         "aiDrafted": true
       },
@@ -4710,7 +4710,7 @@
         "id": "msg-43",
         "cohortIds": ["c-general", "c-families", "c-prm", "c-connections"],
         "channel": "sms",
-        "body": "NWD518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
+        "body": "ACX518 to Manchester: the engineer is now expected at the aircraft at about 15:00 local, later than we said. Please stay near gate 5; refreshments are being arranged. Next update by 15:15.",
         "status": "sent",
         "aiDrafted": true,
         "sentAtMinute": 27.5,
@@ -5467,7 +5467,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 168,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "firstInformedAtMinute": 7.6
@@ -5476,7 +5476,7 @@
         "id": "c-general",
         "kind": "general",
         "count": 168,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "care_issued",
         "careIssued": 168,
         "firstInformedAtMinute": 7.6
@@ -5524,7 +5524,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 18,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "notes": "Six families with young children",
@@ -5534,7 +5534,7 @@
         "id": "c-families",
         "kind": "families",
         "count": 18,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "care_issued",
         "careIssued": 18,
         "notes": "Six families with young children",
@@ -5577,7 +5577,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "notes": "Three WCHR, one WCHS",
@@ -5587,7 +5587,7 @@
         "id": "c-prm",
         "kind": "prm",
         "count": 4,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "care_issued",
         "careIssued": 4,
         "notes": "Three WCHR, one WCHS",
@@ -5636,7 +5636,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 22,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "informed",
         "careIssued": 0,
         "onwardDeadline": "2026-07-03T19:30:00Z",
@@ -5647,7 +5647,7 @@
         "id": "c-connections",
         "kind": "connections",
         "count": 22,
-        "flight": "NWD518",
+        "flight": "ACX518",
         "status": "care_issued",
         "careIssued": 22,
         "onwardDeadline": "2026-07-03T19:30:00Z",
@@ -8143,7 +8143,7 @@
       "system": "engineers",
       "entity": "engineers",
       "id": "eng-f1",
-      "change": "Contract engineer on site at NW-TQA"
+      "change": "Contract engineer on site at AX-TQA"
     }
   },
   {
@@ -8200,7 +8200,7 @@
       "op": "update",
       "before": {
         "id": "wo-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "defectId": "def-4",
         "task": "Lightning strike inspection (entry/exit points)",
         "status": "assigned",
@@ -8211,7 +8211,7 @@
       },
       "after": {
         "id": "wo-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "defectId": "def-4",
         "task": "Lightning strike inspection (entry/exit points)",
         "status": "in_progress",
@@ -8346,7 +8346,7 @@
       "after": {
         "id": "rep-41",
         "kind": "occurrence",
-        "body": "DRAFT for a named reporter. NW-TQA (NWD517) reported a lightning strike on approach into FAO on 3 July. No abnormal indications. Inspection by a contract B1 engineer arranged; passengers held at the gate with meal vouchers.",
+        "body": "DRAFT for a named reporter. AX-TQA (ACX517) reported a lightning strike on approach into FAO on 3 July. No abnormal indications. Inspection by a contract B1 engineer arranged; passengers held at the gate with meal vouchers.",
         "status": "draft",
         "forHumanReporter": true,
         "aiDrafted": true,
@@ -9017,7 +9017,7 @@
       "op": "update",
       "before": {
         "id": "wo-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "defectId": "def-4",
         "task": "Lightning strike inspection (entry/exit points)",
         "status": "in_progress",
@@ -9028,7 +9028,7 @@
       },
       "after": {
         "id": "wo-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "defectId": "def-4",
         "task": "Lightning strike inspection (entry/exit points)",
         "status": "in_progress",
@@ -9501,7 +9501,7 @@
       "op": "update",
       "before": {
         "id": "wo-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "defectId": "def-4",
         "task": "Lightning strike inspection (entry/exit points)",
         "status": "in_progress",
@@ -9512,7 +9512,7 @@
       },
       "after": {
         "id": "wo-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "defectId": "def-4",
         "task": "Lightning strike inspection (entry/exit points)",
         "status": "awaiting_certification",
@@ -9566,7 +9566,7 @@
       "tool": "record_engineering_decision",
       "system": "mne",
       "tier": "propose",
-      "args": { "tail": "NW-TQA", "decision": "release" }
+      "args": { "tail": "AX-TQA", "decision": "release" }
     }
   },
   {
@@ -9585,11 +9585,11 @@
       "toolCallId": "tc-122",
       "tool": "record_engineering_decision",
       "args": {
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "decision": "release",
         "rationale": "Lightning strike inspection complete; exit marks within limits."
       },
-      "summary": "Record Rui Almada’s release of NW-TQA after the lightning-strike inspection.",
+      "summary": "Record Rui Almada’s release of AX-TQA after the lightning-strike inspection.",
       "reasoning": "Release is reserved to certifying staff; this captures his decision so boarding can start.",
       "tier": "propose",
       "unresolvedChecks": ["Certificate of release signed by the certifying engineer"],
@@ -9763,7 +9763,7 @@
       "op": "create",
       "after": {
         "id": "ed-41",
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "decision": "release",
         "decidedBy": {
           "kind": "human",
@@ -9787,10 +9787,10 @@
     "payload": {
       "system": "mne",
       "entity": "aircraft",
-      "id": "NW-TQA",
+      "id": "AX-TQA",
       "op": "update",
       "before": {
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "type": "A321",
         "station": "FAO",
         "status": "unserviceable",
@@ -9798,7 +9798,7 @@
         "maintenance": { "lastCheckType": "A-check", "lastCheckDate": "2026-06-21" }
       },
       "after": {
-        "tail": "NW-TQA",
+        "tail": "AX-TQA",
         "type": "A321",
         "station": "FAO",
         "status": "released",
@@ -10150,7 +10150,7 @@
     "simMinute": 108,
     "simTime": "2026-07-03T15:18:00.000Z",
     "wallTime": "2026-07-03T15:18:00.360Z",
-    "payload": { "system": "occ", "entity": "flights", "id": "NWD518", "change": "Boarding NWD518" }
+    "payload": { "system": "occ", "entity": "flights", "id": "ACX518", "change": "Boarding ACX518" }
   },
   {
     "runId": "run-demo-s04",
@@ -10163,11 +10163,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "update",
       "before": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -10178,8 +10178,8 @@
         "pax": 212
       },
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -10955,7 +10955,7 @@
     "simMinute": 122,
     "simTime": "2026-07-03T15:32:00.000Z",
     "wallTime": "2026-07-03T15:20:20.540Z",
-    "payload": { "system": "occ", "entity": "flights", "id": "NWD518", "change": "NWD518 departed" }
+    "payload": { "system": "occ", "entity": "flights", "id": "ACX518", "change": "ACX518 departed" }
   },
   {
     "runId": "run-demo-s04",
@@ -10968,11 +10968,11 @@
     "payload": {
       "system": "occ",
       "entity": "flights",
-      "id": "NWD518",
+      "id": "ACX518",
       "op": "update",
       "before": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -10983,8 +10983,8 @@
         "pax": 212
       },
       "after": {
-        "flight": "NWD518",
-        "tail": "NW-TQA",
+        "flight": "ACX518",
+        "tail": "AX-TQA",
         "from": "FAO",
         "to": "MAN",
         "std": "2026-07-03T14:15:00Z",
@@ -11012,7 +11012,7 @@
       "after": {
         "id": "tl-3",
         "atMinute": 122.2,
-        "text": "NWD518 departed 77 minutes late after the contract engineer’s release",
+        "text": "ACX518 departed 77 minutes late after the contract engineer’s release",
         "source": "orchestrator"
       }
     }
@@ -11041,7 +11041,7 @@
     "payload": {
       "role": "maintenance",
       "report": {
-        "summary": "maintenance work complete for NW-TQA.",
+        "summary": "maintenance work complete for AX-TQA.",
         "actionsTaken": [],
         "openIssues": [],
         "recommendations": [],
@@ -11068,7 +11068,7 @@
     "payload": {
       "role": "flightops",
       "report": {
-        "summary": "flightops work complete for NW-TQA.",
+        "summary": "flightops work complete for AX-TQA.",
         "actionsTaken": [],
         "openIssues": [],
         "recommendations": [],
@@ -11090,7 +11090,7 @@
     "payload": {
       "role": "passenger",
       "report": {
-        "summary": "passenger work complete for NW-TQA.",
+        "summary": "passenger work complete for AX-TQA.",
         "actionsTaken": [],
         "openIssues": [],
         "recommendations": [],
@@ -11112,7 +11112,7 @@
     "payload": {
       "role": "ground",
       "report": {
-        "summary": "ground work complete for NW-TQA.",
+        "summary": "ground work complete for AX-TQA.",
         "actionsTaken": [],
         "openIssues": [],
         "recommendations": [],
@@ -11231,7 +11231,7 @@
     "payload": {
       "role": "orchestrator",
       "report": {
-        "summary": "NWD518 departed 77 minutes late after a contract B1 inspection chosen by the Duty Manager from four options. An FDP extension attempt was blocked.",
+        "summary": "ACX518 departed 77 minutes late after a contract B1 inspection chosen by the Duty Manager from four options. An FDP extension attempt was blocked.",
         "actionsTaken": [
           "Options decision",
           "Meal vouchers after a rejected refreshment proposal",

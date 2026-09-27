@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "id": "s01-pushback-tug-contact",
   "title": "Towbar shear and nose-gear contact on pushback",
-  "narrative": "During pushback of Northwind Air NWD214 (Manchester to Palma) from stand 32, the towbar shear pin fails and the tug makes contact with the nose landing gear of NW-KES. The aircraft stops clear of the stand line with 174 passengers on board. The flight deck requests engineering and asks for the aircraft to be towed back on stand.",
+  "narrative": "During pushback of Accent Air ACX214 (Manchester to Palma) from stand 32, the towbar shear pin fails and the tug makes contact with the nose landing gear of AX-KES. The aircraft stops clear of the stand line with 174 passengers on board. The flight deck requests engineering and asks for the aircraft to be towed back on stand.",
   "visibility": "public",
   "inspiredBy": [],
   "startSimTime": "2026-06-14T06:50:00Z",
   "aircraft": {
-    "tail": "NW-KES",
+    "tail": "AX-KES",
     "type": "A320",
     "station": "MAN",
     "stand": "32",
     "nextSectors": [
       {
-        "flight": "NWD214",
+        "flight": "ACX214",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -21,7 +21,7 @@
         "distanceKm": 1470
       },
       {
-        "flight": "NWD215",
+        "flight": "ACX215",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -47,8 +47,8 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35, "stand": "34" },
-      { "tail": "NW-PQT", "type": "A320", "station": "LGW", "availableFromMinute": 90 }
+      { "tail": "AX-LRM", "type": "A320", "station": "MAN", "availableFromMinute": 35, "stand": "34" },
+      { "tail": "AX-PQT", "type": "A320", "station": "LGW", "availableFromMinute": 90 }
     ],
     "engineers": [
       {
@@ -119,38 +119,38 @@
       }
     ],
     "cohorts": [
-      { "id": "c-general", "kind": "general", "count": 144, "flight": "NWD214" },
+      { "id": "c-general", "kind": "general", "count": 144, "flight": "ACX214" },
       {
         "id": "c-families",
         "kind": "families",
         "count": 11,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "notes": "Four families with young children"
       },
-      { "id": "c-prm", "kind": "prm", "count": 3, "flight": "NWD214", "notes": "Two WCHR, one WCHC" },
+      { "id": "c-prm", "kind": "prm", "count": 3, "flight": "ACX214", "notes": "Two WCHR, one WCHC" },
       {
         "id": "c-um",
         "kind": "unaccompanied_minors",
         "count": 2,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "notes": "Escorted by cabin crew"
       },
       {
         "id": "c-connections",
         "kind": "connections",
         "count": 14,
-        "flight": "NWD214",
+        "flight": "ACX214",
         "onwardDeadline": "2026-06-14T12:30:00Z",
         "notes": "Onward ferry connections at PMI"
       }
     ],
     "stands": [
-      { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-KES" },
+      { "id": "32", "station": "MAN", "kind": "contact", "occupiedByTail": "AX-KES" },
       {
         "id": "34",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-LRM",
+        "occupiedByTail": "AX-LRM",
         "occupiedUntilMinute": 35
       },
       { "id": "R7", "station": "MAN", "kind": "remote" }
@@ -172,8 +172,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD214",
-        "tail": "NW-KES",
+        "flight": "ACX214",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "PMI",
         "std": "2026-06-14T06:52:00Z",
@@ -181,8 +181,8 @@
         "pax": 174
       },
       {
-        "flight": "NWD215",
-        "tail": "NW-KES",
+        "flight": "ACX215",
+        "tail": "AX-KES",
         "from": "PMI",
         "to": "MAN",
         "std": "2026-06-14T10:00:00Z",
@@ -190,8 +190,8 @@
         "pax": 168
       },
       {
-        "flight": "NWD230",
-        "tail": "NW-KES",
+        "flight": "ACX230",
+        "tail": "AX-KES",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-14T13:10:00Z",
@@ -199,8 +199,8 @@
         "pax": 151
       },
       {
-        "flight": "NWD231",
-        "tail": "NW-KES",
+        "flight": "ACX231",
+        "tail": "AX-KES",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-14T14:50:00Z",
@@ -223,7 +223,7 @@
           "id": "MAN:tug",
           "patch": { "available": 0 }
         },
-        { "op": "info", "text": "Handler: no tug available for NW-KES before 07:50Z." }
+        { "op": "info", "text": "Handler: no tug available for AX-KES before 07:50Z." }
       ]
     },
     {
@@ -265,13 +265,13 @@
     {
       "atMinute": 10,
       "actor": "Maintenance control",
-      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-1", "tail": "NW-KES" } },
+      "action": { "tool": "page_engineer", "args": { "engineerId": "eng-1", "tail": "AX-KES" } },
       "note": "Engineer called by phone after the ramp report."
     },
     {
       "atMinute": 14,
       "actor": "Ramp supervisor",
-      "action": { "tool": "request_tow", "args": { "tail": "NW-KES", "standId": "32" } },
+      "action": { "tool": "request_tow", "args": { "tail": "AX-KES", "standId": "32" } },
       "note": "Tow requested by radio."
     },
     {
@@ -292,7 +292,7 @@
       "actor": "OCC controller",
       "action": {
         "tool": "propose_swap",
-        "args": { "fromTail": "NW-KES", "toTail": "NW-LRM", "flights": ["NWD214", "NWD215"] },
+        "args": { "fromTail": "AX-KES", "toTail": "AX-LRM", "flights": ["ACX214", "ACX215"] },
         "decision": "approve"
       },
       "note": "Swap agreed once engineering gave an estimate."
@@ -312,7 +312,7 @@
       "actor": "Duty engineer",
       "action": {
         "tool": "record_engineering_decision",
-        "args": { "tail": "NW-KES", "decision": "rectify" },
+        "args": { "tail": "AX-KES", "decision": "rectify" },
         "decision": "approve"
       },
       "note": "Rectification logged after the swap."
@@ -327,7 +327,7 @@
     "requiredTools": ["page_engineer", "send_passenger_message", "request_tow"],
     "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
     "orderedPairs": [["page_engineer", "record_engineering_decision"]],
-    "referenceSummary": "Page a B1 engineer at once, get the aircraft back on stand, inform passengers early (PRM, minors and connections first), and swap to the spare NW-LRM once engineering confirms the damage needs rectification."
+    "referenceSummary": "Page a B1 engineer at once, get the aircraft back on stand, inform passengers early (PRM, minors and connections first), and swap to the spare AX-LRM once engineering confirms the damage needs rectification."
   },
   "kpiParams": {
     "eurPerMinute": 100,

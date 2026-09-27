@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s10-brake-overheat-fdp-squeeze",
   "title": "Brake overheat on turnaround; crew FDP margin collapsing",
-  "narrative": "Tenerife South, late afternoon. NW-TFB, an A321, arrives from Manchester after a heavy landing and a long taxi; brake temperatures reach 450 °C and one brake shows a hot-brake indication. The return NWD741 to Manchester is due at 17:35 with 215 passengers. The brakes must cool and be inspected. The crew reported in Manchester at 11:15, so every hour of delay eats their duty margin, and Manchester has a night curfew. There is no standby crew and no spare in Tenerife.",
+  "narrative": "Tenerife South, late afternoon. AX-TFB, an A321, arrives from Manchester after a heavy landing and a long taxi; brake temperatures reach 450 °C and one brake shows a hot-brake indication. The return ACX741 to Manchester is due at 17:35 with 215 passengers. The brakes must cool and be inspected. The crew reported in Manchester at 11:15, so every hour of delay eats their duty margin, and Manchester has a night curfew. There is no standby crew and no spare in Tenerife.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -18,13 +18,13 @@
   ],
   "startSimTime": "2026-09-04T16:45:00Z",
   "aircraft": {
-    "tail": "NW-TFB",
+    "tail": "AX-TFB",
     "type": "A321",
     "station": "TFS",
     "stand": "18",
     "nextSectors": [
       {
-        "flight": "NWD741",
+        "flight": "ACX741",
         "from": "TFS",
         "to": "MAN",
         "std": "2026-09-04T17:35:00Z",
@@ -50,7 +50,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
+      { "tail": "AX-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
     ],
     "engineers": [
       {
@@ -171,26 +171,26 @@
       }
     ],
     "cohorts": [
-      { "id": "c741-general", "kind": "general", "count": 158, "flight": "NWD741" },
+      { "id": "c741-general", "kind": "general", "count": 158, "flight": "ACX741" },
       {
         "id": "c741-families",
         "kind": "families",
         "count": 40,
-        "flight": "NWD741",
+        "flight": "ACX741",
         "notes": "School starts Monday; many families"
       },
-      { "id": "c741-prm", "kind": "prm", "count": 6, "flight": "NWD741", "notes": "4 WCHR, 2 WCHC" },
-      { "id": "c741-um", "kind": "unaccompanied_minors", "count": 3, "flight": "NWD741" },
+      { "id": "c741-prm", "kind": "prm", "count": 6, "flight": "ACX741", "notes": "4 WCHR, 2 WCHC" },
+      { "id": "c741-um", "kind": "unaccompanied_minors", "count": 3, "flight": "ACX741" },
       {
         "id": "c741-connections",
         "kind": "connections",
         "count": 8,
-        "flight": "NWD741",
+        "flight": "ACX741",
         "onwardDeadline": "2026-09-04T23:00:00Z"
       }
     ],
     "stands": [
-      { "id": "18", "station": "TFS", "kind": "contact", "occupiedByTail": "NW-TFB" },
+      { "id": "18", "station": "TFS", "kind": "contact", "occupiedByTail": "AX-TFB" },
       { "id": "19", "station": "TFS", "kind": "contact" },
       { "id": "R30", "station": "TFS", "kind": "remote" }
     ],
@@ -217,8 +217,8 @@
     "curfews": [{ "station": "MAN", "fromLocal": "23:30", "toLocal": "06:00" }],
     "rotation": [
       {
-        "flight": "NWD740",
-        "tail": "NW-TFB",
+        "flight": "ACX740",
+        "tail": "AX-TFB",
         "from": "MAN",
         "to": "TFS",
         "std": "2026-09-04T12:15:00Z",
@@ -226,8 +226,8 @@
         "pax": 219
       },
       {
-        "flight": "NWD741",
-        "tail": "NW-TFB",
+        "flight": "ACX741",
+        "tail": "AX-TFB",
         "from": "TFS",
         "to": "MAN",
         "std": "2026-09-04T17:35:00Z",
@@ -260,7 +260,7 @@
           "entity": "defects",
           "record": {
             "id": "DEF-002",
-            "tail": "NW-TFB",
+            "tail": "AX-TFB",
             "description": "Wheel 3 fuse plug melted, tyre deflating; wheel and brake change required",
             "ata": "32",
             "status": "open",
@@ -289,7 +289,7 @@
         "args": {
           "cohortIds": ["c741-general", "c741-families", "c741-prm", "c741-um", "c741-connections"],
           "channel": "sms",
-          "body": "NWD741 to Manchester is delayed while the aircraft brakes cool and are inspected. Please stay near the gate; next update by 18:30 local time."
+          "body": "ACX741 to Manchester is delayed while the aircraft brakes cool and are inspected. Please stay near the gate; next update by 18:30 local time."
         },
         "decision": "approve"
       },
@@ -301,7 +301,7 @@
       "action": {
         "tool": "create_work_order",
         "args": {
-          "tail": "NW-TFB",
+          "tail": "AX-TFB",
           "defectId": "DEF-001",
           "task": "brake_cooling_and_inspection",
           "estimatedDurationMin": 75,
@@ -327,7 +327,7 @@
     {
       "atMinute": 150,
       "actor": "OCC duty manager",
-      "action": { "tool": "propose_cancel", "args": { "flight": "NWD741" }, "decision": "approve" },
+      "action": { "tool": "propose_cancel", "args": { "flight": "ACX741" }, "decision": "approve" },
       "note": "Cancelled when crew duty and curfew close the window; hotels arranged."
     }
   ],

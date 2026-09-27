@@ -28,6 +28,19 @@ const REQUIRED: Record<string, string> = {
   'EU261 / UK261': 'the passenger-compensation rules for delays and cancellations',
   PRM: 'passengers needing assistance',
   'Ground handler': 'the contractor providing stairs, buses, loading and pushback',
+  // Task 07: airborne incidents and the live network.
+  Diversion:
+    'landing at an airport other than the planned destination; the commander decides whether and where',
+  'Air turnback': 'returning to the departure airport after take-off, decided by the commander',
+  'PAN / MAYDAY':
+    'radio calls the crew make: PAN means urgency, MAYDAY means distress (grave and imminent danger)',
+  'Overweight landing':
+    'landing above the maximum landing weight; allowed when the commander judges it necessary, followed by an engineering inspection',
+  ETOPS:
+    'rules for twin-engine aircraft flying far from diversion airports (not relevant to this short-haul network)',
+  'RFFS category': 'the airport rescue and fire-fighting cover level, on a scale of 1 to 10',
+  Squawk: 'the four-digit transponder code; special codes signal an emergency or a radio failure',
+  'ETA / STA / STD': 'estimated time of arrival / scheduled time of arrival / scheduled time of departure',
 };
 
 const setPlain = (on: boolean) => act(() => useUi.getState().setPlainLanguage(on));

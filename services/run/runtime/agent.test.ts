@@ -33,7 +33,7 @@ function viaSpecialist(role: string, steps: ScriptStep[]) {
 const MSG = {
   cohortIds: ['c-general'],
   channel: 'sms',
-  body: 'Your flight NWD101 is delayed by a door check. Next update 06:30.',
+  body: 'Your flight ACX101 is delayed by a door check. Next update 06:30.',
 };
 
 /** Simulate the API: decide every proposal after `delayMs` of (virtual) human thinking time. */
@@ -228,8 +228,8 @@ describe('runAgent: human approvals (approve / edit / reject)', () => {
           step('R.', call('report', REPORT)),
         ],
         maintenance: [
-          step('Read.', call('get_aircraft_status', { tail: 'NW-FXA' })),
-          step('Read again.', call('get_aircraft_status', { tail: 'NW-FXA' })),
+          step('Read.', call('get_aircraft_status', { tail: 'AX-FXA' })),
+          step('Read again.', call('get_aircraft_status', { tail: 'AX-FXA' })),
           step('R.', call('report', REPORT)),
         ],
       }),

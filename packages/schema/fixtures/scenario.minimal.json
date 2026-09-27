@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "id": "fx-minimal-cargo-door-sensor",
   "title": "Fixture: forward cargo door sensor fault before departure",
-  "narrative": "During boarding of Northwind Air NWD101 from Manchester to Dublin, the flight deck reports an intermittent FWD CARGO DOOR indication on NW-FXA. The door is visually closed and latched. The handler asks whether bags can continue loading. This is a small test fixture, not one of the shipped scenarios.",
+  "narrative": "During boarding of Accent Air ACX101 from Manchester to Dublin, the flight deck reports an intermittent FWD CARGO DOOR indication on AX-FXA. The door is visually closed and latched. The handler asks whether bags can continue loading. This is a small test fixture, not one of the shipped scenarios.",
   "visibility": "public",
   "inspiredBy": [],
   "startSimTime": "2026-06-12T05:30:00Z",
   "aircraft": {
-    "tail": "NW-FXA",
+    "tail": "AX-FXA",
     "type": "A320",
     "station": "MAN",
     "stand": "22",
     "nextSectors": [
       {
-        "flight": "NWD101",
+        "flight": "ACX101",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-12T06:10:00Z",
@@ -21,7 +21,7 @@
         "distanceKm": 265
       },
       {
-        "flight": "NWD102",
+        "flight": "ACX102",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-12T07:45:00Z",
@@ -44,7 +44,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-FXB", "type": "A320", "station": "MAN", "availableFromMinute": 45, "stand": "24" }
+      { "tail": "AX-FXB", "type": "A320", "station": "MAN", "availableFromMinute": 45, "stand": "24" }
     ],
     "engineers": [
       {
@@ -97,24 +97,24 @@
       }
     ],
     "cohorts": [
-      { "id": "c-general", "kind": "general", "count": 140, "flight": "NWD101" },
+      { "id": "c-general", "kind": "general", "count": 140, "flight": "ACX101" },
       {
         "id": "c-connections",
         "kind": "connections",
         "count": 18,
-        "flight": "NWD101",
+        "flight": "ACX101",
         "onwardDeadline": "2026-06-12T08:30:00Z",
         "notes": "Onward long-haul connections at DUB"
       },
-      { "id": "c-prm", "kind": "prm", "count": 4, "flight": "NWD101", "notes": "Two WCHC" }
+      { "id": "c-prm", "kind": "prm", "count": 4, "flight": "ACX101", "notes": "Two WCHC" }
     ],
     "stands": [
-      { "id": "22", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-FXA" },
+      { "id": "22", "station": "MAN", "kind": "contact", "occupiedByTail": "AX-FXA" },
       {
         "id": "24",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-FXB",
+        "occupiedByTail": "AX-FXB",
         "occupiedUntilMinute": 45
       },
       { "id": "R5", "station": "MAN", "kind": "remote" }
@@ -134,8 +134,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD101",
-        "tail": "NW-FXA",
+        "flight": "ACX101",
+        "tail": "AX-FXA",
         "from": "MAN",
         "to": "DUB",
         "std": "2026-06-12T06:10:00Z",
@@ -143,8 +143,8 @@
         "pax": 162
       },
       {
-        "flight": "NWD102",
-        "tail": "NW-FXA",
+        "flight": "ACX102",
+        "tail": "AX-FXA",
         "from": "DUB",
         "to": "MAN",
         "std": "2026-06-12T07:45:00Z",
@@ -191,7 +191,7 @@
         "args": {
           "cohortIds": ["c-general", "c-connections", "c-prm"],
           "channel": "sms",
-          "body": "Your flight NWD101 is delayed while engineers check a door sensor. Next update by 06:30."
+          "body": "Your flight ACX101 is delayed while engineers check a door sensor. Next update by 06:30."
         },
         "decision": "approve"
       },
@@ -202,7 +202,7 @@
       "actor": "OCC controller",
       "action": {
         "tool": "propose_swap",
-        "args": { "fromTail": "NW-FXA", "toTail": "NW-FXB", "flights": ["NWD101", "NWD102"] },
+        "args": { "fromTail": "AX-FXA", "toTail": "AX-FXB", "flights": ["ACX101", "ACX102"] },
         "decision": "approve"
       },
       "note": "Swap once the spare is free."
@@ -217,7 +217,7 @@
     "requiredTools": ["page_engineer", "send_passenger_message"],
     "forbiddenTools": ["defer_defect", "release_aircraft", "extend_crew_fdp"],
     "orderedPairs": [["page_engineer", "propose_swap"]],
-    "referenceSummary": "Page a B1 engineer at once, inform passengers early (PRM and connections first), keep the spare NW-FXB ready and let the certifying engineer decide rectify versus swap."
+    "referenceSummary": "Page a B1 engineer at once, inform passengers early (PRM and connections first), keep the spare AX-FXB ready and let the certifying engineer decide rectify versus swap."
   },
   "kpiParams": {
     "eurPerMinute": 100,

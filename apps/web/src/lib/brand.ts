@@ -9,12 +9,12 @@
 import type { AppConfig, BrandPack, Station } from '@ica/schema/browser';
 
 /** The product name (task 06 §1.1). The package scope, stack ids, repo and table names keep "ica". */
-export const PRODUCT_NAME = 'Ground Incident Coordination Agent';
+export const PRODUCT_NAME = 'Incident Coordination Agent';
 
 export const DEFAULT_BRAND: BrandPack = {
   productName: PRODUCT_NAME,
-  carrierName: 'Northwind Air',
-  carrierCode: 'NWD',
+  carrierName: 'Accent Air',
+  carrierCode: 'ACX',
   colours: { primary: '#1F3A5F', accent: '#4F8FBF' },
   stations: ['MAN', 'PMI', 'EDI', 'FAO', 'AGP', 'DUB', 'ALC', 'TFS', 'LGW', 'AMS', 'CDG', 'BCN'],
   disclaimer: 'Simulated systems · fictional carrier',

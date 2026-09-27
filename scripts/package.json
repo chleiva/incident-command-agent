@@ -2,7 +2,7 @@
   "name": "@ica/scripts",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — Ops scripts (user:create, secrets:set, kb:upload, scenarios:push, deploy), dev orchestration and hygiene helpers. Owned by task 04.",
+  "description": "Incident Coordination Agent — Ops scripts (user:create, secrets:set, kb:upload, scenarios:push, deploy), dev orchestration and hygiene helpers. Owned by task 04.",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

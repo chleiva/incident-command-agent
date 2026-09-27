@@ -42,7 +42,7 @@ describe('settings', () => {
 
 describe('app config', () => {
   it('validates brand packs and stations', () => {
-    expect(parseBrandPack(JSON.stringify(DEFAULT_BRAND)).carrierCode).toBe('NWD');
+    expect(parseBrandPack(JSON.stringify(DEFAULT_BRAND)).carrierCode).toBe('ACX');
     expect(() => parseBrandPack('{"carrierName":"X"}')).toThrow(/invalid brand pack/);
     const st = parseStations(
       JSON.stringify({ stations: [{ iata: 'ZZZ', name: 'Z', lat: 1, lon: 2, country: 'GB', extra: 1 }] }),

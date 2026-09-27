@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s05-cargo-door-warning",
   "title": "Aft cargo door warning at gate",
-  "narrative": "Manchester, morning. Boarding of NWD611 to Tenerife South (218 passengers, A321 NW-MCD) is almost complete when the flight deck gets an AFT CARGO DOOR warning. The handler reports the door closed and the handle flush. The warning clears after a few minutes and the captain asks whether they can go, then it comes back. A B2 engineer is available at once, a B1 shortly. A spare A321 finishes a check at minute 70.",
+  "narrative": "Manchester, morning. Boarding of ACX611 to Tenerife South (218 passengers, A321 AX-MCD) is almost complete when the flight deck gets an AFT CARGO DOOR warning. The handler reports the door closed and the handle flush. The warning clears after a few minutes and the captain asks whether they can go, then it comes back. A B2 engineer is available at once, a B1 shortly. A spare A321 finishes a check at minute 70.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -13,13 +13,13 @@
   ],
   "startSimTime": "2026-07-22T07:47:00Z",
   "aircraft": {
-    "tail": "NW-MCD",
+    "tail": "AX-MCD",
     "type": "A321",
     "station": "MAN",
     "stand": "12",
     "nextSectors": [
       {
-        "flight": "NWD611",
+        "flight": "ACX611",
         "from": "MAN",
         "to": "TFS",
         "std": "2026-07-22T08:15:00Z",
@@ -27,7 +27,7 @@
         "distanceKm": 3048
       },
       {
-        "flight": "NWD612",
+        "flight": "ACX612",
         "from": "TFS",
         "to": "MAN",
         "std": "2026-07-22T13:30:00Z",
@@ -50,7 +50,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MCS", "type": "A321", "station": "MAN", "availableFromMinute": 70, "stand": "48" }
+      { "tail": "AX-MCS", "type": "A321", "station": "MAN", "availableFromMinute": 70, "stand": "48" }
     ],
     "engineers": [
       {
@@ -181,33 +181,33 @@
       }
     ],
     "cohorts": [
-      { "id": "c611-general", "kind": "general", "count": 170, "flight": "NWD611" },
+      { "id": "c611-general", "kind": "general", "count": 170, "flight": "ACX611" },
       {
         "id": "c611-families",
         "kind": "families",
         "count": 34,
-        "flight": "NWD611",
+        "flight": "ACX611",
         "notes": "Holiday families, 14 children"
       },
-      { "id": "c611-prm", "kind": "prm", "count": 5, "flight": "NWD611", "notes": "3 WCHR, 2 WCHS" },
-      { "id": "c611-um", "kind": "unaccompanied_minors", "count": 3, "flight": "NWD611" },
-      { "id": "c611-premium", "kind": "premium", "count": 6, "flight": "NWD611" },
+      { "id": "c611-prm", "kind": "prm", "count": 5, "flight": "ACX611", "notes": "3 WCHR, 2 WCHS" },
+      { "id": "c611-um", "kind": "unaccompanied_minors", "count": 3, "flight": "ACX611" },
+      { "id": "c611-premium", "kind": "premium", "count": 6, "flight": "ACX611" },
       {
         "id": "c612-connections",
         "kind": "connections",
         "count": 12,
-        "flight": "NWD612",
+        "flight": "ACX612",
         "onwardDeadline": "2026-07-22T20:00:00Z",
         "notes": "Return passengers connecting at Manchester"
       }
     ],
     "stands": [
-      { "id": "12", "station": "MAN", "kind": "contact", "occupiedByTail": "NW-MCD" },
+      { "id": "12", "station": "MAN", "kind": "contact", "occupiedByTail": "AX-MCD" },
       {
         "id": "48",
         "station": "MAN",
         "kind": "contact",
-        "occupiedByTail": "NW-MCS",
+        "occupiedByTail": "AX-MCS",
         "occupiedUntilMinute": 70
       },
       { "id": "R4", "station": "MAN", "kind": "remote" }
@@ -235,8 +235,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD611",
-        "tail": "NW-MCD",
+        "flight": "ACX611",
+        "tail": "AX-MCD",
         "from": "MAN",
         "to": "TFS",
         "std": "2026-07-22T08:15:00Z",
@@ -244,8 +244,8 @@
         "pax": 218
       },
       {
-        "flight": "NWD612",
-        "tail": "NW-MCD",
+        "flight": "ACX612",
+        "tail": "AX-MCD",
         "from": "TFS",
         "to": "MAN",
         "std": "2026-07-22T13:30:00Z",
@@ -301,7 +301,7 @@
         "args": {
           "cohortIds": ["c611-general", "c611-families", "c611-prm", "c611-um", "c611-premium"],
           "channel": "sms",
-          "body": "NWD611 to Tenerife is delayed while engineers check a cargo door indication. Please stay seated; next update by 08:45."
+          "body": "ACX611 to Tenerife is delayed while engineers check a cargo door indication. Please stay seated; next update by 08:45."
         },
         "decision": "approve"
       },
@@ -313,7 +313,7 @@
       "action": {
         "tool": "create_work_order",
         "args": {
-          "tail": "NW-MCD",
+          "tail": "AX-MCD",
           "defectId": "DEF-001",
           "task": "sensor_troubleshooting",
           "estimatedDurationMin": 50,
@@ -325,7 +325,7 @@
     {
       "atMinute": 50,
       "actor": "Ground coordinator",
-      "action": { "tool": "notify_handler", "args": { "kind": "offload_bags", "tail": "NW-MCD" } },
+      "action": { "tool": "notify_handler", "args": { "kind": "offload_bags", "tail": "AX-MCD" } },
       "note": "Aft hold offloaded for access."
     },
     {
@@ -333,7 +333,7 @@
       "actor": "OCC duty manager",
       "action": {
         "tool": "propose_swap",
-        "args": { "fromTail": "NW-MCD", "toTail": "NW-MCS", "flights": ["NWD611", "NWD612"] },
+        "args": { "fromTail": "AX-MCD", "toTail": "AX-MCS", "flights": ["ACX611", "ACX612"] },
         "decision": "approve"
       },
       "note": "Swap once the spare is out of its check."
@@ -348,7 +348,7 @@
     "decisionBeforeMin": 75,
     "requiredTools": ["page_engineer", "send_passenger_message", "get_aircraft_status"],
     "orderedPairs": [["page_engineer", "propose_swap"]],
-    "referenceSummary": "Treat an intermittent cargo door warning as unresolved until certifying staff clear it: do not let the warning clearing lead to a departure. Page the B2 at once (sensors) with the B1 as back-up, hold loading, keep passengers informed, and prepare the spare NW-MCS (from minute 70) for both Tenerife sectors in case troubleshooting runs long. Any MEL relief is for the certifying engineer to decide."
+    "referenceSummary": "Treat an intermittent cargo door warning as unresolved until certifying staff clear it: do not let the warning clearing lead to a departure. Page the B2 at once (sensors) with the B1 as back-up, hold loading, keep passengers informed, and prepare the spare AX-MCS (from minute 70) for both Tenerife sectors in case troubleshooting runs long. Any MEL relief is for the certifying engineer to decide."
   },
   "kpiParams": {
     "eurPerMinute": 100,

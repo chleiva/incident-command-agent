@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Ground Incident Coordination Agent contributors
+ * Copyright 2026 Incident Command Agent contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 /** Builds the CDK app: DataStack, WebWafStack (us-east-1), WebStack, ApiStack, with cdk-nag AwsSolutions checks. */
@@ -57,13 +57,13 @@ export function buildApp(opts: BuildAppOptions = {}): BuiltApp {
     env,
     ephemeral: config.ephemeral,
     webSearch: config.webSearch,
-    description: 'Ground Incident Coordination Agent: DynamoDB table, S3 buckets, secret placeholders',
+    description: 'Incident Coordination Agent: DynamoDB table, S3 buckets, secret placeholders',
   });
   const webWaf = config.cloudfrontWaf
     ? new WebWafStack(app, names.webWaf, {
         env: { account: config.account, region: 'us-east-1' },
         crossRegionReferences: true,
-        description: 'Ground Incident Coordination Agent: CloudFront WAF (us-east-1)',
+        description: 'Incident Coordination Agent: CloudFront WAF (us-east-1)',
       })
     : undefined;
   const web = new WebStack(app, names.web, {
@@ -73,7 +73,7 @@ export function buildApp(opts: BuildAppOptions = {}): BuiltApp {
     webAclArn: webWaf?.webAclArn,
     cognitoDomainPrefix: config.cognitoDomainPrefix,
     webDistDir: config.webDistDir,
-    description: 'Ground Incident Coordination Agent: CloudFront distribution and SPA deployment',
+    description: 'Incident Coordination Agent: CloudFront distribution and SPA deployment',
   });
   const api = new ApiStack(app, names.api, {
     env,
@@ -85,8 +85,7 @@ export function buildApp(opts: BuildAppOptions = {}): BuiltApp {
     llmSecret: data.llmSecret,
     searchSecret: data.searchSecret,
     distribution: web.distribution,
-    description:
-      'Ground Incident Coordination Agent: Cognito, HTTP + WebSocket APIs, Lambdas, WAF, budget, alarms',
+    description: 'Incident Coordination Agent: Cognito, HTTP + WebSocket APIs, Lambdas, WAF, budget, alarms',
   });
 
   for (const s of [data, webWaf, web, api]) if (s) Tags.of(s).add('project', 'incident-command-agent');

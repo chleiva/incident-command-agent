@@ -208,15 +208,15 @@ export const SHIPPED_SCENARIOS: readonly ShippedScenarioInfo[] = [
 
 /** The fictional carrier: the only identity allowed in the public tree. */
 export const CARRIER = {
-  name: 'Northwind Air',
-  code: 'NWD',
+  name: 'Accent Air',
+  code: 'ACX',
   mainBase: 'MAN',
 } as const;
 
-/** `NWD` + 3 digits, 100–999. */
-export const FLIGHT_NUMBER_PATTERN = '^NWD[1-9][0-9]{2}$';
-/** Clearly fictional tails: `NW-` + three capital letters. */
-export const TAIL_PATTERN = '^NW-[A-Z]{3}$';
+/** `ACX` + 3 digits, 100–999. */
+export const FLIGHT_NUMBER_PATTERN = '^ACX[1-9][0-9]{2}$';
+/** Clearly fictional tails: `AX-` + three capital letters. */
+export const TAIL_PATTERN = '^AX-[A-Z]{3}$';
 /** IATA airport code. */
 export const IATA_PATTERN = '^[A-Z]{3}$';
 /** Local wall-clock time `HH:MM`. */

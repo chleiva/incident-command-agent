@@ -4,7 +4,7 @@
  */
 /**
  * Boot configuration. `/config.json` (WebRuntimeConfig, next to the SPA) is the only switch between local, AWS and
- * mock modes; then `GET /config` gives the brand pack (falling back to the bundled Northwind Air defaults, FR-11).
+ * mock modes; then `GET /config` gives the brand pack (falling back to the bundled Accent Air defaults, FR-11).
  */
 import type { AppConfig, WebRuntimeConfig } from '@ica/schema/browser';
 import { createApiClient, type ApiClient } from './api';

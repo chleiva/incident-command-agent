@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "s09-fuel-spill-at-stand",
   "title": "Fuel spill during refuelling, fire service attends",
-  "narrative": "Alicante, early evening. During refuelling of NW-ALF (A321) for NWD631 to Manchester at 17:45 with 220 passengers, fuel overflows from the left wing vent and about 200 litres spill onto the stand. The airport fire service attends and closes the stand; boarding had not started. The aircraft must be inspected before flight. The contracted engineer in Alicante is available; there is no spare in Alicante.",
+  "narrative": "Alicante, early evening. During refuelling of AX-ALF (A321) for ACX631 to Manchester at 17:45 with 220 passengers, fuel overflows from the left wing vent and about 200 litres spill onto the stand. The airport fire service attends and closes the stand; boarding had not started. The aircraft must be inspected before flight. The contracted engineer in Alicante is available; there is no spare in Alicante.",
   "visibility": "public",
   "inspiredBy": [
     {
@@ -18,13 +18,13 @@
   ],
   "startSimTime": "2026-08-20T17:02:00Z",
   "aircraft": {
-    "tail": "NW-ALF",
+    "tail": "AX-ALF",
     "type": "A321",
     "station": "ALC",
     "stand": "9",
     "nextSectors": [
       {
-        "flight": "NWD631",
+        "flight": "ACX631",
         "from": "ALC",
         "to": "MAN",
         "std": "2026-08-20T17:45:00Z",
@@ -50,7 +50,7 @@
   },
   "world": {
     "spares": [
-      { "tail": "NW-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
+      { "tail": "AX-MAT", "type": "A321", "station": "MAN", "availableFromMinute": 0, "stand": "52" }
     ],
     "engineers": [
       {
@@ -151,31 +151,31 @@
       }
     ],
     "cohorts": [
-      { "id": "c631-general", "kind": "general", "count": 168, "flight": "NWD631" },
+      { "id": "c631-general", "kind": "general", "count": 168, "flight": "ACX631" },
       {
         "id": "c631-families",
         "kind": "families",
         "count": 38,
-        "flight": "NWD631",
+        "flight": "ACX631",
         "notes": "Many families returning from holiday"
       },
-      { "id": "c631-prm", "kind": "prm", "count": 4, "flight": "NWD631", "notes": "3 WCHR, 1 WCHC" },
-      { "id": "c631-um", "kind": "unaccompanied_minors", "count": 2, "flight": "NWD631" },
+      { "id": "c631-prm", "kind": "prm", "count": 4, "flight": "ACX631", "notes": "3 WCHR, 1 WCHC" },
+      { "id": "c631-um", "kind": "unaccompanied_minors", "count": 2, "flight": "ACX631" },
       {
         "id": "c631-connections",
         "kind": "connections",
         "count": 8,
-        "flight": "NWD631",
+        "flight": "ACX631",
         "onwardDeadline": "2026-08-20T22:30:00Z"
       }
     ],
     "stands": [
-      { "id": "9", "station": "ALC", "kind": "contact", "occupiedByTail": "NW-ALF" },
+      { "id": "9", "station": "ALC", "kind": "contact", "occupiedByTail": "AX-ALF" },
       {
         "id": "11",
         "station": "ALC",
         "kind": "contact",
-        "occupiedByTail": "NW-XAL",
+        "occupiedByTail": "AX-XAL",
         "occupiedUntilMinute": 50
       },
       { "id": "R15", "station": "ALC", "kind": "remote" }
@@ -203,8 +203,8 @@
     "curfews": [],
     "rotation": [
       {
-        "flight": "NWD630",
-        "tail": "NW-ALF",
+        "flight": "ACX630",
+        "tail": "AX-ALF",
         "from": "MAN",
         "to": "ALC",
         "std": "2026-08-20T13:20:00Z",
@@ -212,8 +212,8 @@
         "pax": 215
       },
       {
-        "flight": "NWD631",
-        "tail": "NW-ALF",
+        "flight": "ACX631",
+        "tail": "AX-ALF",
         "from": "ALC",
         "to": "MAN",
         "std": "2026-08-20T17:45:00Z",
@@ -240,7 +240,7 @@
             "status": "on_site",
             "etaMinute": 4,
             "releaseAtMinute": 60,
-            "tail": "NW-ALF"
+            "tail": "AX-ALF"
           }
         },
         {
@@ -281,13 +281,13 @@
     {
       "atMinute": 10,
       "actor": "Station manager",
-      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "NW-ALF" } },
+      "action": { "tool": "notify_handler", "args": { "kind": "hold_boarding", "tail": "AX-ALF" } },
       "note": "Boarding held by the gate."
     },
     {
       "atMinute": 18,
       "actor": "Ground coordinator",
-      "action": { "tool": "notify_handler", "args": { "kind": "fuel_spill_cleanup", "tail": "NW-ALF" } },
+      "action": { "tool": "notify_handler", "args": { "kind": "fuel_spill_cleanup", "tail": "AX-ALF" } },
       "note": "Handler asked to support the fire service with clean-up."
     },
     {
@@ -304,7 +304,7 @@
         "args": {
           "cohortIds": ["c631-general", "c631-families", "c631-prm", "c631-um", "c631-connections"],
           "channel": "sms",
-          "body": "NWD631 to Manchester is delayed while a fuel spill on the stand is cleaned up and the aircraft is checked. Please stay in the gate area; next update by 19:00 local time."
+          "body": "ACX631 to Manchester is delayed while a fuel spill on the stand is cleaned up and the aircraft is checked. Please stay in the gate area; next update by 19:00 local time."
         },
         "decision": "approve"
       },

@@ -108,7 +108,7 @@ describe('local dev server', () => {
     expect(list.status).toBe(200);
     expect(list.headers.get('access-control-allow-origin')).toBe('*');
     expect(list.body.items[0].id).toBe(SCENARIO.id);
-    expect((await api('GET', '/config')).body.brand.carrierName).toBe('Northwind Air');
+    expect((await api('GET', '/config')).body.brand.carrierName).toBe('Accent Air');
 
     const created = await api('POST', '/runs', { scenarioId: SCENARIO.id, mode: 'agent', speed: 30 });
     expect(created.status).toBe(201);

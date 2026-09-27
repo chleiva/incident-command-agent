@@ -412,9 +412,9 @@ export const ScenarioSchema = Type.Object(
   {
     ...strict,
     $id: SCENARIO_SCHEMA_ID,
-    title: 'Ground Incident Coordination Agent scenario',
+    title: 'Incident Coordination Agent scenario',
     description:
-      'A ground or pre-departure incident scenario for the fictional carrier Northwind Air (schemaVersion 1).',
+      'A ground or pre-departure incident scenario for the fictional carrier Accent Air (schemaVersion 1).',
   },
 );
 export type Scenario = Static<typeof ScenarioSchema>;

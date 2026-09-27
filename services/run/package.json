@@ -2,7 +2,7 @@
   "name": "@ica/run",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — Run Lambda: world engine, ReAct runtime, guardrails, baseline (task 02) and mocked systems, tools, roles, knowledge (task 03).",
+  "description": "Incident Coordination Agent — Run Lambda: world engine, ReAct runtime, guardrails, baseline (task 02) and mocked systems, tools, roles, knowledge (task 03).",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
@@ -23,6 +23,7 @@
     "@aws-sdk/client-bedrock-runtime": "^3.1141.0",
     "@aws-sdk/client-s3": "^3.1141.0",
     "@ica/kb": "*",
+    "@ica/network": "*",
     "@ica/scenarios": "*",
     "@ica/schema": "*",
     "@ica/store": "*",

@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "$id": "urn:incident-command-agent:schema:scenario:1",
-  "title": "Ground Incident Coordination Agent scenario",
-  "description": "A ground or pre-departure incident scenario for the fictional carrier Northwind Air (schemaVersion 1).",
+  "title": "Incident Coordination Agent scenario",
+  "description": "A ground or pre-departure incident scenario for the fictional carrier Accent Air (schemaVersion 1).",
   "type": "object",
   "required": [
     "schemaVersion",
@@ -91,7 +91,7 @@
       ],
       "properties": {
         "tail": {
-          "pattern": "^NW-[A-Z]{3}$",
+          "pattern": "^AX-[A-Z]{3}$",
           "type": "string"
         },
         "type": {
@@ -145,7 +145,7 @@
             ],
             "properties": {
               "flight": {
-                "pattern": "^NWD[1-9][0-9]{2}$",
+                "pattern": "^ACX[1-9][0-9]{2}$",
                 "type": "string"
               },
               "from": {
@@ -285,7 +285,7 @@
             ],
             "properties": {
               "tail": {
-                "pattern": "^NW-[A-Z]{3}$",
+                "pattern": "^AX-[A-Z]{3}$",
                 "type": "string"
               },
               "type": {
@@ -540,7 +540,7 @@
                 "type": "integer"
               },
               "flight": {
-                "pattern": "^NWD[1-9][0-9]{2}$",
+                "pattern": "^ACX[1-9][0-9]{2}$",
                 "type": "string"
               },
               "notes": {
@@ -585,7 +585,7 @@
                 ]
               },
               "occupiedByTail": {
-                "pattern": "^NW-[A-Z]{3}$",
+                "pattern": "^AX-[A-Z]{3}$",
                 "type": "string"
               },
               "occupiedUntilMinute": {
@@ -745,11 +745,11 @@
             ],
             "properties": {
               "flight": {
-                "pattern": "^NWD[1-9][0-9]{2}$",
+                "pattern": "^ACX[1-9][0-9]{2}$",
                 "type": "string"
               },
               "tail": {
-                "pattern": "^NW-[A-Z]{3}$",
+                "pattern": "^AX-[A-Z]{3}$",
                 "type": "string"
               },
               "from": {
@@ -962,7 +962,7 @@
                       "type": "string"
                     },
                     "flight": {
-                      "pattern": "^NWD[1-9][0-9]{2}$",
+                      "pattern": "^ACX[1-9][0-9]{2}$",
                       "type": "string"
                     },
                     "minutes": {

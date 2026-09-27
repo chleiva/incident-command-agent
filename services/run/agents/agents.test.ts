@@ -47,7 +47,7 @@ describe('agent roles', () => {
         options: [
           {
             id: 'swap',
-            label: 'Swap to NW-FXB',
+            label: 'Swap to AX-FXB',
             metrics: {
               timeToDepartureMin: 80,
               costEur: 7200,

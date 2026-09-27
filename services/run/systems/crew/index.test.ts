@@ -12,8 +12,8 @@ describe('crew FDP arithmetic', () => {
   it('seeds operating crew on the tail rotation with used and remaining FDP', () => {
     const { state } = harness();
     const cpt = state.crew.crew['crew-cpt-1'];
-    expect(cpt).toMatchObject({ status: 'operating', assignedFlight: 'NWD101' });
-    expect(pairing(state, cpt).map((f) => f.flight)).toEqual(['NWD101', 'NWD102']);
+    expect(cpt).toMatchObject({ status: 'operating', assignedFlight: 'ACX101' });
+    expect(pairing(state, cpt).map((f) => f.flight)).toEqual(['ACX101', 'ACX102']);
     // reported at −20; last on-blocks at 200 → 660 − 20 − 200 = 440
     expect(cpt).toMatchObject({ fdpUsedMin: 20, fdpRemainingMin: 440 });
     expect(state.crew.crew['crew-cpt-sby']).toMatchObject({
@@ -31,7 +31,7 @@ describe('crew FDP arithmetic', () => {
       remainingPlannedMin: 140,
       remainingMin: 440,
     });
-    const delayed = applyMutations(h.state, retimeFlight(h.state, 'NWD101', 70)); // 30 min late, propagates
+    const delayed = applyMutations(h.state, retimeFlight(h.state, 'ACX101', 70)); // 30 min late, propagates
     expect(computeFdp(delayed, cpt, 60)).toMatchObject({ usedMin: 80, remainingMin: 410 });
     const ms = tickCrew(delayed, 60, 1);
     expect(ms.length).toBe(2);
@@ -53,7 +53,7 @@ describe('crew standby assignment', () => {
     const h = harness();
     const r = assignStandby(
       h.state,
-      { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-cpt-1', flight: 'NWD101' },
+      { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-cpt-1', flight: 'ACX101' },
       10,
     );
     expect(r.ok).toBe(true);
@@ -62,7 +62,7 @@ describe('crew standby assignment', () => {
     const s = applyMutations(h.state, r.mutations);
     expect(s.crew.crew['crew-cpt-sby']).toMatchObject({
       status: 'assigned',
-      assignedFlight: 'NWD101',
+      assignedFlight: 'ACX101',
       sectorsPlanned: 2,
     });
     expect(s.crew.crew['crew-cpt-1'].status).toBe('off');
@@ -73,7 +73,7 @@ describe('crew standby assignment', () => {
     expect(
       assignStandby(
         h.state,
-        { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-fo-1', flight: 'NWD101' },
+        { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-fo-1', flight: 'ACX101' },
         10,
       ),
     ).toMatchObject({
@@ -83,7 +83,7 @@ describe('crew standby assignment', () => {
     expect(
       assignStandby(
         h.state,
-        { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-cpt-1', flight: 'NWD102' },
+        { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-cpt-1', flight: 'ACX102' },
         10,
       ),
     ).toMatchObject({
@@ -96,7 +96,7 @@ describe('crew standby assignment', () => {
     expect(
       assignStandby(
         h2.state,
-        { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-cpt-1', flight: 'NWD101' },
+        { standbyId: 'crew-cpt-sby', replacesCrewId: 'crew-cpt-1', flight: 'ACX101' },
         10,
       ),
     ).toMatchObject({

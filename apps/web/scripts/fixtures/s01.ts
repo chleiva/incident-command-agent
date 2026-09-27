@@ -36,18 +36,18 @@ export const s01Scenario: Scenario = {
   id: 's01-pushback-tug-contact',
   title: 'Towbar shear and nose-gear contact on pushback',
   narrative:
-    'During pushback of Northwind Air NWD214 (Manchester to Palma) from stand 32, the towbar shear pin fails and the tug makes contact with the nose landing gear of NW-KES. The aircraft stops clear of the stand line with 174 passengers on board. The flight deck requests engineering and asks for the aircraft to be towed back on stand.',
+    'During pushback of Accent Air ACX214 (Manchester to Palma) from stand 32, the towbar shear pin fails and the tug makes contact with the nose landing gear of AX-KES. The aircraft stops clear of the stand line with 174 passengers on board. The flight deck requests engineering and asks for the aircraft to be towed back on stand.',
   visibility: 'public',
   inspiredBy: [],
   startSimTime: '2026-06-14T06:50:00Z',
   aircraft: {
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     type: 'A320',
     station: 'MAN',
     stand: '32',
     nextSectors: [
-      { flight: 'NWD214', from: 'MAN', to: 'PMI', std: '2026-06-14T06:52:00Z', pax: 174, distanceKm: 1470 },
-      { flight: 'NWD215', from: 'PMI', to: 'MAN', std: '2026-06-14T10:00:00Z', pax: 168, distanceKm: 1470 },
+      { flight: 'ACX214', from: 'MAN', to: 'PMI', std: '2026-06-14T06:52:00Z', pax: 174, distanceKm: 1470 },
+      { flight: 'ACX215', from: 'PMI', to: 'MAN', std: '2026-06-14T10:00:00Z', pax: 168, distanceKm: 1470 },
     ],
   },
   trigger: {
@@ -67,8 +67,8 @@ export const s01Scenario: Scenario = {
   },
   world: {
     spares: [
-      { tail: 'NW-LRM', type: 'A320', station: 'MAN', availableFromMinute: 35, stand: '34' },
-      { tail: 'NW-PQT', type: 'A320', station: 'LGW', availableFromMinute: 90 },
+      { tail: 'AX-LRM', type: 'A320', station: 'MAN', availableFromMinute: 35, stand: '34' },
+      { tail: 'AX-PQT', type: 'A320', station: 'LGW', availableFromMinute: 90 },
     ],
     engineers: [
       {
@@ -139,34 +139,34 @@ export const s01Scenario: Scenario = {
       },
     ],
     cohorts: [
-      { id: 'c-general', kind: 'general', count: 144, flight: 'NWD214' },
+      { id: 'c-general', kind: 'general', count: 144, flight: 'ACX214' },
       {
         id: 'c-families',
         kind: 'families',
         count: 11,
-        flight: 'NWD214',
+        flight: 'ACX214',
         notes: 'Four families with young children',
       },
-      { id: 'c-prm', kind: 'prm', count: 3, flight: 'NWD214', notes: 'Two WCHR, one WCHC' },
+      { id: 'c-prm', kind: 'prm', count: 3, flight: 'ACX214', notes: 'Two WCHR, one WCHC' },
       {
         id: 'c-um',
         kind: 'unaccompanied_minors',
         count: 2,
-        flight: 'NWD214',
+        flight: 'ACX214',
         notes: 'Escorted by cabin crew',
       },
       {
         id: 'c-connections',
         kind: 'connections',
         count: 14,
-        flight: 'NWD214',
+        flight: 'ACX214',
         onwardDeadline: '2026-06-14T12:30:00Z',
         notes: 'Onward ferry connections at PMI',
       },
     ],
     stands: [
-      { id: '32', station: 'MAN', kind: 'contact', occupiedByTail: 'NW-KES' },
-      { id: '34', station: 'MAN', kind: 'contact', occupiedByTail: 'NW-LRM', occupiedUntilMinute: 35 },
+      { id: '32', station: 'MAN', kind: 'contact', occupiedByTail: 'AX-KES' },
+      { id: '34', station: 'MAN', kind: 'contact', occupiedByTail: 'AX-LRM', occupiedUntilMinute: 35 },
       { id: 'R7', station: 'MAN', kind: 'remote' },
     ],
     handler: {
@@ -186,8 +186,8 @@ export const s01Scenario: Scenario = {
     curfews: [],
     rotation: [
       {
-        flight: 'NWD214',
-        tail: 'NW-KES',
+        flight: 'ACX214',
+        tail: 'AX-KES',
         from: 'MAN',
         to: 'PMI',
         std: '2026-06-14T06:52:00Z',
@@ -195,8 +195,8 @@ export const s01Scenario: Scenario = {
         pax: 174,
       },
       {
-        flight: 'NWD215',
-        tail: 'NW-KES',
+        flight: 'ACX215',
+        tail: 'AX-KES',
         from: 'PMI',
         to: 'MAN',
         std: '2026-06-14T10:00:00Z',
@@ -204,8 +204,8 @@ export const s01Scenario: Scenario = {
         pax: 168,
       },
       {
-        flight: 'NWD230',
-        tail: 'NW-KES',
+        flight: 'ACX230',
+        tail: 'AX-KES',
         from: 'MAN',
         to: 'DUB',
         std: '2026-06-14T13:10:00Z',
@@ -213,8 +213,8 @@ export const s01Scenario: Scenario = {
         pax: 151,
       },
       {
-        flight: 'NWD231',
-        tail: 'NW-KES',
+        flight: 'ACX231',
+        tail: 'AX-KES',
         from: 'DUB',
         to: 'MAN',
         std: '2026-06-14T14:50:00Z',
@@ -232,7 +232,7 @@ export const s01Scenario: Scenario = {
         'The only other tug on shift is committed to a wide-body departure for the next 40 minutes.',
       effects: [
         { op: 'patch', system: 'handler', entity: 'equipment', id: 'MAN:tug', patch: { available: 0 } },
-        { op: 'info', text: 'Handler: no tug available for NW-KES before 07:50Z.' },
+        { op: 'info', text: 'Handler: no tug available for AX-KES before 07:50Z.' },
       ],
     },
     {
@@ -271,13 +271,13 @@ export const s01Scenario: Scenario = {
     {
       atMinute: 10,
       actor: 'Maintenance control',
-      action: { tool: 'page_engineer', args: { engineerId: 'eng-1', tail: 'NW-KES' } },
+      action: { tool: 'page_engineer', args: { engineerId: 'eng-1', tail: 'AX-KES' } },
       note: 'Engineer called by phone after the ramp report.',
     },
     {
       atMinute: 14,
       actor: 'Ramp supervisor',
-      action: { tool: 'request_tow', args: { tail: 'NW-KES', standId: '32' } },
+      action: { tool: 'request_tow', args: { tail: 'AX-KES', standId: '32' } },
       note: 'Tow requested by radio.',
     },
     {
@@ -295,7 +295,7 @@ export const s01Scenario: Scenario = {
       actor: 'OCC controller',
       action: {
         tool: 'propose_swap',
-        args: { fromTail: 'NW-KES', toTail: 'NW-LRM', flights: ['NWD214', 'NWD215'] },
+        args: { fromTail: 'AX-KES', toTail: 'AX-LRM', flights: ['ACX214', 'ACX215'] },
         decision: 'approve',
       },
       note: 'Swap agreed once engineering gave an estimate.',
@@ -315,7 +315,7 @@ export const s01Scenario: Scenario = {
       actor: 'Duty engineer',
       action: {
         tool: 'record_engineering_decision',
-        args: { tail: 'NW-KES', decision: 'rectify' },
+        args: { tail: 'AX-KES', decision: 'rectify' },
         decision: 'approve',
       },
       note: 'Rectification logged after the swap.',
@@ -331,7 +331,7 @@ export const s01Scenario: Scenario = {
     forbiddenTools: ['defer_defect', 'release_aircraft', 'extend_crew_fdp'],
     orderedPairs: [['page_engineer', 'record_engineering_decision']],
     referenceSummary:
-      'Page a B1 engineer at once, get the aircraft back on stand, inform passengers early (PRM, minors and connections first), and swap to the spare NW-LRM once engineering confirms the damage needs rectification.',
+      'Page a B1 engineer at once, get the aircraft back on stand, inform passengers early (PRM, minors and connections first), and swap to the spare AX-LRM once engineering confirms the damage needs rectification.',
   },
   kpiParams: {
     eurPerMinute: 100,
@@ -473,16 +473,16 @@ export function buildS01Agent(): RunEvent[] {
   });
   const trig = r.put(2, WORLD, 'mne', 'defects', 'def-1', {
     id: 'def-1',
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     description: 'Tug contact with nose landing gear during pushback (towbar shear pin failure)',
     ata: '32',
     status: 'open',
     raisedAtMinute: 2,
   });
-  r.patch(2, WORLD, 'mne', 'aircraft', 'NW-KES', { status: 'unserviceable' });
+  r.patch(2, WORLD, 'mne', 'aircraft', 'AX-KES', { status: 'unserviceable' });
   k.primaryDelay = 45;
   k.reactionary = 30;
-  const delayMut = r.patch(2, WORLD, 'occ', 'flights', 'NWD214', {
+  const delayMut = r.patch(2, WORLD, 'occ', 'flights', 'ACX214', {
     status: 'delayed',
     delayMin: 45,
     etd: '2026-06-14T07:37:00Z',
@@ -505,23 +505,23 @@ export function buildS01Agent(): RunEvent[] {
     'I will open the incident, then brief maintenance, ground, flight ops and passenger agents in parallel.',
   );
   let t = call(ORCH, 2.4, 1, 'open_incident', 'runtime', 'execute', {
-    title: 'NW-KES nose-gear contact on pushback',
+    title: 'AX-KES nose-gear contact on pushback',
     severity: 'high',
   });
-  timeline(2.4, ORCH, 1, 'Incident opened: NW-KES nose-gear contact on pushback (NWD214)');
+  timeline(2.4, ORCH, 1, 'Incident opened: AX-KES nose-gear contact on pushback (ACX214)');
   result(ORCH, 2.4, 1, t, 'open_incident', true, { incidentId: 'inc-s01-1' }, undefined, 40);
   t = call(ORCH, 2.5, 1, 'set_objective', 'runtime', 'execute', {
-    objective: 'Safe outcome for NW-KES, first passenger message before minute 15, protect the PMI rotation.',
+    objective: 'Safe outcome for AX-KES, first passenger message before minute 15, protect the PMI rotation.',
   });
   result(ORCH, 2.5, 1, t, 'set_objective', true, { ok: true }, undefined, 30);
   const briefs: [keyof typeof role, string][] = [
     [
       MX,
-      'Get a B1 engineer to NW-KES, raise a work order and establish the damage and an estimate. Deferral and release are for certifying staff only.',
+      'Get a B1 engineer to AX-KES, raise a work order and establish the damage and an estimate. Deferral and release are for certifying staff only.',
     ],
-    [GND, 'Get NW-KES back on stand 32 safely and plan disembarkation if the tow is delayed.'],
-    [OPS, 'Assess the knock-on for the NW-KES rotation, crew FDP and spare options.'],
-    [PAXA, 'Inform NWD214 passengers early, with PRM, unaccompanied minors and connections first.'],
+    [GND, 'Get AX-KES back on stand 32 safely and plan disembarkation if the tow is delayed.'],
+    [OPS, 'Assess the knock-on for the AX-KES rotation, crew FDP and spare options.'],
+    [PAXA, 'Inform ACX214 passengers early, with PRM, unaccompanied minors and connections first.'],
   ];
   for (const [id, brief] of briefs) {
     const tcid = call(ORCH, 2.6, 1, 'delegate', 'runtime', 'execute', { role: role[id], brief });
@@ -538,9 +538,9 @@ export function buildS01Agent(): RunEvent[] {
     1,
     'Check the aircraft status and the nose-gear inspection guidance before paging an engineer.',
   );
-  t = call(MX, 3.0, 1, 'get_aircraft_status', 'mne', 'execute', { tail: 'NW-KES' });
+  t = call(MX, 3.0, 1, 'get_aircraft_status', 'mne', 'execute', { tail: 'AX-KES' });
   result(MX, 3.0, 1, t, 'get_aircraft_status', true, {
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     status: 'unserviceable',
     openDefects: ['def-1'],
     stand: '32',
@@ -579,7 +579,7 @@ export function buildS01Agent(): RunEvent[] {
   );
   t = call(MX, 3.5, 2, 'page_engineer', 'engineers', 'execute', {
     engineerId: 'eng-1',
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     standId: '32',
   });
   const page = r.patch(3.5, agent('maintenance'), 'engineers', 'engineers', 'eng-1', {
@@ -593,13 +593,13 @@ export function buildS01Agent(): RunEvent[] {
   result(MX, 3.5, 2, t, 'page_engineer', true, { engineerId: 'eng-1', etaMinute: 12, travelMode: 'drive' });
   timeline(3.6, MX, 2, 'B1 engineer Ada Pennick paged, ETA 9 min');
   t = call(MX, 3.8, 2, 'create_work_order', 'mne', 'execute', {
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     defectId: 'def-1',
     task: 'Inspect nose landing gear after tug contact',
   });
   r.put(3.8, agent('maintenance'), 'mne', 'workOrders', 'wo-1', {
     id: 'wo-1',
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     defectId: 'def-1',
     task: 'Inspect nose landing gear after tug contact',
     status: 'assigned',
@@ -621,9 +621,9 @@ export function buildS01Agent(): RunEvent[] {
   result(GND, 3.88, 1, t, 'get_stand_status', true, {
     standId: '32',
     kind: 'contact',
-    occupiedByTail: 'NW-KES',
+    occupiedByTail: 'AX-KES',
   });
-  t = call(GND, 3.9, 1, 'request_tow', 'airport', 'execute', { tail: 'NW-KES', standId: '32' });
+  t = call(GND, 3.9, 1, 'request_tow', 'airport', 'execute', { tail: 'AX-KES', standId: '32' });
   r.put(3.9, agent('ground'), 'airport', 'resourceRequests', 'rr-tow-1', {
     id: 'rr-tow-1',
     kind: 'tow',
@@ -637,7 +637,7 @@ export function buildS01Agent(): RunEvent[] {
     kind: 'tow',
     status: 'queued',
     ackAtMinute: 7,
-    note: 'Tow NW-KES back on stand 32 with a second tug and towbar',
+    note: 'Tow AX-KES back on stand 32 with a second tug and towbar',
   });
   result(GND, 4.0, 1, t, 'request_tow', true, { requestId: 'rr-tow-1', etaMinute: 16 });
 
@@ -650,9 +650,9 @@ export function buildS01Agent(): RunEvent[] {
     1,
     'Passengers have been on board since boarding closed; the first message must go out now, with minors and PRM handled by the crew.',
   );
-  t = call(PAXA, 4.2, 1, 'get_manifest_summary', 'pss', 'execute', { flight: 'NWD214' });
+  t = call(PAXA, 4.2, 1, 'get_manifest_summary', 'pss', 'execute', { flight: 'ACX214' });
   result(PAXA, 4.2, 1, t, 'get_manifest_summary', true, {
-    flight: 'NWD214',
+    flight: 'ACX214',
     pax: 174,
     cohorts: { general: 144, families: 11, prm: 3, unaccompanied_minors: 2, connections: 14 },
   });
@@ -678,7 +678,7 @@ export function buildS01Agent(): RunEvent[] {
     280,
   );
   const msg1Body =
-    'NWD214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.';
+    'ACX214 to Palma: our aircraft had a minor contact with the towing vehicle during pushback. Engineers are on their way to check it. Please stay seated; we will update you by 07:15.';
   t = call(PAXA, 4.8, 2, 'draft_passenger_message', 'pss', 'execute', {
     cohortIds: ALL_COHORTS,
     channel: 'sms',
@@ -713,7 +713,7 @@ export function buildS01Agent(): RunEvent[] {
         body: msg1Body,
         requestId: req(sendTc1),
       },
-      summary: 'Send the first delay message to all 174 passengers on NWD214 (SMS).',
+      summary: 'Send the first delay message to all 174 passengers on ACX214 (SMS).',
       reasoning:
         'Passengers have had no information since the aircraft stopped. The message states the cause in plain words, the next step (engineer inspection) and the time of the next update, and makes no compensation claims.',
       expiresAtMinute: 15,
@@ -737,13 +737,13 @@ export function buildS01Agent(): RunEvent[] {
   );
 
   // ---- flight ops: rotation, FDP, spares
-  thought(OPS, 5.2, 1, 'Look at the rest of the NW-KES day and what a 45 to 180 minute delay does to it.');
-  t = call(OPS, 5.3, 1, 'get_rotation', 'occ', 'execute', { tail: 'NW-KES' });
+  thought(OPS, 5.2, 1, 'Look at the rest of the AX-KES day and what a 45 to 180 minute delay does to it.');
+  t = call(OPS, 5.3, 1, 'get_rotation', 'occ', 'execute', { tail: 'AX-KES' });
   result(OPS, 5.3, 1, t, 'get_rotation', true, {
-    tail: 'NW-KES',
-    sectors: ['NWD214', 'NWD215', 'NWD230', 'NWD231'],
+    tail: 'AX-KES',
+    sectors: ['ACX214', 'ACX215', 'ACX230', 'ACX231'],
   });
-  t = call(OPS, 5.5, 1, 'get_crew_fdp', 'crew', 'execute', { flight: 'NWD214' });
+  t = call(OPS, 5.5, 1, 'get_crew_fdp', 'crew', 'execute', { flight: 'ACX214' });
   result(OPS, 5.5, 1, t, 'get_crew_fdp', true, {
     minRemainingFdpMin: 605,
     limitingCrew: 'crew-cpt-1',
@@ -752,15 +752,15 @@ export function buildS01Agent(): RunEvent[] {
   t = call(OPS, 5.8, 2, 'find_spare_aircraft', 'occ', 'execute', { type: 'A320', near: 'MAN' });
   result(OPS, 5.8, 2, t, 'find_spare_aircraft', true, {
     candidates: [
-      { tail: 'NW-LRM', station: 'MAN', availableFromMinute: 35 },
-      { tail: 'NW-PQT', station: 'LGW', availableFromMinute: 90 },
+      { tail: 'AX-LRM', station: 'MAN', availableFromMinute: 35 },
+      { tail: 'AX-PQT', station: 'LGW', availableFromMinute: 90 },
     ],
   });
   thought(
     OPS,
     6.0,
     2,
-    'NW-LRM on stand 34 frees up at 07:25Z: a swap would protect the PMI return if the inspection finds damage.',
+    'AX-LRM on stand 34 frees up at 07:25Z: a swap would protect the PMI return if the inspection finds damage.',
   );
 
   r.advanceTo(6);
@@ -853,7 +853,7 @@ export function buildS01Agent(): RunEvent[] {
     system: 'engineers',
     entity: 'engineers',
     id: 'eng-1',
-    change: 'Engineer on site at NW-KES',
+    change: 'Engineer on site at AX-KES',
   });
   const onsite = r.patch(12, WORLD, 'engineers', 'engineers', 'eng-1', {
     status: 'on_site',
@@ -864,7 +864,7 @@ export function buildS01Agent(): RunEvent[] {
   timeline(12.2, MX, 5, 'Engineer on site; nose-gear inspection started');
   k.primaryDelay = 70;
   k.reactionary = 45;
-  const d2 = r.patch(12.3, WORLD, 'occ', 'flights', 'NWD214', { delayMin: 70, etd: '2026-06-14T08:02:00Z' });
+  const d2 = r.patch(12.3, WORLD, 'occ', 'flights', 'ACX214', { delayMin: 70, etd: '2026-06-14T08:02:00Z' });
   k.seqs.cost.push(onsite.seq, d2.seq);
   r.kpiUpdate(12.3);
 
@@ -889,7 +889,7 @@ export function buildS01Agent(): RunEvent[] {
     WORLD,
     'occ',
     'flights',
-    'NWD214',
+    'ACX214',
     { delayMin: 95, etd: '2026-06-14T08:27:00Z' },
     { causedBySeq: tw.seq },
   );
@@ -904,7 +904,7 @@ export function buildS01Agent(): RunEvent[] {
     2,
     'No tug until about 07:50Z: plan a disembark on the apron with stairs and buses so passengers are not held on board.',
   );
-  t = call(GND, 18.8, 2, 'request_bus', 'airport', 'execute', { station: 'MAN', count: 2, tail: 'NW-KES' });
+  t = call(GND, 18.8, 2, 'request_bus', 'airport', 'execute', { station: 'MAN', count: 2, tail: 'AX-KES' });
   r.put(18.8, agent('ground'), 'airport', 'resourceRequests', 'rr-bus-1', {
     id: 'rr-bus-1',
     kind: 'bus',
@@ -916,7 +916,7 @@ export function buildS01Agent(): RunEvent[] {
   t = call(GND, 19.0, 2, 'notify_handler', 'handler', 'execute', {
     station: 'MAN',
     kind: 'stairs',
-    note: 'Two sets of stairs to NW-KES for an apron disembark',
+    note: 'Two sets of stairs to AX-KES for an apron disembark',
   });
   r.put(19.0, agent('ground'), 'handler', 'tasks', 'ht-2', {
     id: 'ht-2',
@@ -924,7 +924,7 @@ export function buildS01Agent(): RunEvent[] {
     kind: 'stairs',
     status: 'queued',
     ackAtMinute: 22,
-    note: 'Two sets of stairs to NW-KES',
+    note: 'Two sets of stairs to AX-KES',
   });
   r.put(19.0, agent('ground'), 'airport', 'resourceRequests', 'rr-stairs-1', {
     id: 'rr-stairs-1',
@@ -999,7 +999,7 @@ export function buildS01Agent(): RunEvent[] {
     system: 'airport',
     entity: 'resourceRequests',
     id: 'rr-stairs-1',
-    change: 'Stairs on site at NW-KES',
+    change: 'Stairs on site at AX-KES',
   });
   r.patch(25, WORLD, 'airport', 'resourceRequests', 'rr-stairs-1', { status: 'on_site' });
   r.patch(25, WORLD, 'handler', 'tasks', 'ht-2', { status: 'done' });
@@ -1011,7 +1011,7 @@ export function buildS01Agent(): RunEvent[] {
     system: 'airport',
     entity: 'resourceRequests',
     id: 'rr-bus-1',
-    change: 'Buses at NW-KES; disembark under way',
+    change: 'Buses at AX-KES; disembark under way',
   });
   r.patch(27, WORLD, 'airport', 'resourceRequests', 'rr-bus-1', { status: 'on_site' });
   r.advanceTo(28);
@@ -1032,14 +1032,14 @@ export function buildS01Agent(): RunEvent[] {
   });
   k.primaryDelay = 178;
   k.reactionary = 150;
-  const d4 = r.patch(28.2, WORLD, 'occ', 'flights', 'NWD214', { delayMin: 178, etd: '2026-06-14T09:50:00Z' });
-  r.patch(28.2, WORLD, 'occ', 'flights', 'NWD215', {
+  const d4 = r.patch(28.2, WORLD, 'occ', 'flights', 'ACX214', { delayMin: 178, etd: '2026-06-14T09:50:00Z' });
+  r.patch(28.2, WORLD, 'occ', 'flights', 'ACX215', {
     status: 'delayed',
     delayMin: 0,
     reactionaryDelayMin: 95,
   });
-  r.patch(28.2, WORLD, 'occ', 'flights', 'NWD230', { status: 'delayed', reactionaryDelayMin: 40 });
-  r.patch(28.2, WORLD, 'occ', 'flights', 'NWD231', { status: 'delayed', reactionaryDelayMin: 15 });
+  r.patch(28.2, WORLD, 'occ', 'flights', 'ACX230', { status: 'delayed', reactionaryDelayMin: 40 });
+  r.patch(28.2, WORLD, 'occ', 'flights', 'ACX231', { status: 'delayed', reactionaryDelayMin: 15 });
   k.seqs.cost.push(finding.seq, d4.seq);
   k.seqs.sat.push(d4.seq);
   r.kpiUpdate(28.3);
@@ -1048,10 +1048,10 @@ export function buildS01Agent(): RunEvent[] {
     MX,
     28.5,
     5,
-    'Rectification is about 150 minutes: NW-KES will not make NWD214 before the 3-hour threshold.',
+    'Rectification is about 150 minutes: AX-KES will not make ACX214 before the 3-hour threshold.',
     'Reporting to the orchestrator so it can put the alternatives to the Duty Manager.',
   );
-  t = call(MX, 28.7, 5, 'get_open_defects', 'mne', 'execute', { tail: 'NW-KES' });
+  t = call(MX, 28.7, 5, 'get_open_defects', 'mne', 'execute', { tail: 'AX-KES' });
   result(MX, 28.7, 5, t, 'get_open_defects', true, { defects: [{ id: 'def-1', status: 'open', ata: '32' }] });
 
   // ---- orchestrator: options decision (min 30)
@@ -1060,11 +1060,11 @@ export function buildS01Agent(): RunEvent[] {
     ORCH,
     30.1,
     3,
-    'Three real alternatives: swap to NW-LRM, hold for rectification, or cancel. The Duty Manager decides.',
+    'Three real alternatives: swap to AX-LRM, hold for rectification, or cancel. The Duty Manager decides.',
     'Swap is fastest and keeps the PMI return; holding crosses the 3-hour threshold for 174 passengers.',
   );
   const decTc = call(ORCH, 30.3, 3, 'request_decision', 'runtime', 'propose', {
-    question: 'How should NWD214 operate?',
+    question: 'How should ACX214 operate?',
   });
   r.push(
     'agent.proposal',
@@ -1074,15 +1074,15 @@ export function buildS01Agent(): RunEvent[] {
       approvalId: 'ap-decision-1',
       toolCallId: decTc,
       tool: 'request_decision',
-      args: { question: 'How should NWD214 operate?', flights: ['NWD214', 'NWD215'] },
+      args: { question: 'How should ACX214 operate?', flights: ['ACX214', 'ACX215'] },
       summary:
-        'Choose how NWD214 operates: swap to spare NW-LRM (recommended), hold for rectification, or cancel.',
+        'Choose how ACX214 operates: swap to spare AX-LRM (recommended), hold for rectification, or cancel.',
       reasoning:
-        'The engineer’s finding needs about 150 minutes of rectification (a provisional reading until the certifying engineer decides). NW-LRM is free on stand 34 from 07:25Z, crew FDP has 10 h left, and a swap departs about 55 minutes late. Holding projects 178 minutes, at the EU261 3-hour threshold for 174 passengers. Cancelling triggers rebooking on the evening flight.',
+        'The engineer’s finding needs about 150 minutes of rectification (a provisional reading until the certifying engineer decides). AX-LRM is free on stand 34 from 07:25Z, crew FDP has 10 h left, and a swap departs about 55 minutes late. Holding projects 178 minutes, at the EU261 3-hour threshold for 174 passengers. Cancelling triggers rebooking on the evening flight.',
       options: [
         {
           id: 'opt-swap',
-          label: 'Swap NWD214/215 to spare NW-LRM (stand 34)',
+          label: 'Swap ACX214/215 to spare AX-LRM (stand 34)',
           metrics: {
             timeToDepartureMin: 25,
             costEur: 13300,
@@ -1091,17 +1091,17 @@ export function buildS01Agent(): RunEvent[] {
             constraints: ['Spare free from 07:25Z', 'Crew FDP OK (10 h left)'],
           },
           recommended: true,
-          unresolvedChecks: ['Crew for NW-LRM confirmed by crew control'],
+          unresolvedChecks: ['Crew for AX-LRM confirmed by crew control'],
           approvalScope: {
             authorises:
-              'Choosing “Swap NWD214/215 to spare NW-LRM” as the plan. Each action it leads to is proposed and approved separately.',
+              'Choosing “Swap ACX214/215 to spare AX-LRM” as the plan. Each action it leads to is proposed and approved separately.',
             doesNotAuthorise: ['Executing the swap: OCC confirms and executes it'],
           },
           dataAsOfMinute: 28.7,
         },
         {
           id: 'opt-hold',
-          label: 'Hold NW-KES for rectification',
+          label: 'Hold AX-KES for rectification',
           metrics: {
             timeToDepartureMin: 150,
             costEur: 114400,
@@ -1115,7 +1115,7 @@ export function buildS01Agent(): RunEvent[] {
         },
         {
           id: 'opt-cancel',
-          label: 'Cancel NWD214 and rebook on NWD218',
+          label: 'Cancel ACX214 and rebook on ACX218',
           metrics: {
             timeToDepartureMin: 610,
             costEur: 61800,
@@ -1153,12 +1153,12 @@ export function buildS01Agent(): RunEvent[] {
   );
   t = call(REC, 32.6, 2, 'draft_occurrence_report', 'record', 'execute', {
     kind: 'occurrence',
-    tail: 'NW-KES',
+    tail: 'AX-KES',
   });
   const rep = r.put(32.6, agent('record'), 'record', 'reports', 'rep-1', {
     id: 'rep-1',
     kind: 'occurrence',
-    body: 'DRAFT for a named reporter. On 14 June at 06:52Z during pushback of NW-KES (NWD214, MAN stand 32) the towbar shear pin failed and the tug contacted the nose landing gear. No injuries. Passengers disembarked on the apron by stairs and bus. Inspection found a cracked torque-link bracket; the aircraft is out of service pending rectification.',
+    body: 'DRAFT for a named reporter. On 14 June at 06:52Z during pushback of AX-KES (ACX214, MAN stand 32) the towbar shear pin failed and the tug contacted the nose landing gear. No injuries. Passengers disembarked on the apron by stairs and bus. Inspection found a cracked torque-link bracket; the aircraft is out of service pending rectification.',
     status: 'draft',
     forHumanReporter: true,
     aiDrafted: true,
@@ -1172,8 +1172,8 @@ export function buildS01Agent(): RunEvent[] {
   r.push('world.process', 35, WORLD, {
     system: 'occ',
     entity: 'spares',
-    id: 'NW-LRM',
-    change: 'Spare NW-LRM available on stand 34',
+    id: 'AX-LRM',
+    change: 'Spare AX-LRM available on stand 34',
   });
   r.patch(35, WORLD, 'airport', 'stands', '34', { occupiedUntilMinute: 35 });
 
@@ -1195,9 +1195,9 @@ export function buildS01Agent(): RunEvent[] {
   // ---- flight ops sends the swap request (approving it SENDS A REQUEST to OCC; OCC confirms and executes)
   thought(OPS, 36.35, 3, 'The Duty Manager chose the swap; propose the swap request to OCC.');
   const swapTc = call(OPS, 36.4, 3, 'propose_swap', 'occ', 'propose', {
-    fromTail: 'NW-KES',
-    toTail: 'NW-LRM',
-    flights: ['NWD214', 'NWD215'],
+    fromTail: 'AX-KES',
+    toTail: 'AX-LRM',
+    flights: ['ACX214', 'ACX215'],
   });
   r.push(
     'agent.proposal',
@@ -1207,10 +1207,10 @@ export function buildS01Agent(): RunEvent[] {
       approvalId: 'ap-swap-1',
       toolCallId: swapTc,
       tool: 'propose_swap',
-      args: { fromTail: 'NW-KES', toTail: 'NW-LRM', flights: ['NWD214', 'NWD215'] },
-      summary: 'Send the swap request to OCC: NW-LRM takes over NWD214 and NWD215 from NW-KES.',
+      args: { fromTail: 'AX-KES', toTail: 'AX-LRM', flights: ['ACX214', 'ACX215'] },
+      summary: 'Send the swap request to OCC: AX-LRM takes over ACX214 and ACX215 from AX-KES.',
       reasoning:
-        'The Duty Manager chose the swap option. NW-LRM is on stand 34 and free from 07:25Z; the crew keep their duty margin. OCC confirms and executes the swap.',
+        'The Duty Manager chose the swap option. AX-LRM is on stand 34 and free from 07:25Z; the crew keep their duty margin. OCC confirms and executes the swap.',
       tier: 'propose',
       unresolvedChecks: [
         'Spare aircraft serviceability confirmed by maintenance control',
@@ -1219,7 +1219,7 @@ export function buildS01Agent(): RunEvent[] {
       approvalScope: SCOPE.propose_swap,
       dataAsOfMinute: 35,
       assumptions: [
-        { key: 'spareAvailableFromMinute', value: 35, source: 'occ/spares/NW-LRM#availableFromMinute' },
+        { key: 'spareAvailableFromMinute', value: 35, source: 'occ/spares/AX-LRM#availableFromMinute' },
       ],
     },
     env(OPS, 3),
@@ -1238,9 +1238,9 @@ export function buildS01Agent(): RunEvent[] {
     'swap-1',
     {
       id: 'swap-1',
-      fromTail: 'NW-KES',
-      toTail: 'NW-LRM',
-      flights: ['NWD214', 'NWD215'],
+      fromTail: 'AX-KES',
+      toTail: 'AX-LRM',
+      flights: ['ACX214', 'ACX215'],
       status: 'requested',
       approvedBy: DM,
       requestedAtMinute: 36.95,
@@ -1251,9 +1251,9 @@ export function buildS01Agent(): RunEvent[] {
   result(OPS, 36.95, 3, swapTc, 'propose_swap', true, {
     swap: {
       id: 'swap-1',
-      fromTail: 'NW-KES',
-      toTail: 'NW-LRM',
-      flights: ['NWD214', 'NWD215'],
+      fromTail: 'AX-KES',
+      toTail: 'AX-LRM',
+      flights: ['ACX214', 'ACX215'],
       status: 'requested',
     },
     note: 'Swap request sent to OCC; OCC confirms and executes it (expected at minute 41.95).',
@@ -1261,7 +1261,7 @@ export function buildS01Agent(): RunEvent[] {
     expectedDelayMin: 58,
   });
   k.seqs.cost.push(dec2.seq, swap.seq);
-  timeline(36.97, ORCH, 6, 'Duty Manager chose the swap to NW-LRM; swap request sent to OCC');
+  timeline(36.97, ORCH, 6, 'Duty Manager chose the swap to AX-LRM; swap request sent to OCC');
   r.kpiUpdate(36.98);
 
   // ---- ground: board from stand 34
@@ -1269,13 +1269,13 @@ export function buildS01Agent(): RunEvent[] {
     GND,
     37.0,
     3,
-    'Passengers are in the terminal; request stand 34 for boarding on NW-LRM and release the buses.',
+    'Passengers are in the terminal; request stand 34 for boarding on AX-LRM and release the buses.',
   );
-  t = call(GND, 37.2, 3, 'request_stand', 'airport', 'execute', { standId: '34', tail: 'NW-LRM' });
+  t = call(GND, 37.2, 3, 'request_stand', 'airport', 'execute', { standId: '34', tail: 'AX-LRM' });
   r.put(37.2, agent('ground'), 'airport', 'standRequests', 'sr-1', {
     id: 'sr-1',
     standId: '34',
-    tail: 'NW-LRM',
+    tail: 'AX-LRM',
     status: 'requested',
     confirmAtMinute: 40,
   });
@@ -1289,7 +1289,7 @@ export function buildS01Agent(): RunEvent[] {
     'Tell passengers about the new aircraft and time; families and PRM have waited over 30 minutes, so propose refreshment vouchers.',
   );
   const msg2Body =
-    'NWD214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.';
+    'ACX214 to Palma: we are changing aircraft so you can travel sooner. New departure about 07:50 from gate 34. Refreshment vouchers are available at the gate for families and passengers needing assistance. Next update by 07:30.';
   t = call(PAXA, 37.7, 4, 'draft_passenger_message', 'pss', 'execute', {
     cohortIds: ALL_COHORTS,
     channel: 'sms',
@@ -1372,7 +1372,7 @@ export function buildS01Agent(): RunEvent[] {
     system: 'airport',
     entity: 'standRequests',
     id: 'sr-1',
-    change: 'Stand 34 confirmed for NW-LRM',
+    change: 'Stand 34 confirmed for AX-LRM',
   });
   r.patch(40, WORLD, 'airport', 'standRequests', 'sr-1', { status: 'confirmed' });
   r.patch(40, WORLD, 'airport', 'resourceRequests', 'rr-bus-1', { status: 'released' });
@@ -1414,7 +1414,7 @@ export function buildS01Agent(): RunEvent[] {
     system: 'occ',
     entity: 'swaps',
     id: 'swap-1',
-    change: 'OCC confirmed and executed the swap: NWD214/215 re-tailed to NW-LRM',
+    change: 'OCC confirmed and executed the swap: ACX214/215 re-tailed to AX-LRM',
   });
   const swapDone = r.put(
     41.95,
@@ -1424,9 +1424,9 @@ export function buildS01Agent(): RunEvent[] {
     'swap-1',
     {
       id: 'swap-1',
-      fromTail: 'NW-KES',
-      toTail: 'NW-LRM',
-      flights: ['NWD214', 'NWD215'],
+      fromTail: 'AX-KES',
+      toTail: 'AX-LRM',
+      flights: ['ACX214', 'ACX215'],
       status: 'executed',
       approvedBy: DM,
       requestedAtMinute: 36.95,
@@ -1435,7 +1435,7 @@ export function buildS01Agent(): RunEvent[] {
     },
     { causedBySeq: decSwap.seq },
   );
-  r.patch(41.95, WORLD, 'occ', 'spares', 'NW-LRM', { assignedTo: 'NWD214' }, { causedBySeq: decSwap.seq });
+  r.patch(41.95, WORLD, 'occ', 'spares', 'AX-LRM', { assignedTo: 'ACX214' }, { causedBySeq: decSwap.seq });
   k.primaryDelay = 58;
   k.reactionary = 25;
   const f1 = r.patch(
@@ -1443,8 +1443,8 @@ export function buildS01Agent(): RunEvent[] {
     WORLD,
     'occ',
     'flights',
-    'NWD214',
-    { tail: 'NW-LRM', status: 'delayed', delayMin: 58, etd: '2026-06-14T07:50:00Z' },
+    'ACX214',
+    { tail: 'AX-LRM', status: 'delayed', delayMin: 58, etd: '2026-06-14T07:50:00Z' },
     { causedBySeq: decSwap.seq },
   );
   r.patch(
@@ -1452,8 +1452,8 @@ export function buildS01Agent(): RunEvent[] {
     WORLD,
     'occ',
     'flights',
-    'NWD215',
-    { tail: 'NW-LRM', status: 'delayed', delayMin: 0, reactionaryDelayMin: 25 },
+    'ACX215',
+    { tail: 'AX-LRM', status: 'delayed', delayMin: 0, reactionaryDelayMin: 25 },
     { causedBySeq: decSwap.seq },
   );
   r.patch(
@@ -1461,7 +1461,7 @@ export function buildS01Agent(): RunEvent[] {
     WORLD,
     'occ',
     'flights',
-    'NWD230',
+    'ACX230',
     { status: 'scheduled', reactionaryDelayMin: 0 },
     { causedBySeq: decSwap.seq },
   );
@@ -1470,7 +1470,7 @@ export function buildS01Agent(): RunEvent[] {
     WORLD,
     'occ',
     'flights',
-    'NWD231',
+    'ACX231',
     { status: 'scheduled', reactionaryDelayMin: 0 },
     { causedBySeq: decSwap.seq },
   );
@@ -1520,7 +1520,7 @@ export function buildS01Agent(): RunEvent[] {
     'Ada Pennick has finished the inspection; her rectify decision must be recorded against her name.',
   );
   const engTc = call(MX, 44.3, 6, 'record_engineering_decision', 'mne', 'propose', {
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     decision: 'rectify',
   });
   r.push(
@@ -1532,11 +1532,11 @@ export function buildS01Agent(): RunEvent[] {
       toolCallId: engTc,
       tool: 'record_engineering_decision',
       args: {
-        tail: 'NW-KES',
+        tail: 'AX-KES',
         decision: 'rectify',
         rationale: 'Cracked torque-link bracket; replace before next flight.',
       },
-      summary: 'Record the certifying engineer’s decision: rectify NW-KES (replace the torque-link bracket).',
+      summary: 'Record the certifying engineer’s decision: rectify AX-KES (replace the torque-link bracket).',
       reasoning:
         'Only certifying staff may decide rectify, defer or release. This records Ada Pennick’s decision so the work order and stores request can proceed.',
       tier: 'propose',
@@ -1558,10 +1558,10 @@ export function buildS01Agent(): RunEvent[] {
   r.push('world.process', 46, WORLD, {
     system: 'occ',
     entity: 'flights',
-    id: 'NWD214',
-    change: 'Boarding NWD214 on NW-LRM at stand 34',
+    id: 'ACX214',
+    change: 'Boarding ACX214 on AX-LRM at stand 34',
   });
-  r.patch(46, WORLD, 'occ', 'flights', 'NWD214', { status: 'boarding' });
+  r.patch(46, WORLD, 'occ', 'flights', 'ACX214', { status: 'boarding' });
   const dec5 = r.push('approval.decision', 47.5, CERT, {
     approvalId: 'ap-eng-1',
     decision: 'approve',
@@ -1579,7 +1579,7 @@ export function buildS01Agent(): RunEvent[] {
     'ed-1',
     {
       id: 'ed-1',
-      tail: 'NW-KES',
+      tail: 'AX-KES',
       decision: 'rectify',
       decidedBy: CERT,
       atMinute: 47.5,
@@ -1599,7 +1599,7 @@ export function buildS01Agent(): RunEvent[] {
     'tlg-1',
     {
       id: 'tlg-1',
-      tail: 'NW-KES',
+      tail: 'AX-KES',
       text: 'NLG torque-link bracket found cracked following tug contact on pushback. Rectification decided by the certifying engineer; replacement bracket requested from stores. (Draft for certifying engineer.)',
       status: 'draft',
       aiDrafted: true,
@@ -1618,9 +1618,9 @@ export function buildS01Agent(): RunEvent[] {
       role: 'ground',
       report: {
         summary:
-          'Passengers disembarked by stairs and bus while no tug was available; stand 34 confirmed for NW-LRM.',
+          'Passengers disembarked by stairs and bus while no tug was available; stand 34 confirmed for AX-LRM.',
         actionsTaken: ['Tow requested', 'Two buses and stairs', 'Stand 34 requested and confirmed'],
-        openIssues: ['Tow NW-KES to the hangar when a tug is free'],
+        openIssues: ['Tow AX-KES to the hangar when a tug is free'],
         recommendations: ['Keep one tug in reserve during the morning wave'],
         citations: [],
       },
@@ -1634,14 +1634,14 @@ export function buildS01Agent(): RunEvent[] {
     {
       role: 'flightops',
       report: {
-        summary: 'NWD214/215 swapped to NW-LRM; NWD230/231 protected on the original schedule.',
+        summary: 'ACX214/215 swapped to AX-LRM; ACX230/231 protected on the original schedule.',
         actionsTaken: [
           'Rotation and FDP checked',
           'Spare identified',
           'Swap request sent to OCC after the Duty Manager’s decision; OCC executed it',
         ],
         openIssues: [],
-        recommendations: ['Plan NW-KES back into the rotation after rectification'],
+        recommendations: ['Plan AX-KES back into the rotation after rectification'],
         citations: [],
       },
     },
@@ -1652,13 +1652,13 @@ export function buildS01Agent(): RunEvent[] {
   r.push('world.process', 54, WORLD, {
     system: 'occ',
     entity: 'flights',
-    id: 'NWD214',
-    change: 'NWD214 pushed back on NW-LRM',
+    id: 'ACX214',
+    change: 'ACX214 pushed back on AX-LRM',
   });
   k.resolved = true;
-  const dep = r.patch(54, WORLD, 'occ', 'flights', 'NWD214', { status: 'departed', delayMin: 58 });
+  const dep = r.patch(54, WORLD, 'occ', 'flights', 'ACX214', { status: 'departed', delayMin: 58 });
   k.seqs.compliance.push(dep.seq);
-  timeline(54.2, REC, 7, 'NWD214 departed on NW-LRM, 58 minutes late');
+  timeline(54.2, REC, 7, 'ACX214 departed on AX-LRM, 58 minutes late');
   r.kpiUpdate(54.3);
 
   r.push(
@@ -1696,7 +1696,7 @@ export function buildS01Agent(): RunEvent[] {
       role: 'maintenance',
       report: {
         summary:
-          'Cracked torque-link bracket found on NW-KES; rectification decided and recorded by the certifying engineer.',
+          'Cracked torque-link bracket found on AX-KES; rectification decided and recorded by the certifying engineer.',
         actionsTaken: [
           'Engineer paged at minute 3.5',
           'Work order wo-1',
@@ -1822,7 +1822,7 @@ export function buildS01Agent(): RunEvent[] {
     ORCH,
     58.1,
     4,
-    'All specialists have reported; NWD214 is airborne on NW-LRM and the open issues are with named humans.',
+    'All specialists have reported; ACX214 is airborne on AX-LRM and the open issues are with named humans.',
   );
   r.push(
     'agent.report',
@@ -1832,13 +1832,13 @@ export function buildS01Agent(): RunEvent[] {
       role: 'orchestrator',
       report: {
         summary:
-          'NWD214 departed 58 minutes late on spare NW-LRM after the Duty Manager chose the swap and OCC executed it; NW-KES is out of service for the rectification the certifying engineer decided. Passengers informed at minute 6.4.',
+          'ACX214 departed 58 minutes late on spare AX-LRM after the Duty Manager chose the swap and OCC executed it; AX-KES is out of service for the rectification the certifying engineer decided. Passengers informed at minute 6.4.',
         actionsTaken: [
           'Incident opened and specialists briefed in parallel',
           'Options decision put to the Duty Manager',
           'Evidence pack exported',
         ],
-        openIssues: ['Occurrence report to be filed by a named person', 'NW-KES bracket from stores'],
+        openIssues: ['Occurrence report to be filed by a named person', 'AX-KES bracket from stores'],
         recommendations: ['Review tug reserve policy for the morning wave'],
         citations: [],
         recommendationDetails: [
@@ -1904,16 +1904,16 @@ export function buildS01Baseline(): RunEvent[] {
   });
   const trig = r.put(2, WORLD, 'mne', 'defects', 'def-1', {
     id: 'def-1',
-    tail: 'NW-KES',
+    tail: 'AX-KES',
     description: 'Tug contact with nose landing gear during pushback (towbar shear pin failure)',
     ata: '32',
     status: 'open',
     raisedAtMinute: 2,
   });
-  r.patch(2, WORLD, 'mne', 'aircraft', 'NW-KES', { status: 'unserviceable' });
+  r.patch(2, WORLD, 'mne', 'aircraft', 'AX-KES', { status: 'unserviceable' });
   k.primaryDelay = 45;
   k.reactionary = 30;
-  r.patch(2, WORLD, 'occ', 'flights', 'NWD214', { status: 'delayed', delayMin: 45 });
+  r.patch(2, WORLD, 'occ', 'flights', 'ACX214', { status: 'delayed', delayMin: 45 });
   k.seqs.cost.push(trig.seq);
 
   r.advanceTo(10);
@@ -1921,7 +1921,7 @@ export function buildS01Baseline(): RunEvent[] {
     10,
     'Maintenance control',
     'page_engineer',
-    { engineerId: 'eng-1', tail: 'NW-KES' },
+    { engineerId: 'eng-1', tail: 'AX-KES' },
     'Engineer called by phone after the ramp report.',
   );
   r.patch(
@@ -1935,7 +1935,7 @@ export function buildS01Baseline(): RunEvent[] {
   );
   k.seqs.latency.push(pg.seq);
   r.advanceTo(14);
-  act(14, 'Ramp supervisor', 'request_tow', { tail: 'NW-KES', standId: '32' }, 'Tow requested by radio.');
+  act(14, 'Ramp supervisor', 'request_tow', { tail: 'AX-KES', standId: '32' }, 'Tow requested by radio.');
   r.put(14, human('Ramp supervisor', 'Ramp supervisor'), 'airport', 'resourceRequests', 'rr-tow-1', {
     id: 'rr-tow-1',
     kind: 'tow',
@@ -1954,14 +1954,14 @@ export function buildS01Baseline(): RunEvent[] {
   r.patch(18, WORLD, 'handler', 'equipment', 'MAN:tug', { available: 0 }, { causedBySeq: tw.seq });
   k.primaryDelay = 110;
   k.reactionary = 90;
-  r.patch(18, WORLD, 'occ', 'flights', 'NWD214', { delayMin: 110 }, { causedBySeq: tw.seq });
+  r.patch(18, WORLD, 'occ', 'flights', 'ACX214', { delayMin: 110 }, { causedBySeq: tw.seq });
   k.seqs.cost.push(tw.seq);
   r.advanceTo(20);
   r.push('world.process', 20, WORLD, {
     system: 'engineers',
     entity: 'engineers',
     id: 'eng-1',
-    change: 'Engineer on site at NW-KES',
+    change: 'Engineer on site at AX-KES',
   });
   r.patch(20, WORLD, 'engineers', 'engineers', 'eng-1', { status: 'on_site' });
   r.advanceTo(28);
@@ -1982,7 +1982,7 @@ export function buildS01Baseline(): RunEvent[] {
       id: 'msg-b1',
       cohortIds: ALL_COHORTS,
       channel: 'sms',
-      body: 'NWD214 is delayed due to a technical issue. Further information to follow.',
+      body: 'ACX214 is delayed due to a technical issue. Further information to follow.',
       status: 'sent',
       aiDrafted: true,
       sentAtMinute: 28,
@@ -2012,10 +2012,10 @@ export function buildS01Baseline(): RunEvent[] {
     id: 'wo-b1',
     change: 'Inspection finding: torque-link bracket cracked',
   });
-  r.patch(38, WORLD, 'mne', 'aircraft', 'NW-KES', { status: 'aog' });
+  r.patch(38, WORLD, 'mne', 'aircraft', 'AX-KES', { status: 'aog' });
   k.primaryDelay = 190;
   k.reactionary = 170;
-  const d = r.patch(38, WORLD, 'occ', 'flights', 'NWD214', { delayMin: 190 });
+  const d = r.patch(38, WORLD, 'occ', 'flights', 'ACX214', { delayMin: 190 });
   k.seqs.cost.push(d.seq);
   r.kpiUpdate(38.2);
   r.advanceTo(50);
@@ -2023,7 +2023,7 @@ export function buildS01Baseline(): RunEvent[] {
     50,
     'OCC controller',
     'propose_swap',
-    { fromTail: 'NW-KES', toTail: 'NW-LRM', flights: ['NWD214', 'NWD215'] },
+    { fromTail: 'AX-KES', toTail: 'AX-LRM', flights: ['ACX214', 'ACX215'] },
     'Swap agreed once engineering gave an estimate.',
   );
   r.put(
@@ -2034,9 +2034,9 @@ export function buildS01Baseline(): RunEvent[] {
     'swap-b1',
     {
       id: 'swap-b1',
-      fromTail: 'NW-KES',
-      toTail: 'NW-LRM',
-      flights: ['NWD214', 'NWD215'],
+      fromTail: 'AX-KES',
+      toTail: 'AX-LRM',
+      flights: ['ACX214', 'ACX215'],
       status: 'approved',
       approvedBy: human('OCC controller', 'OCC controller'),
     },
@@ -2051,8 +2051,8 @@ export function buildS01Baseline(): RunEvent[] {
     WORLD,
     'occ',
     'flights',
-    'NWD214',
-    { tail: 'NW-LRM', delayMin: 88 },
+    'ACX214',
+    { tail: 'AX-LRM', delayMin: 88 },
     { causedBySeq: sw.seq },
   );
   r.patch(
@@ -2060,8 +2060,8 @@ export function buildS01Baseline(): RunEvent[] {
     WORLD,
     'occ',
     'flights',
-    'NWD215',
-    { tail: 'NW-LRM', status: 'delayed', reactionaryDelayMin: 60 },
+    'ACX215',
+    { tail: 'AX-LRM', status: 'delayed', reactionaryDelayMin: 60 },
     { causedBySeq: sw.seq },
   );
   k.seqs.cost.push(sw.seq, f.seq);
@@ -2084,7 +2084,7 @@ export function buildS01Baseline(): RunEvent[] {
     70,
     'Duty engineer',
     'record_engineering_decision',
-    { tail: 'NW-KES', decision: 'rectify' },
+    { tail: 'AX-KES', decision: 'rectify' },
     'Rectification logged after the swap.',
   );
   k.engDecisionMin = 70;
@@ -2094,11 +2094,11 @@ export function buildS01Baseline(): RunEvent[] {
   r.push('world.process', 84, WORLD, {
     system: 'occ',
     entity: 'flights',
-    id: 'NWD214',
-    change: 'NWD214 pushed back on NW-LRM',
+    id: 'ACX214',
+    change: 'ACX214 pushed back on AX-LRM',
   });
   k.resolved = true;
-  r.patch(84, WORLD, 'occ', 'flights', 'NWD214', { status: 'departed' });
+  r.patch(84, WORLD, 'occ', 'flights', 'ACX214', { status: 'departed' });
   const finalKpis = r.kpiUpdate(84.2).payload;
   r.push('run.completed', 84.5, WORLD, {
     reason: 'horizon',

@@ -2,7 +2,7 @@
   "name": "@ica/api",
   "version": "0.1.0",
   "private": true,
-  "description": "Ground Incident Coordination Agent — HTTP router Lambda, WebSocket connect/disconnect, stream fan-out, local dev server. Owned by task 04.",
+  "description": "Incident Coordination Agent — HTTP router Lambda, WebSocket connect/disconnect, stream fan-out, local dev server. Owned by task 04.",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
@@ -20,6 +20,7 @@
     "@aws-sdk/client-s3": "^3.1141.0",
     "@aws-sdk/s3-request-presigner": "^3.1141.0",
     "@aws-sdk/util-dynamodb": "^3.996.9",
+    "@ica/network": "*",
     "@ica/run": "*",
     "@ica/scenarios": "*",
     "@ica/schema": "*",
