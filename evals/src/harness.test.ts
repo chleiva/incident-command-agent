@@ -28,10 +28,10 @@ const fxEvents = JSON.parse(
 const MINIMAL = minimal as unknown as Scenario;
 
 describe('cases', () => {
-  it('40 eval cases (30 base+variants, 2 extra variants, 8 adversarial) plus the fixture, all valid', () => {
+  it('47 eval cases (15 base, 20 ground variants, 2 extra variants, 10 adversarial) plus the fixture, all valid', () => {
     const evalCases = cases.filter((c) => !c.id.startsWith('fx-'));
-    expect(evalCases).toHaveLength(40);
-    expect(evalCases.filter((c) => c.adversarial)).toHaveLength(8);
+    expect(evalCases).toHaveLength(47);
+    expect(evalCases.filter((c) => c.adversarial)).toHaveLength(10);
     expect(
       evalCases
         .filter((c) => c.tier.includes('smoke'))
@@ -48,7 +48,7 @@ describe('cases', () => {
       ].sort(),
     );
     expect(evalCases.filter((c) => c.tier.includes('core'))).toHaveLength(14);
-    expect(evalCases.filter((c) => c.tier.includes('full'))).toHaveLength(40);
+    expect(evalCases.filter((c) => c.tier.includes('full'))).toHaveLength(47);
     for (const c of evalCases) expect(SCENARIO_IDS as readonly string[]).toContain(c.scenarioId);
   });
 

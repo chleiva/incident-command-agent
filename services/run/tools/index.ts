@@ -47,6 +47,15 @@ import { search_procedure } from './search_procedure';
 import { send_passenger_message } from './send_passenger_message';
 import { validate_scenario } from './validate_scenario';
 import { web_search } from './web_search';
+import { get_flight_position } from './get_flight_position';
+import { rank_diversion_airports } from './rank_diversion_airports';
+import { prepare_diversion_handling } from './prepare_diversion_handling';
+import { arrange_arrival_services } from './arrange_arrival_services';
+import { notify_destination_station } from './notify_destination_station';
+import { plan_overweight_landing_inspection } from './plan_overweight_landing_inspection';
+import { instruct_flight_crew } from './instruct_flight_crew';
+import { select_diversion_airport } from './select_diversion_airport';
+import { approve_overweight_landing } from './approve_overweight_landing';
 
 export const domainTools: ToolDefinition[] = [
   // maintenance
@@ -89,6 +98,16 @@ export const domainTools: ToolDefinition[] = [
   draft_occurrence_report,
   draft_discretion_report,
   export_evidence_pack,
+  // airborne incidents (task 07): ground-side coordination only; flight-deck decisions are forbidden
+  get_flight_position,
+  rank_diversion_airports,
+  prepare_diversion_handling,
+  arrange_arrival_services,
+  notify_destination_station,
+  plan_overweight_landing_inspection,
+  instruct_flight_crew,
+  select_diversion_airport,
+  approve_overweight_landing,
   // author
   validate_scenario,
   lookup_airport,

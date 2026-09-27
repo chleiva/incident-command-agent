@@ -91,6 +91,8 @@ const HOLD_MIN: Record<ResourceRequest['kind'], number> = {
   stairs: 60,
   gpu: 90,
   fire_service: 45,
+  medical: 60,
+  police: 60,
 };
 
 export function requestResource(

@@ -4,9 +4,27 @@
  */
 /** A selected flight's incident context (where the aircraft is, what it still has to fly) and the applicable types. */
 import { rotationOf, type DaySchedule, type NetworkFlight, type NetworkTail } from '../schedule';
-import { flightStateAt, type FlightPhase } from '../state';
+import { flightStateAt, isAirborne, type FlightPhase } from '../state';
+import { suitableAirports } from '../suitability';
 import { isBase } from '../stations';
 import { INCIDENT_TYPES, type IncidentType } from './incidentTypes';
+
+/**
+ * Where an airborne incident ends (the scenario's world, standing in for the commander's decision): back to the
+ * departure airport for a turnback or an early engine shutdown, otherwise the best-ranked suitable airport other
+ * than the destination. Null when there is none within reach.
+ */
+export function arrivalFor(type: IncidentType, ctx: FlightIncidentContext): string | null {
+  if (type.id === 'air_turnback' || type.id === 'engine_shutdown_overweight_landing') return ctx.flight.from;
+  const st = flightStateAt(ctx.flight, ctx.atMs);
+  const options = suitableAirports(st.position, ctx.flight.type, {
+    atMs: ctx.atMs,
+    exclude: [ctx.flight.to],
+    maxDistanceKm: 700,
+    limit: 3,
+  });
+  return options.find((o) => o.suitable)?.iata ?? null;
+}
 
 export interface FlightIncidentContext {
   schedule: DaySchedule;
@@ -57,6 +75,24 @@ export function incidentTypesFor(ctx: FlightIncidentContext): IncidentTypeOption
   const atBase = isBase(ctx.station);
   const out = INCIDENT_TYPES.filter((t) => t.phases.includes(ctx.phase)).map((type): IncidentTypeOption => {
     if (!type.available) return { type, enabled: false, reason: 'Coming soon' };
+    if (type.category === 'airborne') {
+      const st = flightStateAt(ctx.flight, ctx.atMs);
+      if (!isAirborne(st.phase))
+        return { type, enabled: false, reason: 'Only while the aircraft is in the air' };
+      if (type.maxProgress !== undefined && st.progress > type.maxProgress)
+        return {
+          type,
+          enabled: false,
+          reason: 'Written for early in the flight; the aircraft is well past that',
+        };
+      if (!arrivalFor(type, ctx))
+        return {
+          type,
+          enabled: false,
+          reason: 'No suitable airport within reach other than the destination',
+        };
+      return { type, enabled: true };
+    }
     if (type.category === 'ground' && ctx.nextSectors.length === 0)
       return { type, enabled: false, reason: 'No further flights on this aircraft today' };
     if (type.requires === 'base' && !atBase)

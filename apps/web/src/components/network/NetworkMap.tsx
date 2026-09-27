@@ -10,6 +10,7 @@ import type { Aircraft, Engineer, Flight, Spare, Station } from '@ica/schema/bro
 import { geoConicEqualArea, geoGraticule, geoPath } from 'd3-geo';
 import { useMemo, useState } from 'react';
 import { useElementSize } from '../../lib/useElementSize';
+import type { AirborneView } from '../../lib/airborne';
 import { StateFrame, type LoadStatus } from '../ui/primitives';
 
 type Tone = 'neutral' | 'warning' | 'critical' | 'good';
@@ -38,6 +39,7 @@ export function NetworkMap({
   focusTail,
   status = 'ready',
   error,
+  airborne = [],
 }: {
   stations: Station[];
   flights: Flight[];
@@ -47,6 +49,8 @@ export function NetworkMap({
   focusTail?: string;
   status?: LoadStatus;
   error?: string | null;
+  /** Task 07: aircraft in the air (airborne incidents), drawn moving towards their destination. */
+  airborne?: AirborneView[];
 }) {
   const [ref, { width, height }] = useElementSize<HTMLDivElement>();
   const [hover, setHover] = useState<string | null>(null);
@@ -57,6 +61,7 @@ export function NetworkMap({
     flights.forEach((f) => (used.add(f.from), used.add(f.to)));
     spares.forEach((s) => used.add(s.station));
     aircraft.forEach((a) => used.add(a.station));
+    airborne.forEach((a) => (used.add(a.destination), used.add(a.plannedDestination)));
     // Fit to the stations in play (rotation, spares, incident); fall back to the whole network.
     const inPlay = stations.filter((s) => used.has(s.iata));
     const pts = (inPlay.length >= 2 ? inPlay : stations).map((s) => [s.lon, s.lat] as [number, number]);
@@ -71,7 +76,7 @@ export function NetworkMap({
     const path = geoPath(projection);
     const graticule = path(geoGraticule().step([5, 5])()) ?? '';
     return { projection, path, graticule, used };
-  }, [stations, flights, spares, aircraft, width, height]);
+  }, [stations, flights, spares, aircraft, width, height, airborne]);
 
   const p = (iata: string) => {
     const s = byIata.get(iata);
@@ -156,6 +161,40 @@ export function NetworkMap({
                 stroke="rgb(var(--c-fg-muted))"
                 strokeDasharray="2 4"
               />
+            );
+          })}
+          {airborne.map((a) => {
+            const xy = model.projection([a.lon, a.lat]);
+            const to = p(a.destination);
+            if (!xy) return null;
+            const ang =
+              to && a.phase !== 'landed' ? (Math.atan2(to[1] - xy[1], to[0] - xy[0]) * 180) / Math.PI : 0;
+            const tone: Tone =
+              a.squawk === 'mayday' ? 'critical' : a.squawk === 'pan' ? 'warning' : 'neutral';
+            return (
+              <g key={a.flight} data-airborne={a.flight}>
+                {to && a.phase !== 'landed' && (
+                  <line
+                    x1={xy[0]}
+                    y1={xy[1]}
+                    x2={to[0]}
+                    y2={to[1]}
+                    stroke={STROKE[tone]}
+                    strokeDasharray="5 4"
+                    strokeWidth={1.5}
+                  />
+                )}
+                <g transform={`translate(${xy[0]},${xy[1]}) rotate(${ang})`}>
+                  <path
+                    d="M9 0 L1 -1.5 L-1 -8 L-3.5 -8 L-2 -1.5 L-6.5 -1.3 L-8.5 -4 L-10 -4 L-8.5 0 L-10 4 L-8.5 4 L-6.5 1.3 L-2 1.5 L-3.5 8 L-1 8 L1 1.5 Z"
+                    fill={tone === 'neutral' ? 'rgb(var(--c-fg))' : STROKE[tone]}
+                  />
+                </g>
+                <text x={xy[0] + 12} y={xy[1] - 10} fontSize={11} className="num" fill="rgb(var(--c-fg))">
+                  {a.flight} → {a.destination}
+                  {a.phase === 'landed' ? ' · landed' : ` · ${a.minutesToLanding} min`}
+                </text>
+              </g>
             );
           })}
           {stations.map((s) => {

@@ -35,6 +35,11 @@ export const ComplianceValueSchema = Type.Object({
   fdpRespected: Type.Boolean(),
   morDraftedWithin72h: Type.Boolean(),
   threeHourThresholdAvoided: Type.Union([Type.Boolean(), Type.Null()]),
+  /**
+   * Addition (task 07): no attempt to instruct the flight deck or take the commander's decisions (flight-deck
+   * forbidden tools). null / absent = not an airborne incident.
+   */
+  commanderAuthorityRespected: Type.Optional(Type.Union([Type.Boolean(), Type.Null()])),
 });
 export type ComplianceValue = Static<typeof ComplianceValueSchema>;
 
@@ -68,6 +73,11 @@ export const KpiSnapshotSchema = Type.Object({
   compliance: KpiOf(ComplianceValueSchema),
   safety: KpiOf(SafetyValueSchema),
   latency: KpiOf(LatencyValueSchema),
+  /**
+   * Addition (task 07): diversion or turnback cost (estimate): landing, handling, fuel and crew, onward transport,
+   * plus the care surge at the arrival station. Included in `totalCostEur`. Absent for ground incidents.
+   */
+  diversionCostEur: Type.Optional(KpiOf(Type.Number())),
 });
 export type KpiSnapshot = Static<typeof KpiSnapshotSchema>;
 

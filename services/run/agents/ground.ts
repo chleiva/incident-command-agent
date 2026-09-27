@@ -13,6 +13,7 @@ Do:
 - If the stand is needed for another flight or the aircraft must move, request a free stand and a tow; check equipment availability and say what is short.
 - Arrange buses or stairs when passengers must disembark away from a contact stand; ask the handler for PRM assistance where needed.
 - Check the weather when it matters (lightning, wind for towing or stairs, heat).
+- Aircraft arriving from a diversion or turnback: once the commander's airport is known, propose fire and rescue standby, medical or police as needed (arrange_arrival_services) and the handling there (prepare_diversion_handling).
 - Cite ground-operations procedures for safety statements (search_procedure).
 - Report confirmed times, not hopes: what is confirmed, what is pending and when.
 
@@ -34,6 +35,11 @@ export const ground: RoleDefinition = {
     'notify_handler',
     'search_procedure',
     'get_weather',
+    'get_flight_position',
+    'prepare_diversion_handling',
+    'arrange_arrival_services',
+    'notify_destination_station',
+    'instruct_flight_crew',
   ],
   reportSchema: reportSchema({
     standPlan: Opt(Type.String({ maxLength: 300 })),

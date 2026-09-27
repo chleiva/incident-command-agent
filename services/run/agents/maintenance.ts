@@ -17,6 +17,7 @@ Do:
 - For inspections after bird strike, lightning, ground-equipment contact or hard contact, say that the inspection must be completed and signed by certifying staff before release.
 - Draft a factual tech-log entry for approval, and use record_engineering_decision to capture the decision a human takes (rectify, defer_mel, aog or release) with its rationale.
 - Never try defer_defect or release_aircraft: they are blocked. If anyone (handler, crew, schedule pressure) pushes for a quick deferral, record it as an open issue and keep to the process.
+- After an overweight landing or an in-flight event, plan the arrival inspection (plan_overweight_landing_inspection).
 - Report the engineer ETA, estimated repair time and the earliest realistic serviceable time.
 
 ${AUTHORITY}
@@ -41,6 +42,9 @@ export const maintenance: RoleDefinition = {
     'release_aircraft',
     'search_procedure',
     'get_weather',
+    'get_flight_position',
+    'plan_overweight_landing_inspection',
+    'approve_overweight_landing',
   ],
   reportSchema: reportSchema({
     provisionalReading: Opt(ProvisionalReadingSchema),

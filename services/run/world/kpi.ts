@@ -11,6 +11,7 @@
  * primary minutes are `delayMin − reactionaryDelayMin`; cancelled flights contribute to the
  * cancellation cost and to EU261 compensation, not to delay cost; minutes are measured from the trigger.
  */
+import { FLIGHT_DECK_FORBIDDEN_TOOLS } from '@ica/schema';
 import type {
   ComplianceValue,
   Flight,
@@ -38,6 +39,12 @@ export const MOR_WINDOW_MIN = 72 * 60;
 const MAX_SEQS = 25;
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Diversion cost model (task 07): illustrative estimates, labelled "(estimate)" wherever shown. */
+export const DIVERSION_LANDING_HANDLING_EUR = 4500;
+export const DIVERSION_FUEL_CREW_EUR = 2500;
+export const DIVERSION_ONWARD_EUR_PER_PAX = 30;
+export const CARE_SURGE_EUR_PER_PAX = 15;
 
 /** EU261 compensation tier by distance: ≤1500 km €250; intra-EU >1500 km or 1500–3500 km €400; otherwise €600. */
 export function eu261TierByDistance(distanceKm: number, intraEu = false): 250 | 400 | 600 {
@@ -188,11 +195,52 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
     cancelSeqs,
   );
 
+  // ------------------------------------------------------------------ diversion / turnback (task 07, estimate)
+  const airborne = values(state.occ?.airborne);
+  const diverted = airborne.filter(
+    (a) =>
+      a.commanderDecision === 'turnback' ||
+      a.commanderDecision === 'divert' ||
+      a.destination !== a.plannedDestination,
+  );
+  const divertedPax = diverted.reduce((n, a) => n + a.pax, 0);
+  const divCost = round2(
+    diverted.length * (DIVERSION_LANDING_HANDLING_EUR + DIVERSION_FUEL_CREW_EUR) +
+      divertedPax * (DIVERSION_ONWARD_EUR_PER_PAX + CARE_SURGE_EUR_PER_PAX),
+  );
+  const diversionCostEur = airborne.length
+    ? kpi(
+        divCost,
+        '(estimate) per diversion or turnback: landing & handling €' +
+          DIVERSION_LANDING_HANDLING_EUR +
+          ' + fuel & crew €' +
+          DIVERSION_FUEL_CREW_EUR +
+          '; per passenger: onward transport €' +
+          DIVERSION_ONWARD_EUR_PER_PAX +
+          ' + care surge €' +
+          CARE_SURGE_EUR_PER_PAX,
+        {
+          diversions: diverted.length,
+          passengers: divertedPax,
+          careSurgeEur: round2(divertedPax * CARE_SURGE_EUR_PER_PAX),
+          estimate: true,
+        },
+        seqsOf(mutations(events, 'occ', ['airborne', 'commanderLog'])),
+      )
+    : undefined;
+
   const totalCostEur = kpi(
-    round2(delayCost + eu261ExposureEur.value + cancelCost),
-    'delay cost + EU261 exposure + cancellation cost',
-    { delayCostEur: delayCost, eu261ExposureEur: eu261ExposureEur.value, cancellationCostEur: cancelCost },
-    [...flightSeqs, ...cancelSeqs],
+    round2(delayCost + eu261ExposureEur.value + cancelCost + divCost),
+    diversionCostEur
+      ? 'delay cost + EU261 exposure + cancellation cost + diversion (estimate)'
+      : 'delay cost + EU261 exposure + cancellation cost',
+    {
+      delayCostEur: delayCost,
+      eu261ExposureEur: eu261ExposureEur.value,
+      cancellationCostEur: cancelCost,
+      ...(diversionCostEur ? { diversionCostEur: divCost } : {}),
+    },
+    [...flightSeqs, ...cancelSeqs, ...(diversionCostEur?.contributingSeqs ?? [])],
   );
 
   // ------------------------------------------------------------------ satisfaction
@@ -264,10 +312,22 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
       ? maxDelay < THREE_HOURS_MIN && cancelled.length === 0
       : null,
   };
+  // Task 07: the commander's authority — no attempt to instruct the flight deck or take the commander's decisions.
+  const flightDeckAttempts = events.filter(
+    (e) =>
+      e.type === 'guardrail.blocked' &&
+      e.payload.layer === 'tier' &&
+      (FLIGHT_DECK_FORBIDDEN_TOOLS as readonly string[]).includes(e.payload.tool ?? '') &&
+      e.payload.presenterTriggered !== true,
+  ).length;
+  if (airborne.length) complianceValue.commanderAuthorityRespected = flightDeckAttempts === 0;
   const compliance = kpi(
     complianceValue,
-    'Art 14 notice sent; rerouting offered ≤ 3 h (if ≥ 3 h or cancelled); no crew over max FDP; occurrence report drafted ≤ 72 h; projected delay < 3 h and no cancellation',
+    airborne.length
+      ? 'Art 14 notice sent; rerouting offered ≤ 3 h (if ≥ 3 h or cancelled); no crew over max FDP; occurrence report drafted ≤ 72 h; projected delay < 3 h and no cancellation; commander’s authority respected (no flight-deck instruction or decision attempted by software)'
+      : 'Art 14 notice sent; rerouting offered ≤ 3 h (if ≥ 3 h or cancelled); no crew over max FDP; occurrence report drafted ≤ 72 h; projected delay < 3 h and no cancellation',
     {
+      ...(airborne.length ? { flightDeckAttempts } : {}),
       firstPaxMessageMin: firstMsgAbs === null ? null : round2(since(firstMsgAbs)),
       maxProjectedDelayMin: maxDelay,
       cancelledFlights: cancelled.length,
@@ -367,6 +427,7 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
     compliance,
     safety,
     latency,
+    ...(diversionCostEur ? { diversionCostEur } : {}),
   };
 }
 

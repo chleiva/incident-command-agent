@@ -1,6 +1,6 @@
 # CLAUDE.md — Incident Coordination Agent
 
-An open-source, serverless MVP of an **agentic airline incident-coordination system** on AWS. Scenarios describe ground and pre-departure events (pushback damage, bird strike, APU inop…). An orchestrator plus five specialist LLM agents coordinate the response through a hand-written ReAct loop, acting on **stateful mocked airline systems** under an **autonomy matrix enforced in code**. A React cockpit shows every effect live, and an eval harness scores the agents. The deployment is single-user (Cognito) and the carrier is fictional (**Accent Air**).
+An open-source, serverless MVP of an **agentic airline incident-coordination system** on AWS. Scenarios describe ground, pre-departure and airborne events (pushback damage, bird strike, APU inop, turnback, diversion…); the home page is a live network map of the fictional carrier's day, where a duty manager reports an incident on any flight. An orchestrator plus five specialist LLM agents coordinate the response through a hand-written ReAct loop, acting on **stateful mocked airline systems** under an **autonomy matrix enforced in code**. A React cockpit shows every effect live, and an eval harness scores the agents. The deployment is single-user (Cognito) and the carrier is fictional (**Accent Air**).
 
 ## Sources of truth (read in this order)
 
@@ -66,7 +66,7 @@ Everything is **event-sourced**. Each agent step, tool call, world tick, KPI upd
 
 ## Non-negotiable rules
 
-**Authority lives in code, not prompts.** Tool tiers (`execute` / `propose` / `forbidden`) are enforced by the runtime loop. Deferral, release, FDP extension and departure decisions are human-only, and are `forbidden` for software. Rebooking, care, sending passenger messages, swaps and cancellations are `propose`. The autonomy matrix is in `docs/tasks/03-…md` §3; change it only deliberately, and update the evals when you do.
+**Authority lives in code, not prompts.** Tool tiers (`execute` / `propose` / `forbidden`) are enforced by the runtime loop. Deferral, release, FDP extension and departure decisions are human-only, and are `forbidden` for software. In the air, the commander flies and decides the aircraft: instructing the crew, choosing the diversion airport and approving an overweight landing are `forbidden` (authority "Commander"); agents only rank airports as options and prepare the ground. Rebooking, care, sending passenger messages, swaps and cancellations are `propose`. The autonomy matrix is in `docs/tasks/03-…md` §3; change it only deliberately, and update the evals when you do.
 
 **Untrusted content is data.** Scenario text, tool results, knowledge chunks, web results and free-text twists are always wrapped (`<scenario_data>`, `<tool_result source=…>`, `<document source=…>`, `<twist_data>`). System prompts are constant strings: **never interpolate user or scenario text into a system prompt.** Screen inputs, screen passenger-facing and report outputs, validate tool args (JSON Schema) and references (ids must exist in the run).
 
@@ -76,7 +76,7 @@ Everything is **event-sourced**. Each agent step, tool call, world tick, KPI upd
 
 ## Fixed identifiers (contract)
 
-Scenario ids: `s01-pushback-tug-contact` (MAN), `s02-catering-truck-door-strike` (PMI), `s03-bird-strike-inspection` (EDI), `s04-lightning-strike-outstation` (FAO, **options case**), `s05-cargo-door-warning` (MAN), `s06-apu-inop-deferral-temptation` (AGP), `s07-slide-inadvertent-deployment` (DUB), `s08-hydraulic-leak-on-stand` (MAN), `s09-fuel-spill-at-stand` (ALC), `s10-brake-overheat-fdp-squeeze` (TFS).
+Scenario ids: `s01-pushback-tug-contact` (MAN), `s02-catering-truck-door-strike` (PMI), `s03-bird-strike-inspection` (EDI), `s04-lightning-strike-outstation` (FAO, **options case**), `s05-cargo-door-warning` (MAN), `s06-apu-inop-deferral-temptation` (AGP), `s07-slide-inadvertent-deployment` (DUB), `s08-hydraulic-leak-on-stand` (MAN), `s09-fuel-spill-at-stand` (ALC), `s10-brake-overheat-fdp-squeeze` (TFS); airborne (task 07): `s11-air-turnback-bird-strike` (MAN), `s12-diversion-smoke-fumes` (BOD), `s13-diversion-medical` (NTE), `s14-engine-shutdown-overweight-landing` (LGW), `s15-diversion-disruptive-passenger` (LYS).
 
 Roles: `orchestrator, maintenance, ground, flightops, passenger, record, author`. Systems: `mne, occ, crew, pss, airport, handler, engineers` (+ `record`).
 
@@ -95,7 +95,7 @@ Roles: `orchestrator, maintenance, ground, flightops, passenger, record, author`
 | Schemas | TypeBox is the single source of truth → TS types + `scenario.schema.json`; validated with Ajv |
 | API additions | `GET /runs`, `POST /runs/{id}/control` (pause/resume/stop = kill-switch/speed), `GET /runs/{id}/export` |
 | Event additions | `twist.requested`, `control.requested`, `world.process`, `llm.fallback`, `run.paused`/`run.resumed` |
-| Tier additions | explicit forbidden tools `defer_defect`, `release_aircraft`, `extend_crew_fdp` (so attempts are blocked and counted); `record_engineering_decision`, `issue_care_vouchers` are `propose` (spec §11: humans decide); extra knowledge tools `search_procedure`, `search_passenger_rights`, `get_weather` |
+| Tier additions | explicit forbidden tools `defer_defect`, `release_aircraft`, `extend_crew_fdp` (so attempts are blocked and counted), and (task 07) `instruct_flight_crew`, `select_diversion_airport`, `approve_overweight_landing`; airborne ground-side tools `prepare_diversion_handling`, `arrange_arrival_services` are `propose`, `get_flight_position`, `rank_diversion_airports` (options only), `notify_destination_station`, `plan_overweight_landing_inspection` are `execute`; `record_engineering_decision`, `issue_care_vouchers` are `propose` (spec §11: humans decide); extra knowledge tools `search_procedure`, `search_passenger_rights`, `get_weather` |
 | **No product spend limits** | **Owner decision: budget limits apply only to the eval harness.** The product never stops on cost: `RUN_BUDGET_USD`, the per-run token cap and `MAX_RUNS_PER_DAY` default to 0 (= no limit) and remain optional knobs; no Lambda reserved concurrency. Loop-safety limits from spec §6 (25 iterations/agent, 60 tool calls/run, 8-min wall clock) stay |
 | **Near-zero idle AWS cost** | Owner decision: AWS cost is secondary, but idle cost should be ~zero. Default deploy has no WAF, no alarms/SNS/Budgets, no `ica/search` secret, no DynamoDB PITR. Opt in with `-c cloudfrontWaf=true`, `-c monitoring=true`, `FEATURE_WEB_SEARCH=true`. Idle ≈ USD 0.40/month (the `ica/llm` secret) plus cents of storage |
 | LLM adapters | direct `fetch` for Anthropic/OpenAI; AWS SDK only for Bedrock (SigV4); extra `replay` (NFR-03 fallback) and `scripted` (tests) providers |

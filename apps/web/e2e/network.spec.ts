@@ -5,6 +5,28 @@
 /** The live-network home (mock mode): map, flight list, flight panel. `?at=HH:MM` pins the network clock start. */
 import { expect, test } from '@playwright/test';
 
+test('report an airborne incident: the aircraft flies on the cockpit map to the arrival station', async ({
+  page,
+}) => {
+  await page.goto('/?at=12:00&timescale=4');
+  await page.getByRole('button', { name: 'Airborne', exact: true }).click();
+  await page.getByRole('listbox', { name: 'Flights' }).getByRole('option').first().click();
+  await page.getByTestId('flight-panel').getByRole('button', { name: 'Report incident' }).click();
+  const dialog = page.getByTestId('report-dialog');
+  // Only airborne types for a flight in the air; the commander decides the flight.
+  await expect(dialog.locator('input[type="radio"]').first()).toBeVisible();
+  await expect(dialog.locator('[data-incident-type="fuel_spill"]')).toHaveCount(0);
+  await dialog.locator('input[type="radio"]:not([disabled])').first().check();
+  await expect(dialog.getByTestId('preview-trigger')).not.toBeEmpty();
+  await expect(dialog.getByText(/the commander lands at/)).toBeVisible();
+  await dialog.getByRole('button', { name: 'Start' }).click();
+
+  await expect(page).toHaveURL(/\/runs\/run-mock-/);
+  await expect(page.getByTestId('arrival-panel')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('[data-airborne]').first()).toBeVisible();
+  await expect(page.getByTestId('arrival-eta')).toContainText(/Lands in|Landed/);
+});
+
 test('report a ground incident from the map: list → preview → start → cockpit', async ({ page }) => {
   await page.goto('/?at=12:00&timescale=4');
   await page.getByRole('button', { name: 'On ground', exact: true }).click();

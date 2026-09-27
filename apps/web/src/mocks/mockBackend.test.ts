@@ -41,7 +41,7 @@ describe('mock backend', () => {
     await settle(200);
     const [config, scenarios, runs, report] = await p;
     expect(config.brand.carrierName).toBe('Accent Air');
-    expect(scenarios.items).toHaveLength(10);
+    expect(scenarios.items).toHaveLength(15);
     expect(runs.items.map((r) => r.runId)).toContain('run-demo-s01');
     expect(report.ledger.lifetimeCapGbp).toBe(10);
   });

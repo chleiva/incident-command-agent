@@ -19,7 +19,7 @@ import { toolByName } from './tools/index';
 const byId = (id: string) => publicScenarios.find((s) => s.id === id) as Scenario;
 
 describe('shipped scenarios', () => {
-  it('ships exactly the ten fixed ids', () => {
+  it('ships exactly the fixed ids', () => {
     expect(publicScenarios.map((s) => s.id).sort()).toEqual([...SCENARIO_IDS].sort());
   });
 

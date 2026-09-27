@@ -18,7 +18,10 @@ Mock-mode URL parameters:
 
 - Home (`/`): `?at=HH:MM` starts the network clock at a time of day (UTC); `?flight=ACX123` opens a flight; `?network=<seed>`
   picks another fictional day. **Report incident** works in mock mode too: the scenario is built from the flight in the
-  browser and a recorded response (s01 at a base, s04 at an outstation) replays with its identifiers moved onto the flight.
+  browser and a recorded response (s01 at a base, s04 at an outstation, the s11 air turnback for a flight in the air)
+  replays with its identifiers moved onto the flight. For an airborne report the cockpit shows the aircraft flying to the
+  arrival station with an ETA countdown, and the Ground zone becomes *Arrival station* (fire and rescue, medical, police,
+  handling, engineers meeting the aircraft).
 - `?autopilot=1`: every decision is taken with the recorded human decision after its recorded delay (hands-free).
 - `?timescale=4`: compresses the replay pacing on top of the run speed (rehearsals only).
 - `/runs/<id>?at=31`: open a run at a sim minute (history view); `?dev=1` shows the dev overlay (event counts,

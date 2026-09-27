@@ -39,6 +39,12 @@ export const HANDLER_TASK_KINDS = [
   'damage_inspection_access',
   'foreign_object_sweep',
   'prm_assistance',
+  // task 07: an aircraft arriving from a diversion or turnback
+  'diversion_handling',
+  'refuel',
+  'catering_uplift',
+  'hotel_hold',
+  'station_notification',
 ] as const;
 export type HandlerTaskKind = (typeof HANDLER_TASK_KINDS)[number];
 
@@ -59,6 +65,11 @@ export const TASK_DURATION_MIN: Record<HandlerTaskKind, number> = {
   damage_inspection_access: 15,
   foreign_object_sweep: 15,
   prm_assistance: 20,
+  diversion_handling: 30,
+  refuel: 25,
+  catering_uplift: 30,
+  hotel_hold: 20,
+  station_notification: 1,
 };
 
 const TASK_TEXT: Record<HandlerTaskKind, string> = {
@@ -77,6 +88,11 @@ const TASK_TEXT: Record<HandlerTaskKind, string> = {
   damage_inspection_access: 'Provide access equipment for damage inspection',
   foreign_object_sweep: 'FOD sweep of the stand',
   prm_assistance: 'Assist passengers with reduced mobility',
+  diversion_handling: 'Handle an unscheduled arrival (turnaround team, stand, steps)',
+  refuel: 'Arrange refuelling',
+  catering_uplift: 'Arrange catering and water uplift',
+  hotel_hold: 'Hold hotel rooms for passengers and crew',
+  station_notification: 'Station informed of the flight change',
 };
 
 export const poolId = (station: string, kind: EquipmentKind) => `${station}:${kind}`;

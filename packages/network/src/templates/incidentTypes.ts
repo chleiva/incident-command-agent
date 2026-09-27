@@ -25,6 +25,8 @@ export interface IncidentType {
   requires: StationRequirement;
   /** False while the type is not built yet ("coming soon"). */
   available: boolean;
+  /** Airborne types written for early in the flight (e.g. on the climb): the latest progress (0–1) they fit. */
+  maxProgress?: number;
 }
 
 const PRE_DEPARTURE: FlightPhase[] = ['scheduled', 'boarding'];
@@ -145,7 +147,8 @@ export const AIRBORNE_INCIDENT_TYPES: readonly IncidentType[] = [
     phases: ['airborne'],
     template: 's11-air-turnback-bird-strike',
     requires: 'any',
-    available: false,
+    maxProgress: 0.3,
+    available: true,
   },
   {
     id: 'diversion_technical',
@@ -155,7 +158,7 @@ export const AIRBORNE_INCIDENT_TYPES: readonly IncidentType[] = [
     phases: AIRBORNE,
     template: 's12-diversion-smoke-fumes',
     requires: 'any',
-    available: false,
+    available: true,
   },
   {
     id: 'diversion_medical',
@@ -165,7 +168,7 @@ export const AIRBORNE_INCIDENT_TYPES: readonly IncidentType[] = [
     phases: AIRBORNE,
     template: 's13-diversion-medical',
     requires: 'any',
-    available: false,
+    available: true,
   },
   {
     id: 'engine_shutdown_overweight_landing',
@@ -176,7 +179,8 @@ export const AIRBORNE_INCIDENT_TYPES: readonly IncidentType[] = [
     phases: AIRBORNE,
     template: 's14-engine-shutdown-overweight-landing',
     requires: 'any',
-    available: false,
+    maxProgress: 0.4,
+    available: true,
   },
   {
     id: 'unruly_passenger_diversion',
@@ -186,7 +190,7 @@ export const AIRBORNE_INCIDENT_TYPES: readonly IncidentType[] = [
     phases: AIRBORNE,
     template: 's15-diversion-disruptive-passenger',
     requires: 'any',
-    available: false,
+    available: true,
   },
 ];
 

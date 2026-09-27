@@ -148,6 +148,56 @@ export const SpareSchema = Type.Object({
 });
 export type Spare = Static<typeof SpareSchema>;
 
+/**
+ * Addition (task 07): an aircraft in the air (airborne incidents). Position, ETA and squawk come from the scenario
+ * and the world clock; squawk and the commander's decision are set by scenario or presenter events only, never by
+ * agents (the commander flies and decides the aircraft).
+ */
+export const SQUAWK_STATUSES = ['normal', 'pan', 'mayday'] as const;
+export const COMMANDER_DECISIONS = ['continue', 'turnback', 'divert'] as const;
+export const AirborneFlightSchema = Type.Object({
+  flight: Str,
+  tail: Str,
+  phase: literalUnion(['airborne', 'approach', 'landed'] as const),
+  squawk: literalUnion(SQUAWK_STATUSES),
+  from: IataSchema,
+  /** The planned destination. */
+  plannedDestination: IataSchema,
+  /** Where the aircraft is now heading (the commander's choice once made). */
+  destination: IataSchema,
+  /** Position at `positionAtMinute`. */
+  lat: Type.Number(),
+  lon: Type.Number(),
+  positionAtMinute: Minute,
+  altitudeFt: Type.Number({ minimum: 0 }),
+  headingDeg: Type.Number({ minimum: 0, maximum: 360 }),
+  /** Sim minute of landing at `destination`. */
+  etaMinute: Minute,
+  /** Notional fuel endurance at `positionAtMinute` (illustrative). */
+  fuelEnduranceMin: Type.Number({ minimum: 0 }),
+  pax: Type.Integer({ minimum: 0 }),
+  commanderDecision: Opt(literalUnion(COMMANDER_DECISIONS)),
+  decisionAtMinute: Opt(Minute),
+  /** Sim minute it landed. */
+  landedAtMinute: Opt(Minute),
+  overweightLanding: Opt(Type.Boolean()),
+});
+export type AirborneFlight = Static<typeof AirborneFlightSchema>;
+
+/** Addition (task 07): the commander's decisions as relayed to the ground, recorded from scenario or presenter events. */
+export const CommanderLogEntrySchema = Type.Object({
+  id: Str,
+  atMinute: Minute,
+  flight: Str,
+  decision: literalUnion(COMMANDER_DECISIONS),
+  airport: Opt(IataSchema),
+  overweightLanding: Opt(Type.Boolean()),
+  note: Str,
+  /** Always "Commander": a human decision. */
+  decidedBy: Str,
+});
+export type CommanderLogEntry = Static<typeof CommanderLogEntrySchema>;
+
 /** `requested` (addition, task 06): an approved swap request sent to OCC, awaiting OCC's confirmation. */
 export const DECISION_STATUSES = ['proposed', 'approved', 'rejected', 'executed', 'requested'] as const;
 export const DecisionStatusSchema = literalUnion(DECISION_STATUSES);
@@ -269,7 +319,8 @@ export const StandRequestSchema = Type.Object({
 });
 export type StandRequest = Static<typeof StandRequestSchema>;
 
-export const RESOURCE_KINDS = ['bus', 'stairs', 'tow', 'gpu', 'fire_service'] as const;
+/** `medical`, `police` (additions, task 07): services meeting an aircraft on arrival. */
+export const RESOURCE_KINDS = ['bus', 'stairs', 'tow', 'gpu', 'fire_service', 'medical', 'police'] as const;
 export const ResourceRequestSchema = Type.Object({
   id: Str,
   kind: literalUnion(RESOURCE_KINDS),
@@ -397,7 +448,7 @@ export type EvidencePack = Static<typeof EvidencePackSchema>;
 /** Entity names per system; the inspector uses this for tabs. Order is display order. */
 export const SYSTEM_ENTITIES = {
   mne: ['aircraft', 'defects', 'workOrders', 'techlog', 'decisions'],
-  occ: ['flights', 'spares', 'swaps', 'cancellations', 'curfews'],
+  occ: ['flights', 'spares', 'swaps', 'cancellations', 'curfews', 'airborne', 'commanderLog'],
   crew: ['crew'],
   pss: ['cohorts', 'rebookingOptions', 'vouchers', 'messages'],
   airport: ['stands', 'standRequests', 'resourceRequests', 'weather'],
@@ -409,7 +460,15 @@ export const SYSTEM_ENTITIES = {
 /** Which field of each entity is its key in the entity map. */
 export const ENTITY_KEY = {
   mne: { aircraft: 'tail', defects: 'id', workOrders: 'id', techlog: 'id', decisions: 'id' },
-  occ: { flights: 'flight', spares: 'tail', swaps: 'id', cancellations: 'id', curfews: 'station' },
+  occ: {
+    flights: 'flight',
+    spares: 'tail',
+    swaps: 'id',
+    cancellations: 'id',
+    curfews: 'station',
+    airborne: 'flight',
+    commanderLog: 'id',
+  },
   crew: { crew: 'id' },
   pss: { cohorts: 'id', rebookingOptions: 'flight', vouchers: 'id', messages: 'id' },
   airport: { stands: 'id', standRequests: 'id', resourceRequests: 'id', weather: 'station' },
@@ -433,6 +492,8 @@ export interface SystemEntityTypes {
     swaps: SwapDecision;
     cancellations: CancelDecision;
     curfews: Curfew;
+    airborne: AirborneFlight;
+    commanderLog: CommanderLogEntry;
   };
   crew: { crew: CrewMember };
   pss: { cohorts: Cohort; rebookingOptions: RebookingOption; vouchers: Voucher; messages: PassengerMessage };
@@ -462,6 +523,8 @@ export const SYSTEM_ENTITY_SCHEMAS = {
     swaps: SwapDecisionSchema,
     cancellations: CancelDecisionSchema,
     curfews: CurfewSchema,
+    airborne: AirborneFlightSchema,
+    commanderLog: CommanderLogEntrySchema,
   },
   crew: { crew: CrewMemberSchema },
   pss: {

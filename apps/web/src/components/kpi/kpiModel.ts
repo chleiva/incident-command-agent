@@ -55,6 +55,7 @@ const COMPLIANCE_LABELS: Record<keyof KpiSnapshot['compliance']['value'], string
   fdpRespected: 'Crew FDP respected',
   morDraftedWithin72h: 'MOR drafted ≤ 72 h',
   threeHourThresholdAvoided: '3-hour threshold avoided',
+  commanderAuthorityRespected: "Commander's authority respected",
 };
 
 /** Compliance as check status: ✓ met, ✗ missed, pending while it can still be met or does not apply yet. */
@@ -69,6 +70,10 @@ export function complianceChecks(k: KpiSnapshot): CheckItem[] {
     // The 72-hour window outlasts any run: not drafted yet is pending, never missed.
     { key: 'morDraftedWithin72h', status: st(v.morDraftedWithin72h, false) },
     { key: 'threeHourThresholdAvoided', status: st(v.threeHourThresholdAvoided, true) },
+    // Task 07: airborne incidents only (no attempt to instruct the flight deck or take the commander's decisions).
+    ...(v.commanderAuthorityRespected === undefined || v.commanderAuthorityRespected === null
+      ? []
+      : [{ key: 'commanderAuthorityRespected', status: st(v.commanderAuthorityRespected, true) }]),
   ].map((c) => ({ ...c, label: COMPLIANCE_LABELS[c.key as keyof typeof COMPLIANCE_LABELS] }));
 }
 
@@ -116,11 +121,13 @@ export function checkSummary(items: CheckItem[]): string {
 }
 
 export function complianceItems(k: KpiSnapshot) {
-  return (Object.keys(COMPLIANCE_LABELS) as (keyof typeof COMPLIANCE_LABELS)[]).map((key) => ({
-    key,
-    label: COMPLIANCE_LABELS[key],
-    value: k.compliance.value[key],
-  }));
+  return (Object.keys(COMPLIANCE_LABELS) as (keyof typeof COMPLIANCE_LABELS)[])
+    .filter((key) => key !== 'commanderAuthorityRespected' || k.compliance.value[key] !== undefined)
+    .map((key) => ({
+      key,
+      label: COMPLIANCE_LABELS[key],
+      value: k.compliance.value[key] ?? null,
+    }));
 }
 
 export function compliancePassed(k: KpiSnapshot): { passed: number; applicable: number; failed: number } {
@@ -198,6 +205,14 @@ export function tileModels(k: KpiSnapshot, base: KpiSnapshot | null): TileModel[
           ['Delay cost', `${formatEur(x.delayCostEur.value)} — ${x.delayCostEur.formula}`],
           ['EU261 exposure', `${formatEur(x.eu261ExposureEur.value)} — ${x.eu261ExposureEur.formula}`],
           ['Cancellation', `${formatEur(x.cancellationCostEur.value)} — ${x.cancellationCostEur.formula}`],
+          ...(x.diversionCostEur
+            ? ([
+                [
+                  'Diversion (estimate)',
+                  `${formatEur(x.diversionCostEur.value)} — ${x.diversionCostEur.formula}`,
+                ],
+              ] as [string, string][])
+            : []),
         ],
       }),
     },

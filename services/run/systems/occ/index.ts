@@ -22,6 +22,7 @@
  *   now + 20 min (5-minute steps) and the delay propagates; a dispatchable flight whose ETD has passed departs.
  */
 import { localHhMm } from '@ica/kb';
+import { seedAirborne, tickAirborne } from './airborne';
 import type {
   Actor,
   AircraftType,
@@ -77,6 +78,8 @@ export function compatibleType(spare: AircraftType, needed: AircraftType, pax: n
 const ACTIVE: Flight['status'][] = ['scheduled', 'delayed', 'boarding', 'swapped'];
 export const isActive = (f: Flight) => ACTIVE.includes(f.status);
 
+export { seedAirborne, tickAirborne, airborneNow } from './airborne';
+
 export function seedOcc(scenario: Scenario): SystemStateOf<'occ'> {
   const origin = scenario.startSimTime;
   const flights: Record<string, Flight> = {};
@@ -125,7 +128,15 @@ export function seedOcc(scenario: Scenario): SystemStateOf<'occ'> {
     };
   const curfews: Record<string, Curfew> = {};
   for (const c of scenario.world.curfews) curfews[c.station] = { ...c };
-  return { flights, spares, swaps: {}, cancellations: {}, curfews };
+  return {
+    flights,
+    spares,
+    swaps: {},
+    cancellations: {},
+    curfews,
+    airborne: seedAirborne(scenario),
+    commanderLog: {},
+  };
 }
 
 // ------------------------------------------------------------------ time helpers
@@ -460,7 +471,7 @@ export function dispatchable(state: SystemState, tail: string): boolean {
 
 export function tickOcc(state: SystemState, simMinute: number, _dtMin: number): SystemMutation[] {
   if (originMs(state) === undefined) return [];
-  const out: SystemMutation[] = confirmSwapRequests(state, simMinute);
+  const out: SystemMutation[] = [...confirmSwapRequests(state, simMinute), ...tickAirborne(state, simMinute)];
   let s = out.length ? applyMutations(state, out) : state;
   const tails = new Set(Object.values(s.occ.flights).map((f) => f.tail));
   for (const tail of tails) {
@@ -495,6 +506,15 @@ export const occ: MockSystem<'occ'> = {
     tail: [
       ...new Set([...Object.values(state.occ.flights).map((f) => f.tail), ...Object.keys(state.occ.spares)]),
     ],
-    station: [...new Set(Object.values(state.occ.flights).flatMap((f) => [f.from, f.to]))],
+    station: [
+      ...new Set([
+        ...Object.values(state.occ.flights).flatMap((f) => [f.from, f.to]),
+        ...Object.values(state.occ.airborne ?? {}).flatMap((a) => [
+          a.from,
+          a.plannedDestination,
+          a.destination,
+        ]),
+      ]),
+    ],
   }),
 };

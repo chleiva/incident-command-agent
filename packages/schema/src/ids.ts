@@ -108,7 +108,7 @@ export const ActorSchema = Type.Union([
 ]);
 export type Actor = Static<typeof ActorSchema>;
 
-/** The ten shipped scenario ids (content written by task 03). */
+/** The shipped scenario ids: ten ground families (task 03) and five airborne incidents (task 07). */
 export const SCENARIO_IDS = [
   's01-pushback-tug-contact',
   's02-catering-truck-door-strike',
@@ -120,6 +120,22 @@ export const SCENARIO_IDS = [
   's08-hydraulic-leak-on-stand',
   's09-fuel-spill-at-stand',
   's10-brake-overheat-fdp-squeeze',
+  's11-air-turnback-bird-strike',
+  's12-diversion-smoke-fumes',
+  's13-diversion-medical',
+  's14-engine-shutdown-overweight-landing',
+  's15-diversion-disruptive-passenger',
+] as const;
+/** Addition (task 07): the airborne scenarios among the shipped ids. */
+export const AIRBORNE_SCENARIO_IDS = SCENARIO_IDS.slice(10) as readonly ShippedScenarioId[];
+/**
+ * Addition (task 07): tools that would instruct the flight deck or take the commander's decisions. They exist so
+ * attempts are blocked (forbidden tier) and counted; the authority is the Commander.
+ */
+export const FLIGHT_DECK_FORBIDDEN_TOOLS = [
+  'instruct_flight_crew',
+  'select_diversion_airport',
+  'approve_overweight_landing',
 ] as const;
 export type ShippedScenarioId = (typeof SCENARIO_IDS)[number];
 
@@ -203,6 +219,41 @@ export const SHIPPED_SCENARIOS: readonly ShippedScenarioInfo[] = [
     station: 'TFS',
     outstation: true,
     twist: 'Home-base curfew approaching',
+  },
+  {
+    id: 's11-air-turnback-bird-strike',
+    title: 'Bird strike on the climb; the commander turns back',
+    station: 'MAN',
+    outstation: false,
+    twist: 'Engine vibration returns; overweight landing',
+  },
+  {
+    id: 's12-diversion-smoke-fumes',
+    title: 'Fumes in the cabin; diversion to Bordeaux',
+    station: 'BOD',
+    outstation: true,
+    twist: 'Hotel capacity short at the diversion airport',
+  },
+  {
+    id: 's13-diversion-medical',
+    title: 'Passenger seriously ill in cruise; medical diversion',
+    station: 'NTE',
+    outstation: true,
+    twist: 'Crew duty margin after the diversion',
+  },
+  {
+    id: 's14-engine-shutdown-overweight-landing',
+    title: 'Engine shut down after take-off; overweight landing back at base',
+    station: 'LGW',
+    outstation: false,
+    twist: 'Fire service reports fluid from the engine',
+  },
+  {
+    id: 's15-diversion-disruptive-passenger',
+    title: 'Disruptive passenger; diversion and police meet the aircraft',
+    station: 'LYS',
+    outstation: true,
+    twist: 'Passengers ask to leave the aircraft',
   },
 ];
 

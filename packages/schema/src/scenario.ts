@@ -388,6 +388,29 @@ export const InspiredBySchema = Type.Object(
   strict,
 );
 
+/**
+ * Addition (task 07): an airborne incident. The aircraft is in the air at sim minute 0; `aircraft.station` is the
+ * airport where it will land (the commander's choice, revealed to the ground by a scenario twist that records the
+ * commander's decision). Agents never choose the airport or instruct the crew.
+ */
+export const ScenarioAirborneSchema = Type.Object(
+  {
+    flight: FlightNumberSchema,
+    from: IataSchema,
+    plannedDestination: IataSchema,
+    position: Type.Object({ lat: Type.Number(), lon: Type.Number() }, strict),
+    altitudeFt: Type.Number({ minimum: 0 }),
+    headingDeg: Type.Number({ minimum: 0, maximum: 360 }),
+    /** Sim minute of landing at the planned destination (before any decision). */
+    etaMinute: Minute,
+    fuelEnduranceMin: Type.Number({ minimum: 0 }),
+    squawk: literalUnion(['normal', 'pan', 'mayday'] as const),
+    pax: Count,
+  },
+  strict,
+);
+export type ScenarioAirborne = Static<typeof ScenarioAirborneSchema>;
+
 export const SCENARIO_SCHEMA_ID = 'urn:incident-command-agent:schema:scenario:1';
 
 export const ScenarioSchema = Type.Object(
@@ -408,13 +431,15 @@ export const ScenarioSchema = Type.Object(
     baseline: Type.Array(BaselineStepSchema),
     expected: ExpectedConstraintsSchema,
     kpiParams: KpiParamsSchema,
+    /** Addition (task 07): present for airborne incidents. */
+    airborne: Type.Optional(ScenarioAirborneSchema),
   },
   {
     ...strict,
     $id: SCENARIO_SCHEMA_ID,
     title: 'Incident Coordination Agent scenario',
     description:
-      'A ground or pre-departure incident scenario for the fictional carrier Accent Air (schemaVersion 1).',
+      'A ground, pre-departure or airborne incident scenario for the fictional carrier Accent Air (schemaVersion 1).',
   },
 );
 export type Scenario = Static<typeof ScenarioSchema>;

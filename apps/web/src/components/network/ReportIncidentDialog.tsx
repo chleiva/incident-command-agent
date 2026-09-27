@@ -264,6 +264,12 @@ export function ReportIncidentDialog({
                   {preview.twists.length > 0 && (
                     <p className="text-caption text-fg-subtle">Twists: {preview.twists.join(' · ')}</p>
                   )}
+                  {options.find((o) => o.type.id === selected)?.type.category === 'airborne' && (
+                    <p className="text-caption text-fg" data-testid="commander-authority-note">
+                      The commander flies and decides the aircraft. The agents only prepare options and the
+                      ground; instructing the crew is blocked.
+                    </p>
+                  )}
                 </>
               )}
               {mode === 'mock' && selected && (

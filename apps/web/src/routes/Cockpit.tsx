@@ -54,6 +54,8 @@ import {
 import { downloadBlob, renderEvidencePdf } from '../lib/evidencePdf';
 import { simClockAt } from '../lib/format';
 import { stationsForMap } from '../lib/stations';
+import { airborneAt } from '../lib/airborne';
+import { ArrivalPanel } from '../components/ground/ArrivalPanel';
 import { latestCaption } from '../lib/narrator';
 import { usePalette } from '../store/palette';
 import { useUi } from '../store/ui';
@@ -131,7 +133,9 @@ export default function Cockpit() {
   const aircraft = Object.values(view.systems.mne.aircraft);
   const spares = Object.values(view.systems.occ.spares);
   const engineers = Object.values(view.systems.engineers.engineers);
+  const airborneRecs = Object.values(view.systems.occ.airborne ?? {});
   const mapStations = stationsForMap(app.stations, [
+    ...airborneRecs.flatMap((a) => [a.from, a.destination, a.plannedDestination]),
     ...flights.flatMap((f) => [f.from, f.to]),
     ...aircraft.map((a) => a.station),
     ...spares.map((x) => x.station),
@@ -544,6 +548,7 @@ export default function Cockpit() {
               focusTail={focus?.tail}
               status={zoneStatus}
               error={loadError}
+              airborne={airborneRecs.map((a) => airborneAt(a, nowMinute))}
             />
           </div>
           <div className="shrink-0 border-t border-border pt-2">
@@ -559,11 +564,21 @@ export default function Cockpit() {
 
         <Zone
           id="ground"
-          title="Ground"
-          question="What is happening at the aircraft?"
+          title={airborneRecs[0] ? `Arrival station · ${airborneRecs[0].destination}` : 'Ground'}
+          question={airborneRecs[0] ? 'Who meets the aircraft?' : 'What is happening at the aircraft?'}
           className="xl:col-span-4"
           bodyClassName="zone-scroll flex flex-col gap-2 p-2"
         >
+          {airborneRecs[0] && (
+            <ArrivalPanel
+              airborne={airborneRecs[0]}
+              commanderLog={Object.values(view.systems.occ.commanderLog ?? {})}
+              resources={Object.values(view.systems.airport.resourceRequests)}
+              tasks={Object.values(view.systems.handler.tasks)}
+              engineers={engineers}
+              minute={nowMinute}
+            />
+          )}
           <StandView
             aircraft={focus}
             stand={stand}

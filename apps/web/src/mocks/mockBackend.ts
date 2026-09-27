@@ -113,6 +113,39 @@ export function screenText(text: string): ScreeningResult {
   return { verdict: 'clean', findings: [] };
 }
 
+/**
+ * The airborne mock recording is a turnback. When it replays for a diversion, keep the departure airport and the
+ * commander's decision right (the remap sends the template's departure airport to the arrival station).
+ */
+function airborneFixer(flight: string, from: string, typeId: string): (events: RunEvent[]) => RunEvent[] {
+  const turnback = typeId === 'air_turnback' || typeId === 'engine_shutdown_overweight_landing';
+  if (turnback) return (e) => e;
+  const fixRecord = (r: unknown) => {
+    if (!r || typeof r !== 'object') return r;
+    const o = { ...(r as Record<string, unknown>) };
+    if (o.flight === flight && 'plannedDestination' in o) o.from = from;
+    if (o.flight === flight && o.decidedBy === 'Commander') o.decision = 'divert';
+    if (o.commanderDecision === 'turnback') o.commanderDecision = 'divert';
+    return o;
+  };
+  const text = (s: string) =>
+    s.replace(/returning to/g, 'diverting to').replace(/turning back/g, 'diverting');
+  return (events) =>
+    events.map((e) => {
+      if (e.type === 'system.mutation' && e.payload.system === 'occ')
+        return {
+          ...e,
+          payload: { ...e.payload, before: fixRecord(e.payload.before), after: fixRecord(e.payload.after) },
+        } as RunEvent;
+      if (e.type === 'world.twist')
+        return {
+          ...e,
+          payload: { ...e.payload, title: text(e.payload.title), description: text(e.payload.description) },
+        } as RunEvent;
+      return e;
+    });
+}
+
 export class MockBackend {
   private readonly runs = new Map<string, MockRun>();
   private readonly scenarios = new Map<string, { scenario: Scenario; recording: Recording }>();
@@ -274,7 +307,7 @@ export class MockBackend {
 
   /**
    * Mock `POST /runs` with a flight context (task 07): the scenario is built in the browser with the same templates the
-   * server uses; the replay is a recorded run (s01 at a base, s04 at an outstation) with its identifiers, stations and
+   * server uses; the replay is a recorded run (s01 at a base, s04 at an outstation, s11 in the air) with its identifiers, stations and
    * times moved onto the flight by the same remapping. Free text is screened and added to the narrative (no LLM).
    */
   private async createFlightRun(req: CreateRunRequest): Promise<Response> {
@@ -293,10 +326,18 @@ export class MockBackend {
     const screening = req.text ? screenText(req.text) : undefined;
     if (screening?.verdict === 'rejected')
       return err(422, 'input_rejected', 'the text was rejected by input screening');
+    const airborne = T.incidentTypeById(typeId)?.category === 'airborne';
     const outstation = !isBase(ctx.station);
-    const rec = recordingFor(outstation ? 's04-lightning-strike-outstation' : 's01-pushback-tug-contact');
+    const rec = recordingFor(
+      airborne
+        ? 's11-air-turnback-bird-strike'
+        : outstation
+          ? 's04-lightning-strike-outstation'
+          : 's01-pushback-tug-contact',
+    );
     if (!rec) return err(500, 'mock_error', 'no recording');
-    const recType = outstation ? 'lightning_strike' : 'pushback_tug_contact';
+    // Airborne: the turnback recording moved onto this flight and the airport of the chosen type.
+    const recType = airborne ? typeId : outstation ? 'lightning_strike' : 'pushback_tug_contact';
     let built;
     let replay;
     try {
@@ -322,10 +363,13 @@ export class MockBackend {
         : {}),
       narrative: `${built.scenario.narrative}${note}`,
     };
+    const fix = airborne
+      ? airborneFixer(fc.flightId, schedule.flights.find((f) => f.flight === fc.flightId)!.from, typeId)
+      : (e: RunEvent[]) => e;
     const recording: Recording = {
       scenario,
-      agent: replay.remap(rec.agent),
-      baseline: replay.remap(rec.baseline),
+      agent: fix(replay.remap(rec.agent)),
+      baseline: fix(replay.remap(rec.baseline)),
     };
     this.scenarios.set(scenario.id, { scenario, recording });
     const res = this.createRun({ ...req, scenarioId: scenario.id });

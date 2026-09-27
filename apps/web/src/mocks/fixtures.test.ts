@@ -43,11 +43,13 @@ describe('mock-mode recordings are valid contract data', () => {
 
       it('agent run covers every zone', () => {
         const types = new Set(rec.agent.map((e) => e.type));
+        // The airborne recording shows the commander's authority respected: no blocked attempt in it.
+        const airborne = !!rec.scenario.airborne;
         for (const t of [
           'agent.proposal',
           'approval.decision',
           'world.twist',
-          'guardrail.blocked',
+          ...(airborne ? [] : ['guardrail.blocked']),
           'agent.report',
           'kpi.update',
           'world.process',

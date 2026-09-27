@@ -253,6 +253,12 @@ export const FORBIDDEN_EXPLANATIONS: Record<string, string> = {
     'Blocked: releasing the aircraft to service is reserved to certifying staff. Software cannot do it. Ask the certifying engineer via a human decision.',
   extend_crew_fdp:
     "Blocked: extending a flight duty period is the commander's discretion (ORO.FTL.205). Software cannot do it. Flag the FDP risk and propose alternatives (standby crew, swap) instead.",
+  instruct_flight_crew:
+    'Blocked: the commander flies the aircraft and decides its conduct. Software never instructs the flight deck. Prepare options and the ground (arrival services, handling, passengers) instead.',
+  select_diversion_airport:
+    "Blocked: whether and where to divert is the commander's decision. Rank options with rank_diversion_airports for the commander's consideration, then prepare the airport the commander chooses.",
+  approve_overweight_landing:
+    "Blocked: landing overweight is the commander's decision. Plan the overweight-landing inspection at the arrival station instead.",
 };
 
 /** The rule behind each forbidden tool and who holds the authority (shown on the "Blocked by autonomy policy" card). */
@@ -268,6 +274,18 @@ export const FORBIDDEN_RULES: Record<string, { rule: string; authority: string }
   extend_crew_fdp: {
     rule: "Extending a flight duty period is the commander's discretion (ORO.FTL.205(f))",
     authority: 'Aircraft commander',
+  },
+  instruct_flight_crew: {
+    rule: 'The commander has final authority over the conduct of the flight (CAT.GEN.MPA.105); the ground never instructs the flight deck',
+    authority: 'Commander',
+  },
+  select_diversion_airport: {
+    rule: "Whether and where to divert is the commander's decision (CAT.GEN.MPA.105); software prepares options only",
+    authority: 'Commander',
+  },
+  approve_overweight_landing: {
+    rule: "Landing above the maximum landing weight is the commander's decision (CAT.GEN.MPA.105)",
+    authority: 'Commander',
   },
 };
 

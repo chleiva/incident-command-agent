@@ -4,8 +4,8 @@
  */
 /**
  * Flight-context scenarios (task 07, `@ica/network/templates`) against the real systems and tools: for each ground
- * incident type, scenarios built from live-network flights seed cleanly and their baseline chronology runs through
- * the same handlers the agents use (no agent loop, no LLM).
+ * and airborne incident type, scenarios built from live-network flights seed cleanly and their baseline chronology
+ * runs through the same handlers the agents use (no agent loop, no LLM).
  */
 import { flightTimes, generateDaySchedule } from '@ica/network';
 import { buildScenarioFromFlight, incidentContext, incidentTypesFor } from '@ica/network/templates';
@@ -22,7 +22,13 @@ function samples(n: number): Map<string, Scenario[]> {
   const out = new Map<string, Scenario[]>();
   for (const f of schedule.flights) {
     const t = flightTimes(f);
-    for (const at of [t.offBlockMs - 20 * 60_000, t.offBlockMs + 5 * 60_000, t.inBlockMs + 15 * 60_000]) {
+    for (const at of [
+      t.offBlockMs - 20 * 60_000,
+      t.offBlockMs + 5 * 60_000,
+      t.inBlockMs + 15 * 60_000,
+      t.takeoffMs + 6 * 60_000,
+      (t.takeoffMs + t.landingMs) / 2,
+    ]) {
       for (const o of incidentTypesFor(incidentContext(schedule, f.flight, at)!).filter((x) => x.enabled)) {
         const list = out.get(o.type.id) ?? [];
         if (list.length >= n || list.some((s) => s.aircraft.tail === f.tail)) continue;
@@ -36,12 +42,12 @@ function samples(n: number): Map<string, Scenario[]> {
 
 describe('flight-context scenarios run through the real tools', () => {
   const byType = samples(2);
-  it('covers every ground incident type', () => {
-    expect(byType.size).toBe(10);
+  it('covers every ground and airborne incident type', () => {
+    expect(byType.size).toBe(15);
   });
   for (const [type, list] of byType)
     for (const s of list)
-      it(`${type} on ${s.aircraft.nextSectors[0]!.flight} at ${s.aircraft.station}: seeds and runs its baseline`, async () => {
+      it(`${type} on ${s.airborne?.flight ?? s.aircraft.nextSectors[0]!.flight} at ${s.aircraft.station}: seeds and runs its baseline`, async () => {
         const h = await fixtureHarness(structuredClone(s));
         const refs = knownRefs(h.state);
         for (const tw of s.twists)

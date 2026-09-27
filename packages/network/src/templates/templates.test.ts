@@ -103,6 +103,42 @@ describe('buildScenarioFromFlight', () => {
   });
 });
 
+describe('airborne types', () => {
+  it('builds a valid airborne scenario for every airborne flight × applicable type', () => {
+    const perType = new Map<string, number>();
+    for (const f of schedule.flights.filter((x) => !x.cancelled)) {
+      const t = flightTimes(f);
+      for (const at of [t.takeoffMs + 6 * 60_000, (t.takeoffMs + t.landingMs) / 2]) {
+        const ctx = incidentContext(schedule, f.flight, at)!;
+        for (const o of incidentTypesFor(ctx).filter((x) => x.enabled && x.type.category === 'airborne')) {
+          const b = buildScenarioFromFlight(schedule, f.flight, o.type.id, { atMs: at });
+          const v = validateScenario(b.scenario);
+          expect(v.ok ? [] : v.errors, `${f.flight} ${o.type.id}`).toEqual([]);
+          const s = b.scenario;
+          expect(s.airborne?.flight).toBe(f.flight);
+          expect(s.airborne?.plannedDestination).toBe(f.to);
+          const cmd = s.twists.find((x) => x.id === 'tw-commander-decision')!;
+          const patch = cmd.effects.find((e) => e.op === 'patch');
+          expect(patch && patch.op === 'patch' && patch.id).toBe(f.flight);
+          expect(patch && patch.op === 'patch' && patch.patch.destination).toBe(s.aircraft.station);
+          if (o.type.id === 'air_turnback') expect(s.aircraft.station).toBe(f.from);
+          else if (o.type.id !== 'engine_shutdown_overweight_landing')
+            expect(s.aircraft.station).not.toBe(f.to);
+          perType.set(o.type.id, (perType.get(o.type.id) ?? 0) + 1);
+        }
+      }
+    }
+    for (const id of [
+      'air_turnback',
+      'diversion_technical',
+      'diversion_medical',
+      'engine_shutdown_overweight_landing',
+      'unruly_passenger_diversion',
+    ])
+      expect(perType.get(id) ?? 0, id).toBeGreaterThan(0);
+  });
+});
+
 describe('remap', () => {
   it('replaces whole tokens, codes inside ids, and shifts times', () => {
     const r = createRemapper({

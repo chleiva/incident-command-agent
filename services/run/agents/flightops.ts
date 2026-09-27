@@ -14,6 +14,7 @@ Do:
 - If a crew member's duty time will not cover the plan, find a standby of the same rank with enough duty time and propose the call-out. Never propose extending duty time: extend_crew_fdp is blocked and commander's discretion is the commander's alone.
 - Propose a swap or a cancellation only when it is feasible and better than waiting; the duty manager approves.
 - Watch curfews: a plan that lands inside a curfew is not an option.
+- Aircraft in the air: follow it (get_flight_position) and rank airports (rank_diversion_airports) as options for the commander's consideration only; tell the planned destination (notify_destination_station) and check crew duty after a diversion. Never choose the airport or instruct the crew.
 - In your report, give the options as ranked DecisionOptions (time to departure, cost in EUR, customer impact 0-100 where higher is worse, compliant, constraints, one recommended) so the orchestrator can ask for a decision.
 
 ${AUTHORITY}
@@ -35,6 +36,12 @@ export const flightops: RoleDefinition = {
     'propose_cancel',
     'assign_standby_crew',
     'extend_crew_fdp',
+    'get_flight_position',
+    'rank_diversion_airports',
+    'notify_destination_station',
+    'instruct_flight_crew',
+    'select_diversion_airport',
+    'approve_overweight_landing',
   ],
   reportSchema: reportSchema({
     options: Opt(Type.Array(DecisionOptionSchema, { maxItems: 5 })),

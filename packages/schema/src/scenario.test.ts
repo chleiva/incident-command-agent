@@ -78,8 +78,8 @@ describe('validateScenario', () => {
 });
 
 describe('fixed scenario ids', () => {
-  it('lists the ten shipped ids, all matching the id pattern', () => {
-    expect(SCENARIO_IDS).toHaveLength(10);
+  it('lists the fifteen shipped ids (ten ground, five airborne), all matching the id pattern', () => {
+    expect(SCENARIO_IDS).toHaveLength(15);
     expect(SHIPPED_SCENARIOS.map((s) => s.id)).toEqual([...SCENARIO_IDS]);
     for (const id of SCENARIO_IDS) expect(id).toMatch(new RegExp(SCENARIO_ID_PATTERN));
   });

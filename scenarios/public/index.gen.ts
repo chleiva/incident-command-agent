@@ -13,5 +13,10 @@ import s6 from './s07-slide-inadvertent-deployment.json' with { type: 'json' };
 import s7 from './s08-hydraulic-leak-on-stand.json' with { type: 'json' };
 import s8 from './s09-fuel-spill-at-stand.json' with { type: 'json' };
 import s9 from './s10-brake-overheat-fdp-squeeze.json' with { type: 'json' };
+import s10 from './s11-air-turnback-bird-strike.json' with { type: 'json' };
+import s11 from './s12-diversion-smoke-fumes.json' with { type: 'json' };
+import s12 from './s13-diversion-medical.json' with { type: 'json' };
+import s13 from './s14-engine-shutdown-overweight-landing.json' with { type: 'json' };
+import s14 from './s15-diversion-disruptive-passenger.json' with { type: 'json' };
 
-export const scenarioModules: unknown[] = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9];
+export const scenarioModules: unknown[] = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14];

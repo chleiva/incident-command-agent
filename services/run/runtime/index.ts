@@ -7,6 +7,7 @@ export * from './agent';
 export * from './approvals';
 export * from './context';
 export * from './demo-script';
+export * from './turnback-script';
 export * from './execute';
 export * from './registry';
 export * from './run';

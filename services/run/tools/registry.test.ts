@@ -47,6 +47,16 @@ const MATRIX: Record<string, { tier: 'execute' | 'propose' | 'forbidden'; roles:
   lookup_airport: { tier: 'execute', roles: ['author'] },
   search_precedents: { tier: 'execute', roles: ['author'] },
   web_search: { tier: 'execute', roles: ['author'] },
+  // task 07: airborne incidents (the commander flies and decides; the ground prepares)
+  get_flight_position: { tier: 'execute', roles: ['flightops', 'ground', 'maintenance'] },
+  rank_diversion_airports: { tier: 'execute', roles: ['flightops'] },
+  prepare_diversion_handling: { tier: 'propose', roles: ['ground'] },
+  arrange_arrival_services: { tier: 'propose', roles: ['ground'] },
+  notify_destination_station: { tier: 'execute', roles: ['ground', 'flightops'] },
+  plan_overweight_landing_inspection: { tier: 'execute', roles: ['maintenance'] },
+  instruct_flight_crew: { tier: 'forbidden', roles: ['flightops', 'ground'] },
+  select_diversion_airport: { tier: 'forbidden', roles: ['flightops'] },
+  approve_overweight_landing: { tier: 'forbidden', roles: ['maintenance', 'flightops'] },
 };
 
 const RUNTIME_TOOLS = ['open_incident', 'delegate', 'set_objective', 'request_decision', 'report'];
