@@ -48,6 +48,29 @@ describe('POST /runs with a flight context', () => {
     expect(b.statusCode).toBe(201);
   });
 
+  it("placement (demo review 2): the server rebuilds exactly what the dialog previewed, at the aircraft's real location", async () => {
+    const h = makeDeps();
+    // ACX125 at the gate at PMI (09:30Z): the PMI turnaround for ACX126, starting at the report time.
+    const turn = { ...flightContext, flightId: 'ACX125', at: '2026-09-27T09:30:00.000Z' };
+    const r = await h.handler(
+      req('POST', '/runs', { body: { flightContext: turn, incidentType: 'vehicle_strike', mode: 'agent' } }),
+    );
+    expect(r.statusCode).toBe(201);
+    const stored = await h.store.getScenario(json<{ scenarioId: string }>(r).scenarioId);
+    const preview = buildScenarioFromFlight(schedule, 'ACX125', 'vehicle_strike', {
+      atMs: Date.parse(turn.at),
+    });
+    expect(stored).toEqual(preview.scenario);
+    expect(stored?.aircraft.station).toBe('PMI');
+    expect(stored?.startSimTime).toBe('2026-09-27T09:30:00Z');
+    // Live case: ACX125 selected at 22:47Z, long after AX-ZZD flew back to MAN: never an incident at PMI at 09:20Z.
+    const late = { ...turn, at: '2026-09-27T22:47:00.000Z' };
+    const refused = await h.handler(
+      req('POST', '/runs', { body: { flightContext: late, incidentType: 'vehicle_strike', mode: 'agent' } }),
+    );
+    expect(refused.statusCode).toBe(409);
+  });
+
   it('validates the request: either scenarioId or flightContext, a known flight, an applicable type', async () => {
     const h = makeDeps();
     const post = (body: unknown) => h.handler(req('POST', '/runs', { body }));

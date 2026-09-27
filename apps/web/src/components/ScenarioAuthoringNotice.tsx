@@ -10,6 +10,7 @@
 import type { RunProjection } from '@ica/schema/browser';
 import { Icon } from './ui/Icon';
 import { AiDraftedBadge, cx } from './ui/primitives';
+import { plainText } from '../lib/announce';
 
 export function ScenarioAuthoringNotice({
   authoring,
@@ -39,7 +40,7 @@ export function ScenarioAuthoringNotice({
         <Icon name={authoring.status === 'patched' ? 'check' : 'info'} size={12} />
       )}
       <span className="min-w-0 flex-1">
-        {authoring.detail}
+        {plainText(authoring.detail)}
         {preparing && (
           <span className="text-fg-subtle"> The world starts as soon as the scenario is ready.</span>
         )}

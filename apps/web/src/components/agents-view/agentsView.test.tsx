@@ -319,7 +319,7 @@ describe('dashboard Agent activity panel', () => {
           : '',
       );
     expect(titles).toEqual(expected);
-    expect(titles).toContain('Paged the duty engineer — ETA 9 min');
+    expect(titles).toContain('Paged Ada Pennick (B1) — ETA m12');
   });
 
   it('code chips carry the full agent name', async () => {

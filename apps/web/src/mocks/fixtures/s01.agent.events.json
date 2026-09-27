@@ -1540,8 +1540,16 @@
       "toolCallId": "tc-9",
       "tool": "page_engineer",
       "ok": true,
-      "resultPreview": "{\"engineerId\":\"eng-1\",\"etaMinute\":12,\"travelMode\":\"drive\"}",
-      "result": { "engineerId": "eng-1", "etaMinute": 12, "travelMode": "drive" }
+      "resultPreview": "{\"engineerId\":\"eng-1\",\"name\":\"Ada Pennick\",\"licence\":\"B1\",\"status\":\"paged\",\"destination\":\"MAN\",\"etaMinute\":12,\"travelMode\":\"drive\"}",
+      "result": {
+        "engineerId": "eng-1",
+        "name": "Ada Pennick",
+        "licence": "B1",
+        "status": "paged",
+        "destination": "MAN",
+        "etaMinute": 12,
+        "travelMode": "drive"
+      }
     }
   },
   {

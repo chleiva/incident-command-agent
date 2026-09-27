@@ -16,6 +16,7 @@ import type {
   DecisionOption,
   EventPayloadMap,
   EventDraft,
+  PriorToolCall,
   RunEvent,
   SystemMutation,
   ToolContext,
@@ -201,6 +202,30 @@ async function checkCall(
   return null;
 }
 
+/** This agent run's earlier calls of `tool` (oldest first), excluding `currentId`, with their outcomes. */
+function priorCallsOf(site: CallSite, tool: string, currentId: string): PriorToolCall[] {
+  const events = site.ctx.eventLog();
+  const results = new Map<string, RunEvent<'agent.tool_result'>['payload']>();
+  for (const e of events)
+    if (e.type === 'agent.tool_result' && e.agentRunId === site.agentRunId)
+      results.set(e.payload.toolCallId, e.payload);
+  const out: PriorToolCall[] = [];
+  for (const e of events) {
+    if (e.type !== 'agent.tool_call' || e.agentRunId !== site.agentRunId) continue;
+    if (e.payload.tool !== tool || e.payload.toolCallId === currentId) continue;
+    const r = results.get(e.payload.toolCallId);
+    if (!r) continue;
+    out.push({
+      toolCallId: e.payload.toolCallId,
+      args: (e.payload.args ?? {}) as Record<string, unknown>,
+      ok: r.ok,
+      atMinute: e.simMinute,
+      ...(r.result !== undefined ? { result: r.result } : {}),
+    });
+  }
+  return out;
+}
+
 /** Run the handler and persist its mutations together with the tool result. */
 async function runHandler(
   site: CallSite,
@@ -231,6 +256,7 @@ async function runHandler(
         knowledge: ctx.knowledge,
         rng: ctx.rng,
         log: (msg) => ctx.log({ agentRunId: site.agentRunId, tool: tool.name, msg }),
+        priorCalls: (name) => priorCallsOf(site, name, call.id),
       };
       outcome = await tool.handler(args, toolCtx);
     }
@@ -239,15 +265,31 @@ async function runHandler(
     outcome = { ok: false, error: `tool failed: ${(err as Error).message}` };
   }
   if (!outcome.ok) {
+    // A failure may carry structured detail (e.g. page_engineer's alternatives): recorded and sent to the model.
+    const detail =
+      outcome.data && typeof outcome.data === 'object' && !Array.isArray(outcome.data)
+        ? (outcome.data as Record<string, unknown>)
+        : undefined;
     await ctx.append([
       ctx.draft(
         'agent.tool_result',
-        { toolCallId: call.id, tool: tool.name, ok: false, resultPreview: preview(outcome.error) },
+        {
+          toolCallId: call.id,
+          tool: tool.name,
+          ok: false,
+          resultPreview: preview(outcome.error),
+          ...(detail ? { result: detail } : {}),
+        },
         site.actor,
         envExtra(site),
       ),
     ]);
-    return { ok: false, isError: true, content: wrapped(tool.name, tool.system, { error: outcome.error }) };
+    return {
+      ok: false,
+      isError: true,
+      content: wrapped(tool.name, tool.system, { error: outcome.error, ...(detail ?? {}) }),
+      ...(detail ? { data: detail } : {}),
+    };
   }
   // One net mutation per row: a handler that chains helpers may touch a row twice (one transaction cannot).
   const mutations: SystemMutation[] = netMutations(outcome.mutations ?? []);
@@ -486,6 +528,12 @@ function proposalProvenance(
 function withOptionProvenance(options: DecisionOption[], asOf: number | undefined): DecisionOption[] {
   return options.map((o) => ({
     ...o,
+    // Always a boolean on the event (the tool schema lets the model omit it; the loop derives it).
+    recommended: o.recommended === true,
+    metrics: {
+      ...o.metrics,
+      constraints: Array.isArray(o.metrics?.constraints) ? o.metrics.constraints : [],
+    },
     ...(o.dataAsOfMinute === undefined && asOf !== undefined ? { dataAsOfMinute: asOf } : {}),
     approvalScope: o.approvalScope ?? {
       authorises: `Choosing “${o.label}” as the plan. Each action it leads to is proposed and approved separately.`,

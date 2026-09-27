@@ -7,13 +7,14 @@
  * run store whatever the scrubber cursor, decides through the normal approval route (optimistic, 409-aware) and
  * takes the viewer's auto-approve setting (⌘K) and the countdown length (10 s; a mock-mode test hook may shorten it).
  */
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useRunActions } from '../../app/actions';
 import { useServices } from '../../app/services';
 import { useLiveMinute } from '../../app/useLiveMinute';
 import { useRun } from '../../app/useRunConnection';
 import { autoApproveMs } from '../../lib/autoApprove';
 import { pendingByUrgency } from '../../lib/derive';
+import { usePresenterPace } from '../../lib/presenterPace';
 import type { RunStore } from '../../store/runStore';
 import { useUi } from '../../store/ui';
 import { DecisionPopup } from './DecisionPopup';
@@ -30,6 +31,21 @@ export function LiveDecisionPopup({ runId, store }: { runId: string; store: RunS
   const nowMinute = useLiveMinute(head, true);
   const ended =
     head.meta.status === 'completed' || head.meta.status === 'failed' || head.meta.status === 'aborted';
+  // Presenter pace: a run started fast slows to 6× when the first decision card appears (no-op otherwise).
+  const setSpeed = useCallback(
+    (speed: number) => actions.control(runId, { action: 'set_speed', speed }, { auto: true }),
+    [actions, runId],
+  );
+  usePresenterPace(
+    runId,
+    {
+      pendingDecisions: pending.length,
+      // Before run.created the projection's speed is a placeholder: not a speed change.
+      speed: head.meta.mode ? head.meta.speed : undefined,
+      enabled: !ended && head.meta.mode === 'agent',
+    },
+    setSpeed,
+  );
   if (ended || head.meta.mode === 'baseline') return null;
   return (
     <DecisionPopup

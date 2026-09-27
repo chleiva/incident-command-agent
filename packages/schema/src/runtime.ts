@@ -49,7 +49,15 @@ export interface WorldScheduled {
 
 export type ToolOutcome<O = unknown> =
   | { ok: true; data: O; mutations?: SystemMutation[]; citations?: Citation[]; followUps?: WorldScheduled[] }
-  | { ok: false; error: string };
+  | {
+      ok: false;
+      error: string;
+      /**
+       * Addition (demo review 2): structured detail of a failure (e.g. `page_engineer`: who could not be paged, why,
+       * and the available alternatives). Sent to the model with the error and recorded as `agent.tool_result.result`.
+       */
+      data?: unknown;
+    };
 
 export interface KnowledgeHit {
   chunkId: string;
@@ -106,6 +114,22 @@ export interface ToolContext {
    * `export_evidence_pack` attaches it to the pack.
    */
   kpis?: KpiSnapshot;
+  /**
+   * Addition (demo review 2): this agent run's earlier calls of `tool` (oldest first; the current call excluded),
+   * read from the event log. Lets a tool refuse an immediate retry of a call that just failed.
+   */
+  priorCalls?: (tool: string) => PriorToolCall[];
+}
+
+/** One earlier tool call of the same agent run (see `ToolContext.priorCalls`). */
+export interface PriorToolCall {
+  toolCallId: string;
+  args: Record<string, unknown>;
+  ok: boolean;
+  /** Sim minute of the call. */
+  atMinute: number;
+  /** The recorded result data (a failure's `data` included), when any. */
+  result?: unknown;
 }
 
 export interface ToolRef {

@@ -12,6 +12,8 @@ import type { DaySchedule, NetworkFlight } from '@ica/network';
 import type * as Templates from '@ica/network/templates';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect, useId, useMemo, useState } from 'react';
+import { PACE_FAST, PACE_SLOW } from '../../lib/presenterPace';
+import { useUi } from '../../store/ui';
 import { Icon } from '../ui/Icon';
 import { Badge, Button, cx } from '../ui/primitives';
 
@@ -22,6 +24,8 @@ export interface ReportRequest {
   text?: string;
   withBaseline: boolean;
   speed: number;
+  /** Presenter pace: start at 15×, slow to 6× at the first decision (mirrors the ⌘K toggle). */
+  presenterPace: boolean;
 }
 
 const OTHER = 'other';
@@ -65,6 +69,9 @@ export function ReportIncidentDialog({
   const [text, setText] = useState('');
   const [withBaseline, setWithBaseline] = useState(true);
   const [speed, setSpeed] = useState(6);
+  // Mirrors the ⌘K "Presenter pace" toggle (the same per-viewer preference).
+  const presenterPace = useUi((s) => s.presenterPace);
+  const setPresenterPace = useUi((s) => s.setPresenterPace);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,7 +112,8 @@ export function ReportIncidentDialog({
       incidentType: selected,
       ...(text.trim() ? { text: text.trim() } : {}),
       withBaseline,
-      speed,
+      speed: presenterPace ? PACE_FAST : speed,
+      presenterPace,
     });
     if (!runId) {
       setBusy(false);
@@ -130,7 +138,11 @@ export function ReportIncidentDialog({
                 <span className="num">
                   {flight.from} → {flight.to} · {flight.tail} ({flight.type})
                 </span>
-                {ctx ? ` · ${ctx.phase.replace('_', ' ')} · incident at ${ctx.station}` : ''}
+                {ctx
+                  ? ctx.placement.kind === 'moved_on'
+                    ? ` · aircraft now ${ctx.phase.replace('_', ' ')} (${ctx.flight.flight}) · incident at ${ctx.station}`
+                    : ` · ${ctx.phase.replace('_', ' ')} · incident at ${ctx.station}`
+                  : ''}
               </Dialog.Description>
             </div>
             <Dialog.Close
@@ -240,6 +252,16 @@ export function ReportIncidentDialog({
               className="flex flex-col gap-2 rounded-md border border-border bg-surface p-3"
             >
               <h3 className="text-caption font-semibold uppercase tracking-wide text-fg-muted">Will run</h3>
+              {/* Where the incident happens when it is not simply "on this flight, where it is now". */}
+              {((preview && !('error' in preview) && preview.placement) || ctx?.placement.note) && (
+                <p
+                  className="rounded-md border border-warning/40 bg-warning-bg px-2 py-1.5 text-caption text-fg"
+                  data-testid="placement-note"
+                >
+                  <Icon name="info" size={12} className="mr-1 inline" />
+                  {(preview && !('error' in preview) && preview.placement) || ctx?.placement.note}
+                </p>
+              )}
               {!selected && <p className="text-caption text-fg-muted">Pick an incident type.</p>}
               {selected === OTHER && (
                 <p className="text-caption text-fg-muted">
@@ -291,9 +313,23 @@ export function ReportIncidentDialog({
               Run the human baseline alongside
             </label>
             <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={presenterPace}
+                onChange={(e) => setPresenterPace(e.target.checked)}
+                className="h-4 w-4 accent-[rgb(var(--c-fg))]"
+                aria-describedby={`${id}-pace-hint`}
+              />
+              Presenter pace
+              <span id={`${id}-pace-hint`} className="text-caption text-fg-subtle">
+                {PACE_FAST}× until the first decision, then {PACE_SLOW}×
+              </span>
+            </label>
+            <label className="flex items-center gap-2">
               Speed
               <select
-                value={speed}
+                value={presenterPace ? PACE_FAST : speed}
+                disabled={presenterPace}
                 onChange={(e) => setSpeed(Number(e.target.value))}
                 className="h-7 rounded-md border border-border-control/70 bg-surface-raised px-2 text-body text-fg"
               >

@@ -151,11 +151,20 @@ describe('new backend markers in headlines (≤ 60 chars)', () => {
       expect(alreadyPaged(r)).toBe(true);
       const h = headline('page_engineer', { engineerId: 'eng-1', station: 'MAN' }, r, { minute: 20 });
       expect(h).toBe('Engineer already paged at MAN — ETA m34');
+      // With the engineer's name (current backend): who, not where.
+      expect(
+        headline(
+          'page_engineer',
+          { engineerId: 'eng-1', station: 'MAN' },
+          { ...r, name: 'Ari Voss' },
+          { minute: 20 },
+        ),
+      ).toBe('Already paged Ari Voss — ETA m34');
       expect(h.length).toBeLessThanOrEqual(HEADLINE_MAX);
     }
     expect(alreadyPaged({ etaMinute: 12 })).toBe(false);
     expect(headline('page_engineer', { station: 'MAN' }, { etaMinute: 12 }, { minute: 3 })).toBe(
-      'Paged the duty engineer at MAN — ETA 9 min',
+      'Paged an engineer at MAN — ETA 9 min',
     );
   });
 

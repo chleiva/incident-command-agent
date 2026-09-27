@@ -7,6 +7,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { FlightList, filterFlights } from './FlightList';
 import { FlightPanel } from './FlightPanel';
+import { ReportIncidentDialog } from './ReportIncidentDialog';
 
 const schedule = generateDaySchedule('accent-air', '2026-09-27');
 const noon = Date.parse('2026-09-27T12:00:00Z');
@@ -70,5 +71,40 @@ describe('<FlightPanel>', () => {
     );
     expect(screen.queryByTestId('options-only-note')).toBeNull();
     expect(screen.getByText('Boarding')).toBeInTheDocument();
+  });
+});
+
+describe('<ReportIncidentDialog> placement (demo review 2)', () => {
+  const f125 = schedule.flights.find((x) => x.flight === 'ACX125')!;
+  const dialog = (hhmm: string) =>
+    render(
+      <ReportIncidentDialog
+        open
+        onOpenChange={() => {}}
+        schedule={schedule}
+        flight={f125}
+        t={Date.parse(`2026-09-27T${hhmm}:00Z`)}
+        onStart={async () => null}
+      />,
+    );
+
+  it('a landed flight: says the incident applies at the next turnaround', async () => {
+    dialog('09:30');
+    expect(await screen.findByTestId('placement-note')).toHaveTextContent(
+      'this incident type applies at the next turnaround: ACX126 at PMI (due 10:15Z)',
+    );
+  });
+
+  it('long after landing, once the aircraft has flown on: says where it is now', async () => {
+    dialog('22:47');
+    expect(await screen.findByTestId('placement-note')).toHaveTextContent(/at the gate at MAN after ACX126/);
+    expect(screen.getByTestId('report-dialog')).toHaveTextContent(/incident at MAN/);
+  });
+
+  it('before departure: no note (the incident is on this flight, here)', async () => {
+    dialog('06:10');
+    await screen.findAllByRole('radio');
+    expect(screen.queryByTestId('placement-note')).toBeNull();
+    expect(screen.getByTestId('report-dialog')).toHaveTextContent(/incident at MAN/);
   });
 });

@@ -25,8 +25,10 @@ type Args = Record<string, unknown>;
 export interface HeadlineContext {
   /** Sim minute of the call (turns an absolute ETA minute into "ETA 9 min"). */
   minute?: number;
-  /** The call's result was an error. */
+  /** The call's result was an error. `result` is then the failure's structured data, when the tool sent any. */
   failed?: boolean;
+  /** The error text of a failed call (`agent.tool_result.resultPreview`), read only for plain failure reasons. */
+  error?: string;
 }
 
 // ------------------------------------------------------------------------------------------------ text helpers
@@ -272,10 +274,47 @@ const search =
     return withText(`${what}: `, a.query, suffix);
   };
 
-const tried =
-  (text: (a: Args) => string): Template =>
-  (a) =>
-    `Tried to ${text(a)}`;
+/** Forbidden tools read "Tried to …" whatever the outcome (they are blocked, not failed). */
+const KEEP_ON_FAILURE = new WeakSet<Template>();
+const tried = (text: (a: Args) => string): Template => {
+  const t: Template = (a) => `Tried to ${text(a)}`;
+  KEEP_ON_FAILURE.add(t);
+  return t;
+};
+
+/** "{prefix}{person}{suffix}" within the limit: the person's name is clipped, never the facts around it. */
+function withPerson(prefix: string, name: string, suffix = ''): string {
+  const room = HEADLINE_MAX - prefix.length - suffix.length;
+  return `${prefix}${clipText(name, Math.max(6, room))}${suffix}`;
+}
+
+const etaM = (m: number | undefined) => (m === undefined ? '' : ` — ETA m${Math.round(m)}`);
+
+/** The plain reason a page failed: from the failure's data, else read from the error text. Never an id. */
+function pageFailureReason(r: Args, error = ''): string {
+  const fromText = /busy until minute (\d+(?:\.\d+)?)/i.exec(error)?.[1];
+  const until = num(r.busyUntilMinute) ?? (fromText !== undefined ? Number(fromText) : undefined);
+  if (r.reason === 'busy' || /\bis busy\b/i.test(error))
+    return until !== undefined ? `busy until m${Math.round(until)}` : 'busy';
+  if (r.reason === 'unknown' || /unknown engineer|not on the roster/i.test(error)) return 'not on the roster';
+  if (/call again with a reason/i.test(error)) return 'another engineer is on the way';
+  return '';
+}
+
+/**
+ * Failure templates: what went wrong, in plain words (live, demo review 2: five failed pages all read "Paged the duty
+ * engineer at PMI"). Other tools read "Could not {label}" when their call failed.
+ */
+export const FAILURE_TEMPLATES: Record<string, Template> = {
+  page_engineer: (_a, r, ctx) => {
+    const name = str(r.name);
+    const why = pageFailureReason(r, ctx.error);
+    const suffix = why ? ` — ${why}` : '';
+    if (r.retryRefused === true)
+      return name ? withPerson('Did not re-page ', name, suffix) : `Did not re-page the engineer${suffix}`;
+    return name ? withPerson('Could not page ', name, suffix) : `Could not page an engineer${suffix}`;
+  },
+};
 
 export const HEADLINE_TEMPLATES: Record<string, Template> = {
   // ---------------------------------------------------------------- runtime
@@ -316,15 +355,21 @@ export const HEADLINE_TEMPLATES: Record<string, Template> = {
   },
   page_engineer: (a, r, ctx) => {
     const eta = num(r.etaMinute);
+    const name = str(r.name);
+    const licence = /^(B1|B2|A|C)$/.test(str(r.licence)) ? ` (${str(r.licence)})` : '';
+    const where = station(a.station) || station(r.destination) || station(r.station);
     // Additive backend marker: the engineer was already on the way (no second page).
-    if (alreadyPaged(r)) {
-      const where = station(a.station) || station(r.station);
-      return `Engineer already paged${at(where)}${eta !== undefined ? ` — ETA m${Math.round(eta)}` : ''}`;
-    }
+    if (alreadyPaged(r))
+      return name
+        ? withPerson('Already paged ', name, etaM(eta))
+        : `Engineer already paged${at(where)}${etaM(eta)}`;
+    if (!done(r)) return `Paging an engineer${where ? ` to ${where}` : ''}`;
+    // Who, and when they arrive (absolute sim minute, like the rest of the cockpit).
+    if (name) return withPerson('Paged ', name, `${licence}${etaM(eta)}`);
+    // An older result without the engineer's name: the relative ETA, as before.
     const mins =
       eta !== undefined && ctx.minute !== undefined ? Math.max(0, Math.round(eta - ctx.minute)) : eta;
-    const where = station(a.station);
-    return `Paged the duty engineer${at(where)}${mins !== undefined ? ` — ETA ${mins} min` : ''}`;
+    return `Paged an engineer${at(where)}${mins !== undefined ? ` — ETA ${mins} min` : ''}`;
   },
   draft_techlog_entry: (a) => `Drafted a tech log entry${forX(tail(a.tail))}`,
   record_engineering_decision: (a, r) => {
@@ -503,7 +548,13 @@ export function alreadyPaged(r: Record<string, unknown>): boolean {
 
 export function headline(tool: string, args?: unknown, result?: unknown, ctx: HeadlineContext = {}): string {
   const template = HEADLINE_TEMPLATES[tool];
-  const r = ctx.failed ? {} : obj(result);
+  if (ctx.failed) {
+    const failure = FAILURE_TEMPLATES[tool];
+    if (failure) return fitHeadline(failure(obj(args), obj(result), ctx));
+    if (template && KEEP_ON_FAILURE.has(template)) return fitHeadline(template(obj(args), {}, ctx));
+    return fitHeadline(TOOL_LABEL[tool] ? `Could not ${toolLabel(tool)}` : 'A tool call failed');
+  }
+  const r = obj(result);
   const text = template
     ? template(obj(args), r, ctx)
     : TOOL_LABEL[tool]

@@ -20,6 +20,7 @@ import { AiDraftedBadge, ApproverLine, Badge, Button, Kbd, TierBadge, cx, type T
 import { DiffEditor } from './DiffEditor';
 import { OptionsMatrix } from './OptionsMatrix';
 import { ProvenancePanel } from './Provenance';
+import { approvalPhrase } from '../../lib/announce';
 
 type Mode = 'idle' | 'editing' | 'rejecting';
 
@@ -112,7 +113,7 @@ export function DecisionCard({
       : undefined;
     return (
       <article
-        aria-label={`${verb}: ${approval.summary}`}
+        aria-label={`${verb}: ${approvalPhrase(approval)}`}
         data-decided={approval.approvalId}
         className="rounded-md border border-border bg-surface-sunken px-3 py-2"
       >
@@ -126,7 +127,7 @@ export function DecisionCard({
           <span className="ml-auto text-fg-subtle">{humaniseTool(approval.tool)}</span>
         </div>
         <p className="mt-1 line-clamp-2 text-body text-fg-muted">
-          {option ? option.label : approval.summary}
+          {option ? option.label : approvalPhrase(approval)}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-x-2">
           <ApproverLine
@@ -191,7 +192,7 @@ export function DecisionCard({
         </p>
       )}
       <p id={`${id}-summary`} className="mt-2 text-body-lg text-fg">
-        <GlossaryText text={approval.summary} />
+        <GlossaryText text={approvalPhrase(approval)} />
       </p>
       <p className="mt-0.5 font-mono text-micro text-fg-subtle">{approval.tool}</p>
       {swap && (

@@ -41,6 +41,13 @@ const commands: PaletteCommand[] = [
     })),
   { id: 'captions', group: 'View', label: 'Hide story captions', icon: 'captions', run: fn() },
   { id: 'theme', group: 'View', label: 'Switch to the light theme', icon: 'sun', run: fn() },
+  {
+    id: 'presenter-pace',
+    group: 'Presenter',
+    label: 'Presenter pace: fast until the first decision: on',
+    icon: 'clock',
+    run: fn(),
+  },
 ];
 
 export const Empty: Story = { name: 'Empty (no context commands)', args: { commands: [] } };

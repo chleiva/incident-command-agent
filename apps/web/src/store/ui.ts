@@ -5,6 +5,7 @@
 /** Global UI state: theme, captions, toasts, palette, zone focus, optimistic approvals, live announcements. */
 import type { ApprovalDecisionKind } from '@ica/schema/browser';
 import { create } from 'zustand';
+import { plainText } from '../lib/announce';
 
 export type Theme = 'dark' | 'light';
 export type ToastTone = 'info' | 'good' | 'warning' | 'critical';
@@ -50,6 +51,12 @@ interface UiState {
    */
   autoApprove: boolean;
   setAutoApprove(on: boolean): void;
+  /**
+   * Presenter pace (demo review 2): runs start at 15× and slow to 6× at the first decision card. Default OFF;
+   * persisted per viewer under `PRESENTER_PACE_KEY` (see lib/presenterPace.ts).
+   */
+  presenterPace: boolean;
+  setPresenterPace(on: boolean): void;
   setTheme(t: Theme): void;
   toggleCaptions(): void;
   setPlainLanguage(on: boolean): void;
@@ -80,6 +87,7 @@ export const HIDE_THOUGHTS_KEY = 'ica.agents.hideThoughts';
 export const AUTO_APPROVE_KEY = 'ica.autoApprove.v2';
 export const LEGACY_AUTO_APPROVE_KEYS = ['ica.autoApprove'] as const;
 const OPEN_RUN_KEY = 'ica.openRun';
+export const PRESENTER_PACE_KEY = 'ica.presenterPace';
 
 function read(key: string): string | null {
   try {
@@ -148,6 +156,11 @@ export const useUi = create<UiState>()((set, get) => ({
   hideThoughts: read(HIDE_THOUGHTS_KEY) === 'on',
   aboutOpen: false,
   autoApprove: readAutoApprove(),
+  presenterPace: read(PRESENTER_PACE_KEY) === 'on',
+  setPresenterPace(presenterPace) {
+    write(PRESENTER_PACE_KEY, presenterPace ? 'on' : 'off');
+    set({ presenterPace });
+  },
   setAutoApprove(autoApprove) {
     write(AUTO_APPROVE_KEY, autoApprove ? 'on' : 'off');
     set({ autoApprove });
@@ -180,7 +193,14 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   pushToast(t, ttlMs = 5_000) {
     const id = ++toastId;
-    set({ toasts: [...get().toasts.slice(-3), { ...t, id }] });
+    // Toasts sit in a polite live region: plain words only (no tool names, no JSON).
+    const toast: Toast = {
+      ...t,
+      id,
+      title: plainText(t.title) || t.title,
+      ...(t.body !== undefined ? { body: plainText(t.body) } : {}),
+    };
+    set({ toasts: [...get().toasts.slice(-3), toast] });
     if (ttlMs > 0) setTimeout(() => get().dismissToast(id), ttlMs);
   },
   dismissToast(id) {
@@ -195,7 +215,7 @@ export const useUi = create<UiState>()((set, get) => ({
   announce(text) {
     // Re-announce identical text by clearing first.
     set({ announcement: '' });
-    setTimeout(() => set({ announcement: text }), 30);
+    setTimeout(() => set({ announcement: plainText(text) }), 30);
   },
   markTriggered() {
     set({ triggeredAt: performance.now(), firstEventMs: null });

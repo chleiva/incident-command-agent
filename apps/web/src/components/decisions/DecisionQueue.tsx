@@ -11,6 +11,7 @@ import { Icon } from '../ui/Icon';
 import { StateFrame, type LoadStatus } from '../ui/primitives';
 import { InvalidationNotice } from '../agents/PolicyCards';
 import { DecisionCard } from './DecisionCard';
+import { approvalPhrase } from '../../lib/announce';
 
 export function DecisionQueue({
   pending,
@@ -43,7 +44,7 @@ export function DecisionQueue({
     const ids = new Set(pending.map((p) => p.approvalId));
     if (seen.current && announce) {
       const fresh = pending.filter((p) => !seen.current!.has(p.approvalId));
-      if (fresh.length) say(`Decision needed: ${fresh.map((f) => f.summary).join('; ')}`);
+      if (fresh.length) say(`Decision needed: ${fresh.map((f) => approvalPhrase(f)).join('; ')}`);
     }
     seen.current = ids;
   }, [pending, say, announce]);
@@ -58,7 +59,7 @@ export function DecisionQueue({
               approvalId: a.approvalId,
               affectedAssumptions: a.invalidated!.affectedAssumptions,
             }}
-            proposal={{ summary: a.summary, tool: a.tool }}
+            proposal={{ summary: approvalPhrase(a), tool: a.tool }}
             revisionPending={!!a.supersededBy}
           />
         ))}

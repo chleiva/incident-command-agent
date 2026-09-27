@@ -160,6 +160,79 @@ export function repairLeakedParameters(
 
 export type RepairedCall = ToolCallInput;
 
+// ------------------------------------------------------------------------------------------------ redundant fields
+/**
+ * `request_decision` carries the recommendation twice: top-level `recommendedOptionId` and per-option
+ * `recommended`. Live (demo review 2) the model sent only the top-level id and the call was refused
+ * (`/options/0: missing required: recommended`). Both are derived from each other here, deterministically:
+ * - a valid `recommendedOptionId` wins: each option's `recommended` = (its id === that id);
+ * - else the first option flagged `recommended: true` gives `recommendedOptionId` (other flags → false);
+ * - else nothing is recommended (every flag false, no id) — never a refusal.
+ * Also: a missing `metrics.constraints` becomes `[]`, and numeric strings in the metrics become numbers.
+ * Returns the JSON pointers it changed (recorded as `argsRepaired`).
+ */
+export function coerceDecisionArgs(input: Record<string, unknown>): {
+  input: Record<string, unknown>;
+  repaired: string[];
+} {
+  if (!Array.isArray(input.options)) return { input, repaired: [] };
+  const repaired: string[] = [];
+  const options = input.options.map((o) =>
+    o && typeof o === 'object' && !Array.isArray(o) ? { ...(o as Record<string, unknown>) } : o,
+  ) as (Record<string, unknown> | unknown)[];
+  const objs = options.filter(
+    (o): o is Record<string, unknown> => !!o && typeof o === 'object' && !Array.isArray(o),
+  );
+  const ids = new Set(objs.map((o) => o.id).filter((x): x is string => typeof x === 'string'));
+  const top = typeof input.recommendedOptionId === 'string' ? input.recommendedOptionId.trim() : undefined;
+  const flagged = objs.find((o) => o.recommended === true && typeof o.id === 'string')?.id as
+    string | undefined;
+  const rec = top && ids.has(top) ? top : flagged;
+  const out: Record<string, unknown> = { ...input, options };
+  if (rec !== undefined) {
+    if (input.recommendedOptionId !== rec) repaired.push('/recommendedOptionId');
+    out.recommendedOptionId = rec;
+  } else if ('recommendedOptionId' in input) {
+    delete out.recommendedOptionId;
+    repaired.push('/recommendedOptionId');
+  }
+  options.forEach((o, i) => {
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return;
+    const opt = o as Record<string, unknown>;
+    const want = rec !== undefined && opt.id === rec;
+    if (opt.recommended !== want) {
+      opt.recommended = want;
+      repaired.push(`/options/${i}/recommended`);
+    }
+    const m = opt.metrics;
+    if (m && typeof m === 'object' && !Array.isArray(m)) {
+      const metrics = { ...(m as Record<string, unknown>) };
+      if (metrics.constraints === undefined || metrics.constraints === null) {
+        metrics.constraints = [];
+        repaired.push(`/options/${i}/metrics/constraints`);
+      } else if (typeof metrics.constraints === 'string') {
+        metrics.constraints = [metrics.constraints];
+        repaired.push(`/options/${i}/metrics/constraints`);
+      }
+      for (const k of ['timeToDepartureMin', 'costEur', 'customerImpact'])
+        if (typeof metrics[k] === 'string' && /^\s*-?\d+(\.\d+)?\s*$/.test(metrics[k] as string)) {
+          metrics[k] = Number(metrics[k]);
+          repaired.push(`/options/${i}/metrics/${k}`);
+        }
+      opt.metrics = metrics;
+    }
+  });
+  return repaired.length ? { input: out, repaired } : { input, repaired: [] };
+}
+
+/** Tool-specific coercion of redundant or derivable fields (runs after the leak repair, before validation). */
+export const ARG_COERCERS: Record<
+  string,
+  (input: Record<string, unknown>) => { input: Record<string, unknown>; repaired: string[] }
+> = {
+  request_decision: coerceDecisionArgs,
+};
+
 /**
  * A call to a tool named after a delegable role becomes a `delegate` call (same id). `delegable` is the role enum
  * of the agent's own `delegate` tool, so an agent without `delegate` is never normalised.
@@ -180,7 +253,10 @@ export function normaliseRoleCall(
   };
 }
 
-/** Both repairs, in order: leaked markup first (on the original args), then role-name normalisation. */
+/**
+ * The repairs, in order: leaked markup first (on the original args), then role-name normalisation, then the tool's
+ * coercion of redundant fields (`ARG_COERCERS`).
+ */
 export function repairCall(
   call: ToolCallInput,
   delegable: readonly string[],
@@ -192,5 +268,9 @@ export function repairCall(
     schemaOf?.(call.name),
   );
   const fixed = normaliseRoleCall({ ...call, input }, delegable, hasTool);
-  return repaired.length ? { ...fixed, argsRepaired: repaired } : fixed;
+  const coerce = ARG_COERCERS[fixed.name];
+  const coerced = coerce ? coerce((fixed.input ?? {}) as Record<string, unknown>) : undefined;
+  const all = [...repaired, ...(coerced?.repaired ?? [])];
+  const out = coerced?.repaired.length ? { ...fixed, input: coerced.input } : fixed;
+  return all.length ? { ...out, argsRepaired: all } : out;
 }

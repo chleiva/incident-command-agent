@@ -103,6 +103,107 @@ describe('buildScenarioFromFlight', () => {
   });
 });
 
+describe('placement: the incident happens on the selected flight, where it is now (demo review 2)', () => {
+  // AX-ZZD: ACX125 MAN→PMI 06:40–09:25, ACX126 PMI→MAN 10:15–13:00 (ACX127/ACX128 cancelled today).
+  const at = (hhmm: string) => Date.parse(`2026-09-27T${hhmm}:00Z`);
+  const f125 = schedule.flights.find((f) => f.flight === 'ACX125')!;
+  it('fixture: the live rotation', () => {
+    expect([f125.from, f125.to, f125.tail]).toEqual(['MAN', 'PMI', 'AX-ZZD']);
+  });
+
+  it('before departure (boarding): on the selected flight at its departure station, no note', () => {
+    const t = flightTimes(f125).offBlockMs - 20 * 60_000;
+    const ctx = incidentContext(schedule, 'ACX125', t)!;
+    expect(ctx.phase).toBe('boarding');
+    expect(ctx.placement).toEqual({ kind: 'on_flight' });
+    expect(ctx.station).toBe('MAN');
+    const o = incidentTypesFor(ctx).find((x) => x.enabled)!;
+    const b = buildScenarioFromFlight(schedule, 'ACX125', o.type.id, { atMs: t });
+    expect(b.scenario.aircraft.station).toBe('MAN');
+    expect(b.scenario.aircraft.nextSectors[0]!.flight).toBe('ACX125');
+    expect(b.preview.placement).toBeUndefined();
+    expect(Date.parse(b.scenario.startSimTime)).toBeGreaterThanOrEqual(
+      Math.floor(t / 60_000) * 60_000 - 60 * 60_000,
+    );
+  });
+
+  it('taxiing: on the selected flight at that station', () => {
+    const t = flightTimes(f125).offBlockMs + 5 * 60_000;
+    const ctx = incidentContext(schedule, 'ACX125', t)!;
+    expect(ctx.phase).toBe('taxi_out');
+    expect(ctx.placement.kind).toBe('on_flight');
+    const o = incidentTypesFor(ctx).find((x) => x.enabled);
+    if (o) {
+      const b = buildScenarioFromFlight(schedule, 'ACX125', o.type.id, { atMs: t });
+      expect(b.scenario.aircraft.station).toBe('MAN');
+      expect(b.scenario.aircraft.nextSectors[0]!.flight).toBe('ACX125');
+    }
+  });
+
+  it('airborne: in the air on the selected flight', () => {
+    const t = at('07:30');
+    const ctx = incidentContext(schedule, 'ACX125', t)!;
+    expect(ctx.phase).toBe('airborne');
+    expect(ctx.placement.kind).toBe('on_flight');
+    const b = buildScenarioFromFlight(schedule, 'ACX125', 'diversion_medical', { atMs: t });
+    expect(b.scenario.airborne?.flight).toBe('ACX125');
+    expect(b.scenario.startSimTime).toBe('2026-09-27T07:30:00Z');
+  });
+
+  it('at the gate after landing: at that station, and the preview says it applies at the next turnaround', () => {
+    const t = at('09:30');
+    const ctx = incidentContext(schedule, 'ACX125', t)!;
+    expect(ctx.phase).toBe('at_gate');
+    expect(ctx.placement.kind).toBe('turnaround');
+    expect(ctx.station).toBe('PMI');
+    const b = buildScenarioFromFlight(schedule, 'ACX125', 'vehicle_strike', { atMs: t });
+    expect(b.preview.placement).toMatch(/applies at the next turnaround: ACX126 at PMI \(due 10:15Z\)/);
+    expect(b.scenario.title).toContain('ACX125 → ACX126');
+    // The sim starts when the aircraft is at the gate and the report is made (not before ACX125 is in).
+    expect(Date.parse(b.scenario.startSimTime)).toBeGreaterThanOrEqual(flightTimes(f125).inBlockMs);
+    expect(b.scenario.startSimTime).toBe('2026-09-27T09:30:00Z');
+  });
+
+  it('live case: ACX125 selected at 22:47 (long landed; AX-ZZD back at the gate at MAN after ACX126) is not placed at PMI', () => {
+    const t = at('22:47');
+    const ctx = incidentContext(schedule, 'ACX125', t)!;
+    expect(ctx.placement.kind).toBe('moved_on');
+    expect(ctx.selected.flight).toBe('ACX125');
+    expect(ctx.flight.flight).toBe('ACX126');
+    expect(ctx.station).toBe('MAN');
+    expect(ctx.placement.note).toMatch(/ACX125 landed at PMI at 09:25Z and AX-ZZD has flown on/);
+    expect(ctx.placement.note).toMatch(/at the gate at MAN after ACX126/);
+    expect(ctx.placement.note).toMatch(/no further flights today/);
+    // No flights left today: ground incident types cannot start (the old behaviour built ACX126 at PMI at 09:20Z).
+    expect(incidentTypesFor(ctx).filter((o) => o.enabled)).toEqual([]);
+    expect(() => buildScenarioFromFlight(schedule, 'ACX125', 'vehicle_strike', { atMs: t })).toThrow(
+      TemplateError,
+    );
+  });
+
+  it("moved on and now airborne: placed in the air on the aircraft's current flight", () => {
+    const t = at('11:30');
+    const ctx = incidentContext(schedule, 'ACX125', t)!;
+    expect(ctx.placement.kind).toBe('moved_on');
+    expect(ctx.flight.flight).toBe('ACX126');
+    expect(ctx.phase).toBe('airborne');
+    const o = incidentTypesFor(ctx).find((x) => x.enabled)!;
+    const b = buildScenarioFromFlight(schedule, 'ACX125', o.type.id, { atMs: t });
+    expect(b.scenario.airborne?.flight).toBe('ACX126');
+    expect(b.preview.placement).toMatch(/in the air as ACX126 to MAN/);
+  });
+
+  it('not there yet: a later flight selected while the aircraft is still on an earlier one says so', () => {
+    const t = at('07:30');
+    const ctx = incidentContext(schedule, 'ACX126', t)!;
+    expect(ctx.placement.kind).toBe('not_there_yet');
+    expect(ctx.placement.note).toMatch(/AX-ZZD is not at PMI yet \(it is in the air as ACX125 to PMI\)/);
+    const o = incidentTypesFor(ctx).find((x) => x.enabled)!;
+    const b = buildScenarioFromFlight(schedule, 'ACX126', o.type.id, { atMs: t });
+    expect(Date.parse(b.scenario.startSimTime)).toBeGreaterThanOrEqual(flightTimes(f125).inBlockMs);
+  });
+});
+
 describe('airborne types', () => {
   it('builds a valid airborne scenario for every airborne flight × applicable type', () => {
     const perType = new Map<string, number>();

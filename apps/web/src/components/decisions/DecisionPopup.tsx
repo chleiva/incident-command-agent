@@ -46,6 +46,7 @@ import { Icon } from '../ui/Icon';
 import { Badge, Button, Kbd, cx } from '../ui/primitives';
 import { urgency } from './DecisionCard';
 import { DiffEditor } from './DiffEditor';
+import { approvalPhrase } from '../../lib/announce';
 
 type Mode = 'idle' | 'editing' | 'rejecting';
 
@@ -133,7 +134,7 @@ export function DecisionPopup({
     if (!current || announced.current === current.approvalId) return;
     announced.current = current.approvalId;
     const who = current.role ? `the ${roleShortName(current.role)} agent` : 'an agent';
-    setAnnouncement(`Decision needed from ${who}: ${current.summary}. Press D to review it.`);
+    setAnnouncement(`Decision needed from ${who}: ${approvalPhrase(current)}. Press D to review it.`);
   }, [current]);
 
   // `D` focuses the card (and restores it when minimised), unless the viewer is typing.
@@ -378,7 +379,7 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
           ref={ref as Ref<HTMLButtonElement>}
           onClick={() => onMinimise(false)}
           data-popup-approval={approvalId}
-          aria-label={`Decision waiting: ${approval.summary}. Show the decision card.`}
+          aria-label={`Decision waiting: ${approvalPhrase(approval)}. Show the decision card.`}
           className="inline-flex items-center gap-2 rounded-full border border-warning/60 bg-surface-raised px-3 py-1.5 text-caption text-fg shadow-e3 outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
           {countdownOn ? (
@@ -457,7 +458,7 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
                 className="w-full truncate rounded-md border border-border px-2 py-1 text-left text-caption text-fg-muted hover:bg-surface-hover hover:text-fg"
               >
                 {q.role ? `${roleShortName(q.role)}: ` : ''}
-                {q.summary}
+                {approvalPhrase(q)}
               </button>
             </li>
           ))}
@@ -474,7 +475,7 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
         </p>
       )}
       <p id={`${id}-summary`} className="mt-1 text-body-lg text-fg">
-        <GlossaryText text={approval.summary} />
+        <GlossaryText text={approvalPhrase(approval)} />
       </p>
 
       <dl className="mt-2 grid gap-1 rounded-md bg-surface-sunken p-2 text-caption">

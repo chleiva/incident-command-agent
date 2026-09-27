@@ -65,7 +65,7 @@ export function ToolCallCard({ item, defaultOpen = false }: { item: ToolFeedItem
     item.call.tool,
     item.call.args,
     item.result ? resultData(item.result.result, item.result.resultPreview) : undefined,
-    { minute: item.minute, failed: !!failed },
+    { minute: item.minute, failed: !!failed, error: failed ? item.result?.resultPreview : undefined },
   );
 
   return (

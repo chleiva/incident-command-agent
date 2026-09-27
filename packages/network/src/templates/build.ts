@@ -22,7 +22,7 @@ import { crewFor } from '../network';
 import type { DaySchedule, NetworkFlight } from '../schedule';
 import { NETWORK_STATIONS, stationByIata } from '../stations';
 import { arrivalFor, incidentContext, incidentTypesFor, type FlightIncidentContext } from './context';
-import { flightStateAt, isAirborne } from '../state';
+import { flightStateAt, flightTimes, isAirborne } from '../state';
 import { incidentTypeById, type IncidentType } from './incidentTypes';
 import { templateScenario } from './library';
 import { createRemapper, dedupeStringArrays, type RemapSpec } from './remap';
@@ -42,8 +42,11 @@ export interface BuiltScenario {
   context: FlightIncidentContext;
   /** Apply the same remapping to anything recorded against the template (mock-mode recordings). */
   remap: <T>(v: T) => T;
-  /** One-line preview for the report dialog. */
-  preview: { trigger: string; facts: string[]; twists: string[] };
+  /**
+   * One-line preview for the report dialog. `placement` (demo review 2): where the incident happens when that is not
+   * simply "on the selected flight, where it is now" (e.g. "This incident type applies at the next turnaround…").
+   */
+  preview: { trigger: string; facts: string[]; twists: string[]; placement?: string };
 }
 
 export class TemplateError extends Error {
@@ -208,12 +211,15 @@ export function buildScenarioFromFlight(
   typeId: string,
   opts: BuildOptions = {},
 ): BuiltScenario {
-  const flight = schedule.flights.find((f) => f.flight === flightId);
-  if (!flight)
+  const selected = schedule.flights.find((f) => f.flight === flightId);
+  if (!selected)
     throw new TemplateError(`flight ${flightId} is not in the ${schedule.date} schedule`, 'flight_not_found');
   const type = incidentTypeById(typeId);
   if (!type) throw new TemplateError(`unknown incident type '${typeId}'`, 'unknown_type');
-  const ctx = incidentContext(schedule, flightId, opts.atMs ?? flight.stdMs)!;
+  const ctx = incidentContext(schedule, flightId, opts.atMs ?? selected.stdMs)!;
+  // The flight the incident is anchored on: the selected one, or the aircraft's current flight when the selected
+  // flight is long over and the aircraft has flown on (`ctx.placement`, said explicitly in the preview).
+  const flight = ctx.flight;
   if (!opts.force) {
     const option = incidentTypesFor(ctx).find((o) => o.type.id === type.id);
     if (!option)
@@ -341,11 +347,20 @@ export function buildScenarioFromFlight(
     if (cr.id.includes(`-${tDigits}-`))
       tokens[cr.id] = cr.id.replace(`-${tDigits}-`, `-${digits(first.flight)}-`);
 
-  // ---- time: keep the template's lead time between sim start and the first affected departure
+  // ---- time: keep the template's lead time between sim start and the first affected departure, but the incident
+  // happens where the aircraft is: never before it is at the gate (the inbound leg's in-block), and not before the
+  // report when the aircraft is already there (at most 5 min before the departure, so the template still works).
   const lead = air ? 0 : Date.parse(T.aircraft.nextSectors[0]!.std) - Date.parse(T.startSimTime);
-  const startMs = air
-    ? Math.floor(ctx.atMs / 60_000) * 60_000
-    : Math.floor((first.stdMs - lead) / 60_000) * 60_000;
+  const floorMin = (ms: number) => Math.floor(ms / 60_000) * 60_000;
+  let startMs = air ? floorMin(ctx.atMs) : floorMin(first.stdMs - lead);
+  if (!air) {
+    const latest = floorMin(first.stdMs - 5 * 60_000);
+    if (ctx.placement.kind !== 'not_there_yet')
+      startMs = Math.max(startMs, Math.min(floorMin(ctx.atMs), latest));
+    const inbound = ctx.dayLegs.filter((l) => l.stdMs < first.stdMs).at(-1);
+    if (inbound && inbound.to === S)
+      startMs = Math.max(startMs, Math.ceil(flightTimes(inbound).inBlockMs / 60_000) * 60_000);
+  }
   const spec: RemapSpec = { tokens, idCodes, shiftMs: startMs - Date.parse(T.startSimTime) };
   const remapper = createRemapper(spec);
   const R = remapper.value(T);
@@ -406,7 +421,10 @@ export function buildScenarioFromFlight(
   const scenario: Scenario = {
     schemaVersion: 1,
     id: `fc-${schedule.date}-${flightId.toLowerCase()}-${type.id.replace(/_/g, '-')}`.slice(0, 64),
-    title: `${type.label}: ${first.flight} at ${S}`,
+    title:
+      ctx.placement.kind === 'turnaround' && ctx.selected.flight !== first.flight
+        ? `${type.label}: ${S} turnaround, ${ctx.selected.flight} → ${first.flight}`
+        : `${type.label}: ${first.flight} at ${S}`,
     narrative: `${narrative} Built from Accent Air's live network (fictional day schedule, ${schedule.date}).`,
     visibility: 'private',
     inspiredBy: t0.inspiredBy,
@@ -466,6 +484,7 @@ export function buildScenarioFromFlight(
         `Engineers: ${scenario.world.engineers.filter((e) => e.station === S).length} on station, ${scenario.world.engineers.filter((e) => e.station !== S).length} elsewhere`,
       ],
       twists: scenario.twists.map((t) => t.title),
+      ...(ctx.placement.note ? { placement: ctx.placement.note } : {}),
     },
   };
 }

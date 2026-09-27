@@ -427,6 +427,13 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
         const data = resultData(e.payload.result, e.payload.resultPreview);
         if (!e.payload.ok) {
           row.failed = true;
+          // What went wrong, in plain words (never the in-flight "Paged …" wording for a failed call).
+          if (row.call)
+            row.headline = headline(row.call.tool, row.call.args, data, {
+              minute: row.minute,
+              failed: true,
+              error: e.payload.resultPreview,
+            });
           if (isRecordingFailure(e.payload.resultPreview) && row.call)
             row.headline = fitHeadline(`Not recorded (system error): ${toolLabel(row.call.tool)}`);
           if (row.call?.tool === 'report' && !rowByKey.has(row.key)) {

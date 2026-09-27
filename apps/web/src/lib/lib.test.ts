@@ -112,7 +112,7 @@ describe('narrator', () => {
     )!;
     expect(captionFor(page)).toBe('Engineer paged — ETA 9 min');
     const blocked = S01.agent.find((e) => e.type === 'guardrail.blocked')!;
-    expect(captionFor(blocked)).toMatch(/^Blocked — Defer defect is reserved for humans/);
+    expect(captionFor(blocked)).toBe('Blocked — only a person may defer a defect; nothing changed');
     expect(latestCaption(S01.agent)?.text).toBe('Run complete');
   });
 });

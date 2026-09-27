@@ -10,6 +10,7 @@ import { CommandPalette, type PaletteCommand } from '../components/presenter/Com
 import { Skeleton } from '../components/ui/primitives';
 import type { Services } from '../lib/config';
 import { AUTO_APPROVE_PALETTE_LABEL } from '../lib/autoApprove';
+import { PACE_FAST, PACE_SLOW, PRESENTER_PACE_LABEL } from '../lib/presenterPace';
 import { usePalette } from '../store/palette';
 import { useUi } from '../store/ui';
 import { ServicesProvider } from './services';
@@ -75,6 +76,7 @@ function GlobalPalette() {
   const theme = useUi((s) => s.theme);
   const plain = useUi((s) => s.plainLanguage);
   const autoApprove = useUi((s) => s.autoApprove);
+  const presenterPace = useUi((s) => s.presenterPace);
   const navigate = useNavigate();
   const openRunId = useUi((s) => s.openRunId);
 
@@ -167,6 +169,25 @@ function GlobalPalette() {
           body: on
             ? 'Decisions approve themselves after 10 s unless you look at them.'
             : 'Decision cards now wait for you.',
+        });
+      },
+    },
+    {
+      // Presenter pace: new runs start at 15× and slow to 6× at the first decision card (default OFF, per viewer).
+      id: 'presenter-pace',
+      group: 'Presenter',
+      label: `${PRESENTER_PACE_LABEL}: ${presenterPace ? 'on' : 'off'}`,
+      icon: 'clock',
+      keywords: ['presenter', 'pace', 'speed', 'fast', 'demo', 'decision', '15', '6'],
+      run: () => {
+        const on = !useUi.getState().presenterPace;
+        useUi.getState().setPresenterPace(on);
+        useUi.getState().pushToast({
+          tone: 'info',
+          title: on ? 'Presenter pace on' : 'Presenter pace off',
+          body: on
+            ? `New runs start at ${PACE_FAST}× and slow to ${PACE_SLOW}× when the first decision appears.`
+            : 'New runs start at the speed you choose.',
         });
       },
     },

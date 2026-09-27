@@ -123,7 +123,11 @@ export function llmSummary(e: AuditLlmEntry): string {
 }
 
 export function toolSummary(e: AuditToolEntry): string {
-  return headline(e.tool, e.args, e.result, { minute: e.simMinute, failed: e.ok === false });
+  return headline(e.tool, e.args, e.result, {
+    minute: e.simMinute,
+    failed: e.ok === false,
+    ...(e.ok === false && (e.error ?? e.resultPreview) ? { error: e.error ?? e.resultPreview } : {}),
+  });
 }
 
 export function entrySummary(e: AuditEntry): string {

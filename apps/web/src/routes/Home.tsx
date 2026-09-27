@@ -115,7 +115,7 @@ export default function Home() {
                   incidentType: r.incidentType,
                   ...(r.text ? { text: r.text } : {}),
                 },
-                { withBaseline: r.withBaseline, speed: r.speed },
+                { withBaseline: r.withBaseline, speed: r.speed, presenterPace: r.presenterPace },
               )
             }
           />

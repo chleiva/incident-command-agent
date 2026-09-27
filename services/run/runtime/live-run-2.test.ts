@@ -313,7 +313,7 @@ describe('live run 2, bug D: free-text length caps and leniency', () => {
     expect(blocked.payload.reason).toMatch(/allowed values/);
   });
 
-  it('lenientArgs: structured strings (ids, patterns, short caps) are never truncated', () => {
+  it('lenientArgs: structured strings (ids, patterns) are never truncated; short free-text caps are (demo review 2)', () => {
     const tool = {
       inputSchema: {
         type: 'object',
@@ -326,7 +326,10 @@ describe('live run 2, bug D: free-text length caps and leniency', () => {
       },
     };
     expect(lenientArgs(tool, { id: 'a'.repeat(60) })).toBeNull();
-    expect(lenientArgs(tool, { code: 'b'.repeat(30) })).toBeNull();
+    // A short cap without pattern/enum/format is free text too: truncated with a bare ellipsis.
+    const code = lenientArgs(tool, { code: 'b'.repeat(30) })!;
+    expect(code.truncated).toEqual(['/code']);
+    expect(code.args.code).toBe(`${'b'.repeat(19)}…`);
     expect(lenientArgs(tool, { note: 'ok' })).toBeNull();
     const r = lenientArgs(tool, { note: 'n'.repeat(300), code: 'c' })!;
     expect(r.truncated).toEqual(['/note']);

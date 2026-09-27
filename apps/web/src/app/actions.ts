@@ -14,6 +14,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiRequestError, type ApiClient } from '../lib/api';
 import { downloadBlob } from '../lib/evidencePdf';
+import { markManualSpeed, startSpeed, usePace } from '../lib/presenterPace';
 import { useUi } from '../store/ui';
 import { useServices } from './services';
 
@@ -63,19 +64,26 @@ export function useRunActions() {
   const navigate = useNavigate();
   return useMemo(() => {
     const toast = useUi.getState().pushToast;
-    const start = async (scenarioId: string, opts: { withBaseline: boolean; speed: number }) => {
+    const start = async (
+      scenarioId: string,
+      opts: { withBaseline: boolean; speed: number; presenterPace?: boolean },
+    ) => {
       useUi.getState().markTriggered();
+      // Presenter pace: start at 15×; the decision popup slows the run to 6× at the first decision.
+      const pace = opts.presenterPace ?? useUi.getState().presenterPace;
+      const speed = startSpeed(opts.speed, pace);
       try {
         let baselineId: string | undefined;
         if (opts.withBaseline) {
-          baselineId = (await api.createRun({ scenarioId, mode: 'baseline', speed: opts.speed })).runId;
+          baselineId = (await api.createRun({ scenarioId, mode: 'baseline', speed })).runId;
         }
         const { runId } = await api.createRun({
           scenarioId,
           mode: 'agent',
-          speed: opts.speed,
+          speed,
           ...(baselineId ? { pairedRunId: baselineId } : {}),
         });
+        if (pace) usePace.getState().arm(runId);
         if (baselineId) useUi.getState().setPair(runId, baselineId);
         navigate(`/runs/${encodeURIComponent(runId)}`);
         return runId;
@@ -92,16 +100,18 @@ export function useRunActions() {
      */
     const startFromFlight = async (
       report: Pick<CreateRunRequest, 'flightContext' | 'incidentType' | 'text'>,
-      opts: { withBaseline: boolean; speed: number },
+      opts: { withBaseline: boolean; speed: number; presenterPace?: boolean },
     ) => {
       useUi.getState().markTriggered();
+      const pace = opts.presenterPace ?? useUi.getState().presenterPace;
       try {
         const res: CreateRunResponse = await api.createRun({
           ...report,
           mode: 'agent',
-          speed: opts.speed,
+          speed: startSpeed(opts.speed, pace),
           ...(opts.withBaseline ? { withBaseline: true } : {}),
         });
+        if (pace) usePace.getState().arm(res.runId);
         if (res.pairedRunId) useUi.getState().setPair(res.runId, res.pairedRunId);
         if (res.screening?.verdict === 'neutralised')
           toast({ tone: 'info', title: 'Details neutralised by screening before reaching the agents.' });
@@ -117,7 +127,9 @@ export function useRunActions() {
       startFromFlight,
       decide: (runId: string, approvalId: string, req: ApprovalDecisionRequest) =>
         decideOptimistically(api, runId, approvalId, req),
-      control: async (runId: string, req: ControlRequest) => {
+      /** `auto`: presenter pace's own speed change (a manual one stops the pacing of that run). */
+      control: async (runId: string, req: ControlRequest, opts: { auto?: boolean } = {}) => {
+        if (req.action === 'set_speed' && !opts.auto) markManualSpeed(runId);
         try {
           await api.control(runId, req);
         } catch (e) {

@@ -138,6 +138,18 @@ export const delegateTool: RuntimeToolDefinition = {
   },
 };
 
+/** DecisionOption for the model: `recommended` and `metrics.constraints` optional (derived / defaulted). */
+function relaxedOptionSchema(): JSONSchema {
+  const s = JSON.parse(JSON.stringify(DecisionOptionSchema)) as {
+    required?: string[];
+    properties?: { metrics?: { required?: string[] } };
+  };
+  s.required = (s.required ?? []).filter((k) => k !== 'recommended');
+  const m = s.properties?.metrics;
+  if (m) m.required = (m.required ?? []).filter((k) => k !== 'constraints');
+  return s as unknown as JSONSchema;
+}
+
 export const requestDecisionTool: RuntimeToolDefinition = {
   name: 'request_decision',
   description:
@@ -145,7 +157,9 @@ export const requestDecisionTool: RuntimeToolDefinition = {
   inputSchema: {
     type: 'object',
     additionalProperties: false,
-    required: ['question', 'options', 'recommendedOptionId'],
+    // The recommendation may be given either way (top-level id or per-option flag) or not at all; the loop derives
+    // one from the other before validation (call-repair.ts `coerceDecisionArgs`).
+    required: ['question', 'options'],
     properties: {
       question: { type: 'string', minLength: 1, maxLength: 1000 },
       unresolvedChecks: {
@@ -158,7 +172,7 @@ export const requestDecisionTool: RuntimeToolDefinition = {
         type: 'array',
         minItems: 2,
         maxItems: 5,
-        items: JSON.parse(JSON.stringify(DecisionOptionSchema)) as JSONSchema,
+        items: relaxedOptionSchema(),
       },
       recommendedOptionId: { type: 'string', minLength: 1 },
     },
@@ -178,7 +192,9 @@ export const requestDecisionTool: RuntimeToolDefinition = {
   async run(input, site, extra) {
     const options = (input.options as { id: string; label: string }[]) ?? [];
     const d = extra.decision;
-    const selected = d?.selectedOptionId ?? String(input.recommendedOptionId);
+    const selected =
+      d?.selectedOptionId ??
+      (typeof input.recommendedOptionId === 'string' ? input.recommendedOptionId : options[0]?.id);
     const opt = options.find((o) => o.id === selected);
     if (!opt) return { ok: false, error: `selected option '${selected}' is not one of the options` };
     const who =

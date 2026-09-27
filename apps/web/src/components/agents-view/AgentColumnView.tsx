@@ -26,6 +26,7 @@ import { Icon } from '../ui/Icon';
 import { StateFrame, type LoadStatus } from '../ui/primitives';
 import { AgentRowView } from './AgentRowView';
 import { ColumnHeader } from './ColumnHeader';
+import { plainText } from '../../lib/announce';
 
 /** Lists longer than this render only the rows in view (plus overscan). */
 export const VIRTUALIZE_AFTER = 40;
@@ -125,7 +126,7 @@ export const AgentColumnView = forwardRef<ColumnHandle, AgentColumnViewProps>(fu
     if (stick.current) scrollToEnd();
     else setBehind((b) => b + added);
     const newest = rows.at(-1);
-    if (announce && newest) setLiveText(`${roleName(role)}: ${newest.headline}`);
+    if (announce && newest) setLiveText(plainText(`${roleName(role)}: ${newest.headline}`));
   }, [rows, announce, role, scrollToEnd]);
 
   useEffect(() => {

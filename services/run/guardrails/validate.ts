@@ -109,8 +109,9 @@ export function validateToolArgs(tool: Pick<ToolDefinition, 'inputSchema'>, args
 
 /** Appended to a free-text value the runtime truncated at its schema cap. */
 export const TRUNCATION_SUFFIX = ' …[truncated]';
-/** Below this cap a string is treated as structured (ids, codes, titles), never truncated. */
-export const FREE_TEXT_MIN_CAP = 100;
+/** Below this cap the truncation marker is the bare ellipsis (the full suffix would not fit). */
+export const SHORT_TRUNCATION_SUFFIX = '…';
+const FULL_SUFFIX_MIN_CAP = 40;
 
 export interface LenientArgs {
   args: Record<string, unknown>;
@@ -132,12 +133,16 @@ function schemaAt(schema: unknown, schemaPath: string): Record<string, unknown> 
   return cur && typeof cur === 'object' ? (cur as Record<string, unknown>) : undefined;
 }
 
-function isFreeText(node: Record<string, unknown> | undefined): boolean {
+/**
+ * Free text = a string field with a length cap and no pattern / enum / const / format (demo review 2: whatever the
+ * cap; ids, codes and request ids all carry a pattern, so they are never truncated).
+ */
+export function isFreeText(node: Record<string, unknown> | undefined): boolean {
   return (
     !!node &&
     node.type === 'string' &&
     typeof node.maxLength === 'number' &&
-    node.maxLength >= FREE_TEXT_MIN_CAP &&
+    node.maxLength > 0 &&
     node.pattern === undefined &&
     node.enum === undefined &&
     node.const === undefined &&
@@ -157,12 +162,13 @@ function setPointer(obj: unknown, pointer: string, value: unknown): void {
 
 /** Cut `text` so that it plus the suffix fits in `cap`. */
 export function truncateAtCap(text: string, cap: number): string {
-  return `${text.slice(0, Math.max(0, cap - TRUNCATION_SUFFIX.length)).trimEnd()}${TRUNCATION_SUFFIX}`;
+  const suffix = cap >= FULL_SUFFIX_MIN_CAP ? TRUNCATION_SUFFIX : SHORT_TRUNCATION_SUFFIX;
+  return `${text.slice(0, Math.max(0, cap - suffix.length)).trimEnd()}${suffix}`;
 }
 
 /**
- * Length leniency: when the ONLY validation errors are `maxLength` on free-text string fields (type string, cap ≥
- * 100, no pattern/enum/format), return the args with those values truncated at the cap (or, for the tool's
+ * Length leniency: when the ONLY validation errors are `maxLength` on free-text string fields (`isFreeText`: type
+ * string, any cap, no pattern/enum/const/format), return the args with those values truncated at the cap (or, for the tool's
  * `splitOverlong` fields, passed through uncut) instead of rejecting the call. Returns null when the args are valid
  * or when any other error remains (the call is then rejected as before).
  */

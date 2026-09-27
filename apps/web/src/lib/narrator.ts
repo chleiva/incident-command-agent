@@ -7,9 +7,16 @@
  * No LLM. Returns null for events that do not deserve a caption.
  */
 import type { Engineer, PassengerMessage, RunEvent, SwapDecision } from '@ica/schema/browser';
-import { ROLE_LABEL, humaniseTool } from './format';
+import { approvalPhrase, blockedPhrase, plainText } from './announce';
+import { ROLE_LABEL } from './format';
 
+/** Every caption is plain words (no tool names, no JSON): see lib/announce.ts. */
 export function captionFor(e: RunEvent): string | null {
+  const text = rawCaption(e);
+  return text === null ? null : plainText(text) || null;
+}
+
+function rawCaption(e: RunEvent): string | null {
   switch (e.type) {
     case 'run.started':
       return 'World clock started';
@@ -22,7 +29,7 @@ export function captionFor(e: RunEvent): string | null {
     case 'world.twist':
       return `Twist — ${e.payload.title}`;
     case 'agent.proposal':
-      return `Decision needed — ${e.payload.summary}`;
+      return `Decision needed — ${approvalPhrase(e.payload)}`;
     case 'approval.decision': {
       if (e.payload.decidedBy.kind === 'policy' && e.payload.decidedBy.policy === 'simulation-auto')
         return 'Auto-approved (simulation) — no one decided in time';
@@ -36,7 +43,7 @@ export function captionFor(e: RunEvent): string | null {
       return `${who} ${verb} the proposal`;
     }
     case 'guardrail.blocked':
-      return `Blocked — ${e.payload.tool ? humaniseTool(e.payload.tool) : 'an action'} is reserved for humans; nothing changed`;
+      return blockedPhrase(e.payload.tool, e.payload.layer);
     case 'system.mutation': {
       const p = e.payload;
       if (p.system === 'engineers' && p.entity === 'engineers') {

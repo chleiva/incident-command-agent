@@ -5,6 +5,7 @@
 import { flightStateAt, generateDaySchedule, isAirborne, type DaySchedule } from '@ica/network';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useNetworkClock } from '../../lib/networkClock';
+import { useUi } from '../../store/ui';
 import { Frame } from '../../stories/support';
 import { FlightList } from './FlightList';
 import { FlightPanel } from './FlightPanel';
@@ -145,6 +146,44 @@ export const ReportDialogAirborne: Story = {
   render: () => {
     const t = at('12:00');
     const f = schedule.flights.find((x) => isAirborne(flightStateAt(x, t).phase))!;
+    return (
+      <ReportIncidentDialog
+        open
+        onOpenChange={() => {}}
+        schedule={schedule}
+        flight={f}
+        t={t}
+        onStart={async () => null}
+      />
+    );
+  },
+};
+
+/** Demo review 2: a landed flight's incident happens at its turnaround, and the dialog says so. */
+export const ReportDialogTurnaround: Story = {
+  name: 'Report incident · at the gate after landing (turnaround note)',
+  render: () => (
+    <ReportIncidentDialog
+      open
+      onOpenChange={() => {}}
+      schedule={schedule}
+      flight={schedule.flights.find((x) => x.flight === 'ACX125')!}
+      t={at('09:30')}
+      onStart={async () => null}
+    />
+  ),
+};
+
+/** Demo review 2: "Presenter pace" on — 15× until the first decision, then 6× (mirrors the ⌘K toggle). */
+export const ReportDialogPresenterPace: Story = {
+  name: 'Report incident · presenter pace on',
+  beforeEach: () => {
+    useUi.setState({ presenterPace: true });
+    return () => useUi.setState({ presenterPace: false });
+  },
+  render: () => {
+    const t = at('12:00');
+    const f = schedule.flights.find((x) => flightStateAt(x, t).phase === 'boarding') ?? schedule.flights[0]!;
     return (
       <ReportIncidentDialog
         open
