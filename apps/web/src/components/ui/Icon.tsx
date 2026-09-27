@@ -41,6 +41,13 @@ const PATHS = {
   edit: 'M10.5 2.5l3 3-7.5 7.5H3v-3z',
   file: 'M4 2h5.5L12 4.5V14H4zM9 2v3h3',
   dot: 'M8 8m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0',
+  thought: 'M4.5 10.5a3 3 0 0 1 .4-6 3.5 3.5 0 0 1 6.4.6 2.7 2.7 0 0 1-.3 5.4zM5 12.5h.1M3.5 14h.1',
+  hourglass: 'M4.5 2.5h7M4.5 13.5h7M5 2.5c0 3.2 6 3 6 5.5s-6 2.3-6 5.5M11 2.5c0 3.2-6 3-6 5.5s6 2.3 6 5.5',
+  decision:
+    'M6.5 7a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4zM2.5 13c.4-2.2 2-3.5 4-3.5 1 0 1.9.3 2.6.9M9.5 12l1.5 1.5 3-3.5',
+  arrowRight: 'M3 8h10M9 4l4 4-4 4',
+  arrowLeft: 'M13 8H3M7 4 3 8l4 4',
+  undo: 'M5.5 3.5 2.5 6.5l3 3M2.5 6.5h6.5a3.5 3.5 0 0 1 0 7H7',
 } as const;
 
 export type IconName = keyof typeof PATHS;

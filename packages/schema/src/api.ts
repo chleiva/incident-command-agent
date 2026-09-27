@@ -94,6 +94,8 @@ export const BrandPackSchema = Type.Object({
   consultancyName: Opt(Str),
   stations: Type.Array(Str),
   disclaimer: Str,
+  /** Addition (task 08, owner request): the About dialog's credit and repository link. */
+  about: Opt(Type.Object({ author: Str, authorUrl: Str, repoUrl: Opt(Str) })),
 });
 export type BrandPack = Static<typeof BrandPackSchema>;
 

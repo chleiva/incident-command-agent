@@ -20,6 +20,8 @@ export function Zone({
   className,
   bodyClassName,
   expandable = true,
+  onExpand,
+  expandLabel,
 }: {
   id: string;
   title: string;
@@ -29,6 +31,9 @@ export function Zone({
   className?: string;
   bodyClassName?: string;
   expandable?: boolean;
+  /** Replaces full screen: the expand action opens another view (Agent activity → the Agents view). */
+  onExpand?: () => void;
+  expandLabel?: string;
 }) {
   const expanded = useUi((s) => s.expandedZone === id);
   const setExpanded = useUi((s) => s.setExpandedZone);
@@ -70,7 +75,19 @@ export function Zone({
         )}
         <div className="ml-auto flex items-center gap-1">
           {actions}
-          {expandable && (
+          {expandable && onExpand && (
+            <button
+              type="button"
+              onClick={onExpand}
+              aria-label={expandLabel ?? `Expand (${title})`}
+              title={expandLabel ?? `Expand (${title})`}
+              data-zone-expand={id}
+              className="inline-flex h-6 w-6 items-center justify-center rounded-sm text-fg-subtle hover:bg-surface-hover hover:text-fg"
+            >
+              <Icon name="expand" size={13} />
+            </button>
+          )}
+          {expandable && !onExpand && (
             <button
               type="button"
               onClick={() => setExpanded(expanded ? null : id)}

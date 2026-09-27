@@ -55,7 +55,7 @@ export function PhoneMock({
               >
                 {message.body}
               </p>
-              <span className="num text-micro text-fg-subtle">
+              <span className="num text-micro text-fg-muted">
                 {message.channel.toUpperCase()} {sentAt ? `· ${sentAt}` : ''}
               </span>
             </motion.div>

@@ -17,6 +17,7 @@ import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
 import { useLiveMinute } from '../app/useLiveMinute';
 import { useRun, useRunConnection, useRunStoreInstance } from '../app/useRunConnection';
+import { useSharedRunStore } from '../store/sharedRuns';
 import { AgentStream } from '../components/agents/AgentStream';
 import { DecisionQueue } from '../components/decisions/DecisionQueue';
 import { AirworthinessPanel } from '../components/ground/AirworthinessPanel';
@@ -70,9 +71,18 @@ export default function Cockpit() {
   const { api, app } = services;
   const actions = useRunActions();
   const navigate = useNavigate();
-  const primary = useRunStoreInstance();
+  // Shared with the Agents view: the same scrubber and history mode on both (task 08).
+  const primary = useSharedRunStore(runId);
   const baseline = useRunStoreInstance();
   useRunConnection(primary, runId);
+  const setOpenRunId = useUi((s) => s.setOpenRunId);
+  useEffect(() => setOpenRunId(runId), [runId, setOpenRunId]);
+  // `#zone-decisions` (the Agents view's "Decide in the decision rail") focuses the decision rail.
+  useEffect(() => {
+    if (window.location.hash !== '#zone-decisions') return;
+    const t = setTimeout(() => document.getElementById('zone-decisions')?.focus(), 50);
+    return () => clearTimeout(t);
+  }, [runId]);
 
   const view = useRun(primary, (s) => s.view);
   const head = useRun(primary, (s) => s.head);
@@ -665,6 +675,8 @@ export default function Cockpit() {
             title="Agent activity"
             question="What are the agents doing?"
             className="min-h-64 flex-1 xl:min-h-0"
+            onExpand={() => navigate(`/runs/${encodeURIComponent(runId)}/agents`)}
+            expandLabel="Open the Agents view"
           >
             <AgentStream items={feed} roleStates={roleStates} status={zoneStatus} error={loadError} />
           </Zone>

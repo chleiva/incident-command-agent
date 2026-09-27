@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** Top bar (brand, navigation, run status slot, the always-visible "simulated systems" badge) and global layers. */
+import * as Tooltip from '@radix-ui/react-tooltip';
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useMatch } from 'react-router-dom';
+import { AboutDialog } from '../components/about/AboutDialog';
 import { Icon } from '../components/ui/Icon';
 import { IconButton, Kbd, SimulatedBadge, cx } from '../components/ui/primitives';
 import { LiveAnnouncer, Toasts } from '../components/ui/Toasts';
@@ -38,6 +40,12 @@ export function AppShell({
   const theme = useUi((s) => s.theme);
   const setTheme = useUi((s) => s.setTheme);
   const setPalette = useUi((s) => s.setPaletteOpen);
+  const aboutOpen = useUi((s) => s.aboutOpen);
+  const setAboutOpen = useUi((s) => s.setAboutOpen);
+  // The run currently open: the one in the URL, else the last one opened in this session.
+  const runMatch = useMatch('/runs/:runId/*');
+  const openRunId = useUi((s) => s.openRunId);
+  const agentsRunId = runMatch?.params.runId ?? openRunId;
   const nav = ({ isActive }: { isActive: boolean }) =>
     cx(
       'rounded-md px-2 py-1 text-body',
@@ -62,6 +70,38 @@ export function AppShell({
           <NavLink to="/" end className={nav}>
             Network
           </NavLink>
+          {agentsRunId ? (
+            <NavLink to={`/runs/${encodeURIComponent(agentsRunId)}/agents`} className={nav}>
+              Agents
+            </NavLink>
+          ) : (
+            <Tooltip.Provider delayDuration={200}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <span
+                    role="link"
+                    aria-disabled="true"
+                    tabIndex={0}
+                    aria-describedby="nav-agents-hint"
+                    data-nav-agents-disabled
+                    className="cursor-not-allowed rounded-md px-2 py-1 text-body text-fg-subtle"
+                  >
+                    Agents
+                  </span>
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content
+                    side="bottom"
+                    sideOffset={4}
+                    className="z-[80] rounded-md border border-border bg-surface-raised px-2 py-1 text-caption text-fg shadow-e2"
+                  >
+                    Open an incident first
+                    <Tooltip.Arrow className="fill-surface-raised" />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
+            </Tooltip.Provider>
+          )}
           <NavLink to="/training" className={nav}>
             Training scenarios
           </NavLink>
@@ -69,6 +109,11 @@ export function AppShell({
             Evals
           </NavLink>
         </nav>
+        {!agentsRunId && (
+          <span id="nav-agents-hint" className="sr-only">
+            Open an incident first
+          </span>
+        )}
         <div className="flex min-w-0 flex-1 items-center justify-center gap-3">{center}</div>
         {right}
         <SimulatedBadge text={simulatedLabel(app.brand.disclaimer)} />
@@ -94,6 +139,14 @@ export function AppShell({
           label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         />
+        <button
+          type="button"
+          onClick={() => setAboutOpen(true)}
+          className="h-7 rounded-md px-2 text-caption text-fg-subtle hover:bg-surface-hover hover:text-fg"
+          data-testid="about-button"
+        >
+          About
+        </button>
         {auth.mode === 'cognito' && (
           <IconButton
             icon="user"
@@ -107,6 +160,7 @@ export function AppShell({
       </main>
       <Toasts />
       <LiveAnnouncer />
+      <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} brand={app.brand} />
     </div>
   );
 }

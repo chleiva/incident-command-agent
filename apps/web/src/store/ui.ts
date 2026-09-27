@@ -39,6 +39,11 @@ interface UiState {
   firstEventMs: number | null;
   /** Paired baseline runs started from the cockpit (agent run → baseline run). */
   pairs: Record<string, string>;
+  /** The run currently open (dashboard or Agents view): the "Agents" nav item opens its Agents view. */
+  openRunId: string | null;
+  /** Agents view (task 08): hide thought rows. Persisted per viewer. */
+  hideThoughts: boolean;
+  aboutOpen: boolean;
   setTheme(t: Theme): void;
   toggleCaptions(): void;
   setPlainLanguage(on: boolean): void;
@@ -53,11 +58,16 @@ interface UiState {
   markTriggered(): void;
   markFirstEvent(): void;
   setPair(agentRunId: string, baselineRunId: string): void;
+  setOpenRunId(runId: string | null): void;
+  setHideThoughts(on: boolean): void;
+  setAboutOpen(open: boolean): void;
 }
 
 const THEME_KEY = 'ica.theme';
 const CAPTIONS_KEY = 'ica.captions';
 export const PLAIN_LANGUAGE_KEY = 'ica.plainLanguage';
+export const HIDE_THOUGHTS_KEY = 'ica.agents.hideThoughts';
+const OPEN_RUN_KEY = 'ica.openRun';
 
 function read(key: string): string | null {
   try {
@@ -71,6 +81,21 @@ function write(key: string, value: string): void {
     window.localStorage.setItem(key, value);
   } catch {
     /* private mode: ignore */
+  }
+}
+function readSession(key: string): string | null {
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function writeSession(key: string, value: string | null): void {
+  try {
+    if (value === null) window.sessionStorage.removeItem(key);
+    else window.sessionStorage.setItem(key, value);
+  } catch {
+    /* storage blocked: the open run is simply not remembered across reloads */
   }
 }
 
@@ -93,6 +118,9 @@ export const useUi = create<UiState>()((set, get) => ({
   triggeredAt: null,
   firstEventMs: null,
   pairs: {},
+  openRunId: readSession(OPEN_RUN_KEY),
+  hideThoughts: read(HIDE_THOUGHTS_KEY) === 'on',
+  aboutOpen: false,
   setTheme(theme) {
     write(THEME_KEY, theme);
     applyTheme(theme);
@@ -147,5 +175,17 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   setPair(agentRunId, baselineRunId) {
     set({ pairs: { ...get().pairs, [agentRunId]: baselineRunId } });
+  },
+  setOpenRunId(openRunId) {
+    if (openRunId === get().openRunId) return;
+    writeSession(OPEN_RUN_KEY, openRunId);
+    set({ openRunId });
+  },
+  setAboutOpen(aboutOpen) {
+    set({ aboutOpen });
+  },
+  setHideThoughts(hideThoughts) {
+    write(HIDE_THOUGHTS_KEY, hideThoughts ? 'on' : 'off');
+    set({ hideThoughts });
   },
 }));

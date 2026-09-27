@@ -35,6 +35,7 @@ import {
 import { DEFAULT_APP_CONFIG } from '../lib/brand';
 import type { SocketLike, Transport } from '../lib/transport';
 import { MOCK_EVAL_REPORT } from './evalReport';
+import { SHOWCASE_RUN_ID, buildAgentsShowcase } from './agentsShowcase';
 import { RECORDINGS, recordingFor, type Recording } from './recordings';
 
 export const MOCK_API_URL = 'mock://api';
@@ -83,6 +84,8 @@ export interface MockBackendOptions {
   timeScale?: number;
   now?: () => number;
   recordings?: Recording[];
+  /** Seed the Agents-view showcase run (default true). */
+  showcase?: boolean;
 }
 
 const json = (status: number, body: unknown) =>
@@ -191,6 +194,12 @@ export class MockBackend {
       const baseId = rec.baseline[0]!.runId;
       this.seedCompleted(rec, rec.agent, agentId, 'agent', baseId);
       this.seedCompleted(rec, rec.baseline, baseId, 'baseline', agentId);
+    }
+    // Task 08: the Agents-view showcase (every row type), paired with the s01 baseline.
+    const s01 = this.recordings.find((r) => r.scenario.id === 's01-pushback-tug-contact');
+    if (s01 && opts.showcase !== false) {
+      const events = buildAgentsShowcase(s01.agent);
+      this.seedCompleted({ ...s01, agent: events }, events, SHOWCASE_RUN_ID, 'agent', s01.baseline[0]!.runId);
     }
   }
 

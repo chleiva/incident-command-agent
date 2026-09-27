@@ -4,7 +4,8 @@
  */
 /** Role avatar (initials). All agents share the AI accent; only activity lights it up. */
 import type { AgentRole } from '@ica/schema/browser';
-import { ROLE_INITIALS, ROLE_LABEL } from '../../lib/format';
+import { roleName } from '../../agents/roles';
+import { ROLE_INITIALS } from '../../lib/format';
 import { cx } from '../ui/primitives';
 
 export function AgentMark({
@@ -12,13 +13,16 @@ export function AgentMark({
   size = 24,
   state = 'idle',
   decorative = true,
+  titled = true,
 }: {
   role: AgentRole | 'world';
   size?: number;
   state?: 'idle' | 'running' | 'awaiting_approval' | 'done' | 'aborted';
   decorative?: boolean;
+  /** Native title tooltip (off where a richer tooltip wraps the mark). */
+  titled?: boolean;
 }) {
-  const label = role === 'world' ? 'World' : ROLE_LABEL[role];
+  const label = role === 'world' ? 'World' : roleName(role);
   const initials = role === 'world' ? 'W' : ROLE_INITIALS[role];
   const active = state === 'running' || state === 'awaiting_approval';
   return (
@@ -26,7 +30,7 @@ export function AgentMark({
       role={decorative ? undefined : 'img'}
       aria-hidden={decorative || undefined}
       aria-label={decorative ? undefined : `${label}: ${state.replace('_', ' ')}`}
-      title={`${label}${state !== 'idle' ? ` · ${state.replace('_', ' ')}` : ''}`}
+      title={titled ? `${label}${state !== 'idle' ? ` · ${state.replace('_', ' ')}` : ''}` : undefined}
       className={cx(
         'relative inline-flex shrink-0 select-none items-center justify-center rounded-md font-semibold',
         active

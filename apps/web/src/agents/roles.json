@@ -1,0 +1,32 @@
+{
+  "orchestrator": {
+    "displayName": "Orchestrator",
+    "objective": "Runs the incident: sets the goal, briefs the specialists, brings their answers together, asks a person when a decision needs authority."
+  },
+  "maintenance": {
+    "displayName": "Maintenance",
+    "abbrev": "MX",
+    "objective": "Finds out what is wrong with the aircraft and what it would take to fix it; hands the airworthiness decision to certifying staff."
+  },
+  "ground": {
+    "displayName": "Ground",
+    "objective": "Arranges the stand, stairs, buses, towing and the ground handler's tasks."
+  },
+  "flightops": {
+    "displayName": "Flight Operations",
+    "objective": "Works out the knock-on effect on today's flights and crew, and finds options: swap, delay, cancel."
+  },
+  "passenger": {
+    "displayName": "Passengers",
+    "abbrev": "PX",
+    "objective": "Keeps passengers informed and looked after; prepares messages, care and rebooking for approval."
+  },
+  "record": {
+    "displayName": "Incident Record",
+    "objective": "Keeps the timeline, decisions and evidence; drafts the reports that must be filed afterwards."
+  },
+  "author": {
+    "displayName": "Scenario Author",
+    "objective": "Turns a description of what's happening into the scenario the team works on."
+  }
+}

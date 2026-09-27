@@ -11,6 +11,13 @@ import type { AppConfig, BrandPack, Station } from '@ica/schema/browser';
 /** The product name (task 06 §1.1). The package scope, stack ids, repo and table names keep "ica". */
 export const PRODUCT_NAME = 'Incident Coordination Agent';
 
+/** The About dialog's credit (owner request, task 08): used when the brand pack has no `about`. */
+export const DEFAULT_ABOUT: NonNullable<BrandPack['about']> = {
+  author: 'Chris Beltran',
+  authorUrl: 'https://www.linkedin.com/in/chris-ai/',
+  repoUrl: 'https://github.com/chleiva/incident-command-agent',
+};
+
 export const DEFAULT_BRAND: BrandPack = {
   productName: PRODUCT_NAME,
   carrierName: 'Accent Air',
@@ -18,6 +25,7 @@ export const DEFAULT_BRAND: BrandPack = {
   colours: { primary: '#1F3A5F', accent: '#4F8FBF' },
   stations: ['MAN', 'PMI', 'EDI', 'FAO', 'AGP', 'DUB', 'ALC', 'TFS', 'LGW', 'AMS', 'CDG', 'BCN'],
   disclaimer: 'Simulated systems · fictional carrier',
+  about: DEFAULT_ABOUT,
 };
 
 /** Public airport reference points (approximate aerodrome coordinates). */
@@ -51,6 +59,7 @@ export function withDefaults(config: Partial<AppConfig> | null | undefined): App
       ...DEFAULT_BRAND,
       ...(config.brand ?? {}),
       productName: config.brand?.productName ?? PRODUCT_NAME,
+      about: { ...DEFAULT_ABOUT, ...(config.brand?.about ?? {}) },
     },
     features: { ...DEFAULT_APP_CONFIG.features, ...(config.features ?? {}) },
     stations: config.stations?.length ? config.stations : DEFAULT_STATIONS,

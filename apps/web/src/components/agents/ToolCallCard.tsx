@@ -8,9 +8,10 @@
  */
 import type { Citation } from '@ica/schema/browser';
 import { useId, useState } from 'react';
+import { headline, resultData } from '../../agents/headline';
 import { GlossaryText } from '../../glossary/Term';
 import type { FeedItem, ToolFeedItem } from '../../lib/derive';
-import { ROLE_LABEL, actorLabel, humaniseTool } from '../../lib/format';
+import { ROLE_LABEL, actorLabel } from '../../lib/format';
 import { Icon } from '../ui/Icon';
 import { AiDraftedBadge, Badge, TierBadge, cx } from '../ui/primitives';
 import { ProvenancePanel } from '../decisions/Provenance';
@@ -58,8 +59,14 @@ export function ToolCallCard({ item, defaultOpen = false }: { item: ToolFeedItem
   const blocked = item.blocked;
   const cites = item.result?.citations ?? [];
   const latency = item.result?.latencyMs;
-  const summary = item.thought?.summary ?? humaniseTool(item.call.tool);
   const failed = item.result && !item.result.ok && !blocked;
+  // Task 08: the title line is generated in code from the tool, its arguments and its result (never model text).
+  const title = headline(
+    item.call.tool,
+    item.call.args,
+    item.result ? resultData(item.result.result, item.result.resultPreview) : undefined,
+    { minute: item.minute, failed: !!failed },
+  );
 
   return (
     <article
@@ -78,12 +85,8 @@ export function ToolCallCard({ item, defaultOpen = false }: { item: ToolFeedItem
       >
         <AgentMark role={item.role} size={20} />
         <span className="min-w-0 flex-1">
-          <span className="line-clamp-2 text-body text-fg">
-            {blocked ? (
-              `Blocked: ${humaniseTool(item.call.tool)}`
-            ) : (
-              <GlossaryText text={summary} focusable={false} />
-            )}
+          <span className="line-clamp-2 text-body text-fg" data-card-title>
+            {title}
           </span>
           <span className="mt-0.5 flex min-w-0 items-center gap-1 text-caption text-fg-subtle">
             <span className="shrink-0 font-mono text-fg-muted">{item.call.tool}</span>

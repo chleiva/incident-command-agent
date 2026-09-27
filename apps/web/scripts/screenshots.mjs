@@ -71,6 +71,18 @@ const SHOTS = [
     },
   },
   { name: 'training', path: '/training', wait: '[data-scenario]', themes: ['dark'] },
+  {
+    // Task 08: the Agents view on the mock showcase run (every row type), one row expanded (history mode).
+    name: 'agents',
+    path: '/runs/run-demo-agents/agents',
+    wait: '[data-column="maintenance"] [data-kind="tool"]',
+    wide: true,
+    act: async (page) => {
+      const row = page.locator('[data-column="maintenance"] [data-kind="tool"]').nth(2);
+      await row.locator('[data-row-button]').click();
+      await page.waitForSelector('[data-row-detail]');
+    },
+  },
   { name: 'evals', path: '/evals', wait: '#layers-h', themes: ['dark'] },
 ];
 const VIEWPORTS = [

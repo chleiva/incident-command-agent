@@ -3,8 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /// <reference types="vitest/config" />
+import { execSync } from 'node:child_process';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
+
+/** Short git commit shown in the About dialog ("dev" outside a git checkout). */
+function appCommit(): string {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch {
+    return 'dev';
+  }
+}
 
 /** Bundle-size budget (spec §4 performance): warn when the initial JS or any chunk grows past the budget. */
 const BUDGET_KB = { entry: 260, chunk: 320, pdf: 480 };
@@ -26,6 +38,7 @@ function bundleBudget(): Plugin {
 
 export default defineConfig({
   plugins: [react(), bundleBudget()],
+  define: { __APP_COMMIT__: JSON.stringify(process.env.APP_COMMIT ?? appCommit()) },
   server: { port: 5173, strictPort: false },
   // Crawl the lazy routes and the mock backend up front, so a cold dev server never reloads mid-session to
   // optimise a newly discovered dependency (that would drop the in-browser mock backend's runs).

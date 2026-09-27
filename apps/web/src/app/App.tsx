@@ -17,6 +17,7 @@ const Home = lazy(() => import('../routes/Home'));
 const Training = lazy(() => import('../routes/Training'));
 const Cockpit = lazy(() => import('../routes/Cockpit'));
 const Compare = lazy(() => import('../routes/Compare'));
+const Agents = lazy(() => import('../routes/Agents'));
 const Evals = lazy(() => import('../routes/Evals'));
 
 function PageSkeleton() {
@@ -72,6 +73,7 @@ function GlobalPalette() {
   const theme = useUi((s) => s.theme);
   const plain = useUi((s) => s.plainLanguage);
   const navigate = useNavigate();
+  const openRunId = useUi((s) => s.openRunId);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -86,6 +88,18 @@ function GlobalPalette() {
 
   const base: PaletteCommand[] = [
     { id: 'home', group: 'Navigate', label: 'Live network (home)', icon: 'plane', run: () => navigate('/') },
+    ...(openRunId
+      ? [
+          {
+            id: 'agents',
+            group: 'Navigate',
+            label: 'Agents view (the open incident)',
+            icon: 'users' as const,
+            keywords: ['agents', 'columns', 'activity', 'who did what'],
+            run: () => navigate(`/runs/${encodeURIComponent(openRunId)}/agents`),
+          },
+        ]
+      : []),
     {
       id: 'training',
       group: 'Navigate',
@@ -100,6 +114,14 @@ function GlobalPalette() {
       label: 'Evaluation report',
       icon: 'check',
       run: () => navigate('/evals'),
+    },
+    {
+      id: 'about',
+      group: 'Navigate',
+      label: 'About',
+      icon: 'info',
+      keywords: ['about', 'credits', 'version', 'licences', 'sources'],
+      run: () => useUi.getState().setAboutOpen(true),
     },
     {
       id: 'theme',
@@ -148,6 +170,7 @@ export function App({ services }: { services: Services }) {
         { path: '/', element: <Home /> },
         { path: '/training', element: <Training /> },
         { path: '/runs/:runId', element: <Cockpit /> },
+        { path: '/runs/:runId/agents', element: <Agents /> },
         { path: '/compare/:agentRunId/:baselineRunId', element: <Compare /> },
         { path: '/evals', element: <Evals /> },
         { path: '*', element: <Home /> },
