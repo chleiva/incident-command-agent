@@ -72,6 +72,10 @@ export type ApprovalDecisionKind = Static<typeof ApprovalDecisionKindSchema>;
 const SpeedSchema = Type.Number({ minimum: 0, maximum: 60, description: 'Sim-time multiplier (default 6)' });
 
 /** Payload schema per event type. Keys are the event `type` strings. */
+/** Addition (async authoring): `scenario.authoring.status`. */
+export const SCENARIO_AUTHORING_STATUSES = ['started', 'patched', 'fallback'] as const;
+export type ScenarioAuthoringStatus = (typeof SCENARIO_AUTHORING_STATUSES)[number];
+
 export const EventPayloadSchemas = {
   'run.created': Type.Object({
     scenarioId: Str,
@@ -243,6 +247,19 @@ export const EventPayloadSchemas = {
   }),
   'baseline.action': Type.Object({ actor: Str, tool: Str, args: Json, note: Str }),
   'llm.fallback': Type.Object({ from: ProviderModelSchema, to: ProviderModelSchema, reason: Str }),
+  /**
+   * Addition (async authoring): preparing a flight-context scenario from the duty manager's free text before the
+   * world starts. `started` (written by the API with `run.created`), then `patched` (the Author's patch was merged and
+   * validated) or `fallback` (the template scenario is used unchanged). Actor `world`; `detail` is UI copy.
+   */
+  'scenario.authoring': Type.Object({
+    status: literalUnion(SCENARIO_AUTHORING_STATUSES),
+    detail: Str,
+    /** Why the patch was not used (validation/reference errors, timeout, provider error), for the log. */
+    errors: Opt(Type.Array(Str)),
+    /** The Author's LLM spend (not included in the run's totals). */
+    costUsd: Opt(Type.Number({ minimum: 0 })),
+  }),
 } satisfies Record<string, TObject>;
 
 export type EventType = keyof typeof EventPayloadSchemas;

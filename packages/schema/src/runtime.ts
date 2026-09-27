@@ -281,10 +281,22 @@ export interface RunDeps {
   providers?: Partial<Record<ProviderId, LlmProvider>>;
 }
 
+/**
+ * Addition (async authoring): prepare the run's (flight-context, template) scenario from the duty manager's free text
+ * before the world starts. The text was screened by the API; it is data for the Author, never instructions.
+ */
+export interface AuthoringRequest {
+  text: string;
+  /** The incident type's label, for the fallback notice ("running the standard … scenario"). */
+  label?: string;
+}
+
 export interface ExecuteRunInput {
   runId: string;
   deps: RunDeps;
   signal?: AbortSignal;
+  /** Addition (async authoring): present on the invocation of the run that authors (see `RunMeta.preparing`). */
+  authoring?: AuthoringRequest;
 }
 
 export interface AuthorResult {

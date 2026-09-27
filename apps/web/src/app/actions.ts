@@ -69,9 +69,10 @@ export function useRunActions() {
       }
     };
     /**
-     * Report an incident on a live-network flight (task 07). The server rebuilds the scenario from the flight; with a
-     * baseline, the baseline request builds (and stores) it first and the agent run reuses its id, so the pair runs
-     * the same scenario — as `start` does for library scenarios.
+     * Report an incident on a live-network flight (task 07, async authoring). One request: the server rebuilds the
+     * scenario from the flight's template, creates the paired baseline itself (`withBaseline`) and answers at once;
+     * with free text, the Run Lambda prepares the scenario from it and the cockpit shows "Preparing scenario…"
+     * (`scenario.authoring` events). Both runs use the identical scenario.
      */
     const startFromFlight = async (
       report: Pick<CreateRunRequest, 'flightContext' | 'incidentType' | 'text'>,
@@ -79,32 +80,17 @@ export function useRunActions() {
     ) => {
       useUi.getState().markTriggered();
       try {
-        let runId: string;
-        let res: CreateRunResponse;
-        if (opts.withBaseline) {
-          res = await api.createRun({ ...report, mode: 'baseline', speed: opts.speed });
-          const agent = await api.createRun({
-            scenarioId: res.scenarioId!,
-            mode: 'agent',
-            speed: opts.speed,
-            pairedRunId: res.runId,
-          });
-          runId = agent.runId;
-          useUi.getState().setPair(runId, res.runId);
-        } else {
-          res = await api.createRun({ ...report, mode: 'agent', speed: opts.speed });
-          runId = res.runId;
-        }
-        if (res.authorFallback)
-          toast({
-            tone: 'warning',
-            title: 'Scenario Author unavailable',
-            body: 'The run uses the incident template for this flight; your details were not added.',
-          });
-        else if (res.screening?.verdict === 'neutralised')
+        const res: CreateRunResponse = await api.createRun({
+          ...report,
+          mode: 'agent',
+          speed: opts.speed,
+          ...(opts.withBaseline ? { withBaseline: true } : {}),
+        });
+        if (res.pairedRunId) useUi.getState().setPair(res.runId, res.pairedRunId);
+        if (res.screening?.verdict === 'neutralised')
           toast({ tone: 'info', title: 'Details neutralised by screening before reaching the agents.' });
-        navigate(`/runs/${encodeURIComponent(runId)}`);
-        return runId;
+        navigate(`/runs/${encodeURIComponent(res.runId)}`);
+        return res.runId;
       } catch (e) {
         toast({ tone: 'critical', title: 'Could not start the run', body: message(e) }, 8_000);
         return null;

@@ -27,6 +27,7 @@ import { screenText, type ScreenInputOptions } from '../guardrails/screen-input'
 import { wrapScenarioData } from '../guardrails/wrap';
 import { WorldEngine } from '../world/engine';
 import { runAgent } from './agent';
+import { prepareRunScenario } from './authoring';
 import type { ApprovalPolicy } from './approvals';
 import { RunContext } from './context';
 import { defaultRegistry, type Registry } from './registry';
@@ -150,6 +151,15 @@ export async function executeRunWith(
   if (meta.status !== 'created') {
     // Idempotency: Lambda retries async invocations; never run the same run twice.
     return { runId, status: 'skipped', error: `run status is '${meta.status}', not 'created'` };
+  }
+  // Async authoring: patch the template scenario from the free text (authoring run) or wait for it (paired run).
+  if (!opts.scenario && (input.authoring || meta.preparing)) {
+    await prepareRunScenario(meta, input.authoring, deps, {
+      registry,
+      signal: input.signal,
+      loadScenario: (id) => loadScenario(deps, id),
+      log: opts.log ?? ((line) => console.log(JSON.stringify({ runId, ...line }))),
+    });
   }
   const scenario = opts.scenario ?? (await loadScenario(deps, meta.scenarioId));
   if (!scenario)

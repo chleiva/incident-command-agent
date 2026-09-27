@@ -41,6 +41,12 @@ export const RunMetaSchema = Type.Object({
   updatedAt: Opt(Type.String({ format: 'date-time' })),
   endedAt: Opt(Type.String({ format: 'date-time' })),
   error: Opt(Str),
+  /**
+   * Addition (async authoring): the scenario is still being prepared from free text (flight-context runs). The run
+   * that authors clears it on itself and on its paired run once the final scenario is stored; a paired run waits
+   * for it before loading the scenario, so both runs use the identical scenario.
+   */
+  preparing: Opt(Type.Boolean()),
 });
 export type RunMeta = Static<typeof RunMetaSchema>;
 
@@ -200,6 +206,11 @@ export const CreateRunRequestSchema = Type.Object(
     incidentType: Opt(Type.String({ pattern: '^[a-z_]{2,48}$' })),
     /** Addition (task 07): optional free text; screened, then the Scenario Author adds the detail (one LLM call). */
     text: Opt(Type.String({ minLength: 1, maxLength: 4000 })),
+    /**
+     * Addition (async authoring, flight context only): also create the paired baseline run on the server. Both runs
+     * use the identical (authored) scenario; the baseline starts after authoring completes.
+     */
+    withBaseline: Opt(Type.Boolean()),
   },
   { additionalProperties: false },
 );
@@ -240,11 +251,39 @@ export interface ListScenariosResponse {
   items: ScenarioSummary[];
 }
 export type GetScenarioResponse = Scenario;
+/**
+ * `POST /scenarios/author` → **202** (async authoring): `{draftId, status: 'pending', screening}`; poll
+ * `GET /scenarios/drafts/{draftId}` (`AuthorDraft`) for the result. `scenario`/`errors` are only set on a draft.
+ */
 export interface AuthorScenarioResponse {
   scenario?: Scenario;
   errors?: string[];
   screening: ScreeningResult;
+  /** Addition (async authoring). */
+  draftId?: string;
+  /** Addition (async authoring). */
+  status?: AuthorDraftStatus;
 }
+
+/** Addition (async authoring). */
+export const AUTHOR_DRAFT_STATUSES = ['pending', 'ready', 'failed'] as const;
+export type AuthorDraftStatus = (typeof AUTHOR_DRAFT_STATUSES)[number];
+
+/** Addition (async authoring): a Training "write a scenario" request, written by the API, completed by the author Lambda. */
+export interface AuthorDraft {
+  draftId: string;
+  status: AuthorDraftStatus;
+  createdAt: string;
+  updatedAt?: string;
+  screening: ScreeningResult;
+  /** Set when `ready`: the validated scenario (already stored as a private scenario). */
+  scenario?: Scenario;
+  /** Validation errors (`ready` without a scenario is never written: that is `failed`), or the failure reason. */
+  errors?: string[];
+}
+export type GetAuthorDraftResponse = AuthorDraft;
+/** A `pending` draft older than this is reported as `failed` (the author Lambda died or timed out). */
+export const AUTHOR_DRAFT_STALE_MS = 6 * 60_000;
 export interface CreateRunResponse {
   runId: string;
   /** Addition (task 07): the scenario the run uses (a flight-context run creates a private scenario; start the paired
@@ -252,8 +291,13 @@ export interface CreateRunResponse {
   scenarioId?: string;
   /** Addition (task 07): screening of the free text, when any. */
   screening?: ScreeningResult;
-  /** Addition (task 07): true when the Scenario Author was unavailable or failed and the template scenario was used. */
+  /** Addition (task 07): true when the Scenario Author was unavailable or failed and the template scenario was used.
+   * (Async authoring: no longer set by `POST /runs`; the outcome is the run's `scenario.authoring` event.) */
   authorFallback?: boolean;
+  /** Addition (async authoring): the server-created baseline run (`withBaseline`). */
+  pairedRunId?: string;
+  /** Addition (async authoring): the scenario is being prepared from the free text in the Run Lambda. */
+  preparing?: boolean;
 }
 export interface ListRunsResponse {
   items: RunMeta[];
@@ -297,6 +341,8 @@ export const API_ROUTES = {
   listScenarios: { method: 'GET', path: '/scenarios' },
   getScenario: { method: 'GET', path: '/scenarios/{id}' },
   authorScenario: { method: 'POST', path: '/scenarios/author' },
+  /** Addition (async authoring). */
+  getAuthorDraft: { method: 'GET', path: '/scenarios/drafts/{id}' },
   createRun: { method: 'POST', path: '/runs' },
   listRuns: { method: 'GET', path: '/runs' },
   getRun: { method: 'GET', path: '/runs/{id}' },

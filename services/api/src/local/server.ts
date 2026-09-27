@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executeRun, loadKnowledgeIndex, runAuthor, screenInput } from '@ica/run';
+import { executeRun, loadKnowledgeIndex, runAuthor, screenInput, screenInputFast } from '@ica/run';
 import { publicScenarios } from '@ica/scenarios';
 import { validateScenario, type KnowledgeIndex, type RunDeps } from '@ica/schema';
 import {
@@ -104,8 +104,13 @@ async function main() {
     bus,
     traces,
     launcher,
-    author: new InProcessAuthorInvoker(runAuthor, deps),
+    author: new InProcessAuthorInvoker(runAuthor, deps, {
+      store,
+      publicIds: publicScenarios.map((s) => s.id),
+      log,
+    }),
     screen: screenInput,
+    screenFast: screenInputFast,
     publicScenarios,
     settings,
     appConfigSource: async () => ({ brand, stations }),

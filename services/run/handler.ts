@@ -16,7 +16,7 @@
  *   S3 Vectors → Cohere Rerank 3.5), see services/run/knowledge/index.ts and docs/deploy.md
  * - `LLM_*`, `RUN_BUDGET_USD`, `RUN_HORIZON_MIN` (see .env.example)
  */
-import type { KnowledgeIndex, RunDeps, SecretStore, Store, TraceStore } from '@ica/schema';
+import type { AuthoringRequest, KnowledgeIndex, RunDeps, SecretStore, Store, TraceStore } from '@ica/schema';
 import {
   DynamoStore,
   S3TraceStore,
@@ -36,9 +36,21 @@ export interface LambdaContextLike {
   awsRequestId?: string;
 }
 
-/** Async invocation payload from the API: `{ runId }`. */
+/**
+ * Async invocation payload from the API: `{ runId }`, plus `authoring: {text, label?}` for a flight-context run whose
+ * scenario is prepared from the duty manager's (screened) free text before the world starts.
+ */
 export interface RunInvocation {
   runId: string;
+  authoring?: AuthoringRequest;
+}
+
+/** Validate the (untrusted) authoring part of an invocation; malformed → ignored (the template scenario stands). */
+export function parseAuthoring(x: unknown): AuthoringRequest | undefined {
+  if (!x || typeof x !== 'object') return undefined;
+  const { text, label } = x as { text?: unknown; label?: unknown };
+  if (typeof text !== 'string' || !text.trim() || text.length > 4000) return undefined;
+  return { text, ...(typeof label === 'string' && label.length <= 80 ? { label } : {}) };
 }
 
 /** Stop gracefully when less than this much Lambda time remains. */
@@ -101,7 +113,13 @@ export function createRunHandler(getDeps: () => HandlerDeps) {
       : undefined;
     if (context && context.getRemainingTimeInMillis() < STOP_MARGIN_MS) ac.abort();
     try {
-      const result = await executeRun({ runId: event.runId, deps, signal: ac.signal });
+      const authoring = parseAuthoring(event.authoring);
+      const result = await executeRun({
+        runId: event.runId,
+        deps,
+        signal: ac.signal,
+        ...(authoring ? { authoring } : {}),
+      });
       console.log(
         JSON.stringify({
           msg: 'run finished',

@@ -158,11 +158,23 @@ describe('ApiStack', () => {
     api.hasResourceProperties('AWS::Lambda::EventInvokeConfig', { MaximumRetryAttempts: 0 });
   });
 
+  it('invokes the author asynchronously without retries and lets it write drafts and scenarios', () => {
+    // Run + author: both async, neither retried.
+    expect(Object.keys(api.findResources('AWS::Lambda::EventInvokeConfig'))).toHaveLength(2);
+    const policies = JSON.stringify(api.findResources('AWS::IAM::Policy'));
+    expect(policies).toMatch(/AuthorFn[^"]*ServiceRole/);
+    const authorPolicy = Object.values(api.findResources('AWS::IAM::Policy')).find((p) =>
+      JSON.stringify(p.Properties.Roles).includes('AuthorFn'),
+    );
+    expect(JSON.stringify(authorPolicy)).toContain('dynamodb:PutItem');
+  });
+
   it('sizes the other Lambdas as specified', () => {
     const fns = Object.values(api.findResources('AWS::Lambda::Function')).map((f) => f.Properties);
     const byDesc = (re: RegExp) => fns.find((p) => re.test(p.Description ?? ''));
     expect(byDesc(/^HTTP API router/)).toMatchObject({ MemorySize: 512, Timeout: 29 });
-    expect(byDesc(/^Scenario Author/)).toMatchObject({ MemorySize: 1024, Timeout: 60 });
+    // Async since the 29 s fix: the author is no longer behind API Gateway.
+    expect(byDesc(/^Scenario Author/)).toMatchObject({ MemorySize: 1024, Timeout: 300 });
     for (const re of [/^WebSocket \$connect/, /^WebSocket \$disconnect/, /^DynamoDB stream/]) {
       expect(byDesc(re)?.MemorySize).toBe(256);
     }

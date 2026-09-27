@@ -6,7 +6,7 @@
  * Persistence interfaces. Defined here (dependency-free) so `runtime.ts` can reference them without a package
  * cycle; `@ica/store` re-exports them and provides the implementations. Import them from `@ica/store`.
  */
-import type { RunMeta, ScenarioSummary, EvalReport } from './api';
+import type { AuthorDraft, RunMeta, ScenarioSummary, EvalReport } from './api';
 import type { ApprovalRecord, ApprovalStatus, EventDraft, RunEvent } from './events';
 import type { StateSystemName } from './ids';
 import type { SystemMutation } from './runtime';
@@ -74,6 +74,10 @@ export interface Store {
   listConnections(runId: string): Promise<string[]>;
 
   // evals
+  /** Addition (async authoring): Training "write a scenario" drafts (`DRAFT#{id}/META`, TTL 1 day). */
+  putAuthorDraft(d: AuthorDraft): Promise<void>;
+  getAuthorDraft(draftId: string): Promise<AuthorDraft | null>;
+
   putEvalReport(r: EvalReport): Promise<void>;
   getLatestEvalReport(): Promise<EvalReport | null>;
 }

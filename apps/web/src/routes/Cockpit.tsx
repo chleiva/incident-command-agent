@@ -33,6 +33,7 @@ import { RotationGantt } from '../components/network/RotationGantt';
 import { SystemTabs } from '../components/inspector/SystemTabs';
 import type { PaletteCommand } from '../components/presenter/CommandPalette';
 import { RunEndedCard } from '../components/RunEndedCard';
+import { ScenarioAuthoringNotice } from '../components/ScenarioAuthoringNotice';
 import { TimeScrubber } from '../components/timeline/TimeScrubber';
 import { Badge, Button, cx } from '../components/ui/primitives';
 import { Zone } from '../components/ui/Zone';
@@ -91,10 +92,13 @@ export default function Cockpit() {
 
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [library, setLibrary] = useState<ScenarioSummary[]>([]);
+  // Async authoring: the scenario changes once (patched) before the world starts; refetch on each authoring step.
+  const authoring = head.meta.authoring;
+  const [authoringDismissed, setAuthoringDismissed] = useState<number | null>(null);
   useEffect(() => {
     if (!head.meta.scenarioId) return;
     api.getScenario(head.meta.scenarioId).then(setScenario, () => setScenario(null));
-  }, [api, head.meta.scenarioId]);
+  }, [api, head.meta.scenarioId, authoring?.status]);
   useEffect(() => {
     api.listScenarios().then(
       (r) => setLibrary(r.items),
@@ -103,7 +107,9 @@ export default function Cockpit() {
   }, [api]);
 
   // ------------------------------------------------------------------------------------------ derived
-  const loading = view.lastSeq === 0 && !loadError;
+  // Preparing the scenario from free text (before `run.started`): the zones wait calmly.
+  const preparing = authoring?.status === 'started' && head.meta.status === 'created';
+  const loading = (view.lastSeq === 0 || preparing) && !loadError;
   const zoneStatus = loadError && view.lastSeq === 0 ? 'error' : loading ? 'loading' : 'ready';
   const startIso =
     scenario?.startSimTime ??
@@ -509,6 +515,12 @@ export default function Cockpit() {
         </div>
       }
     >
+      {authoring && authoringDismissed !== authoring.seq && (
+        <ScenarioAuthoringNotice
+          authoring={authoring}
+          onDismiss={() => setAuthoringDismissed(authoring.seq)}
+        />
+      )}
       <div
         className={cx(
           'grid grid-cols-1 gap-2 p-2 xl:grid-cols-12 xl:grid-rows-[auto_minmax(0,1.3fr)_minmax(0,1fr)]',

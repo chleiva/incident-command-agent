@@ -238,15 +238,20 @@ export class ApiStack extends Stack {
     // A failed run must not be retried automatically (it would duplicate the run's events).
     this.runFn.configureAsyncInvoke({ retryAttempts: 0, maxEventAge: Duration.minutes(5) });
 
+    // Invoked asynchronously by the api Lambda (POST /scenarios/author → draft); not behind API Gateway, so the
+    // Scenario Author gets minutes, not 29 s. Flight-context authoring runs inside the Run Lambda instead.
     const authorFn = fn('AuthorFn', {
-      description: 'Scenario Author: free text → validated scenario',
+      description: 'Scenario Author: free text → validated scenario (async, writes a draft)',
       entry: 'services/api/src/lambda/author.ts',
       memorySize: 1024,
-      timeout: Duration.seconds(60),
+      timeout: Duration.minutes(5),
       environment: runtimeEnv,
       nodeModules: config.runNodeModules,
       externalModules: runtimeExternals,
     });
+
+    // A failed draft is reported to the polling UI; never re-run the author automatically.
+    authorFn.configureAsyncInvoke({ retryAttempts: 0, maxEventAge: Duration.minutes(5) });
 
     const apiFn = fn('ApiFn', {
       description: 'HTTP API router',
@@ -355,7 +360,8 @@ export class ApiStack extends Stack {
       }
     }
     table.grantReadWriteData(this.runFn);
-    table.grantReadData(authorFn);
+    // The author stores the authored (private) scenario and completes its draft (DRAFT#{id}).
+    table.grantReadWriteData(authorFn);
 
     const leading = (prefix: string) => ({
       'ForAllValues:StringLike': { 'dynamodb:LeadingKeys': [`${prefix}*`] },

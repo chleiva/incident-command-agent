@@ -16,15 +16,16 @@ import {
   compileSchema,
   draft,
   summariseScenario,
-  validateScenario,
   type Actor,
   type AppConfig,
   type ApprovalDecisionResponse,
+  type AuthorDraft,
   type AuthorScenarioResponse,
   type ControlResponse,
   type CreateRunRequest,
   type CreateRunResponse,
   type EventDraft,
+  type AuthoringRequest,
   type EvidencePack,
   type ExportResponse,
   type ListEventsResponse,
@@ -41,6 +42,7 @@ import {
 import { buildAppConfig } from '../config/app-config';
 import { errorFields, silentLogger } from '../util/log';
 import { isNotImplemented, type ApiDeps } from './deps';
+import { defaultDraftId, presentDraft } from './drafts';
 import { buildFlightScenario } from './flight-context';
 import { HttpError, badRequest, conflict, notFound, validationFailed } from './errors';
 import { createRouter, humanActor, type RouteContext, type RouteTable } from './router';
@@ -91,6 +93,8 @@ export function createApiHandler(deps: ApiDeps) {
   const log = deps.log ?? silentLogger;
   const now = deps.now ?? (() => new Date());
   const newRunId = deps.newRunId ?? (() => defaultRunId(now()));
+  const newDraftId = deps.newDraftId ?? (() => defaultDraftId(now()));
+  const screenFast = async (text: string) => (deps.screenFast ?? deps.screen)(text);
   const exportMax = deps.exportInlineMaxBytes ?? DEFAULT_EXPORT_INLINE_MAX;
   const configTtl = deps.configTtlMs ?? 60_000;
   let configCache: { at: number; value: AppConfig } | null = null;
@@ -153,55 +157,62 @@ export function createApiHandler(deps: ApiDeps) {
       return { body: s };
     },
 
+    /**
+     * Async authoring: screen (regex only), write a `pending` draft, start the author without waiting (the Scenario
+     * Author can take minutes; API Gateway gives a request 29 s) and answer 202 with the draft id to poll.
+     */
     async authorScenario(ctx) {
       const { text } = validate(validators.author, ctx.body);
-      let result;
+      const screening = await screenFast(text);
+      if (screening.verdict === 'rejected') {
+        throw new HttpError(422, 'input_rejected', 'the text was rejected by input screening', { screening });
+      }
+      const draftId = newDraftId();
+      const draft: AuthorDraft = { draftId, status: 'pending', createdAt: now().toISOString(), screening };
+      await store.putAuthorDraft(draft);
+      ctx.annotate({ draftId });
       try {
-        result = await deps.author.author(text);
+        await deps.author.start(draftId, text);
       } catch (err) {
-        if (isNotImplemented(err)) {
-          throw new HttpError(501, 'not_implemented', 'the Scenario Author is not available yet');
-        }
-        ctx.log.error('author invocation failed', errorFields(err));
-        throw new HttpError(502, 'author_failed', 'the Scenario Author failed');
-      }
-      if (result.screening?.verdict === 'rejected') {
-        throw new HttpError(422, 'input_rejected', 'the text was rejected by input screening', {
-          screening: result.screening,
+        const notImpl = isNotImplemented(err);
+        if (!notImpl) ctx.log.error('author invocation failed', errorFields(err));
+        await store.putAuthorDraft({
+          ...draft,
+          status: 'failed',
+          errors: ['the Scenario Author could not be started'],
+          updatedAt: now().toISOString(),
         });
+        if (notImpl) throw new HttpError(501, 'not_implemented', 'the Scenario Author is not available yet');
+        throw new HttpError(502, 'author_failed', 'the Scenario Author could not be started');
       }
-      const out: AuthorScenarioResponse = { screening: result.screening, errors: result.errors };
-      if (result.scenario) {
-        const v = validateScenario({ ...result.scenario, visibility: 'private' });
-        if (!v.ok) {
-          out.errors = [...(result.errors ?? []), ...v.errors];
-        } else {
-          let scenario = v.value;
-          if (findPublic(scenario.id)) {
-            const suffix = `-a${Math.random().toString(36).slice(2, 6)}`;
-            scenario = { ...scenario, id: `${scenario.id.slice(0, 64 - suffix.length)}${suffix}` };
-          }
-          await store.putScenario(scenario);
-          out.scenario = scenario;
-          ctx.annotate({ scenarioId: scenario.id });
-        }
-      }
-      if (!out.errors?.length) delete out.errors;
-      return { body: out };
+      return {
+        status: 202,
+        body: { draftId, status: 'pending', screening } satisfies AuthorScenarioResponse,
+      };
+    },
+
+    async getAuthorDraft(ctx) {
+      const d = ID_RE.test(ctx.params.id) ? await store.getAuthorDraft(ctx.params.id) : null;
+      if (!d) throw notFound('draft', 'draft_not_found');
+      return { body: presentDraft(d, now().getTime()) };
     },
 
     // ---------------------------------------------------------------- runs
     async createRun(ctx) {
       const req = validate(validators.createRun, ctx.body);
       let scenario: Scenario | null;
-      let extra: Pick<CreateRunResponse, 'screening' | 'authorFallback'> = {};
+      let extra: Pick<CreateRunResponse, 'screening'> = {};
+      let authoring: AuthoringRequest | undefined;
       if (req.flightContext) {
         if (req.scenarioId) throw badRequest('give either scenarioId or flightContext, not both');
+        if (req.withBaseline && req.pairedRunId) throw badRequest('give either withBaseline or pairedRunId');
         const built = await scenarioFromFlight(ctx, req);
         scenario = built.scenario;
-        extra = built.extra;
+        authoring = built.authoring;
+        if (built.screening) extra = { screening: built.screening };
       } else {
         if (!req.scenarioId) throw badRequest('scenarioId or flightContext is required');
+        if (req.withBaseline) throw badRequest('withBaseline needs a flightContext');
         scenario = await findScenario(req.scenarioId);
       }
       if (!scenario) throw notFound('scenario', 'scenario_not_found');
@@ -210,65 +221,105 @@ export function createApiHandler(deps: ApiDeps) {
       }
       const t = now();
       const count = settings.maxRunsPerDay > 0 ? await store.countRunsSince(startOfDayUtc(t)) : 0;
-      if (settings.maxRunsPerDay > 0 && count >= settings.maxRunsPerDay) {
+      const needed = req.withBaseline ? 2 : 1;
+      if (settings.maxRunsPerDay > 0 && count + needed > settings.maxRunsPerDay) {
         throw new HttpError(429, 'daily_run_limit', `daily run limit reached (${settings.maxRunsPerDay})`);
       }
-      const runId = newRunId();
       const speed = req.speed ?? settings.defaultSpeed;
-      const { llm } = settings;
-      const meta: RunMeta = {
-        runId,
-        scenarioId: scenario.id,
-        scenarioTitle: scenario.title,
-        mode: req.mode,
-        status: 'created',
-        createdAt: t.toISOString(),
-        simMinute: 0,
-        lastSeq: 0,
-        totals: { ...ZERO_TOTALS },
-        speed,
-        llm: { provider: llm.provider, model: llm.model },
-        updatedAt: t.toISOString(),
-      };
-      if (req.pairedRunId) meta.pairedRunId = req.pairedRunId;
-      await store.createRun(meta);
-      ctx.annotate({ runId });
-      await appendOne(
-        runId,
-        draft(
-          'run.created',
-          {
-            scenarioId: scenario.id,
-            mode: req.mode,
-            ...(req.pairedRunId ? { pairedRunId: req.pairedRunId } : {}),
-            speed,
-            config: {
-              provider: llm.provider,
-              model: llm.model,
-              limits: llm.limits,
-              ...(llm.fallback ? { fallback: llm.fallback } : {}),
-            },
-          },
-          { actor: humanActor(ctx.principal), simMinute: 0, simTime: scenario.startSimTime },
-        ),
-      );
-      try {
-        await deps.launcher.launch(runId);
-      } catch (err) {
-        ctx.log.error('run launch failed', { runId, ...errorFields(err) });
-        const message = 'the run could not be started';
-        await store.updateRun(runId, { status: 'failed', error: message, endedAt: now().toISOString() });
-        await appendOne(
+      const preparing = !!authoring;
+      const actor = humanActor(ctx.principal);
+      const sc = scenario;
+
+      /** RunMeta + `run.created` (+ `scenario.authoring{started}` while preparing). */
+      const create = async (runId: string, mode: RunMeta['mode'], pairedRunId?: string) => {
+        const { llm } = settings;
+        const meta: RunMeta = {
           runId,
+          scenarioId: sc.id,
+          scenarioTitle: sc.title,
+          mode,
+          status: 'created',
+          createdAt: t.toISOString(),
+          simMinute: 0,
+          lastSeq: 0,
+          totals: { ...ZERO_TOTALS },
+          speed,
+          llm: { provider: llm.provider, model: llm.model },
+          updatedAt: t.toISOString(),
+          ...(pairedRunId ? { pairedRunId } : {}),
+          ...(preparing ? { preparing: true } : {}),
+        };
+        await store.createRun(meta);
+        const envelope = { actor, simMinute: 0, simTime: sc.startSimTime };
+        const drafts: EventDraft[] = [
           draft(
-            'run.failed',
-            { error: message, where: 'api.launch' },
-            { actor: { kind: 'world' }, simMinute: 0, simTime: scenario.startSimTime },
+            'run.created',
+            {
+              scenarioId: sc.id,
+              mode,
+              ...(pairedRunId ? { pairedRunId } : {}),
+              speed,
+              config: {
+                provider: llm.provider,
+                model: llm.model,
+                limits: llm.limits,
+                ...(llm.fallback ? { fallback: llm.fallback } : {}),
+              },
+            },
+            envelope,
           ),
-        );
-        throw new HttpError(502, 'launch_failed', message, { runId });
-      }
-      return { status: 201, body: { runId, scenarioId: scenario.id, ...extra } satisfies CreateRunResponse };
+        ];
+        if (preparing)
+          drafts.push(
+            draft(
+              'scenario.authoring',
+              { status: 'started', detail: 'Preparing scenario from your description…' },
+              { ...envelope, actor: { kind: 'world' } },
+            ),
+          );
+        await store.append(runId, drafts);
+      };
+
+      const launch = async (runId: string, withAuthoring: boolean) => {
+        try {
+          await deps.launcher.launch(runId, withAuthoring && authoring ? { authoring } : undefined);
+        } catch (err) {
+          ctx.log.error('run launch failed', { runId, ...errorFields(err) });
+          const message = 'the run could not be started';
+          await store.updateRun(runId, {
+            status: 'failed',
+            error: message,
+            endedAt: now().toISOString(),
+            ...(preparing ? { preparing: false } : {}),
+          });
+          await appendOne(
+            runId,
+            draft(
+              'run.failed',
+              { error: message, where: 'api.launch' },
+              { actor: { kind: 'world' }, simMinute: 0, simTime: sc.startSimTime },
+            ),
+          );
+          throw new HttpError(502, 'launch_failed', message, { runId });
+        }
+      };
+
+      const runId = newRunId();
+      const baselineId = req.withBaseline ? newRunId() : undefined;
+      await create(runId, req.mode, baselineId ?? req.pairedRunId);
+      if (baselineId) await create(baselineId, 'baseline', runId);
+      ctx.annotate({ runId, ...(baselineId ? { pairedRunId: baselineId } : {}), preparing });
+      // The authoring run first: a paired run waits (in its own Lambda) until the final scenario is stored.
+      await launch(runId, true);
+      if (baselineId) await launch(baselineId, false);
+      const body: CreateRunResponse = {
+        runId,
+        scenarioId: sc.id,
+        ...extra,
+        ...(baselineId ? { pairedRunId: baselineId } : {}),
+        ...(preparing ? { preparing: true } : {}),
+      };
+      return { status: 201, body };
     },
 
     async listRuns(ctx) {

@@ -5,6 +5,8 @@
 /**
  * Free text → Scenario Author agent → a validated scenario preview with its screening findings → start.
  * The text is untrusted: it is screened server-side and reaches the agents only as data.
+ * Async: the author runs in the background (it can take a minute or more); `onAuthor` polls the draft and reports
+ * progress, and a failure is shown calmly with the reasons.
  */
 import type { AuthorScenarioResponse } from '@ica/schema/browser';
 import { useId, useState } from 'react';
@@ -20,7 +22,7 @@ export function AuthorBox({
   initialResult = null,
   initialText = '',
 }: {
-  onAuthor: (text: string) => Promise<AuthorScenarioResponse>;
+  onAuthor: (text: string, onProgress?: (elapsedMs: number) => void) => Promise<AuthorScenarioResponse>;
   onStart: (scenarioId: string) => void;
   initialResult?: AuthorScenarioResponse | null;
   initialText?: string;
@@ -30,12 +32,15 @@ export function AuthorBox({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AuthorScenarioResponse | null>(initialResult);
+  const [elapsedMs, setElapsedMs] = useState(0);
 
   const submit = async () => {
     setBusy(true);
     setError(null);
+    setResult(null);
+    setElapsedMs(0);
     try {
-      setResult(await onAuthor(text));
+      setResult(await onAuthor(text, setElapsedMs));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -79,6 +84,14 @@ export function AuthorBox({
           {formatInt(text.length)} / {formatInt(MAX)}
         </span>
       </div>
+      {busy && (
+        <p role="status" aria-live="polite" className="flex items-center gap-2 text-caption text-fg-muted">
+          <Icon name="sparkle" size={12} />
+          The Scenario Author is writing and validating your scenario
+          {elapsedMs >= 1000 ? ` (${Math.round(elapsedMs / 1000)} s)` : ''}. This usually takes a minute or
+          two; you can keep working.
+        </p>
+      )}
       {error && (
         <p role="alert" className="text-caption text-critical">
           {error}

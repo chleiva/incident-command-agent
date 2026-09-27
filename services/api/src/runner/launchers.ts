@@ -4,56 +4,51 @@
  */
 /** RunLauncher / AuthorInvoker implementations: Lambda invoke (AWS) and in-process (local dev server). */
 import { InvokeCommand, type LambdaClient } from '@aws-sdk/client-lambda';
-import type { AuthorResult, ExecuteRunInput, RunDeps, Store } from '@ica/schema';
+import type { AuthorResult, AuthoringRequest, ExecuteRunInput, RunDeps, Store } from '@ica/schema';
 import { isNotImplemented, type AuthorInvoker, type RunLauncher } from '../http/deps';
+import { completeAuthorDraft } from '../http/drafts';
 import { errorFields, silentLogger, type Logger } from '../util/log';
 import { fakeRun } from './fake-runner';
 
 type LambdaLike = Pick<LambdaClient, 'send'>;
 
-/** Async invoke of the Run Lambda with `{runId}` (spec §5). */
+/** Async invoke of the Run Lambda with `{runId}` (spec §5), plus `authoring` for a run that prepares its scenario. */
 export class LambdaRunLauncher implements RunLauncher {
   constructor(
     private readonly client: LambdaLike,
     private readonly functionName: string,
   ) {}
-  async launch(runId: string): Promise<void> {
+  async launch(runId: string, opts: { authoring?: AuthoringRequest } = {}): Promise<void> {
+    const payload = { runId, ...(opts.authoring ? { authoring: opts.authoring } : {}) };
     const res = await this.client.send(
       new InvokeCommand({
         FunctionName: this.functionName,
         InvocationType: 'Event',
-        Payload: new TextEncoder().encode(JSON.stringify({ runId })),
+        Payload: new TextEncoder().encode(JSON.stringify(payload)),
       }),
     );
     if (res.StatusCode !== 202) throw new Error(`run invoke returned ${res.StatusCode}`);
   }
 }
 
-/** Synchronous invoke of the author Lambda with `{text}` → AuthorResult. */
+/**
+ * Async invoke (`InvocationType: 'Event'`) of the author Lambda with `{draftId, text}`: it runs the Scenario Author
+ * and writes the result to the draft. The API never waits for it (API Gateway's 29 s limit).
+ */
 export class LambdaAuthorInvoker implements AuthorInvoker {
   constructor(
     private readonly client: LambdaLike,
     private readonly functionName: string,
   ) {}
-  async author(text: string): Promise<AuthorResult> {
+  async start(draftId: string, text: string): Promise<void> {
     const res = await this.client.send(
       new InvokeCommand({
         FunctionName: this.functionName,
-        InvocationType: 'RequestResponse',
-        Payload: new TextEncoder().encode(JSON.stringify({ text })),
+        InvocationType: 'Event',
+        Payload: new TextEncoder().encode(JSON.stringify({ draftId, text })),
       }),
     );
-    const raw = res.Payload ? new TextDecoder().decode(res.Payload) : '';
-    if (res.FunctionError) {
-      let message = res.FunctionError;
-      try {
-        message = (JSON.parse(raw) as { errorMessage?: string }).errorMessage ?? message;
-      } catch {
-        /* keep FunctionError */
-      }
-      throw new Error(`author lambda failed: ${message}`);
-    }
-    return JSON.parse(raw) as AuthorResult;
+    if (res.StatusCode !== 202) throw new Error(`author invoke returned ${res.StatusCode}`);
   }
 }
 
@@ -78,9 +73,9 @@ export class InProcessRunLauncher implements RunLauncher {
     this.log = opts.log ?? silentLogger;
   }
 
-  async launch(runId: string): Promise<void> {
+  async launch(runId: string, opts: { authoring?: AuthoringRequest } = {}): Promise<void> {
     const ctrl = new AbortController();
-    const done = this.run(runId, ctrl.signal).finally(() => this.running.delete(runId));
+    const done = this.run(runId, ctrl.signal, opts.authoring).finally(() => this.running.delete(runId));
     this.running.set(runId, { ctrl, done });
   }
 
@@ -88,13 +83,18 @@ export class InProcessRunLauncher implements RunLauncher {
     await fakeRun({ store: this.opts.store, runId, signal, stepMs: this.opts.fakeStepMs });
   }
 
-  private async run(runId: string, signal: AbortSignal): Promise<void> {
+  private async run(runId: string, signal: AbortSignal, authoring?: AuthoringRequest): Promise<void> {
     const mode = this.opts.mode ?? 'auto';
     const log = this.log.child({ runId });
     try {
       if (mode === 'fake') return await this.fake(runId, signal);
       try {
-        await this.opts.executeRun({ runId, deps: await this.opts.deps(), signal });
+        await this.opts.executeRun({
+          runId,
+          deps: await this.opts.deps(),
+          signal,
+          ...(authoring ? { authoring } : {}),
+        });
       } catch (err) {
         if (mode === 'auto' && isNotImplemented(err)) {
           log.warn('executeRun is not implemented yet: using the fake runner (fixture replay)');
@@ -138,13 +138,30 @@ export class InProcessRunLauncher implements RunLauncher {
   }
 }
 
-/** Local dev: `runAuthor` in-process. */
+/** Local dev: `runAuthor` in-process, in the background; the result is written to the draft. */
 export class InProcessAuthorInvoker implements AuthorInvoker {
+  private readonly running = new Map<string, Promise<void>>();
   constructor(
     private readonly runAuthor: (text: string, deps: RunDeps) => Promise<AuthorResult>,
     private readonly deps: () => Promise<RunDeps>,
+    private readonly opts: { store: Store; publicIds?: Iterable<string>; log?: Logger },
   ) {}
-  async author(text: string): Promise<AuthorResult> {
-    return this.runAuthor(text, await this.deps());
+  async start(draftId: string, text: string): Promise<void> {
+    const done = (async () => {
+      let outcome: { result: AuthorResult } | { error: unknown };
+      try {
+        outcome = { result: await this.runAuthor(text, await this.deps()) };
+      } catch (error) {
+        (this.opts.log ?? silentLogger).error('author failed', { draftId, ...errorFields(error) });
+        outcome = { error };
+      }
+      await completeAuthorDraft(this.opts.store, draftId, outcome, { publicIds: this.opts.publicIds });
+    })();
+    const tracked = done.catch(() => undefined).finally(() => this.running.delete(draftId));
+    this.running.set(draftId, tracked);
+  }
+  /** For tests: resolves when the draft's author work settles. */
+  async settled(draftId: string): Promise<void> {
+    await this.running.get(draftId);
   }
 }

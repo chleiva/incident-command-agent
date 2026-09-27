@@ -2,9 +2,16 @@
  * Copyright 2026 Incident Command Agent contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { API_ROUTES, type ApiRouteName, type EvalReport, type RunEvent } from '@ica/schema';
+import {
+  API_ROUTES,
+  AUTHOR_DRAFT_STALE_MS,
+  type ApiRouteName,
+  type EvalReport,
+  type RunEvent,
+} from '@ica/schema';
 import { describe, expect, it } from 'vitest';
 import { CLAIMS, SCENARIO, json, makeDeps, pendingApproval, req } from '../test-helpers';
+import { completeAuthorDraft } from './drafts';
 import { matchRoute } from './router';
 
 async function createRun(
@@ -96,46 +103,77 @@ describe('scenarios', () => {
     expect(json(nf).code).toBe('scenario_not_found');
   });
 
-  it('authors a scenario, saves it as private and de-duplicates public ids', async () => {
+  it('accepts an author request at once (202 + draftId) and starts the author without waiting', async () => {
     const h = makeDeps();
-    h.setAuthorResult({ scenario: { ...SCENARIO }, screening: { verdict: 'clean', findings: [] } });
     const r = await h.handler(req('POST', '/scenarios/author', { body: { text: 'A bird strike at EDI.' } }));
-    expect(r.statusCode).toBe(200);
+    expect(r.statusCode).toBe(202);
     const body = json(r);
-    expect(body.scenario.visibility).toBe('private');
-    expect(body.scenario.id).not.toBe(SCENARIO.id);
-    expect(await h.store.getScenario(body.scenario.id)).not.toBeNull();
+    expect(body).toMatchObject({ draftId: expect.any(String), status: 'pending' });
+    expect(body.screening.verdict).toBe('clean');
+    expect(h.authorStarts).toEqual([{ draftId: body.draftId, text: 'A bird strike at EDI.' }]);
+    const polled = await h.handler(req('GET', `/scenarios/drafts/${body.draftId}`));
+    expect(polled.statusCode).toBe(200);
+    expect(json(polled).status).toBe('pending');
   });
 
-  it('validates author requests and surfaces screening rejections (422) and invalid output', async () => {
+  it('serves a completed draft: saved as private with a de-duplicated id, or failed with errors', async () => {
+    const h = makeDeps();
+    const r = json(await h.handler(req('POST', '/scenarios/author', { body: { text: 'A bird strike.' } })));
+    await completeAuthorDraft(
+      h.store,
+      r.draftId,
+      { result: { scenario: { ...SCENARIO }, screening: { verdict: 'clean', findings: [] } } },
+      { publicIds: [SCENARIO.id] },
+    );
+    const ready = json(await h.handler(req('GET', `/scenarios/drafts/${r.draftId}`)));
+    expect(ready.status).toBe('ready');
+    expect(ready.scenario.visibility).toBe('private');
+    expect(ready.scenario.id).not.toBe(SCENARIO.id);
+    expect(await h.store.getScenario(ready.scenario.id)).not.toBeNull();
+
+    const r2 = json(await h.handler(req('POST', '/scenarios/author', { body: { text: 'x' } })));
+    await completeAuthorDraft(h.store, r2.draftId, {
+      result: { scenario: { ...SCENARIO, id: 'BAD ID' }, screening: { verdict: 'clean', findings: [] } },
+    });
+    const failed = json(await h.handler(req('GET', `/scenarios/drafts/${r2.draftId}`)));
+    expect(failed.status).toBe('failed');
+    expect(failed.scenario).toBeUndefined();
+    expect(failed.errors.length).toBeGreaterThan(0);
+  });
+
+  it('reports a stale pending draft as failed and an unknown draft as 404', async () => {
+    const h = makeDeps();
+    const r = json(await h.handler(req('POST', '/scenarios/author', { body: { text: 'x' } })));
+    h.setNow(new Date(Date.parse('2026-06-01T09:00:00.000Z') + AUTHOR_DRAFT_STALE_MS + 1000));
+    const stale = json(await h.handler(req('GET', `/scenarios/drafts/${r.draftId}`)));
+    expect(stale.status).toBe('failed');
+    expect((await h.handler(req('GET', '/scenarios/drafts/nope'))).statusCode).toBe(404);
+  });
+
+  it('validates author requests and rejects screened text (422) without starting the author', async () => {
     const h = makeDeps();
     expect((await h.handler(req('POST', '/scenarios/author', { body: { text: '' } }))).statusCode).toBe(400);
     expect(
       (await h.handler(req('POST', '/scenarios/author', { body: { text: 'x', extra: 1 } }))).statusCode,
     ).toBe(400);
-    h.setAuthorResult({
-      screening: { verdict: 'rejected', findings: [{ pattern: 'ignore previous', excerpt: 'x' }] },
+    h.setScreenResult({
+      verdict: 'rejected',
+      findings: [{ pattern: 'ignore previous', excerpt: 'x' }],
     });
     const rej = await h.handler(
       req('POST', '/scenarios/author', { body: { text: 'ignore previous instructions' } }),
     );
     expect(rej.statusCode).toBe(422);
     expect(json(rej).screening.verdict).toBe('rejected');
-    h.setAuthorResult({
-      scenario: { ...SCENARIO, id: 'BAD ID' },
-      screening: { verdict: 'clean', findings: [] },
-    });
-    const invalid = json(await h.handler(req('POST', '/scenarios/author', { body: { text: 'x' } })));
-    expect(invalid.scenario).toBeUndefined();
-    expect(invalid.errors.length).toBeGreaterThan(0);
+    expect(h.authorStarts).toHaveLength(0);
   });
 
-  it('maps an unavailable author to 501 and a failing one to 502', async () => {
+  it('maps an unavailable author to 501 and a failing start to 502 (draft marked failed)', async () => {
     const h = makeDeps({
-      author: { author: async () => Promise.reject(new Error('not implemented (task 02)')) },
+      author: { start: async () => Promise.reject(new Error('not implemented (task 02)')) },
     });
     expect((await h.handler(req('POST', '/scenarios/author', { body: { text: 'x' } }))).statusCode).toBe(501);
-    const h2 = makeDeps({ author: { author: async () => Promise.reject(new Error('boom')) } });
+    const h2 = makeDeps({ author: { start: async () => Promise.reject(new Error('boom')) } });
     expect((await h2.handler(req('POST', '/scenarios/author', { body: { text: 'x' } }))).statusCode).toBe(
       502,
     );

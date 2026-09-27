@@ -31,6 +31,7 @@ import {
   type ApprovalRecord,
   type ApprovalPatch,
   type ApprovalStatus,
+  type AuthorDraft,
   type EvalReport,
   type EventDraft,
   type EventPage,
@@ -56,6 +57,8 @@ import {
   approvalSk,
   connectionPk,
   evalPk,
+  draftPk,
+  DRAFT_TTL_DAYS,
   eventSk,
   parseSysSk,
   runPk,
@@ -527,6 +530,30 @@ export class DynamoStore implements Store {
   }
 
   // ------------------------------------------------------------------ evals
+  async putAuthorDraft(d: AuthorDraft): Promise<void> {
+    await this.doc.send(
+      new PutCommand({
+        TableName: this.table,
+        Item: {
+          PK: draftPk(d.draftId),
+          SK: META,
+          draft: d,
+          ttl: Math.floor(this.now().getTime() / 1000) + DRAFT_TTL_DAYS * 86_400,
+        },
+      }),
+    );
+  }
+  async getAuthorDraft(draftId: string): Promise<AuthorDraft | null> {
+    const res = await this.doc.send(
+      new GetCommand({
+        TableName: this.table,
+        Key: { PK: draftPk(draftId), SK: META },
+        ConsistentRead: true,
+      }),
+    );
+    return (res.Item?.draft as AuthorDraft | undefined) ?? null;
+  }
+
   async putEvalReport(r: EvalReport): Promise<void> {
     await this.doc.send(
       new PutCommand({

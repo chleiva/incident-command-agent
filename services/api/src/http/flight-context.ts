@@ -3,23 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * `POST /runs` with a flight context (task 07): the server regenerates Accent Air's day from the seed and date,
- * rebuilds the scenario from the flight with the same `@ica/network` templates the browser previews (the client
- * never sends a scenario), optionally runs the Scenario Author on the duty manager's free text (screened inside the
- * Author path, seeded with the flight's context), validates the result and stores it as a private scenario.
+ * `POST /runs` with a flight context (task 07, async authoring): the server regenerates Accent Air's day from the
+ * seed and date and rebuilds the scenario from the flight with the same `@ica/network` templates the browser previews
+ * (the client never sends a scenario). Deterministic and fast: no LLM in the request path. Free text is screened with
+ * the regex heuristics only and handed to the Run Lambda as an authoring request; the Scenario Author patches the
+ * template there, before the world starts (services/run/runtime/authoring.ts).
  */
 import { generateDaySchedule, type DaySchedule } from '@ica/network';
 import {
   OTHER_INCIDENT_TYPE,
   TemplateError,
-  authorRequestText,
   buildScenarioFromFlight,
   incidentContext,
   incidentTypeById,
+  incidentTypesFor,
   type BuiltScenario,
 } from '@ica/network/templates';
-import { validateScenario, type CreateRunRequest, type CreateRunResponse, type Scenario } from '@ica/schema';
-import { errorFields, type Logger } from '../util/log';
+import {
+  validateScenario,
+  type AuthoringRequest,
+  type CreateRunRequest,
+  type Scenario,
+  type ScreeningResult,
+} from '@ica/schema';
+import type { Logger } from '../util/log';
 import type { ApiDeps } from './deps';
 import { HttpError, badRequest, notFound } from './errors';
 
@@ -37,14 +44,27 @@ function scheduleFor(seed: string, date: string): DaySchedule {
 }
 
 export interface FlightScenarioResult {
+  /** The template scenario, already stored (private). */
   scenario: Scenario;
-  extra: Pick<CreateRunResponse, 'screening' | 'authorFallback'>;
+  /** Present when free text was given: the Run Lambda patches the scenario from it. */
+  authoring?: AuthoringRequest;
+  screening?: ScreeningResult;
 }
 
 const rand = () => Math.random().toString(36).slice(2, 6).padEnd(4, '0');
 
+function build(schedule: DaySchedule, flightId: string, typeId: string, atMs: number, force = false) {
+  try {
+    return buildScenarioFromFlight(schedule, flightId, typeId, { atMs, force });
+  } catch (err) {
+    if (err instanceof TemplateError)
+      throw new HttpError(err.code === 'flight_not_found' ? 404 : 409, err.code, err.message);
+    throw err;
+  }
+}
+
 export async function buildFlightScenario(
-  deps: Pick<ApiDeps, 'author' | 'store'>,
+  deps: Pick<ApiDeps, 'store' | 'screen'> & { screenFast?: ApiDeps['screenFast'] },
   req: CreateRunRequest,
   nowMs: number,
   log: Logger,
@@ -59,63 +79,56 @@ export async function buildFlightScenario(
   const ctx = incidentContext(schedule, fc.flightId, atMs);
   if (!ctx) throw notFound('flight', 'flight_not_found');
 
-  let base: BuiltScenario | undefined;
-  const type = typeId === OTHER_INCIDENT_TYPE ? undefined : incidentTypeById(typeId);
-  if (typeId !== OTHER_INCIDENT_TYPE) {
-    if (!type) throw badRequest(`unknown incident type '${typeId}'`);
-    try {
-      base = buildScenarioFromFlight(schedule, fc.flightId, typeId, { atMs });
-    } catch (err) {
-      if (err instanceof TemplateError)
-        throw new HttpError(err.code === 'flight_not_found' ? 404 : 409, err.code, err.message);
-      throw err;
-    }
-    const v = validateScenario(base.scenario);
-    if (!v.ok) {
-      log.error('flight template produced an invalid scenario', {
-        typeId,
-        flight: fc.flightId,
-        errors: v.errors,
-      });
-      throw new HttpError(500, 'template_invalid', 'the incident template produced an invalid scenario');
-    }
-  } else if (!req.text) {
-    throw badRequest("incidentType 'other' needs a text description");
+  const other = typeId === OTHER_INCIDENT_TYPE;
+  if (other && !req.text) throw badRequest("incidentType 'other' needs a text description");
+  const type = other ? undefined : incidentTypeById(typeId);
+  if (!other && !type) throw badRequest(`unknown incident type '${typeId}'`);
+
+  // Screen first (fast regex only): a rejected description never creates anything.
+  let screening: ScreeningResult | undefined;
+  if (req.text) {
+    screening = await (deps.screenFast ?? deps.screen)(req.text);
+    if (screening.verdict === 'rejected')
+      throw new HttpError(422, 'input_rejected', 'the text was rejected by input screening', { screening });
   }
 
-  let scenario: Scenario | undefined = base?.scenario;
-  const extra: FlightScenarioResult['extra'] = {};
-  if (req.text) {
-    try {
-      const result = await deps.author.author(authorRequestText(ctx, type, req.text, base));
-      extra.screening = result.screening;
-      if (result.screening?.verdict === 'rejected')
-        throw new HttpError(422, 'input_rejected', 'the text was rejected by input screening', {
-          screening: result.screening,
-        });
-      const v = result.scenario ? validateScenario({ ...result.scenario, visibility: 'private' }) : null;
-      if (v?.ok) {
-        const id = `fc-${fc.date}-${fc.flightId.toLowerCase()}-${rand()}`;
-        scenario = { ...v.value, id, visibility: 'private' };
-      } else if (base) {
-        extra.authorFallback = true;
-        log.warn('author scenario invalid; using the template', {
-          errors: v?.ok === false ? v.errors : result.errors,
-        });
-      } else {
-        throw new HttpError(422, 'author_invalid', 'the Scenario Author could not build a valid scenario', {
-          errors: v?.ok === false ? v.errors : (result.errors ?? []),
-        });
-      }
-    } catch (err) {
-      if (err instanceof HttpError) throw err;
-      if (!base) throw new HttpError(502, 'author_failed', 'the Scenario Author failed');
-      // The template scenario stands on its own; the (unscreened) text is not used.
-      log.warn('author unavailable; using the template', errorFields(err));
-      extra.authorFallback = true;
-    }
+  let base: BuiltScenario;
+  if (type) {
+    base = build(schedule, fc.flightId, type.id, atMs);
+  } else {
+    // 'other': the first startable incident family for this flight's phase is the template; the Author makes it
+    // match the description (or it runs as that standard scenario).
+    const option = incidentTypesFor(ctx).find((o) => o.enabled);
+    if (!option)
+      throw new HttpError(409, 'not_applicable', 'no incident template applies to this flight right now');
+    base = build(schedule, fc.flightId, option.type.id, atMs);
+    base = {
+      ...base,
+      scenario: {
+        ...base.scenario,
+        title: `Reported incident: ${fc.flightId} at ${base.scenario.aircraft.station}`,
+      },
+    };
   }
-  if (!scenario) throw new HttpError(500, 'no_scenario', 'no scenario could be built');
+
+  const v = validateScenario(base.scenario);
+  if (!v.ok) {
+    log.error('flight template produced an invalid scenario', {
+      typeId,
+      flight: fc.flightId,
+      errors: v.errors,
+    });
+    throw new HttpError(500, 'template_invalid', 'the incident template produced an invalid scenario');
+  }
+  let scenario: Scenario = { ...v.value, visibility: 'private' };
+  if (req.text) {
+    // A scenario that will be patched must not be shared with another report on the same flight and type.
+    const suffix = `-${rand()}`;
+    scenario = { ...scenario, id: `${scenario.id.slice(0, 64 - suffix.length)}${suffix}` };
+  }
   await deps.store.putScenario(scenario);
-  return { scenario, extra };
+  if (!req.text) return { scenario };
+  const text = screening?.verdict === 'neutralised' ? (screening.neutralisedText ?? req.text) : req.text;
+  const label = type?.label ?? base.type.label;
+  return { scenario, authoring: { text, label }, ...(screening ? { screening } : {}) };
 }

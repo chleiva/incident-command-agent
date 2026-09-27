@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { useRunActions } from '../app/actions';
 import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
+import { authorAndWait } from '../lib/api';
 import { AuthorBox } from '../components/presenter/AuthorBox';
 import { ScenarioPicker } from '../components/presenter/ScenarioPicker';
 import { RecentRuns } from '../components/home/HomePanels';
@@ -71,7 +72,7 @@ export default function Training() {
         />
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AuthorBox
-            onAuthor={(text) => api.authorScenario(text)}
+            onAuthor={(text, onProgress) => authorAndWait(api, text, { onProgress })}
             onStart={(id) => void actions.start(id, { withBaseline: false, speed: 6 })}
           />
           <div className="flex flex-col gap-4">

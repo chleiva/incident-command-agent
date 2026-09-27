@@ -10,7 +10,7 @@ import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-
 import { LambdaClient } from '@aws-sdk/client-lambda';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { screenInput } from '@ica/run';
+import { screenInput, screenInputFast } from '@ica/run';
 import { publicScenarios } from '@ica/scenarios';
 import { DEFAULT_BRAND, FALLBACK_STATIONS, parseBrandPack, parseStations } from '../config/app-config';
 import { settingsFromEnv } from '../config/settings';
@@ -48,6 +48,8 @@ function build() {
     launcher: new LambdaRunLauncher(lambda, envRequired(env, 'RUN_FUNCTION_NAME')),
     author: new LambdaAuthorInvoker(lambda, envRequired(env, 'AUTHOR_FUNCTION_NAME')),
     screen: screenInput,
+    // Request path: regex screening only (no LLM classifier call inside the 29 s API Gateway window).
+    screenFast: screenInputFast,
     publicScenarios,
     settings,
     appConfigSource: async () => ({ brand, stations }),

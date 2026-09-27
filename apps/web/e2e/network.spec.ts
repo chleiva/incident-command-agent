@@ -54,8 +54,15 @@ test('report a ground incident from the map: list → preview → start → cock
   await expect(dialog.getByTestId('author-note')).toBeVisible();
   await dialog.getByRole('button', { name: 'Start' }).click();
 
-  await expect(page).toHaveURL(/\/runs\/run-mock-/);
+  // Async authoring: the cockpit opens at once and shows the calm "preparing" notice, then the result.
+  await expect(page).toHaveURL(/\/runs\/run-mock-/, { timeout: 3_000 });
+  const notice = page.getByTestId('scenario-authoring');
+  await expect(notice).toBeVisible({ timeout: 5_000 });
+  await expect(notice).toHaveAttribute('data-status', 'patched', { timeout: 10_000 });
+  await expect(notice).toContainText('Scenario enriched from your description');
   await expect(page.getByTestId('kpi-value-cost')).toBeVisible({ timeout: 10_000 });
+  // The paired baseline was created by the same request: the side-by-side link is there.
+  await expect(page.getByRole('link', { name: 'Side-by-side' })).toBeAttached();
 });
 
 test('home is the live network: search, filter and open an airborne flight', async ({ page }) => {

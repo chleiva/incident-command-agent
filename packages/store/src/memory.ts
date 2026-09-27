@@ -10,6 +10,7 @@ import {
   type ApprovalPatch,
   type ApprovalRecord,
   type ApprovalStatus,
+  type AuthorDraft,
   type EvalReport,
   type EventBus,
   type EventDraft,
@@ -67,6 +68,8 @@ export interface MemoryStoreSnapshot {
   state: Record<string, Loose>;
   connections: Record<string, string>;
   evals: EvalReport[];
+  /** Addition (async authoring); optional so older snapshots load. */
+  drafts?: AuthorDraft[];
 }
 
 export class MemoryStore implements Store {
@@ -77,6 +80,7 @@ export class MemoryStore implements Store {
   private state = new Map<string, Loose>();
   private connections = new Map<string, string>();
   private evals: EvalReport[] = [];
+  private drafts = new Map<string, AuthorDraft>();
   readonly bus?: EventBus;
   private readonly validate: boolean;
   private readonly now: () => string;
@@ -220,6 +224,14 @@ export class MemoryStore implements Store {
       .sort();
   }
 
+  // ------------------------------------------------------------------ author drafts
+  async putAuthorDraft(d: AuthorDraft): Promise<void> {
+    this.drafts.set(d.draftId, clone(d));
+  }
+  async getAuthorDraft(draftId: string): Promise<AuthorDraft | null> {
+    return clone(this.drafts.get(draftId) ?? null);
+  }
+
   // ------------------------------------------------------------------ evals
   async putEvalReport(r: EvalReport): Promise<void> {
     this.evals = this.evals.filter((x) => x.id !== r.id);
@@ -243,6 +255,7 @@ export class MemoryStore implements Store {
       state: Object.fromEntries(this.state),
       connections: Object.fromEntries(this.connections),
       evals: this.evals,
+      drafts: [...this.drafts.values()],
     });
   }
 
@@ -256,6 +269,7 @@ export class MemoryStore implements Store {
     for (const [k, v] of Object.entries(c.state)) s.state.set(k, v);
     for (const [k, v] of Object.entries(c.connections)) s.connections.set(k, v);
     s.evals = c.evals;
+    for (const d of c.drafts ?? []) s.drafts.set(d.draftId, d);
     return s;
   }
 }

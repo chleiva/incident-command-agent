@@ -151,6 +151,7 @@ payload, envelope)` builds one type-safely. `eventSortKey(seq)` → `EVT#0000004
 | `control.requested` | `{action: pause\|resume\|stop\|set_speed\|demo_forbidden, speed?, tool?}` — written by the API |
 | `baseline.action` | `{actor, tool, args, note}` |
 | `llm.fallback` | `{from: {provider, model}, to: {provider, model}, reason}` |
+| `scenario.authoring` *(addition)* | `{status: started\|patched\|fallback, detail, errors?, costUsd?}` — preparing a flight-context scenario from free text before `run.started` (actor `world`) |
 
 Rules:
 
@@ -234,8 +235,9 @@ swapOrCancelDecisionMin|null}}`. Formulas: task 02 (`services/run/world/kpi.ts`)
 |---|---|---|
 | `GET /scenarios` | – | `{items: ScenarioSummary[]}` |
 | `GET /scenarios/{id}` | – | `Scenario` |
-| `POST /scenarios/author` | `AuthorScenarioRequest {text ≤8000}` | `{scenario?, errors?, screening}` |
-| `POST /runs` | `CreateRunRequest {scenarioId? \| flightContext {seed, date, flightId, at?} + incidentType (+ text?), mode, speed? 1–30, pairedRunId?}` (exactly one of `scenarioId` / `flightContext`) | `{runId, scenarioId?, screening?, authorFallback?}` |
+| `POST /scenarios/author` | `AuthorScenarioRequest {text ≤8000}` | **202** `{draftId, status: 'pending', screening}` (422 when screening rejects) |
+| `GET /scenarios/drafts/{id}` *(addition)* | – | `AuthorDraft {draftId, status: pending\|ready\|failed, createdAt, updatedAt?, screening, scenario?, errors?}` |
+| `POST /runs` | `CreateRunRequest {scenarioId? \| flightContext {seed, date, flightId, at?} + incidentType (+ text?, withBaseline?), mode, speed? 1–30, pairedRunId?}` (exactly one of `scenarioId` / `flightContext`) | **201** `{runId, scenarioId?, screening?, pairedRunId?, preparing?}` (`authorFallback?` is no longer set) |
 | `GET /runs?limit=` | – | `{items: RunMeta[]}` |
 | `GET /runs/{id}` | – | `RunMeta` |
 | `GET /runs/{id}/events?after=&limit=` | limit ≤ `MAX_EVENTS_PAGE` (500) | `{events, lastSeq, hasMore}` |
@@ -254,7 +256,7 @@ server → client `WsServerMessage = {kind:'events', runId, events} | {kind:'pin
 userPoolId, clientId, domain, redirectUri}}`.
 
 Records: `RunMeta {runId, scenarioId, scenarioTitle, mode, status, pairedRunId?, createdAt, simMinute, lastSeq, totals,
-speed, llm?, updatedAt?, endedAt?, error?}`; `ScenarioSummary {id, title, station, aircraftType, triggerType,
+speed, llm?, updatedAt?, endedAt?, error?, preparing?}`; `ScenarioSummary {id, title, station, aircraftType, triggerType,
 visibility, twistCount, inspiredBy}` (`summariseScenario(s)`); `BrandPack {carrierName, carrierCode, logoSvg?,
 colours {primary, accent}, consultancyName?, stations[], disclaimer}`; `Station {iata, name, lat, lon, country}`;
 `EvalReport {id, createdAt, tier, gitSha?, caseCount, passRateByLayer, hardAssertionPassRate, judgeMean|null,
@@ -358,3 +360,4 @@ Additions beyond the task-01 brief (all optional or new, none breaking):
 | systems (task 07) | `occ.airborne` (`AirborneFlight`, keyed by flight: phase, squawk, position fix, destination, ETA, notional endurance, commander decision) and `occ.commanderLog` (`CommanderLogEntry`, `decidedBy: "Commander"`); `SQUAWK_STATUSES`, `COMMANDER_DECISIONS`; `RESOURCE_KINDS` + `medical`, `police` | flight following and the commander's decisions, set only by scenario or presenter events (twists), never by agents |
 | scenario (task 07) | `Scenario.airborne?` (`ScenarioAirborneSchema`: flight, from, plannedDestination, position, altitude, heading, etaMinute, fuelEnduranceMin, squawk, pax); `aircraft.station` is the arrival station | airborne scenarios; the regenerated `scenario.schema.json` |
 | kpi (task 07) | `ComplianceValue.commanderAuthorityRespected?` (airborne only); `KpiSnapshot.diversionCostEur?` (estimate, included in `totalCostEur`) | the commander's authority as a compliance item; diversion and care-surge cost |
+| api/events/runtime/store (async authoring fix, 2026-09-27) | **`POST /runs` with a flight context never waits for an LLM**: regex-only screening (`screenInputFast`), deterministic template scenario (stored private; a fresh id suffix when text is given; `other` uses the first startable family for the flight), `RunMeta.preparing?` + `scenario.authoring{started}`, async Run Lambda invoke `{runId, authoring: {text, label?}}` (`ExecuteRunInput.authoring?`, `AuthoringRequest`). `CreateRunRequest.withBaseline?` (flight context only) creates the paired baseline on the server; `CreateRunResponse.{pairedRunId?, preparing?}`. New event `scenario.authoring {status: started\|patched\|fallback, detail, errors?, costUsd?}` (`SCENARIO_AUTHORING_STATUSES`); reducer `meta.authoring? {status, detail, seq}`. `ScenarioPatchSchema` / `ScenarioPatch` / `applyScenarioPatch` / `SCENARIO_PATCH_LIMITS` / `PATCH_TWIST_PREFIX` (`src/scenario-patch.ts`, browser-safe). **`POST /scenarios/author` is async**: 202 `{draftId, status, screening}` (`AuthorScenarioResponse.{draftId?, status?}`), new route `getAuthorDraft` `GET /scenarios/drafts/{id}` → `AuthorDraft` (`AUTHOR_DRAFT_STATUSES`, `AUTHOR_DRAFT_STALE_MS` = 6 min: an older pending draft is reported failed). `Store.putAuthorDraft/getAuthorDraft` (MemoryStore + snapshot `drafts?`; DynamoStore `DRAFT#{id}/META`, TTL 1 day) + conformance tests | live 2026-09-27: `POST /runs` with free text hit API Gateway's 29 s limit (sync author Lambda invoke, whole-scenario generation ≥ 60 s). The Author now patches the template in the Run Lambda (≤ 4 iterations, ≤ 2 proposals, ≤ 2,048 output tokens, 45 s hard cap, fallback = template); a paired run waits for `preparing` to clear so both runs use the identical scenario |

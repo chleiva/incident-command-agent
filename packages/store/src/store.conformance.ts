@@ -322,5 +322,36 @@ export function runStoreConformance(name: string, factory: () => Store | Promise
       await store.putEvalReport(newest);
       expect((await store.getLatestEvalReport())?.id).toBe(newest.id);
     });
+
+    it('stores, replaces and reads author drafts', async () => {
+      const store = await factory();
+      const draftId = uid('draft');
+      const screening = { verdict: 'clean' as const, findings: [] };
+      await store.putAuthorDraft({
+        draftId,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        screening,
+      });
+      expect(await store.getAuthorDraft(draftId)).toMatchObject({ draftId, status: 'pending' });
+      await store.putAuthorDraft({
+        draftId,
+        status: 'failed',
+        createdAt: new Date().toISOString(),
+        screening,
+        errors: ['boom'],
+      });
+      expect(await store.getAuthorDraft(draftId)).toMatchObject({ status: 'failed', errors: ['boom'] });
+      expect(await store.getAuthorDraft('missing-draft')).toBeNull();
+    });
+
+    it('keeps the additive RunMeta.preparing flag through create and update', async () => {
+      const store = await factory();
+      const m = makeRunMeta({ preparing: true });
+      await store.createRun(m);
+      expect((await store.getRun(m.runId))?.preparing).toBe(true);
+      await store.updateRun(m.runId, { preparing: false });
+      expect((await store.getRun(m.runId))?.preparing).toBe(false);
+    });
   });
 }

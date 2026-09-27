@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** Shared test fixtures for @ica/api (not exported from the package). */
-import { type ApprovalRecord, type AuthorResult, type Scenario, type ScreeningResult } from '@ica/schema';
+import { type ApprovalRecord, type AuthoringRequest, type Scenario, type ScreeningResult } from '@ica/schema';
 import scenarioFixture from '@ica/schema/fixtures/scenario.minimal.json' with { type: 'json' };
 import { MemoryEventBus, MemoryStore, MemoryTraceStore } from '@ica/store';
 import { DEFAULT_BRAND, FALLBACK_STATIONS } from './config/app-config';
@@ -51,16 +51,22 @@ export function makeDeps(overrides: Partial<ApiDeps> & { env?: Record<string, st
   const store = new MemoryStore({ bus });
   const traces = new MemoryTraceStore();
   const launched: string[] = [];
+  const launches: { runId: string; authoring?: AuthoringRequest }[] = [];
+  const authorStarts: { draftId: string; text: string }[] = [];
   const screenCalls: string[] = [];
-  let authorResult: AuthorResult = { screening: { verdict: 'clean', findings: [] } };
   let screenResult: ScreeningResult = { verdict: 'clean', findings: [] };
   let t = new Date('2026-06-01T09:00:00.000Z');
   let n = 0;
   const deps: ApiDeps = {
     store,
     traces,
-    launcher: { launch: async (runId) => void launched.push(runId) },
-    author: { author: async () => authorResult },
+    launcher: {
+      launch: async (runId, opts) => {
+        launched.push(runId);
+        launches.push({ runId, ...(opts?.authoring ? { authoring: opts.authoring } : {}) });
+      },
+    },
+    author: { start: async (draftId, text) => void authorStarts.push({ draftId, text }) },
     screen: async (text) => {
       screenCalls.push(text);
       return screenResult;
@@ -85,9 +91,10 @@ export function makeDeps(overrides: Partial<ApiDeps> & { env?: Record<string, st
     bus,
     traces,
     launched,
+    launches,
+    authorStarts,
     screenCalls,
     handler: createApiHandler(deps),
-    setAuthorResult: (r: AuthorResult) => (authorResult = r),
     setScreenResult: (r: ScreeningResult) => (screenResult = r),
     setNow: (d: Date) => (t = d),
   };

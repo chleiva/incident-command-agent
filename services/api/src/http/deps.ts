@@ -3,18 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** Everything the router needs, injected (Lambda: DynamoDB/S3/Lambda invoke; local: memory + in-process). */
-import type { AppConfig, AuthorResult, Scenario, ScreeningResult, Store, TraceStore } from '@ica/schema';
+import type { AppConfig, AuthoringRequest, Scenario, ScreeningResult, Store, TraceStore } from '@ica/schema';
 import type { ApiSettings } from '../config/settings';
 import type { Logger } from '../util/log';
 
 /** Starts a run asynchronously (Lambda: `InvocationType: 'Event'`; local: fire-and-forget in-process). */
 export interface RunLauncher {
-  launch(runId: string): Promise<void>;
+  /** `authoring`: the run patches its (template) scenario from the screened free text before the world starts. */
+  launch(runId: string, opts?: { authoring?: AuthoringRequest }): Promise<void>;
 }
 
-/** Runs the Scenario Author synchronously (Lambda: RequestResponse invoke of the author Lambda). */
+/**
+ * Starts the Scenario Author for a Training draft, asynchronously (Lambda: `InvocationType: 'Event'` of the author
+ * Lambda; local: in-process). The author writes the result to the draft (`Store.putAuthorDraft`).
+ */
 export interface AuthorInvoker {
-  author(text: string): Promise<AuthorResult>;
+  start(draftId: string, text: string): Promise<void>;
 }
 
 export interface ApiDeps {
@@ -24,6 +28,11 @@ export interface ApiDeps {
   author: AuthorInvoker;
   /** Input screening (spec §11 layer 3), `screenInput` from @ica/run. */
   screen(text: string): Promise<ScreeningResult>;
+  /**
+   * Fast input screening for `POST /runs` and `POST /scenarios/author` (regex heuristics only, never an LLM:
+   * `screenInputFast` from @ica/run). Defaults to `screen`.
+   */
+  screenFast?(text: string): ScreeningResult | Promise<ScreeningResult>;
   /** Shipped scenarios (`publicScenarios` from @ica/scenarios). */
   publicScenarios: Scenario[];
   settings: ApiSettings;
@@ -38,6 +47,7 @@ export interface ApiDeps {
   presign?(key: string): Promise<string>;
   now?(): Date;
   newRunId?(): string;
+  newDraftId?(): string;
   log?: Logger;
   /** Exports above this size are offloaded to the TraceStore and returned as a URL (default 5 MB). */
   exportInlineMaxBytes?: number;

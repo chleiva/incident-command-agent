@@ -11,6 +11,7 @@
 export * from './ids';
 export * from './common';
 export * from './scenario';
+export * from './scenario-patch';
 export * from './systems';
 export * from './kpi';
 export * from './events';

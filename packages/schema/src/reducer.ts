@@ -22,7 +22,13 @@ import type {
   RunTotals,
 } from './common';
 import { ZERO_TOTALS } from './common';
-import { approvalStatusFor, type ApprovalDecisionKind, type ApprovalStatus, type RunEvent } from './events';
+import {
+  approvalStatusFor,
+  type ApprovalDecisionKind,
+  type ApprovalStatus,
+  type RunEvent,
+  type ScenarioAuthoringStatus,
+} from './events';
 import type { Actor, AgentRole, RunMode, RunStatus } from './ids';
 import type { KpiSnapshot } from './kpi';
 import { emptySystemState, type AnyEntity, type SystemState } from './systems';
@@ -130,6 +136,8 @@ export interface RunProjection {
     createdSeq?: number;
     startedWallTime?: string;
     endedWallTime?: string;
+    /** Addition (async authoring): the latest `scenario.authoring` (preparing the scenario from free text). */
+    authoring?: { status: ScenarioAuthoringStatus; detail: string; seq: number };
   };
   simMinute: number;
   simTime: string | null;
@@ -456,6 +464,11 @@ export function applyEvent(state: RunProjection, e: RunEvent): RunProjection {
         ...s,
         meta: { ...s.meta, llm: e.payload.to },
         fallbacks: [...s.fallbacks, { seq: e.seq, ...e.payload }],
+      };
+    case 'scenario.authoring':
+      return {
+        ...s,
+        meta: { ...s.meta, authoring: { status: e.payload.status, detail: e.payload.detail, seq: e.seq } },
       };
     default:
       // twist.requested, control.requested, world.process and future types: no projected state.

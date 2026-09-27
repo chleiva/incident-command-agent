@@ -76,22 +76,30 @@ describe('Lambda launchers', () => {
     await expect(new LambdaRunLauncher(bad, 'x').launch('r')).rejects.toThrow(/500/);
   });
 
-  it('invokes the author Lambda synchronously and surfaces function errors', async () => {
-    const result = { screening: { verdict: 'clean', findings: [] } };
-    const ok = {
-      send: async (c: InvokeCommand) => {
-        expect(c.input.InvocationType).toBe('RequestResponse');
-        return { StatusCode: 200, Payload: new TextEncoder().encode(JSON.stringify(result)) };
-      },
-    } as never;
-    expect(await new LambdaAuthorInvoker(ok, 'author-fn').author('text')).toEqual(result);
-    const failing = {
-      send: async () => ({
-        StatusCode: 200,
-        FunctionError: 'Unhandled',
-        Payload: new TextEncoder().encode(JSON.stringify({ errorMessage: 'boom' })),
-      }),
-    } as never;
-    await expect(new LambdaAuthorInvoker(failing, 'author-fn').author('t')).rejects.toThrow(/boom/);
+  it('passes the authoring request in the async Run Lambda payload', async () => {
+    const sent: InvokeCommand[] = [];
+    const client = { send: async (c: InvokeCommand) => (sent.push(c), { StatusCode: 202 }) } as never;
+    await new LambdaRunLauncher(client, 'run-fn').launch('run-2', {
+      authoring: { text: 'Leak getting worse', label: 'Hydraulic leak' },
+    });
+    expect(sent[0].input.InvocationType).toBe('Event');
+    expect(JSON.parse(new TextDecoder().decode(sent[0].input.Payload as Uint8Array))).toEqual({
+      runId: 'run-2',
+      authoring: { text: 'Leak getting worse', label: 'Hydraulic leak' },
+    });
+  });
+
+  it('invokes the author Lambda asynchronously with {draftId, text}', async () => {
+    const sent: InvokeCommand[] = [];
+    const ok = { send: async (c: InvokeCommand) => (sent.push(c), { StatusCode: 202 }) } as never;
+    await new LambdaAuthorInvoker(ok, 'author-fn').start('draft-1', 'text');
+    expect(sent[0].input.InvocationType).toBe('Event');
+    expect(sent[0].input.FunctionName).toBe('author-fn');
+    expect(JSON.parse(new TextDecoder().decode(sent[0].input.Payload as Uint8Array))).toEqual({
+      draftId: 'draft-1',
+      text: 'text',
+    });
+    const bad = { send: async () => ({ StatusCode: 500 }) } as never;
+    await expect(new LambdaAuthorInvoker(bad, 'x').start('d', 't')).rejects.toThrow(/500/);
   });
 });

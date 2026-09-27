@@ -18,6 +18,7 @@ import {
   summariseScenario,
   type Actor,
   type AppConfig,
+  type AuthorDraft,
   type ApprovalDecisionRequest,
   type ControlRequest,
   type CreateRunRequest,
@@ -88,6 +89,25 @@ const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 const err = (status: number, code: string, error: string) => json(status, { error, code });
 
+/** `scenario.authoring` started → patched (template seqs far above any recording's). */
+function authoringPrelude(simTime: string): RunEvent[] {
+  const base = { runId: 'mock', actor: { kind: 'world' as const }, simMinute: 0, simTime, wallTime: simTime };
+  return [
+    {
+      ...base,
+      seq: 900_001,
+      type: 'scenario.authoring',
+      payload: { status: 'started', detail: 'Preparing scenario from your description…' },
+    },
+    {
+      ...base,
+      seq: 900_002,
+      type: 'scenario.authoring',
+      payload: { status: 'patched', detail: 'Scenario enriched from your description' },
+    },
+  ] as RunEvent[];
+}
+
 /** Regex input screen (a stand-in for the real guardrail; spec §11 layer 3). */
 export function screenText(text: string): ScreeningResult {
   const patterns: [string, RegExp][] = [
@@ -154,6 +174,7 @@ export class MockBackend {
   private dropUntil = 0;
   private readonly sockets = new Set<MockSocket>();
   readonly autopilot: boolean;
+  private drafts = new Map<string, AuthorDraft>();
   timeScale: number;
   private readonly now: () => number;
 
@@ -206,8 +227,23 @@ export class MockBackend {
       return json(200, MOCK_EVAL_REPORT satisfies EvalReport);
     if (a === 'scenarios') {
       if (method === 'GET' && !b) return json(200, { items: this.listScenarios() });
-      if (method === 'POST' && b === 'author')
-        return json(200, this.author(String((body as { text?: string })?.text ?? '')));
+      if (method === 'POST' && b === 'author') {
+        const r = this.author(String((body as { text?: string })?.text ?? ''));
+        return r.status === 'failed' && r.screening.verdict === 'rejected'
+          ? err(422, 'input_rejected', 'the text was rejected by input screening')
+          : json(202, { draftId: r.draftId, status: 'pending', screening: r.screening });
+      }
+      if (method === 'GET' && b === 'drafts' && c) {
+        const d = this.drafts.get(c);
+        if (!d) return err(404, 'draft_not_found', `Draft ${c} not found`);
+        // The mock author "finishes" a moment after the request.
+        return json(
+          200,
+          this.now() - Date.parse(d.createdAt) >= 1200 / this.timeScale
+            ? d
+            : { ...d, status: 'pending', scenario: undefined },
+        );
+      }
       if (method === 'GET' && b) {
         const s = this.scenarios.get(b);
         return s ? json(200, s.scenario) : err(404, 'not_found', `Scenario ${b} not found`);
@@ -284,9 +320,12 @@ export class MockBackend {
     return this.scenarios.has(scenarioId);
   }
 
-  private author(text: string) {
+  private author(text: string): AuthorDraft {
     const screening = screenText(text);
-    if (screening.verdict === 'rejected') return { screening, errors: ['Input rejected by screening'] };
+    const draftId = `draft-mock-${++this.counter}`;
+    const createdAt = new Date(this.now()).toISOString();
+    if (screening.verdict === 'rejected')
+      return { draftId, status: 'failed', createdAt, screening, errors: ['Input rejected by screening'] };
     const base = recordingFor('s01-pushback-tug-contact') ?? this.recordings[0]!;
     const n = ++this.counter;
     const first =
@@ -302,7 +341,9 @@ export class MockBackend {
       visibility: 'private',
     };
     this.scenarios.set(scenario.id, { scenario, recording: base });
-    return { scenario, screening };
+    const d: AuthorDraft = { draftId, status: 'ready', createdAt, screening, scenario };
+    this.drafts.set(draftId, d);
+    return d;
   }
 
   /**
@@ -353,6 +394,8 @@ export class MockBackend {
     } catch (e) {
       return err(409, 'not_applicable', e instanceof Error ? e.message : String(e));
     }
+    // Async authoring (mock): the "Author" adds the screened note to the narrative, announced by scenario.authoring
+    // events before the world starts, like the Run Lambda does.
     const note = req.text
       ? ` Duty manager's note (screened): «${screening?.neutralisedText ?? req.text}»`
       : '';
@@ -372,13 +415,37 @@ export class MockBackend {
       baseline: fix(replay.remap(rec.baseline)),
     };
     this.scenarios.set(scenario.id, { scenario, recording });
-    const res = this.createRun({ ...req, scenarioId: scenario.id });
+    const prelude = req.text ? authoringPrelude(scenario.startSimTime) : [];
+    const agentId = this.nextRunId();
+    const baselineId = req.withBaseline ? this.nextRunId() : undefined;
+    const res = this.createRun(
+      { ...req, scenarioId: scenario.id, ...(baselineId ? { pairedRunId: baselineId } : {}) },
+      prelude,
+      agentId,
+    );
     if (!res.ok) return res;
-    const body = (await res.json()) as { runId: string };
-    return json(200, { runId: body.runId, scenarioId: scenario.id, ...(screening ? { screening } : {}) });
+    if (baselineId) {
+      const b = this.createRun(
+        { scenarioId: scenario.id, mode: 'baseline', speed: req.speed, pairedRunId: agentId },
+        prelude,
+        baselineId,
+      );
+      if (!b.ok) return b;
+    }
+    return json(201, {
+      runId: agentId,
+      scenarioId: scenario.id,
+      ...(baselineId ? { pairedRunId: baselineId } : {}),
+      ...(prelude.length ? { preparing: true } : {}),
+      ...(screening ? { screening } : {}),
+    });
   }
 
-  private createRun(req: CreateRunRequest): Response {
+  private nextRunId(): string {
+    return `run-mock-${Date.now().toString(36)}-${++this.counter}`;
+  }
+
+  private createRun(req: CreateRunRequest, prelude: RunEvent[] = [], id?: string): Response {
     if (!req.scenarioId) return err(400, 'bad_request', 'scenarioId or flightContext is required');
     const entry = this.scenarios.get(req.scenarioId);
     if (!entry)
@@ -387,9 +454,10 @@ export class MockBackend {
         'no_recording',
         `Mock mode has no recording for ${req.scenarioId}; use the local dev server.`,
       );
-    const runId = `run-mock-${Date.now().toString(36)}-${++this.counter}`;
+    const runId = id ?? this.nextRunId();
     const template = req.mode === 'baseline' ? entry.recording.baseline : entry.recording.agent;
-    const script = template.map((e, i) => {
+    const withPrelude = prelude.length ? [template[0]!, ...prelude, ...template.slice(1)] : template;
+    const script = withPrelude.map((e, i) => {
       if (i !== 0 || e.type !== 'run.created') return e;
       const payload = { ...e.payload, scenarioId: req.scenarioId, speed: req.speed ?? 6 } as Record<
         string,
@@ -617,6 +685,8 @@ export class MockBackend {
       this.release(run, t);
       const next = run.script[run.cursor];
       if (!next || !paced) return 0;
+      // Mock "authoring": hold the world a moment while the scenario is prepared.
+      if (t.type === 'scenario.authoring' && t.payload.status === 'started') return 1500 / this.timeScale;
       const msPerMinute = 60_000 / Math.max(1, run.meta.speed) / this.timeScale;
       const gap = Math.max(0, next.simMinute - t.simMinute) * msPerMinute;
       return Math.max(35 / this.timeScale, gap);

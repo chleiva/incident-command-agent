@@ -445,7 +445,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
           },
           "S3Key": "ASSET",
         },
-        "Description": "Scenario Author: free text → validated scenario",
+        "Description": "Scenario Author: free text → validated scenario (async, writes a draft)",
         "Environment": {
           "Variables": {
             "FEATURE_WEB_SEARCH": "true",
@@ -524,9 +524,20 @@ exports[`ApiStack > matches the snapshot 1`] = `
             "Value": "incident-command-agent",
           },
         ],
-        "Timeout": 60,
+        "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "AuthorFnEventInvokeConfigAFFF29CC": {
+      "Properties": {
+        "FunctionName": {
+          "Ref": "AuthorFn58EF01CB",
+        },
+        "MaximumEventAgeInSeconds": 300,
+        "MaximumRetryAttempts": 0,
+        "Qualifier": "$LATEST",
+      },
+      "Type": "AWS::Lambda::EventInvokeConfig",
     },
     "AuthorFnLogsDF6B5CD6": {
       "DeletionPolicy": "Retain",
@@ -601,13 +612,17 @@ exports[`ApiStack > matches the snapshot 1`] = `
             {
               "Action": [
                 "dynamodb:BatchGetItem",
+                "dynamodb:BatchWriteItem",
                 "dynamodb:ConditionCheckItem",
+                "dynamodb:DeleteItem",
                 "dynamodb:DescribeTable",
                 "dynamodb:GetItem",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator",
+                "dynamodb:PutItem",
                 "dynamodb:Query",
                 "dynamodb:Scan",
+                "dynamodb:UpdateItem",
               ],
               "Effect": "Allow",
               "Resource": [
@@ -1955,6 +1970,59 @@ exports[`ApiStack > matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::ApiGatewayV2::Route",
+    },
+    "HttpApiGETscenariosdraftsid366066FF": {
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApiF5A9A8A7",
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "HttpApiCognitoJwt4B02D8E4",
+        },
+        "RouteKey": "GET /scenarios/drafts/{id}",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "HttpApiGETscenariosApiIntegrationB4663493",
+              },
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::ApiGatewayV2::Route",
+    },
+    "HttpApiGETscenariosdraftsidApiIntegrationPermission79C6CC8B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "ApiFnE0725F78",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:execute-api:eu-west-2:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "HttpApiF5A9A8A7",
+              },
+              "/*/*/scenarios/drafts/{id}",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
     "HttpApiGETscenariosidApiIntegrationPermission3A6DAD7B": {
       "Properties": {

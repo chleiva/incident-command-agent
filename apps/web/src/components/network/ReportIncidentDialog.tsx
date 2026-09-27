@@ -229,7 +229,7 @@ export function ReportIncidentDialog({
                   <span className="text-caption text-fg-muted" data-testid="author-note">
                     {mode === 'mock'
                       ? 'Mock mode: your text is screened and added to the scenario; no LLM call.'
-                      : 'Adds a Scenario Author step: one LLM call, about 10–30 s. Your text is screened and treated as data.'}
+                      : 'The cockpit opens at once; the Scenario Author adds your details before the world starts (under a minute). Your text is screened and treated as data.'}
                   </span>
                 )}
               </label>

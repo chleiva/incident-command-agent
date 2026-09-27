@@ -54,7 +54,7 @@ async function start(mode: 'auto' | 'fake' = 'auto') {
     bus,
     traces: new MemoryTraceStore(),
     launcher,
-    author: { author: async () => Promise.reject(new Error('not implemented (task 02)')) },
+    author: { start: async () => Promise.reject(new Error('not implemented (task 02)')) },
     screen: async () => ({ verdict: 'clean', findings: [] }),
     publicScenarios: [SCENARIO],
     settings: settingsFromEnv({ AUTH_MODE: 'none', LLM_PROVIDER: 'scripted', LLM_MODEL: 'fake' }),

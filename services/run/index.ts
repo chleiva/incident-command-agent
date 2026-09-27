@@ -9,7 +9,7 @@
 import { EnvSecretStore } from '@ica/store';
 import type { AuthorResult, ExecuteRunInput, RunDeps, ScreeningResult } from '@ica/schema';
 import { createLlmClassifier } from './guardrails/classifier';
-import { screenText, type ScreenInputOptions } from './guardrails/screen-input';
+import { screenHeuristics, screenText, type ScreenInputOptions } from './guardrails/screen-input';
 import { createProvider } from './llm/router';
 import { defaultRegistry } from './runtime/registry';
 import {
@@ -76,4 +76,13 @@ export async function screenInput(text: string, opts: ScreenInputOptions = {}): 
     c = classifier;
   }
   return screenText(text, { toolNames: toolNamesFor(defaultRegistry()), ...opts, classifier: c });
+}
+
+/**
+ * Fast input screening for request paths (async authoring): the regex heuristics only, never the LLM classifier, so
+ * `POST /runs` and `POST /scenarios/author` stay well under a second. The Run/author Lambdas screen again off the
+ * request path.
+ */
+export function screenInputFast(text: string): ScreeningResult {
+  return screenHeuristics(text, { toolNames: toolNamesFor(defaultRegistry()) });
 }

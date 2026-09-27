@@ -8,6 +8,7 @@
  */
 import type {
   AppConfig,
+  AuthorDraft,
   ApprovalDecisionRequest,
   ApprovalDecisionResponse,
   AuthorScenarioResponse,
@@ -97,7 +98,9 @@ export function createApiClient(opts: ApiClientOptions) {
   return {
     listScenarios: () => request<ListScenariosResponse>('GET', '/scenarios'),
     getScenario: (id: string) => request<Scenario>('GET', `/scenarios/${enc(id)}`),
+    /** 202 `{draftId, status: 'pending', screening}`: poll `getAuthorDraft` (see `authorAndWait`). */
     authorScenario: (text: string) => request<AuthorScenarioResponse>('POST', '/scenarios/author', { text }),
+    getAuthorDraft: (draftId: string) => request<AuthorDraft>('GET', `/scenarios/drafts/${enc(draftId)}`),
     createRun: (req: CreateRunRequest) => request<CreateRunResponse>('POST', '/runs', req),
     listRuns: (limit = 10) => request<ListRunsResponse>('GET', `/runs?limit=${limit}`),
     getRun: (runId: string) => request<RunMeta>('GET', `/runs/${enc(runId)}`),
@@ -118,4 +121,51 @@ export function createApiClient(opts: ApiClientOptions) {
     getConfig: () => request<AppConfig>('GET', '/config'),
     getLatestEval: () => request<EvalReport>('GET', '/evals/latest'),
   };
+}
+
+export interface AuthorWaitOptions {
+  /** Called on every poll with the elapsed milliseconds (progress UI). */
+  onProgress?: (elapsedMs: number) => void;
+  pollMs?: number;
+  timeoutMs?: number;
+  sleep?: (ms: number) => Promise<void>;
+  now?: () => number;
+}
+
+/**
+ * Training "write a scenario": start the Scenario Author (202 + draft id), then poll the draft until it is ready or
+ * failed. Resolves with the same shape the synchronous endpoint used to return.
+ */
+export async function authorAndWait(
+  api: Pick<ApiClient, 'authorScenario' | 'getAuthorDraft'>,
+  text: string,
+  opts: AuthorWaitOptions = {},
+): Promise<AuthorScenarioResponse> {
+  const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const now = opts.now ?? (() => Date.now());
+  const started = now();
+  const first = await api.authorScenario(text);
+  if (!first.draftId || first.scenario || first.status === 'ready' || first.status === 'failed') return first;
+  const timeoutMs = opts.timeoutMs ?? 6 * 60_000;
+  for (;;) {
+    opts.onProgress?.(now() - started);
+    await sleep(opts.pollMs ?? 2_000);
+    const d = await api.getAuthorDraft(first.draftId);
+    if (d.status === 'ready' || d.status === 'failed') {
+      return {
+        draftId: d.draftId,
+        status: d.status,
+        screening: d.screening ?? first.screening,
+        ...(d.scenario ? { scenario: d.scenario } : {}),
+        ...(d.errors?.length ? { errors: d.errors } : {}),
+      };
+    }
+    if (now() - started > timeoutMs)
+      return {
+        draftId: first.draftId,
+        status: 'failed',
+        screening: first.screening,
+        errors: ['The Scenario Author did not finish in time.'],
+      };
+  }
 }

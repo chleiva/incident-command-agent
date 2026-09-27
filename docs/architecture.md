@@ -15,7 +15,7 @@ flowchart LR
     HTTP["HTTP API<br/>JWT authorizer, throttling"]
     WS["WebSocket API<br/>JWT on $connect"]
     API["api Lambda<br/>(router)"]
-    AUTH["author Lambda<br/>runAuthor"]
+    AUTH["author Lambda<br/>runAuthor → draft<br/>5 min"]
     RUN["Run Lambda<br/>world engine + runAgent<br/>15 min"]
     FAN["fan-out Lambda"]
     DDB[("DynamoDB single table<br/>stream NEW_IMAGE")]
@@ -29,8 +29,9 @@ flowchart LR
   SPA -->|login| COG
   SPA -->|JWT| HTTP --> API
   SPA <-->|events| WS
-  API -->|sync invoke| AUTH
-  API -->|async invoke {runId}| RUN
+  API -->|async invoke {draftId, text}| AUTH
+  AUTH -->|draft + private scenario| DDB
+  API -->|async invoke {runId, authoring?}| RUN
   API -->|append events, approvals| DDB
   RUN -->|append events + SYS rows (transaction)| DDB
   RUN --> LLM

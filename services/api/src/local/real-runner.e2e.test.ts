@@ -103,7 +103,7 @@ describe('local dev server with the real runner (scripted provider)', () => {
       bus,
       traces,
       launcher,
-      author: { author: async () => Promise.reject(new Error('unused')) },
+      author: { start: async () => Promise.reject(new Error('unused')) },
       screen: async () => ({ verdict: 'clean', findings: [] }),
       publicScenarios: [S01],
       settings: settingsFromEnv({

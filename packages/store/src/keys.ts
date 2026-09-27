@@ -15,6 +15,7 @@
  * | Mock state | RUN#{id}        | SYS#{system}#{entity}#{id}  | –             | –                      |
  * | Connection | WS#{connId}     | RUN#{id}                    | RUN#{id}      | WS#{connId}            |
  * | Eval       | EVAL#{id}       | META                        | EVAL          | {createdAt}#{id}       |
+ * | Draft      | DRAFT#{id}      | META                        | –             | –                      |
  */
 import { eventSortKey } from '@ica/schema';
 
@@ -26,6 +27,9 @@ export const approvalSk = (approvalId: string) => `APR#${approvalId}`;
 export const sysSk = (system: string, entity: string, id: string) => `SYS#${system}#${entity}#${id}`;
 export const connectionPk = (connectionId: string) => `WS#${connectionId}`;
 export const evalPk = (id: string) => `EVAL#${id}`;
+/** Addition (async authoring): Training author drafts (TTL `DRAFT_TTL_DAYS`). */
+export const draftPk = (id: string) => `DRAFT#${id}`;
+export const DRAFT_TTL_DAYS = 1;
 
 export const GSI1 = 'GSI1';
 export const GSI1_SCENARIOS = 'SCN';
