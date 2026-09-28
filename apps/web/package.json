@@ -19,7 +19,9 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static --quiet",
     "storybook:a11y": "node scripts/a11y-storybook.mjs",
-    "screenshots": "node scripts/screenshots.mjs"
+    "screenshots": "node scripts/screenshots.mjs",
+    "gifs": "node scripts/media.mjs --gifs",
+    "readme:screenshots": "node scripts/media.mjs --pngs"
   },
   "dependencies": {
     "@ica/network": "*",

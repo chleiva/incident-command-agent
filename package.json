@@ -26,6 +26,7 @@
     "prepare": "simple-git-hooks || true",
     "dev": "tsx scripts/dev/write-web-config.ts local && concurrently --kill-others-on-fail -n api,web -c blue,magenta \"npm run dev -w @ica/api\" \"npm run dev -w @ica/web\"",
     "dev:aws": "tsx scripts/dev/write-web-config.ts aws && npm run dev -w @ica/web",
+    "dev:mock": "npm run dev:mock -w @ica/web",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . --max-warnings=0 && prettier --check . --log-level warn",
@@ -44,7 +45,10 @@
     "deploy": "tsx scripts/ops/deploy.ts",
     "synth": "npm run synth -w @ica/infra --",
     "storybook": "npm run storybook -w @ica/web --",
+    "gifs": "npm run gifs -w @ica/web --",
+    "screenshots": "npm run readme:screenshots -w @ica/web --",
     "hygiene": "node scripts/hygiene/hygiene.mjs",
+    "docs:check": "node scripts/docs/check-readme.mjs",
     "run:local": "npm run run:local -w @ica/run --"
   },
   "simple-git-hooks": {
