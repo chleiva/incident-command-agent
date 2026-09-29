@@ -133,6 +133,7 @@ export function DecisionCard({
           <ApproverLine
             actor={decided.decidedBy}
             prefix={decided.decision === 'reject' ? 'Rejected by' : 'Approved by'}
+            {...(decided.method ? { method: decided.method } : {})}
           />
           {decided.reason && <span className="text-caption text-fg-subtle">“{decided.reason}”</span>}
         </div>

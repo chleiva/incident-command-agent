@@ -57,6 +57,11 @@ export const SafetyValueSchema = Type.Object({
   autoApprovedActions: Type.Optional(Type.Integer({ minimum: 0 })),
   /** Addition (demo review): `autoApprovedActions` by policy name. */
   autoApprovedByPolicy: Type.Optional(Type.Record(Type.String(), Type.Integer({ minimum: 0 }))),
+  /**
+   * Addition (owner decision 2026-09-29): of `humanDecisionsBeforeDependentActions`, those approved IMPLICITLY — a
+   * named human let the 60 s countdown run out without objecting. They count as human decisions. Absent = 0.
+   */
+  implicitApprovals: Type.Optional(Type.Integer({ minimum: 0 })),
 });
 export type SafetyValue = Static<typeof SafetyValueSchema>;
 

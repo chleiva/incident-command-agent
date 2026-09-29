@@ -10,7 +10,7 @@
  * `F` expands the focused zone, `⌘K` opens the palette, `Space` pauses/resumes the world clock.
  */
 import type { Engineer, Scenario, ScenarioSummary } from '@ica/schema/browser';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useRunActions } from '../app/actions';
 import { AppShell } from '../app/AppShell';
@@ -28,7 +28,7 @@ import { CommsLog } from '../components/passenger/CommsLog';
 import { CohortBoard } from '../components/passenger/CohortBoard';
 import { PhoneMock } from '../components/passenger/PhoneMock';
 import { KpiStrip } from '../components/kpi/KpiStrip';
-import { autoDecidedApprovals, type KpiTileKey } from '../components/kpi/kpiModel';
+import { autoDecidedApprovals, implicitDecidedApprovals, type KpiTileKey } from '../components/kpi/kpiModel';
 import { WhyDrawer } from '../components/kpi/WhyDrawer';
 import { Narrator } from '../components/narrator/Narrator';
 import { NetworkMap } from '../components/network/NetworkMap';
@@ -36,8 +36,14 @@ import { RotationGantt } from '../components/network/RotationGantt';
 import { SystemTabs } from '../components/inspector/SystemTabs';
 import type { PaletteCommand } from '../components/presenter/CommandPalette';
 import { RunEndedCard } from '../components/RunEndedCard';
-import { RunFailedBanner, RunRecoveryBanner } from '../components/RunHealthBanner';
-import { recoveryState, runFailure, runOutcome } from '../lib/runHealth';
+import { RunContinuationNote, RunFailedBanner, RunRecoveryBanner } from '../components/RunHealthBanner';
+import {
+  isFreshContinuation,
+  latestContinuation,
+  recoveryState,
+  runFailure,
+  runOutcome,
+} from '../lib/runHealth';
 import { ScenarioAuthoringNotice } from '../components/ScenarioAuthoringNotice';
 import { TimeScrubber } from '../components/timeline/TimeScrubber';
 import { Badge, Button, cx } from '../components/ui/primitives';
@@ -152,7 +158,10 @@ export default function Cockpit() {
   const starts = useMemo(() => travelStarts(events), [events]);
   const caption = useMemo(() => latestCaption(events), [events]);
   // Gated actions approved by the simulation or a policy (the safety gate shows ⚠, not ✓).
-  const safetyCtx = useMemo(() => ({ autoApproved: autoDecidedApprovals(view) }), [view]);
+  const safetyCtx = useMemo(
+    () => ({ autoApproved: autoDecidedApprovals(view), implicitApproved: implicitDecidedApprovals(view) }),
+    [view],
+  );
 
   const flights = Object.values(view.systems.occ.flights);
   const aircraft = Object.values(view.systems.mne.aircraft);
@@ -232,6 +241,16 @@ export default function Cockpit() {
   const failure = useMemo(() => runFailure(head, allEvents), [head, allEvents, version]);
   const recovery = useMemo(() => recoveryState(allEvents), [allEvents, version]);
   const [recoveryDismissed, setRecoveryDismissed] = useState<number | null>(null);
+  // Continuation in a fresh worker (15-min compute limit): a transient info note, only while it is fresh.
+  const continuation = useMemo(() => {
+    const c = latestContinuation(allEvents);
+    return c && isFreshContinuation(c, Date.now()) ? c : null;
+  }, [allEvents, version]);
+  const [continuationDismissed, setContinuationDismissed] = useState<number | null>(null);
+  const dismissContinuation = useCallback(
+    () => continuation && setContinuationDismissed(continuation.seq),
+    [continuation],
+  );
   const outcome = runOutcome(head.meta);
   const restart = () =>
     head.meta.scenarioId &&
@@ -559,6 +578,9 @@ export default function Cockpit() {
         recoveryDismissed !== recovery.seq && (
           <RunRecoveryBanner recovery={recovery} onDismiss={() => setRecoveryDismissed(recovery.seq)} />
         )
+      )}
+      {live && !failure && continuation && continuationDismissed !== continuation.seq && (
+        <RunContinuationNote continuation={continuation} onDismiss={dismissContinuation} />
       )}
       <div
         className={cx(

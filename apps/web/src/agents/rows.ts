@@ -18,6 +18,7 @@ import type {
 } from '@ica/schema/browser';
 import { clipText, fitHeadline, headline, HEADLINE_MAX, resultData, toolLabel } from './headline';
 import { ROLE_ORDER, roleShortName } from './roles';
+import { implicitShortPhrase } from '../lib/format';
 
 type P<T extends keyof EventPayloadMap> = EventPayloadMap[T];
 
@@ -33,7 +34,12 @@ export type RowKind =
   | 'stopped'
   | 'report'
   /** The run resumed after a system error (additive `run.resumed_after_error`); shown in the orchestrator column. */
-  | 'recovery';
+  | 'recovery'
+  /**
+   * The run continued in a fresh worker at the 15-minute compute limit (additive `run.continued`): a neutral divider
+   * in the orchestrator column, never an error.
+   */
+  | 'continuation';
 
 export type RowTier = 'executed' | 'proposed' | 'blocked';
 
@@ -70,6 +76,11 @@ export interface AgentRow {
   flags?: (P<'guardrail.flagged'> & { seq: number })[];
   report?: AgentReportEvent;
   aborted?: P<'agent.aborted'>;
+  /**
+   * Stop rows: the agent stopped only because the run was handed over to a fresh worker (the next run-level event is
+   * `run.continuing`). Shown calmly, not as a failure.
+   */
+  handover?: boolean;
   invalidation?: P<'approval.invalidated'>;
   brief?: string;
   approvalId?: string;
@@ -181,6 +192,9 @@ export function decisionHeadline(d: P<'approval.decision'>, minute: number): str
   // A simulation auto-approval never reads as a person.
   if (d.decidedBy.kind === 'policy' && d.decidedBy.policy === 'simulation-auto')
     return fitHeadline(`Auto-approved (simulation)${when}`);
+  // "Approve unless objected": the named person's decision, marked implicit (short form; headlines ≤ 60 chars).
+  if (d.decidedBy.kind === 'human' && d.method === 'implicit' && d.decision !== 'reject')
+    return fitHeadline(`${implicitShortPhrase(d.decidedBy)}${when}`);
   const who = deciderTitle(d.decidedBy);
   if (d.decision === 'reject') {
     const reason = d.reason?.trim();
@@ -221,6 +235,31 @@ export function waitingHeadline(tool: string): string {
 export const THOUGHT_HEADLINE = 'Reasoned about next steps';
 
 export const RECOVERY_HEADLINE = 'Resumed after a system error — re-briefed from the record';
+
+export const CONTINUATION_HEADLINE = 'Continued in a fresh worker (15-min compute limit)';
+
+export const HANDOVER_HEADLINE = 'Paused for the hand-over to a fresh worker';
+
+const RUN_BOUNDARY_TYPES = new Set(['run.continuing', 'run.recovering', 'run.completed', 'run.failed']);
+
+/**
+ * Seqs of stops caused by a hand-over: an agent stop whose next run-level boundary event is `run.continuing`.
+ * Read by type name (the continuation events are additive and optional).
+ */
+export function handoverStops(events: readonly RunEvent[]): Set<number> {
+  const out = new Set<number>();
+  let open: number[] = [];
+  for (const e of events) {
+    const type = e.type as string;
+    if (e.type === 'agent.aborted' && (e.payload.reason === 'stopped' || e.payload.reason === 'wall_clock'))
+      open.push(e.seq);
+    else if (RUN_BOUNDARY_TYPES.has(type)) {
+      if (type === 'run.continuing') for (const s of open) out.add(s);
+      open = [];
+    }
+  }
+  return out;
+}
 
 /** A tool error that says the system could not record the action (a store failure, not the agent's mistake). */
 export function isRecordingFailure(preview: string | undefined): boolean {
@@ -309,6 +348,7 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
     return r;
   };
   const turnOf = (e: RunEvent) => (typeof e.iteration === 'number' ? e.iteration + 1 : undefined);
+  const handovers = handoverStops(events);
 
   for (const e of events) {
     switch (e.type) {
@@ -592,24 +632,27 @@ export function deriveAgents(events: readonly RunEvent[]): AgentsModel {
           minute: e.simMinute,
           role: e.payload.role,
           agentRunId: e.agentRunId,
-          headline: stopHeadline(e.payload, limits),
+          headline: handovers.has(e.seq) ? HANDOVER_HEADLINE : stopHeadline(e.payload, limits),
           aborted: e.payload,
+          ...(handovers.has(e.seq) ? { handover: true } : {}),
         });
         break;
       }
       default: {
-        // Self-recovery (additive event): the orchestrator picks up again from the record.
-        if ((e.type as string) !== 'run.resumed_after_error') break;
+        // Self-recovery and continuation (additive events): the orchestrator picks up again from the record.
+        const type = e.type as string;
+        if (type !== 'run.resumed_after_error' && type !== 'run.continued') break;
         const orch = [...runs.values()].reverse().find((r) => r.role === 'orchestrator');
-        const agentRunId = e.agentRunId ?? orch?.agentRunId ?? 'recovery';
+        const continued = type === 'run.continued';
+        const agentRunId = e.agentRunId ?? orch?.agentRunId ?? (continued ? 'continuation' : 'recovery');
         push({
-          key: `rc-${e.seq}`,
-          kind: 'recovery',
+          key: `${continued ? 'cn' : 'rc'}-${e.seq}`,
+          kind: continued ? 'continuation' : 'recovery',
           seq: e.seq,
           minute: e.simMinute,
           role: 'orchestrator',
           agentRunId,
-          headline: fitHeadline(RECOVERY_HEADLINE),
+          headline: fitHeadline(continued ? CONTINUATION_HEADLINE : RECOVERY_HEADLINE),
         });
         break;
       }

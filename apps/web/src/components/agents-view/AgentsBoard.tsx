@@ -50,11 +50,15 @@ export function decidedText(row: AgentRow): string {
     case 'blocked':
       return `${row.headline}. The guardrail refused it; nothing was changed.`;
     case 'stopped':
-      return `${row.headline}. The agent did no further work.`;
+      return row.handover
+        ? 'The run moved to a fresh worker at the 15-minute compute limit. Nothing failed: pending approvals were kept and the coordination picked up from the record.'
+        : `${row.headline}. The agent did no further work.`;
     case 'report':
       return 'It finished and reported back.';
     case 'recovery':
       return 'The run hit a system error and recovered: the coordination picked up again from the recorded events, with nothing lost.';
+    case 'continuation':
+      return 'One worker may run for 15 minutes, so the run continued in a fresh one. Nothing failed: pending approvals, the clock and the speed were kept, and the orchestrator picked up from the record.';
   }
 }
 

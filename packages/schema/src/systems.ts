@@ -12,7 +12,14 @@
  * - AI-drafted text always carries `aiDrafted: true`.
  */
 import { Type, type Static } from '@sinclair/typebox';
-import { ActorSchema, HHMM_PATTERN, IataSchema, type StateSystemName, literalUnion } from './ids';
+import {
+  ActorSchema,
+  ApprovalMethodSchema,
+  HHMM_PATTERN,
+  IataSchema,
+  type StateSystemName,
+  literalUnion,
+} from './ids';
 import {
   AircraftTypeSchema,
   CohortKindSchema,
@@ -293,6 +300,8 @@ export const PassengerMessageSchema = Type.Object({
   aiDrafted: Type.Literal(true),
   sentAtMinute: Opt(Minute),
   approvedBy: Opt(ActorSchema),
+  /** Addition: how `approvedBy` decided — `implicit` = no objection within 60 s. Absent = explicit. */
+  approvalMethod: Opt(ApprovalMethodSchema),
   /** Addition (task 06): idempotency key of the send call. */
   requestId: Opt(Str),
 });

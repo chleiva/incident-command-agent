@@ -46,7 +46,7 @@ export async function decideOptimistically(
   } catch (e) {
     useUi.getState().setOptimistic(approvalId, null);
     if (e instanceof ApiRequestError && e.status === 409) {
-      if (req.policy !== 'simulation-auto')
+      if (req.policy !== 'simulation-auto' && req.method !== 'implicit')
         useUi.getState().pushToast({
           tone: 'info',
           title: 'Already decided',

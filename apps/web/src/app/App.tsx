@@ -154,20 +154,29 @@ function GlobalPalette() {
       run: () => useUi.getState().togglePlainLanguage(),
     },
     {
-      // Simulation: pending decisions approve themselves after a 10 s countdown (default OFF, per viewer).
+      // Implicit approval: a pending decision is approved in the viewer's name after 60 s unless they object (default ON).
       id: 'auto-approve',
       group: 'Decisions',
       label: `${AUTO_APPROVE_PALETTE_LABEL}: ${autoApprove ? 'on' : 'off'}`,
       icon: 'clock',
-      keywords: ['auto-approve', 'automatic', 'countdown', 'simulation', 'decisions', 'approve', 'timer'],
+      keywords: [
+        'auto-approve',
+        'automatic',
+        'countdown',
+        'implicit',
+        'object',
+        'decisions',
+        'approve',
+        'timer',
+      ],
       run: () => {
         const on = !useUi.getState().autoApprove;
         useUi.getState().setAutoApprove(on);
         useUi.getState().pushToast({
           tone: 'info',
-          title: on ? 'Auto-approve on' : 'Auto-approve off',
+          title: on ? 'Approve unless I object: on' : 'Approve unless I object: off',
           body: on
-            ? 'Decisions approve themselves after 10 s unless you look at them.'
+            ? 'Decisions you leave alone for 60 s are approved in your name, recorded as implicit.'
             : 'Decision cards now wait for you.',
         });
       },

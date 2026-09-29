@@ -72,6 +72,12 @@ export interface Store {
    */
   claimResume?(runId: string, attempt: number): Promise<boolean>;
 
+  /**
+   * Addition (continuation): claim continuation attempt `attempt` of a run, atomically (`RunMeta.continuationAttempt`,
+   * same semantics as `claimResume`, independent counter). Optional: a store without it never continues.
+   */
+  claimContinuation?(runId: string, attempt: number): Promise<boolean>;
+
   // mock state (current, as persisted by append)
   getSystemState(runId: string, system?: StateSystemName): Promise<Partial<SystemState>>;
 

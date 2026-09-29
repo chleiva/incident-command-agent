@@ -5,7 +5,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { plainFailureReason } from '../lib/runHealth';
-import { RunFailedBanner, RunRecoveryBanner } from './RunHealthBanner';
+import { RunContinuationNote, RunFailedBanner, RunRecoveryBanner } from './RunHealthBanner';
 
 const meta: Meta<typeof RunFailedBanner> = {
   title: 'Cockpit/RunHealthBanner',
@@ -60,6 +60,16 @@ export const Recovered: StoryObj<typeof RunRecoveryBanner> = {
         seq: 124,
         resumedMinute: 19,
       }}
+    />
+  ),
+};
+export const Continued: StoryObj<typeof RunContinuationNote> = {
+  name: 'Continued in a fresh worker (informational, auto-dismisses)',
+  render: () => (
+    <RunContinuationNote
+      autoDismissMs={0}
+      onDismiss={fn()}
+      continuation={{ attempt: 2, minute: 84.3, seq: 812, wallTime: '2026-09-29T10:14:00Z' }}
     />
   ),
 };

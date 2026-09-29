@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** Formatting helpers (UK English, € for KPIs, UTC scenario clock). */
-import type { Actor, AgentRole } from '@ica/schema/browser';
+import type { Actor, AgentRole, ApprovalMethod } from '@ica/schema/browser';
 
 const eur0 = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 const int = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 });
@@ -104,9 +104,37 @@ export function isSimulationAuto(a: Actor | undefined | null): boolean {
  * "Approved by Sam Okafor · Duty Manager", "Rejected by …", or just "Auto-approved (simulation)" for the
  * simulation policy (which only ever approves).
  */
-export function decisionPhrase(a: Actor | undefined | null, verb = 'Approved'): string {
+export function decisionPhrase(
+  a: Actor | undefined | null,
+  verb = 'Approved',
+  method?: ApprovalMethod | null,
+): string {
   if (isSimulationAuto(a)) return verb === 'Approved' ? SIMULATION_AUTO_LABEL : SIMULATION_NOT_DECIDED_LABEL;
-  return `${verb} by ${actorLabel(a)}`;
+  const base = `${verb} by ${actorLabel(a)}`;
+  return isImplicitHuman(a, method) ? `${base} — ${IMPLICIT_SUFFIX}` : base;
+}
+
+/**
+ * "Approve unless objected" (owner decision 2026-09-29): the named human did not object within 60 s, so the
+ * decision was approved in their name. The long form reads "Approved by {name} · {role} — no objection within 60 s";
+ * where space is tight, "Approved by {name} (implicit)".
+ */
+export const IMPLICIT_SUFFIX = 'no objection within 60 s';
+
+/** True for a human decision recorded as implicit (a policy is never implicit). */
+export function isImplicitHuman(a: Actor | undefined | null, method?: ApprovalMethod | null): boolean {
+  return method === 'implicit' && a?.kind === 'human';
+}
+
+/** The short form: "Approved by {name} (implicit)". */
+export function implicitShortPhrase(a: Actor | undefined | null): string {
+  const who = a?.kind === 'human' ? a.name : actorLabel(a);
+  return `Approved by ${who} (implicit)`;
+}
+
+/** An actor with " (implicit)" when the decision was implicit (tables and badges). */
+export function actorWithMethod(a: Actor | undefined | null, method?: ApprovalMethod | null): string {
+  return isImplicitHuman(a, method) ? `${actorLabel(a)} (implicit)` : actorLabel(a);
 }
 
 /** A certifying-staff decision the simulation closed without approving it (nobody decided in time). */

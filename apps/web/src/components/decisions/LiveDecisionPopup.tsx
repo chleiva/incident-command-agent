@@ -5,7 +5,8 @@
 /**
  * The decision popup wired to a run: decisions are always NOW, so it reads the HEAD (live) projection of the shared
  * run store whatever the scrubber cursor, decides through the normal approval route (optimistic, 409-aware) and
- * takes the viewer's auto-approve setting (⌘K) and the countdown length (10 s; a mock-mode test hook may shorten it).
+ * takes the viewer's implicit-approval setting (⌘K, default on) and the countdown length (60 s; a mock-mode test hook
+ * may shorten it).
  */
 import { useCallback, useMemo } from 'react';
 import { useRunActions } from '../../app/actions';

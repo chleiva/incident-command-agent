@@ -99,6 +99,28 @@ describe('pss messages and care', () => {
     expect(sendMessage(s, { messageId: d.value.id }, 31, DUTY_MANAGER, h.rng).ok).toBe(false);
   });
 
+  it('records an implicit human approval on the sent message (and never for a policy approver)', () => {
+    const h = harness();
+    const sent = sendMessage(
+      h.state,
+      { cohortIds: ['c-general'], body: 'Update at 06:30.' },
+      12,
+      DUTY_MANAGER,
+      h.rng,
+      'implicit',
+    );
+    expect(sent.ok && sent.value).toMatchObject({ approvedBy: DUTY_MANAGER, approvalMethod: 'implicit' });
+    const byPolicy = sendMessage(
+      h.state,
+      { cohortIds: ['c-general'], body: 'Update at 06:30.' },
+      12,
+      { kind: 'policy', policy: 'eval-auto' },
+      h.rng,
+      'implicit',
+    );
+    expect(byPolicy.ok && byPolicy.value.approvalMethod).toBeUndefined();
+  });
+
   it('issues vouchers per cohort and counts care', () => {
     const h = harness();
     const r = issueVouchers(

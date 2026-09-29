@@ -29,7 +29,7 @@ import {
   type RunEvent,
   type ScenarioAuthoringStatus,
 } from './events';
-import type { Actor, AgentRole, RunMode, RunStatus } from './ids';
+import type { Actor, AgentRole, ApprovalMethod, RunMode, RunStatus } from './ids';
 import type { KpiSnapshot } from './kpi';
 import { emptySystemState, type AnyEntity, type SystemState } from './systems';
 import type { TwistEffect } from './scenario';
@@ -89,6 +89,8 @@ export interface ProjectedApproval {
     selectedOptionId?: string;
     reason?: string;
     decidedBy: Actor;
+    /** Addition: `implicit` = approved in the human's name after no objection within 60 s. Absent = explicit. */
+    method?: ApprovalMethod;
     seq: number;
     atMinute: number;
   };
@@ -149,6 +151,18 @@ export interface RunProjection {
       atMinute: number;
       seq: number;
     };
+    /**
+     * Addition (continuation): the latest `run.continuing` / `run.continued` (a normal hand-over to a fresh worker
+     * at the Lambda compute limit; informational, never an error). The run's status is not changed.
+     */
+    continuation?: {
+      status: 'continuing' | 'continued';
+      attempt: number;
+      atMinute: number;
+      seq: number;
+    };
+    /** Addition (continuation): `run.completed.note` (e.g. "stopped after 3 hours of real time"). */
+    completedNote?: string;
   };
   simMinute: number;
   simTime: string | null;
@@ -275,6 +289,7 @@ export function applyEvent(state: RunProjection, e: RunEvent): RunProjection {
           ...s.meta,
           status: 'completed',
           completedReason: e.payload.reason,
+          ...(e.payload.note ? { completedNote: e.payload.note } : {}),
           endedWallTime: e.wallTime,
         },
         totals: e.payload.totals,
@@ -305,6 +320,32 @@ export function applyEvent(state: RunProjection, e: RunEvent): RunProjection {
             attempt: e.payload.attempt,
             ...(s.meta.recovery?.reason ? { reason: s.meta.recovery.reason } : {}),
             atMinute: e.payload.fromMinute,
+            seq: e.seq,
+          },
+        },
+      };
+    case 'run.continuing':
+      return {
+        ...s,
+        meta: {
+          ...s.meta,
+          continuation: {
+            status: 'continuing',
+            attempt: e.payload.attempt,
+            atMinute: e.simMinute,
+            seq: e.seq,
+          },
+        },
+      };
+    case 'run.continued':
+      return {
+        ...s,
+        meta: {
+          ...s.meta,
+          continuation: {
+            status: 'continued',
+            attempt: e.payload.attempt,
+            atMinute: e.payload.atSimMinute,
             seq: e.seq,
           },
         },
@@ -433,6 +474,7 @@ export function applyEvent(state: RunProjection, e: RunEvent): RunProjection {
           selectedOptionId: p.selectedOptionId,
           reason: p.reason,
           decidedBy: p.decidedBy,
+          ...(p.method ? { method: p.method } : {}),
           seq: e.seq,
           atMinute: e.simMinute,
         },

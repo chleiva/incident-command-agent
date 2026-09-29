@@ -11,7 +11,14 @@ import { useId, useState } from 'react';
 import { headline, resultData } from '../../agents/headline';
 import { GlossaryText } from '../../glossary/Term';
 import type { FeedItem, ToolFeedItem } from '../../lib/derive';
-import { ROLE_LABEL, SIMULATION_AUTO_LABEL, actorLabel, isSimulationAuto } from '../../lib/format';
+import {
+  IMPLICIT_SUFFIX,
+  ROLE_LABEL,
+  SIMULATION_AUTO_LABEL,
+  actorLabel,
+  isImplicitHuman,
+  isSimulationAuto,
+} from '../../lib/format';
 import { Icon } from '../ui/Icon';
 import { AiDraftedBadge, Badge, TierBadge, cx } from '../ui/primitives';
 import { ProvenancePanel } from '../decisions/Provenance';
@@ -158,6 +165,9 @@ export function ToolCallCard({ item, defaultOpen = false }: { item: ToolFeedItem
                       ? 'Edited and approved'
                       : 'Approved'}{' '}
                   by <span className="text-fg">{actorLabel(item.decision.decidedBy)}</span>
+                  {isImplicitHuman(item.decision.decidedBy, item.decision.method) && (
+                    <span data-implicit> — {IMPLICIT_SUFFIX}</span>
+                  )}
                 </span>
               )}
             </>

@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /** Small design-system primitives: Button, Badge, trust badges, Kbd, Skeleton, state frames. */
-import type { Actor, Tier } from '@ica/schema/browser';
+import type { Actor, ApprovalMethod, Tier } from '@ica/schema/browser';
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { SIMULATION_AUTO_LABEL, actorLabel, isSimulationAuto } from '../../lib/format';
+import {
+  IMPLICIT_SUFFIX,
+  SIMULATION_AUTO_LABEL,
+  actorLabel,
+  isImplicitHuman,
+  isSimulationAuto,
+} from '../../lib/format';
 import { Icon, type IconName } from './Icon';
 
 export const cx = (...xs: (string | false | null | undefined)[]) => xs.filter(Boolean).join(' ');
@@ -144,9 +150,12 @@ export function AiDraftedBadge({ className }: { className?: string }) {
 export function ApproverLine({
   actor,
   prefix = 'Approved by',
+  method,
 }: {
   actor: Actor | undefined;
   prefix?: string;
+  /** `implicit`: approved in the person's name after no objection within 60 s. */
+  method?: ApprovalMethod;
 }) {
   if (!actor) return null;
   if (isSimulationAuto(actor))
@@ -160,6 +169,7 @@ export function ApproverLine({
     <span className="inline-flex items-center gap-1 text-caption text-fg-muted">
       <Icon name="user" size={12} />
       {prefix} <span className="text-fg">{actorLabel(actor)}</span>
+      {isImplicitHuman(actor, method) && <span data-implicit> — {IMPLICIT_SUFFIX}</span>}
     </span>
   );
 }

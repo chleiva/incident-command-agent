@@ -237,8 +237,9 @@ export class ApiStack extends Stack {
     });
     // A failed run must not be retried automatically (it would duplicate the run's events).
     this.runFn.configureAsyncInvoke({ retryAttempts: 0, maxEventAge: Duration.minutes(5) });
-    // Self-recovery: a run that fails (or runs out of time with work left) re-invokes this function asynchronously
-    // with {runId, resume}. Scoped by name (not by the function's own ARN attribute, which would be a circular
+    // Self-recovery and continuation: a run that fails re-invokes this function asynchronously with {runId, resume};
+    // one that reaches the 15-minute Lambda maximum with work left hands over with {runId, continuation} (≤ 12
+    // continuations ≈ 3 hours of real time, MAX_RUN_CONTINUATIONS). Scoped by name (not by the function's own ARN attribute, which would be a circular
     // dependency between the function and its role policy): only this stack's Run functions.
     this.runFn.addToRolePolicy(
       new PolicyStatement({
@@ -256,7 +257,8 @@ export class ApiStack extends Stack {
       description: 'Scenario Author: free text → validated scenario (async, writes a draft)',
       entry: 'services/api/src/lambda/author.ts',
       memorySize: 1024,
-      timeout: Duration.minutes(5),
+      // The Lambda maximum: a long free-text authoring must not be cut off (AUTHOR_DRAFT_STALE_MS follows it).
+      timeout: Duration.minutes(15),
       environment: runtimeEnv,
       nodeModules: config.runNodeModules,
       externalModules: runtimeExternals,
@@ -265,6 +267,9 @@ export class ApiStack extends Stack {
     // A failed draft is reported to the polling UI; never re-run the author automatically.
     authorFn.configureAsyncInvoke({ retryAttempts: 0, maxEventAge: Duration.minutes(5) });
 
+    // The HTTP, WebSocket and fan-out functions stay short on purpose: API Gateway caps an integration at 29 s, the
+    // WebSocket handlers only store/verify a connection, and fan-out posts a batch of stream records. Long work runs
+    // asynchronously in the Run and Author Lambdas.
     const apiFn = fn('ApiFn', {
       description: 'HTTP API router',
       entry: 'services/api/src/lambda/http.ts',

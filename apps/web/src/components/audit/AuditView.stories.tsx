@@ -85,6 +85,38 @@ export const FailedRun: Story = {
   },
 };
 
+export const ContinuedRun: Story = {
+  name: 'Long run: continued in fresh workers (info), then stopped at the time limit',
+  args: {
+    run: { ...AUDIT_RUN, status: 'completed' },
+    status: 'ready',
+    picker,
+    runEvents: [
+      {
+        seq: 640,
+        minute: 84,
+        kind: 'continued',
+        tone: 'info',
+        text: 'Continued in a fresh worker at m84 (15-minute compute limit); nothing failed and pending approvals were kept',
+      },
+      {
+        seq: 1210,
+        minute: 168,
+        kind: 'continued',
+        tone: 'info',
+        text: 'Continued in a fresh worker at m168 (15-minute compute limit); nothing failed and pending approvals were kept',
+      },
+      {
+        seq: 1904,
+        minute: 240,
+        kind: 'stopped',
+        tone: 'warning',
+        text: 'Stopped after about 3 hours of real time, the longest a single run may continue. Everything up to this point is kept.',
+      },
+    ],
+  },
+};
+
 export const RunList: StoryObj<typeof RecentRunsTable> = {
   name: 'Run picker (no run selected)',
   render: () => (

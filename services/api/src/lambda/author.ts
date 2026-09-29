@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * `author` Lambda entry (1024 MB, 5 min): invoked **asynchronously** by the `api` Lambda for `POST /scenarios/author`
+ * `author` Lambda entry (1024 MB, 15 min): invoked **asynchronously** by the `api` Lambda for `POST /scenarios/author`
  * with `{draftId, text}` → `runAuthor` → validated scenario stored as private, draft marked `ready` (or `failed`).
  * No longer behind API Gateway, so the Scenario Author is not bound by the 29 s request limit.
  */

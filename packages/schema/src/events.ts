@@ -26,6 +26,7 @@ import {
 import {
   ActorSchema,
   AgentRoleSchema,
+  ApprovalMethodSchema,
   RunModeSchema,
   StateSystemNameSchema,
   TierSchema,
@@ -101,6 +102,11 @@ export const EventPayloadSchemas = {
     reason: literalUnion(['report', 'horizon', 'stopped'] as const),
     totals: RunTotalsSchema,
     finalKpis: KpiSnapshotSchema,
+    /**
+     * Addition (continuation): a plain note on why the run ended, e.g. "stopped after 3 hours of real time" when
+     * the fresh-worker continuations ran out (`MAX_RUN_CONTINUATIONS`). Absent on an ordinary end.
+     */
+    note: Opt(Str),
   }),
   'run.failed': Type.Object({ error: Str, where: Str }),
   /**
@@ -117,6 +123,22 @@ export const EventPayloadSchemas = {
     attempt: Type.Integer({ minimum: 1 }),
     fromMinute: Type.Number(),
     /** Approvals still pending at the resume; they execute when decided. */
+    pendingApprovals: Opt(Type.Integer({ minimum: 0 })),
+  }),
+  /**
+   * Addition (continuation): the Run Lambda is about to reach its 15-minute compute limit with work remaining, and
+   * hands the run over to a fresh invocation. A normal continuation, NOT an error (it never uses the error-resume
+   * allowance): pending approvals stay pending, the sim clock, pause and speed are kept.
+   */
+  'run.continuing': Type.Object({
+    attempt: Type.Integer({ minimum: 1 }),
+    maxAttempts: Opt(Type.Integer({ minimum: 1 })),
+  }),
+  /** Addition (continuation): the fresh invocation rebuilt the run from its event log and carries on. */
+  'run.continued': Type.Object({
+    attempt: Type.Integer({ minimum: 1 }),
+    atSimMinute: Type.Number(),
+    /** Approvals still pending at the hand-over (same ids); they execute when decided. */
     pendingApprovals: Opt(Type.Integer({ minimum: 0 })),
   }),
   /**
@@ -251,6 +273,8 @@ export const EventPayloadSchemas = {
     selectedOptionId: Opt(Str),
     reason: Opt(Str),
     decidedBy: ActorSchema,
+    /** Addition: `implicit` = approved in the named human's name after no objection within 60 s. Absent = explicit. */
+    method: Opt(ApprovalMethodSchema),
   }),
   /**
    * Addition (task 06): an assumption of an already approved decision changed (twist or any mutation). The owning
@@ -432,6 +456,8 @@ export const ApprovalRecordSchema = Type.Object({
       selectedOptionId: Opt(Str),
       reason: Opt(Str),
       decidedBy: ActorSchema,
+      /** Addition: `implicit` = approved in the named human's name after no objection. Absent = explicit. */
+      method: Opt(ApprovalMethodSchema),
       /** Seq of the `approval.decision` event. */
       seq: Type.Integer({ minimum: 1 }),
       decidedAt: Type.String({ format: 'date-time' }),

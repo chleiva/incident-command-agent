@@ -9,6 +9,7 @@ import { getPublicScenario } from '@ica/scenarios';
 import {
   ENTITY_KEY,
   LAMBDA_TIMEOUT_ABORT,
+  MAX_RUN_CONTINUATIONS,
   MAX_RUN_RESUMES,
   RunNotFoundError,
   validateScenario,
@@ -66,8 +67,11 @@ export interface ExecuteRunOptions {
 
 export interface RunResult {
   runId: string;
-  /** `recovering`: the run failed (or ran out of Lambda time) and a resume was scheduled. */
-  status: 'completed' | 'aborted' | 'failed' | 'skipped' | 'recovering';
+  /**
+   * `recovering`: the run failed and an error resume was scheduled. `continuing`: the invocation reached the Lambda
+   * compute limit with work remaining and handed the run over to a fresh invocation (a normal continuation).
+   */
+  status: 'completed' | 'aborted' | 'failed' | 'skipped' | 'recovering' | 'continuing';
   reason?: 'report' | 'horizon' | 'stopped';
   abortReason?: string;
   totals?: RunTotals;
@@ -179,11 +183,24 @@ function lambdaTimedOut(signal: AbortSignal | undefined): boolean {
   return !!signal?.aborted && signal.reason === LAMBDA_TIMEOUT_ABORT;
 }
 
+/** Real time one invocation covers before it hands over (the Run Lambda's 15 min less the 60 s stop margin). */
+const INVOCATION_MINUTES = 14;
+
+/** The plain note of a run whose continuations ran out ("Stopped after about 3 hours of real time …"). */
+export function continuationsExhaustedNote(maxContinuations: number): string {
+  const minutes = (maxContinuations + 1) * INVOCATION_MINUTES;
+  const hours = Math.round(minutes / 30) / 2;
+  const span = minutes < 90 ? `${minutes} minutes` : `${hours} hours`;
+  return `Stopped after about ${span} of real time, the longest a single run may continue. Everything up to this point is kept.`;
+}
+
 /**
- * Run a whole scenario — or resume one (`input.resume`). Resolves when the run ends; never throws for run-level
- * failures: a failure (or the Lambda running out of time with work remaining) schedules a resume when possible
- * (`RunDeps.scheduleResume`, ≤ MAX_RUN_RESUMES, `run.recovering`), else becomes `run.failed`. The final RunMeta
- * status is always written in a `finally`, with retries, and matches the final event.
+ * Run a whole scenario — or resume one (`input.resume`) or continue one (`input.continuation`). Resolves when the
+ * run ends; never throws for run-level failures: a failure schedules an error resume when possible
+ * (`RunDeps.scheduleResume`, ≤ MAX_RUN_RESUMES, `run.recovering`), else becomes `run.failed`. Reaching the compute
+ * limit with work remaining is NOT a failure: it hands over to a fresh invocation (≤ `maxRunContinuations`,
+ * `run.continuing` → `run.continued`), and ends as completed/stopped with a plain note once they run out. The final
+ * RunMeta status is always written in a `finally`, with retries, and matches the final event.
  */
 export async function executeRunWith(
   input: ExecuteRunInput,
@@ -191,6 +208,9 @@ export async function executeRunWith(
 ): Promise<RunResult> {
   const { runId, deps } = input;
   const resume = input.resume;
+  // A continuation (Lambda compute limit) is rebuilt from the log exactly like an error resume, but is not an error.
+  const continuation = resume ? undefined : input.continuation;
+  const restart = resume ?? continuation;
   const registry = opts.registry ?? defaultRegistry();
   const meta = await deps.store.getRun(runId);
   if (!meta) throw new Error(`run not found: ${runId}`);
@@ -200,12 +220,22 @@ export async function executeRunWith(
       return { runId, status: 'skipped', error: `run status is '${meta.status}'; nothing to resume` };
     if (!deps.store.claimResume || !(await deps.store.claimResume(runId, resume.attempt)))
       return { runId, status: 'skipped', error: `resume attempt ${resume.attempt} already claimed` };
+  } else if (continuation) {
+    // Only a live run continues, and each continuation exactly once (its own counter: never an error resume).
+    if (!['running', 'paused'].includes(meta.status))
+      return { runId, status: 'skipped', error: `run status is '${meta.status}'; nothing to continue` };
+    if (!deps.store.claimContinuation || !(await deps.store.claimContinuation(runId, continuation.attempt)))
+      return {
+        runId,
+        status: 'skipped',
+        error: `continuation attempt ${continuation.attempt} already claimed`,
+      };
   } else if (meta.status !== 'created') {
     // Idempotency: Lambda retries async invocations; never run the same run twice.
     return { runId, status: 'skipped', error: `run status is '${meta.status}', not 'created'` };
   }
   // Async authoring: patch the template scenario from the free text (authoring run) or wait for it (paired run).
-  if (!resume && !opts.scenario && (input.authoring || meta.preparing)) {
+  if (!restart && !opts.scenario && (input.authoring || meta.preparing)) {
     await prepareRunScenario(meta, input.authoring, deps, {
       registry,
       signal: input.signal,
@@ -235,7 +265,11 @@ export async function executeRunWith(
     rejectTools: opts.rejectTools,
     signal: input.signal,
     log: opts.log,
-    ...(resume ? { rngSalt: `resume-${resume.attempt}` } : {}),
+    ...(resume
+      ? { rngSalt: `resume-${resume.attempt}` }
+      : continuation
+        ? { rngSalt: `continue-${continuation.attempt}` }
+        : {}),
   });
   opts.onContext?.(ctx);
   const world = { kind: 'world' as const };
@@ -243,13 +277,17 @@ export async function executeRunWith(
   /** The RunMeta patch the `finally` writes (with retries): always set before returning. */
   let final: Partial<RunMeta> | null = null;
   const running: Promise<unknown>[] = [];
+  // Error resumes and continuations are counted apart (RunMeta.resumeAttempt / continuationAttempt).
+  const resumesUsed = resume?.attempt ?? meta.resumeAttempt ?? 0;
+  const continuationsUsed = continuation?.attempt ?? meta.continuationAttempt ?? 0;
+  const maxContinuations = deps.maxRunContinuations ?? MAX_RUN_CONTINUATIONS;
 
   /** A failure (or a Lambda timeout with work left): schedule a resume if we still can, else fail the run. */
   const recoverOrFail = async (reason: string, where: string): Promise<RunResult> => {
     ctx.finish('stopped');
     // Let the agents and the clock wind down (they stop at their next await) before handing over.
     await Promise.race([Promise.allSettled(running), ctx.clock.sleep(5_000)]);
-    const attempt = (resume?.attempt ?? 0) + 1;
+    const attempt = resumesUsed + 1;
     const totals = ctx.totalsNow();
     if (deps.scheduleResume && deps.store.claimResume && attempt <= MAX_RUN_RESUMES) {
       try {
@@ -274,11 +312,37 @@ export async function executeRunWith(
     return { runId, status: 'failed', error: reason, totals };
   };
 
+  /**
+   * The invocation reached its compute limit with work remaining: hand the run over to a fresh invocation (a
+   * normal continuation, `run.continuing`). Pending approvals stay pending; pause and speed are kept. Returns null
+   * when the hand-over could not be scheduled (the caller then treats it as an error).
+   */
+  const continueRun = async (attempt: number): Promise<RunResult | null> => {
+    ctx.finish('stopped');
+    await Promise.race([Promise.allSettled(running), ctx.clock.sleep(5_000)]);
+    const totals = ctx.totalsNow();
+    await ctx.emit('run.continuing', { attempt, maxAttempts: maxContinuations }, world);
+    try {
+      await deps.scheduleResume!({
+        runId,
+        attempt,
+        reason: 'the Run Lambda reached its compute time limit with work remaining',
+        kind: 'continuation',
+      });
+    } catch (err) {
+      ctx.log({ msg: 'continuation could not be scheduled', err: String((err as Error).message) });
+      return null;
+    }
+    ctx.log({ msg: 'run continuing in a fresh invocation', attempt });
+    final = { status: ctx.sim.paused ? 'paused' : 'running', totals, simMinute: ctx.sim.simMinute };
+    return { runId, status: 'continuing', totals };
+  };
+
   try {
     let brief = ORCHESTRATOR_BRIEF;
     let baselineSkip = 0;
     let pending: ApprovalRecord[] = [];
-    if (!resume) {
+    if (!restart) {
       const first = await deps.store.listEvents(runId, 0, 1);
       if (!first.events.length) {
         await ctx.emit(
@@ -308,7 +372,7 @@ export async function executeRunWith(
     const screening = await screenText(scenario.narrative, { toolNames: toolNamesFor(registry) });
     if (screening.verdict !== 'clean') {
       ctx.narrative = screening.neutralisedText ?? scenario.narrative;
-      if (!resume)
+      if (!restart)
         await ctx.emit(
           'guardrail.blocked',
           {
@@ -320,7 +384,8 @@ export async function executeRunWith(
         );
     }
 
-    if (!resume) {
+    let handoverSeq = 0;
+    if (!restart) {
       // Seed: run.started, then the seed as system.mutation events (chunks keep each transaction small).
       let seeded = registry.seedAll(valid.value, ctx.rng);
       if (opts.seedPatches?.length) seeded = applySeedPatches(seeded, opts.seedPatches);
@@ -334,8 +399,14 @@ export async function executeRunWith(
       ctx.primeFromLog(events);
       pending = await deps.store.listApprovals(runId, 'pending');
       baselineSkip = events.filter((e) => e.type === 'baseline.action').length;
+      // Requests (control, twists) written after the previous invocation handed over were never applied.
+      handoverSeq =
+        events.findLast((e) => e.type === 'run.continuing' || e.type === 'run.recovering')?.seq ?? 0;
       if (mode === 'agent')
-        brief = resumeBrief(buildResumeDigest(events, ctx.state, pending, resume.attempt, ctx.sim.simMinute));
+        brief = resumeBrief(
+          buildResumeDigest(events, ctx.state, pending, restart.attempt, ctx.sim.simMinute),
+          continuation ? 'continuation' : 'error',
+        );
     }
 
     engine = new WorldEngine(ctx, {
@@ -349,34 +420,43 @@ export async function executeRunWith(
         : {}),
     });
     if (mode === 'agent') ctx.onDemoForbidden = (tool) => demonstrateForbidden(ctx, tool);
-    if (!resume) {
+    if (!restart) {
       const k0 = engine.computeKpis();
       ctx.latestKpis = k0;
       await ctx.emit('kpi.update', k0, world);
     } else engine.primeFromLog(ctx.eventLog());
 
     const policy: ApprovalPolicy = mode === 'baseline' ? 'baseline' : (deps.approvalsPolicy ?? 'human');
-    if (resume) {
-      await ctx.emit(
-        'run.resumed_after_error',
-        {
-          attempt: resume.attempt,
-          fromMinute: Math.round(ctx.sim.simMinute * 100) / 100,
-          pendingApprovals: pending.length,
-        },
-        world,
-      );
+    if (restart) {
+      const atMinute = Math.round(ctx.sim.simMinute * 100) / 100;
+      if (continuation)
+        await ctx.emit(
+          'run.continued',
+          { attempt: continuation.attempt, atSimMinute: atMinute, pendingApprovals: pending.length },
+          world,
+        );
+      else
+        await ctx.emit(
+          'run.resumed_after_error',
+          { attempt: restart.attempt, fromMinute: atMinute, pendingApprovals: pending.length },
+          world,
+        );
       await deps.store.updateRun(runId, { status: ctx.sim.paused ? 'paused' : 'running' });
-      // Pending approvals are re-attached: each executes on its own once decided (never blocks the run's end).
+      if (handoverSeq) ctx.replayRequestsAfter(handoverSeq);
+      // Pending approvals are re-attached (same ids): each executes on its own once decided, and the run does not
+      // end before they are, as the proposing agent's wait did before the hand-over (the run is still waiting on a
+      // person, so the re-briefed orchestrator's report does not expire them). The clock and a stop still end it.
       const byName = new Map(registry.tools.map((t) => [t.name, t]));
-      for (const a of pending)
-        void reattachApproval(ctx, a, byName.get(a.tool), policy).catch((err: unknown) =>
+      for (const a of pending) {
+        const reattached = reattachApproval(ctx, a, byName.get(a.tool), policy).catch((err: unknown) =>
           ctx.log({
             msg: 're-attached approval ended',
             approvalId: a.approvalId,
             err: String((err as Error).message),
           }),
         );
+        ctx.trackBackground(reattached);
+      }
     }
 
     let orchestratorError: string | null = null;
@@ -397,25 +477,40 @@ export async function executeRunWith(
     if (ctx.logUnwritable) return await recoverOrFail(ctx.logUnwritable, 'executeRun.eventLog');
     if (orchestratorError)
       return await recoverOrFail(`orchestrator: ${orchestratorError}`, 'executeRun.orchestrator');
-    // Out of Lambda time with work remaining: resume in a fresh invocation when possible; otherwise the run ends
-    // as stopped (as before).
-    const canResume =
-      !!deps.scheduleResume && !!deps.store.claimResume && (resume?.attempt ?? 0) < MAX_RUN_RESUMES;
-    if (lambdaTimedOut(input.signal) && ctx.abortDetail === RUN_SIGNAL_ABORT_DETAIL && canResume)
-      return await recoverOrFail(
-        'the Run Lambda reached its time limit with work remaining',
-        'executeRun.timeout',
-      );
+    // Out of compute time with work remaining (the Run Lambda's 15-min limit, or the per-invocation wall clock):
+    // a normal CONTINUATION in a fresh invocation, never an error resume. Without a scheduler the run ends as
+    // before; with its continuations exhausted it ends as completed/stopped with a plain note, never failed.
+    let exhaustedNote: string | undefined;
+    const computeLimit =
+      (lambdaTimedOut(input.signal) && ctx.abortDetail === RUN_SIGNAL_ABORT_DETAIL) ||
+      ctx.abortReason === 'wall_clock';
+    if (computeLimit && deps.scheduleResume && deps.store.claimContinuation) {
+      const attempt = continuationsUsed + 1;
+      if (attempt <= maxContinuations) {
+        const handedOver = await continueRun(attempt);
+        if (handedOver) return handedOver;
+        return await recoverOrFail(
+          'the run could not be handed over to a fresh worker at the compute time limit',
+          'executeRun.continuation',
+        );
+      }
+      exhaustedNote = continuationsExhaustedNote(maxContinuations);
+      ctx.log({ msg: 'continuations exhausted', maxContinuations });
+    }
 
     // Finalise.
     const finalKpis = engine.computeKpis();
     for (const a of await deps.store.listApprovals(runId, 'pending')) {
       await deps.store.putApproval({ ...a, status: 'expired' }).catch(() => undefined);
     }
-    const reason = ctx.finishReason ?? 'stopped';
+    const reason = exhaustedNote ? 'stopped' : (ctx.finishReason ?? 'stopped');
     const totals = ctx.totalsNow();
-    await ctx.emit('run.completed', { reason, totals, finalKpis }, world);
-    const limitAbort = ctx.abortReason && ctx.abortReason !== 'stopped';
+    await ctx.emit(
+      'run.completed',
+      { reason, totals, finalKpis, ...(exhaustedNote ? { note: exhaustedNote } : {}) },
+      world,
+    );
+    const limitAbort = !exhaustedNote && ctx.abortReason && ctx.abortReason !== 'stopped';
     final = {
       status: limitAbort ? 'aborted' : 'completed',
       totals,
@@ -428,7 +523,7 @@ export async function executeRunWith(
       runId,
       status: limitAbort ? 'aborted' : 'completed',
       reason,
-      ...(ctx.abortReason ? { abortReason: ctx.abortReason } : {}),
+      ...(ctx.abortReason && !exhaustedNote ? { abortReason: ctx.abortReason } : {}),
       totals,
       finalKpis,
     };

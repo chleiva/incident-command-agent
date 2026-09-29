@@ -106,6 +106,28 @@ describe('mock backend', () => {
     expect(view.systems.pss.messages['msg-1']).toMatchObject({ status: 'sent', approvedBy: sim });
   });
 
+  it('an implicit approval is the presenter, marked implicit, also on its consequences', async () => {
+    const { api } = setup();
+    const c = api.createRun({ scenarioId: 's01-pushback-tug-contact', mode: 'agent', speed: 30 });
+    await settle(100);
+    const { runId } = await c;
+    await settle(5_000);
+    const d = api.decideApproval(runId, 'ap-msg-1', { decision: 'approve', method: 'implicit' });
+    await settle(100);
+    expect((await d).accepted).toBe(true);
+    await settle(20_000);
+    const p = all(api, runId);
+    await settle(200);
+    const view = foldEvents(await p);
+    const presenter = { kind: 'human', name: 'Demo presenter', roleTitle: 'Duty Manager' };
+    expect(view.approvals['ap-msg-1']!.decision).toMatchObject({ decidedBy: presenter, method: 'implicit' });
+    expect(view.systems.pss.messages['msg-1']).toMatchObject({
+      status: 'sent',
+      approvedBy: presenter,
+      approvalMethod: 'implicit',
+    });
+  });
+
   it('a rejection drops the recorded consequences', async () => {
     const { api } = setup();
     const c = api.createRun({ scenarioId: 's01-pushback-tug-contact', mode: 'agent', speed: 30 });

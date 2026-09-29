@@ -5,7 +5,7 @@
 /** The "Run ended" summary: headline KPIs vs the baseline, the decisions taken, and the exports. */
 import type { KpiSnapshot, ProjectedApproval, RunProjection } from '@ica/schema/browser';
 import { motion } from 'framer-motion';
-import { actorLabel, formatDuration, formatEur, humaniseTool, signed } from '../lib/format';
+import { actorWithMethod, formatDuration, formatEur, humaniseTool, signed } from '../lib/format';
 import { runFailure, runOutcome } from '../lib/runHealth';
 import { Icon } from './ui/Icon';
 import { Button, IconButton, cx } from './ui/primitives';
@@ -88,9 +88,11 @@ export function RunEndedCard({
           <p className="text-caption text-fg-muted">
             {failure
               ? `Cause: ${failure.plain} · sim minute ${view.simMinute.toFixed(0)}`
-              : outcome.kind === 'stopped'
-                ? `Stopped by the presenter (kill switch) · sim minute ${view.simMinute.toFixed(0)}`
-                : `${view.meta.completedReason ?? outcome.label} · sim minute ${view.simMinute.toFixed(0)}`}
+              : outcome.kind === 'stopped' && view.meta.completedNote
+                ? `${view.meta.completedNote} · sim minute ${view.simMinute.toFixed(0)}`
+                : outcome.kind === 'stopped'
+                  ? `Stopped by the presenter (kill switch) · sim minute ${view.simMinute.toFixed(0)}`
+                  : `${view.meta.completedReason ?? outcome.label} · sim minute ${view.simMinute.toFixed(0)}`}
           </p>
         </div>
         <IconButton icon="close" label="Dismiss summary" onClick={onDismiss} />
@@ -165,7 +167,9 @@ export function RunEndedCard({
             <span className="min-w-0 flex-1 truncate text-fg-muted" title={a.summary}>
               {humaniseTool(a.tool)} — {a.decision?.decision}
             </span>
-            <span className="shrink-0 text-fg-subtle">{actorLabel(a.decision?.decidedBy)}</span>
+            <span className="shrink-0 text-fg-subtle">
+              {actorWithMethod(a.decision?.decidedBy, a.decision?.method)}
+            </span>
           </li>
         ))}
       </ul>

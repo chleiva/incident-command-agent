@@ -90,11 +90,15 @@ export class InProcessRunLauncher implements RunLauncher {
     await fakeRun({ store: this.opts.store, runId, signal, stepMs: this.opts.fakeStepMs });
   }
 
-  /** Self-recovery, locally: a resume is another in-process invocation of the same run (`{resume: {attempt}}`). */
+  /**
+   * Self-recovery and continuation, locally: another in-process invocation of the same run (`{resume: {attempt}}`
+   * after an error, `{continuation: {attempt}}` after the per-invocation wall clock).
+   */
   private scheduleResume = async (req: RunResumeRequest): Promise<void> => {
     const ctrl = new AbortController();
-    const key = `${req.runId}#resume-${req.attempt}`;
-    const done = this.run(req.runId, ctrl.signal, undefined, { attempt: req.attempt }).finally(() =>
+    const kind = req.kind === 'continuation' ? 'continuation' : 'resume';
+    const key = `${req.runId}#${kind}-${req.attempt}`;
+    const done = this.run(req.runId, ctrl.signal, undefined, { kind, attempt: req.attempt }).finally(() =>
       this.running.delete(key),
     );
     this.running.set(key, { ctrl, done });
@@ -104,7 +108,7 @@ export class InProcessRunLauncher implements RunLauncher {
     runId: string,
     signal: AbortSignal,
     authoring?: AuthoringRequest,
-    resume?: { attempt: number },
+    restart?: { kind: 'resume' | 'continuation'; attempt: number },
   ): Promise<void> {
     const mode = this.opts.mode ?? 'auto';
     const log = this.log.child({ runId });
@@ -116,7 +120,7 @@ export class InProcessRunLauncher implements RunLauncher {
           deps: { ...(await this.opts.deps()), scheduleResume: this.scheduleResume },
           signal,
           ...(authoring ? { authoring } : {}),
-          ...(resume ? { resume } : {}),
+          ...(restart ? { [restart.kind]: { attempt: restart.attempt } } : {}),
         });
       } catch (err) {
         if (mode === 'auto' && isNotImplemented(err)) {

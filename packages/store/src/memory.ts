@@ -137,11 +137,21 @@ export class MemoryStore implements Store {
     this.runs.set(runId, clone({ ...cur, ...rest, updatedAt: rest.updatedAt ?? this.now() }));
   }
   async claimResume(runId: string, attempt: number): Promise<boolean> {
+    return this.claimAttempt(runId, attempt, 'resumeAttempt');
+  }
+  async claimContinuation(runId: string, attempt: number): Promise<boolean> {
+    return this.claimAttempt(runId, attempt, 'continuationAttempt');
+  }
+  private claimAttempt(
+    runId: string,
+    attempt: number,
+    field: 'resumeAttempt' | 'continuationAttempt',
+  ): boolean {
     // Check-and-set without an await in between: atomic on the event loop.
     const cur = this.runs.get(runId);
     if (!cur) throw new RunNotFoundError(runId);
-    if ((cur.resumeAttempt ?? 0) >= attempt) return false;
-    this.runs.set(runId, { ...cur, resumeAttempt: attempt, updatedAt: this.now() });
+    if ((cur[field] ?? 0) >= attempt) return false;
+    this.runs.set(runId, { ...cur, [field]: attempt, updatedAt: this.now() });
     return true;
   }
   async listRuns(limit: number): Promise<RunMeta[]> {

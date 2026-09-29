@@ -249,6 +249,9 @@ async function runHandler(
         role: site.role,
         actor: site.actor,
         ...(approvedBy ? { approvedBy } : {}),
+        ...(approvedBy?.kind === 'human' && decision?.method === 'implicit'
+          ? { approvalMethod: 'implicit' as const }
+          : {}),
         ...(ctx.latestKpis ? { kpis: deepClone(ctx.latestKpis) } : {}),
         simMinute: ctx.sim.simMinute,
         state: deepClone(ctx.state),

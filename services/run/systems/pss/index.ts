@@ -15,6 +15,7 @@
 import { distanceKm, isEuStation } from '@ica/kb';
 import type {
   Actor,
+  ApprovalMethod,
   Cohort,
   MockSystem,
   PassengerMessage,
@@ -199,7 +200,12 @@ export function sendMessage(
   simMinute: number,
   approvedBy: Actor | undefined,
   rng: () => number,
+  approvalMethod?: ApprovalMethod,
 ): Result<PassengerMessage> {
+  const approval = {
+    ...(approvedBy ? { approvedBy } : {}),
+    ...(approvedBy?.kind === 'human' && approvalMethod === 'implicit' ? { approvalMethod } : {}),
+  };
   const mutations: SystemMutation[] = [];
   let msg: PassengerMessage;
   if (input.messageId) {
@@ -211,7 +217,7 @@ export function sendMessage(
     const m = updated('pss', 'messages', existing.id, existing, {
       status: 'sent',
       sentAtMinute: simMinute,
-      ...(approvedBy ? { approvedBy } : {}),
+      ...approval,
     });
     mutations.push(m);
     msg = m.after as PassengerMessage;
@@ -227,7 +233,7 @@ export function sendMessage(
       status: 'sent',
       aiDrafted: true,
       sentAtMinute: simMinute,
-      ...(approvedBy ? { approvedBy } : {}),
+      ...approval,
     };
     mutations.push(created('pss', 'messages', id, msg));
   }

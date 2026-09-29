@@ -67,6 +67,19 @@ The ApiStack sets these on the Run and author Lambdas; `services/run/handler.ts`
 | `SEARCH_SECRET_ARN` | `ica/search` JSON `{TAVILY_API_KEY, BRAVE_API_KEY}` | copied into `process.env` at cold start when `FEATURE_WEB_SEARCH=true` (for `web_search`) |
 | `KB_EMBEDDINGS`, `KB_VECTOR_STORE`, `KB_VECTOR_BUCKET`, `KB_VECTOR_INDEX`, `KB_EMBED_MODEL`, `KB_EMBED_DIMS`, `KB_EMBED_REGION`, `KB_RERANK`, `KB_RERANK_MODEL`, `KB_RERANK_REGION` | hybrid retrieval backends (see [Knowledge retrieval](#knowledge-retrieval)); `cohere`, `s3vectors`, the DataStack vector bucket/index, `eu.cohere.embed-v4:0`, `1536`, the stack region, `on`, `cohere.rerank-v3-5:0`, `eu-central-1` | knowledge loader |
 
+### Long runs: continuation vs error recovery
+
+A Lambda may run for at most 15 minutes, and a human-paced run (approvals wait for a person) often lasts longer. The Run Lambda stops gracefully when less than 60 s remain and **continues** the run in a fresh invocation of itself (`{runId, continuation: {attempt}}`): the new invocation rebuilds the world from the event log, keeps the sim clock, pause and speed, re-attaches pending approvals with the same ids (they keep the run open until someone decides) and re-briefs the orchestrator. This is normal operation, not an error: the cockpit shows a brief "Continued in a fresh worker at m{t}" note, the Agents view a neutral divider, the Audit view an info entry.
+
+| | Continuation | Error recovery |
+|---|---|---|
+| Trigger | the 15-minute Lambda limit (or the 14-minute per-invocation wall clock) with work remaining | an unwritable event log or an unexpected orchestrator error |
+| Events | `run.continuing` → `run.continued` | `run.recovering` → `run.resumed_after_error` |
+| Limit | `MAX_RUN_CONTINUATIONS` = 12 (≈ 3 hours of real time; env override 0..48) | 2 resumes (`MAX_RUN_RESUMES`) |
+| When exhausted | the run completes as **stopped** with a plain note | the run **fails** |
+
+The two counters are independent (`RunMeta.continuationAttempt`, `RunMeta.resumeAttempt`), and each attempt is claimed with a conditional write, so a duplicate async delivery is skipped. The author Lambda also has the 15-minute maximum. The API Lambda stays at 29 s (API Gateway's integration limit) and the WebSocket and fan-out Lambdas stay short: they never do long work.
+
 ### Knowledge retrieval
 
 The Run and author Lambdas search the knowledge base with a **hybrid pipeline**: BM25 over the chunk files (in memory) **plus** a Cohere Embed v4 query embedding (`search_query`, cached per container) → Amazon S3 Vectors `QueryVectors` (top 50, metadata filter on collection and jurisdiction) → reciprocal rank fusion → collapse of several chunks of one document (`docId`) → **Cohere Rerank 3.5** over the top 30 → *k* hits with verbatim citation quotes. Any Bedrock, S3 Vectors or rerank error or timeout (embed ≈1.5 s, vector query ≈1.5 s, rerank ≈2 s) falls back to the previous stage (fused without rerank → BM25 only); it is logged (`"component":"knowledge","msg":"knowledge search degraded"`) and never fails a run.

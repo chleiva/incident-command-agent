@@ -65,7 +65,7 @@ export const send_passenger_message: ToolDefinition<{
     const [prior] = byRequestId(ctx.state.pss.messages, input.requestId);
     if (prior) return replayed(shape(prior));
     const { requestId, ...rest } = input;
-    const r = sendMessage(ctx.state, rest, ctx.simMinute, approverOf(ctx), ctx.rng);
+    const r = sendMessage(ctx.state, rest, ctx.simMinute, approverOf(ctx), ctx.rng, ctx.approvalMethod);
     return fromResult(
       r.ok
         ? {

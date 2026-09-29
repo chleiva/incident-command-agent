@@ -16,6 +16,7 @@ const SHAPE: Record<MarkerKind, string> = {
   end: 'h-3 w-0.5 bg-fg-muted',
   baseline: 'h-2 w-2 rounded-full border border-fg-subtle',
   recovery: 'h-2 w-2 rotate-45 border border-warning bg-surface',
+  continued: 'h-2 w-px bg-fg-subtle',
   failed: 'h-3 w-0.5 bg-critical',
 };
 

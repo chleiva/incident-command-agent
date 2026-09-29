@@ -248,15 +248,25 @@ export class DynamoStore implements Store {
     }
   }
   async claimResume(runId: string, attempt: number): Promise<boolean> {
+    return this.claimAttempt(runId, attempt, 'resumeAttempt');
+  }
+  async claimContinuation(runId: string, attempt: number): Promise<boolean> {
+    return this.claimAttempt(runId, attempt, 'continuationAttempt');
+  }
+  /** Conditional claim of attempt `attempt` on a RunMeta counter (`field` is a fixed literal, never user input). */
+  private async claimAttempt(
+    runId: string,
+    attempt: number,
+    field: 'resumeAttempt' | 'continuationAttempt',
+  ): Promise<boolean> {
     let attempts = 0;
     try {
       await this.send(
         new UpdateCommand({
           TableName: this.table,
           Key: { PK: runPk(runId), SK: META },
-          UpdateExpression: 'SET resumeAttempt = :a, updatedAt = :now',
-          ConditionExpression:
-            'attribute_exists(PK) AND (attribute_not_exists(resumeAttempt) OR resumeAttempt < :a)',
+          UpdateExpression: `SET ${field} = :a, updatedAt = :now`,
+          ConditionExpression: `attribute_exists(PK) AND (attribute_not_exists(${field}) OR ${field} < :a)`,
           ExpressionAttributeValues: { ':a': attempt, ':now': this.iso() },
         }),
         (n) => (attempts = n),
@@ -269,7 +279,7 @@ export class DynamoStore implements Store {
         return false;
       }
       // Retried after a transient error: our first attempt may have landed (its response lost).
-      return (await this.getRun(runId))?.resumeAttempt === attempt;
+      return (await this.getRun(runId))?.[field] === attempt;
     }
   }
   async listRuns(limit: number): Promise<RunMeta[]> {

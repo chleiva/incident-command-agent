@@ -375,6 +375,59 @@ describe('approvals', () => {
     expect((await post({ decision: 'approve' })).statusCode).toBe(409);
   });
 
+  it('records an implicit approval as the signed-in human with method implicit (approve only)', async () => {
+    const h = makeDeps();
+    const runId = await createRun(h);
+    await h.store.putApproval(pendingApproval(runId));
+    const post = (body: unknown) => h.handler(req('POST', `/runs/${runId}/approvals/apr-1`, { body }));
+    expect((await post({ decision: 'reject', reason: 'x', method: 'implicit' })).statusCode).toBe(400);
+    expect((await post({ decision: 'edit', editedArgs: {}, method: 'implicit' })).statusCode).toBe(400);
+    expect(
+      (await post({ decision: 'approve', method: 'implicit', policy: 'simulation-auto' })).statusCode,
+    ).toBe(400);
+    expect((await post({ decision: 'approve', method: 'tacit' })).statusCode).toBe(400);
+    const ok = await post({ decision: 'approve', method: 'implicit' });
+    expect(ok.statusCode).toBe(200);
+    const human = { kind: 'human', name: CLAIMS.email, roleTitle: 'Duty Manager' };
+    const [e] = (await h.store.listEvents(runId, 1)).events;
+    expect(e).toMatchObject({
+      type: 'approval.decision',
+      actor: human,
+      payload: { decision: 'approve', decidedBy: human, method: 'implicit' },
+    });
+    const rec = await h.store.getApproval(runId, 'apr-1');
+    expect(rec).toMatchObject({ status: 'approved', decision: { decidedBy: human, method: 'implicit' } });
+  });
+
+  it('records no method for an explicit decision', async () => {
+    const h = makeDeps();
+    const runId = await createRun(h);
+    await h.store.putApproval(pendingApproval(runId));
+    const r = await h.handler(
+      req('POST', `/runs/${runId}/approvals/apr-1`, { body: { decision: 'approve', method: 'explicit' } }),
+    );
+    expect(r.statusCode).toBe(200);
+    const [e] = (await h.store.listEvents(runId, 1)).events;
+    expect(e?.type).toBe('approval.decision');
+    expect((e?.payload as { method?: string }).method).toBeUndefined();
+  });
+
+  it('rejects an implicit approval for a certifying tool (400): airworthiness needs an explicit decision', async () => {
+    const h = makeDeps();
+    const runId = await createRun(h);
+    await h.store.putApproval(pendingApproval(runId, { tool: 'record_engineering_decision', args: {} }));
+    const post = (body: unknown) => h.handler(req('POST', `/runs/${runId}/approvals/apr-1`, { body }));
+    const r = await post({ decision: 'approve', method: 'implicit' });
+    expect(r.statusCode).toBe(400);
+    expect(JSON.stringify(json(r))).toMatch(/explicit decision from certifying staff/);
+    expect((await h.store.getApproval(runId, 'apr-1'))?.status).toBe('pending');
+    expect((await h.store.listEvents(runId, 1)).events.some((x) => x.type === 'approval.decision')).toBe(
+      false,
+    );
+    // The same decision made explicitly is accepted.
+    expect((await post({ decision: 'approve', roleTitle: 'Certifying Engineer (B1)' })).statusCode).toBe(200);
+  });
+
   it('refuses decisions on ended runs (409)', async () => {
     const h = makeDeps();
     const runId = await createRun(h);

@@ -11,6 +11,7 @@ import type { EventDraft, RunEventBase } from './events';
 import type {
   Actor,
   AgentRole,
+  ApprovalMethod,
   Jurisdiction,
   KnowledgeCollection,
   ProviderId,
@@ -109,6 +110,11 @@ export interface ToolContext {
    * `EngineeringDecision.decidedBy`) and enforce human-only rules with it. Absent for `execute`-tier calls.
    */
   approvedBy?: Actor;
+  /**
+   * Addition (owner decision 2026-09-29): how `approvedBy` decided — `implicit` = the named human did not object
+   * within 60 s. Absent = explicit. Handlers may record it next to the approver (e.g. `PassengerMessage`).
+   */
+  approvalMethod?: ApprovalMethod;
   /**
    * Addition (integration): the latest KPI snapshot computed by the world engine (read-only), when one exists.
    * `export_evidence_pack` attaches it to the pack.
@@ -319,6 +325,11 @@ export interface RunDeps {
    * Absent = no resume (the run fails as before).
    */
   scheduleResume?: (req: RunResumeRequest) => Promise<void>;
+  /**
+   * Addition (continuation): at most this many fresh-invocation continuations per run (Lambda compute limit).
+   * Absent = `MAX_RUN_CONTINUATIONS`; see `maxRunContinuationsFromEnv`.
+   */
+  maxRunContinuations?: number;
   /** Addition: inject providers directly (tests: scripted/replay). Keyed by provider id. */
   providers?: Partial<Record<ProviderId, LlmProvider>>;
 }
@@ -338,10 +349,35 @@ export interface RunResumeRequest {
   runId: string;
   attempt: number;
   reason: string;
+  /**
+   * Addition (continuation): `continuation` = a normal hand-over at the Lambda compute limit (invocation
+   * `{runId, continuation: {attempt}}`, counted against `MAX_RUN_CONTINUATIONS`); `error` or absent = an error
+   * resume (`{runId, resume: {attempt}}`, counted against `MAX_RUN_RESUMES`).
+   */
+  kind?: RunResumeKind;
 }
+
+export type RunResumeKind = 'error' | 'continuation';
 
 /** Addition (self-recovery): at most this many resumes per run; then `run.failed` as before. */
 export const MAX_RUN_RESUMES = 2;
+
+/**
+ * Addition (continuation): at most this many continuations per run (a fresh Run Lambda every ~14 min, so ≈ 3 hours
+ * of real time). A runaway guard, independent of `MAX_RUN_RESUMES`; when exhausted the run ends as `completed`
+ * with reason `stopped` and a plain note, never `failed`. Env override: `MAX_RUN_CONTINUATIONS`.
+ */
+export const MAX_RUN_CONTINUATIONS = 12;
+/** Upper bound for the `MAX_RUN_CONTINUATIONS` env override (≈ 12 hours). */
+export const MAX_RUN_CONTINUATIONS_CEILING = 48;
+
+/** `MAX_RUN_CONTINUATIONS` from the environment: an integer 0..48; absent or invalid → the default (12). */
+export function maxRunContinuationsFromEnv(env: Record<string, string | undefined>): number {
+  const raw = env.MAX_RUN_CONTINUATIONS;
+  if (raw === undefined || raw.trim() === '') return MAX_RUN_CONTINUATIONS;
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 0 && n <= MAX_RUN_CONTINUATIONS_CEILING ? n : MAX_RUN_CONTINUATIONS;
+}
 
 /** Addition (self-recovery): `AbortSignal.reason` the Run Lambda uses when it is about to time out. */
 export const LAMBDA_TIMEOUT_ABORT = 'lambda_timeout';
@@ -352,6 +388,11 @@ export interface ExecuteRunInput {
   signal?: AbortSignal;
   /** Addition (self-recovery): resume this run (attempt ≥ 1) from its event log instead of starting it. */
   resume?: { attempt: number };
+  /**
+   * Addition (continuation): continue this run (attempt ≥ 1) in a fresh invocation after the previous one reached
+   * the Lambda compute limit. Rebuilt from the event log exactly like a resume, but not an error.
+   */
+  continuation?: { attempt: number };
   /** Addition (async authoring): present on the invocation of the run that authors (see `RunMeta.preparing`). */
   authoring?: AuthoringRequest;
 }

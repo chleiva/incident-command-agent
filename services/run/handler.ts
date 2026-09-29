@@ -17,13 +17,17 @@
  * - `LLM_*`, `RUN_BUDGET_USD`, `RUN_HORIZON_MIN` (see .env.example)
  * - `SIM_AUTO_APPROVE_AFTER_MS`: the simulation safety net for agent runs (default 0 = off; > 0 = ms of real time)
  * - `AWS_LAMBDA_FUNCTION_NAME` (set by Lambda): self-recovery re-invokes this function asynchronously with
- *   `{runId, resume: {attempt}}` when a run fails or runs out of time with work remaining (needs
- *   `lambda:InvokeFunction` on itself; see the ApiStack)
+ *   `{runId, resume: {attempt}}` when a run fails, and continuation with `{runId, continuation: {attempt}}` when it
+ *   reaches the 15-minute compute limit with work remaining (needs `lambda:InvokeFunction` on itself; see the
+ *   ApiStack)
+ * - `MAX_RUN_CONTINUATIONS`: continuations per run (default 12 ≈ 3 hours of real time; 0..48)
  */
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import {
   LAMBDA_TIMEOUT_ABORT,
+  MAX_RUN_CONTINUATIONS_CEILING,
   MAX_RUN_RESUMES,
+  maxRunContinuationsFromEnv,
   simAutoApproveAfterMsFromEnv,
   type AuthoringRequest,
   type RunResumeRequest,
@@ -63,6 +67,8 @@ export interface RunInvocation {
   authoring?: AuthoringRequest;
   /** Self-recovery: resume the run from its event log (attempt 1..MAX_RUN_RESUMES). */
   resume?: { attempt: number };
+  /** Continuation: carry on in this fresh invocation after the previous one reached the compute limit. */
+  continuation?: { attempt: number };
 }
 
 /** Validate the (internal, but still untrusted) resume part of an invocation; malformed → ignored. */
@@ -77,6 +83,18 @@ export function parseResume(x: unknown): { attempt: number } | undefined {
     : undefined;
 }
 
+/** Validate the (internal, but still untrusted) continuation part of an invocation; malformed → ignored. */
+export function parseContinuation(x: unknown): { attempt: number } | undefined {
+  if (!x || typeof x !== 'object') return undefined;
+  const attempt = (x as { attempt?: unknown }).attempt;
+  return typeof attempt === 'number' &&
+    Number.isInteger(attempt) &&
+    attempt >= 1 &&
+    attempt <= MAX_RUN_CONTINUATIONS_CEILING
+    ? { attempt }
+    : undefined;
+}
+
 /**
  * Self-recovery: an asynchronous self-invoke (`InvocationType: 'Event'`) of this function with
  * `{runId, resume: {attempt}}`. Retried on transient errors; throws when it cannot be scheduled.
@@ -85,17 +103,19 @@ export function lambdaSelfInvoker(
   functionName: string,
   client: Pick<LambdaClient, 'send'> = new LambdaClient({}),
 ): (req: RunResumeRequest) => Promise<void> {
-  return async ({ runId, attempt }) => {
+  return async ({ runId, attempt, kind }) => {
+    const payload =
+      kind === 'continuation' ? { runId, continuation: { attempt } } : { runId, resume: { attempt } };
     const res = await withRetry(() =>
       client.send(
         new InvokeCommand({
           FunctionName: functionName,
           InvocationType: 'Event',
-          Payload: new TextEncoder().encode(JSON.stringify({ runId, resume: { attempt } })),
+          Payload: new TextEncoder().encode(JSON.stringify(payload)),
         }),
       ),
     );
-    if (res.StatusCode !== 202) throw new Error(`resume invoke returned ${res.StatusCode}`);
+    if (res.StatusCode !== 202) throw new Error(`${kind ?? 'resume'} invoke returned ${res.StatusCode}`);
   };
 }
 
@@ -163,13 +183,14 @@ export function createRunHandler(getDeps: () => HandlerDeps) {
       llm: llmConfigFromEnv(env),
       approvalsPolicy: 'human',
       simAutoApproveAfterMs: simAutoApproveAfterMsFromEnv(env),
+      maxRunContinuations: maxRunContinuationsFromEnv(env),
       ...(d.clock ? { clock: d.clock } : {}),
     };
     const functionName = env.AWS_LAMBDA_FUNCTION_NAME;
     const scheduleResume = d.scheduleResume ?? (functionName ? lambdaSelfInvoker(functionName) : undefined);
     if (scheduleResume) deps.scheduleResume = scheduleResume;
     const ac = new AbortController();
-    // About to time out: stop with a reason the runtime recognises (work remaining → resume, not "completed").
+    // About to time out: stop with a reason the runtime recognises (work remaining → continuation, not "completed").
     const timer = context
       ? setInterval(() => {
           if (context.getRemainingTimeInMillis() < STOP_MARGIN_MS) ac.abort(LAMBDA_TIMEOUT_ABORT);
@@ -179,12 +200,14 @@ export function createRunHandler(getDeps: () => HandlerDeps) {
     try {
       const authoring = parseAuthoring(event.authoring);
       const resume = parseResume(event.resume);
+      const continuation = resume ? undefined : parseContinuation(event.continuation);
       const result = await executeRun({
         runId: event.runId,
         deps,
         signal: ac.signal,
-        ...(authoring && !resume ? { authoring } : {}),
+        ...(authoring && !resume && !continuation ? { authoring } : {}),
         ...(resume ? { resume } : {}),
+        ...(continuation ? { continuation } : {}),
       });
       console.log(
         JSON.stringify({
@@ -193,6 +216,7 @@ export function createRunHandler(getDeps: () => HandlerDeps) {
           status: result.status,
           reason: result.reason,
           ...(resume ? { resumeAttempt: resume.attempt } : {}),
+          ...(continuation ? { continuationAttempt: continuation.attempt } : {}),
           ...(result.error ? { error: result.error.slice(0, 300) } : {}),
         }),
       );

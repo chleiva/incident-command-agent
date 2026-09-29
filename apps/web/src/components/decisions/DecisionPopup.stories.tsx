@@ -26,8 +26,8 @@ const meta: Meta<typeof DecisionPopup> = {
   args: {
     pending: [first],
     nowMinute: 39,
-    // The default for everyone: the card waits for the viewer (auto-approve is turned on in ⌘K).
-    autoApprove: false,
+    // The default for everyone: "approve unless I object" (60 s, in the viewer's name; switched off in ⌘K).
+    autoApprove: true,
     static: true,
     onDecide: fn(async (): Promise<DecideOutcome> => 'ok'),
   },
@@ -49,36 +49,40 @@ const meta: Meta<typeof DecisionPopup> = {
 export default meta;
 type Story = StoryObj<typeof DecisionPopup>;
 
-export const Waiting: Story = {
-  name: 'Waiting for the viewer (default: auto-approve off, Space hint)',
-};
 export const CountdownRunning: Story = {
-  name: 'Countdown running (auto-approve turned on in ⌘K)',
-  args: { autoApprove: true, initialRemainingMs: 7_000 },
+  name: 'Approving on your behalf unless you object (default, 60 s)',
+  args: { initialRemainingMs: 42_000 },
 };
 export const Paused: Story = {
-  name: 'Paused (hovered or focused, auto-approve on)',
-  args: { autoApprove: true, initialRemainingMs: 6_000, forcePaused: true },
+  name: 'Paused (hovered or focused)',
+  args: { initialRemainingMs: 36_000, forcePaused: true },
+};
+export const Waiting: Story = {
+  name: 'Switched off in ⌘K: waits for the viewer (Space hint)',
+  args: { autoApprove: false },
+};
+export const Certifying: Story = {
+  name: 'Airworthiness decision: explicit only, no countdown',
+  args: { pending: [{ ...first, approvalId: 'ap-story-eng', tool: 'record_engineering_decision' }] },
 };
 export const QueueOfThree: Story = {
   name: 'Queue of 3 (most urgent first)',
   args: { pending: QUEUE },
 };
 export const Editing: Story = {
-  name: 'Editing (no auto-approval)',
+  name: 'Editing (the countdown is cancelled)',
   args: { initialMode: 'editing' },
 };
 export const Conflict: Story = {
   name: '409: decided elsewhere first (closes gracefully)',
   args: {
     pending: two,
-    autoApprove: true,
     durationMs: 1_500,
     onDecide: fn(async (): Promise<DecideOutcome> => 'conflict'),
   },
 };
 export const AutoApproveOff: Story = {
-  name: 'Auto-approve off (waits), queue of 3',
+  name: 'Switched off (waits), queue of 3',
   args: { autoApprove: false, pending: QUEUE },
 };
 export const HistoryMode: Story = {

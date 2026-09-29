@@ -13,6 +13,7 @@ import {
   emptySystemState,
   mutationDraft,
   type Actor,
+  type ApprovalMethod,
   type ApprovalDecisionKind,
   type EventDraft,
   type EventPayloadMap,
@@ -72,6 +73,8 @@ export interface Decision {
   selectedOptionId?: string;
   reason?: string;
   decidedBy: Actor;
+  /** Addition: `implicit` = the named human did not object within 60 s. Absent = explicit. */
+  method?: ApprovalMethod;
   seq: number;
 }
 
@@ -390,6 +393,17 @@ export class RunContext {
     this.ids.seedFrom(JSON.stringify(this.events), RESUME_ID_PREFIXES);
   }
 
+  /**
+   * Continuation/resume: apply the control and twist requests written after the previous invocation handed over
+   * (`afterSeq` = its `run.continuing` / `run.recovering`). That invocation had stopped listening, so they were
+   * never applied (e.g. a pause or a decision-time twist during the hand-over). Pause/resume/speed are idempotent.
+   */
+  replayRequestsAfter(afterSeq: number): void {
+    for (const e of this.events)
+      if (e.seq > afterSeq && (e.type === 'control.requested' || e.type === 'twist.requested'))
+        this.handleExternal(e);
+  }
+
   /** All events seen so far (own and external), in seq order. */
   eventLog(): RunEvent[] {
     return this.events;
@@ -426,6 +440,7 @@ export class RunContext {
           selectedOptionId: e.payload.selectedOptionId,
           reason: e.payload.reason,
           decidedBy: e.payload.decidedBy,
+          ...(e.payload.method ? { method: e.payload.method } : {}),
           seq: e.seq,
         };
         if (!this.decisions.has(e.payload.approvalId)) this.decisions.set(e.payload.approvalId, d);

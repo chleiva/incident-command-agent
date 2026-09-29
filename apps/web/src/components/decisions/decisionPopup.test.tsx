@@ -4,8 +4,9 @@
  */
 /**
  * Decisions are always NOW (the rail reads the head whatever the cursor) and the gentle decision popup with its
- * simulation auto-approval countdown (OFF by default; when turned on in ⌘K it pauses on hover/focus, is cancelled by
- * editing, rejecting or deciding manually, and is 409-graceful). Plus "Auto-approved (simulation)" wherever a decision is shown.
+ * implicit-approval countdown ("approve unless objected": ON by default, 60 s, sent as the viewer's own approval with
+ * `method: 'implicit'`; it pauses on hover/focus, is cancelled by editing, rejecting or deciding manually, is
+ * 409-graceful, and can be switched off in ⌘K). Plus how implicit and simulation decisions read wherever shown.
  */
 import type { ApprovalDecisionRequest, ProjectedApproval, RunEvent } from '@ica/schema/browser';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
@@ -24,7 +25,13 @@ import {
   autoApproveRequest,
 } from '../../lib/autoApprove';
 import { describeEvent } from '../../lib/describe';
-import { SIMULATION_AUTO_LABEL, actorLabel, decisionPhrase } from '../../lib/format';
+import {
+  IMPLICIT_SUFFIX,
+  SIMULATION_AUTO_LABEL,
+  actorLabel,
+  decisionPhrase,
+  implicitShortPhrase,
+} from '../../lib/format';
 import { pendingByUrgency } from '../../lib/derive';
 import { createRunStore, type RunStore } from '../../store/runStore';
 import { AUTO_APPROVE_KEY, LEGACY_AUTO_APPROVE_KEYS, readAutoApprove, useUi } from '../../store/ui';
@@ -89,18 +96,25 @@ describe('<DecisionPopup>', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it(`approves automatically after ${AUTO_APPROVE_SECONDS} s as simulation-auto, via the normal route`, () => {
+  it(`approves in the viewer's name after ${AUTO_APPROVE_SECONDS} s unless they object (method implicit)`, () => {
     vi.useFakeTimers();
     const { card, onDecide } = popup();
-    expect(card().textContent).toContain('Approving automatically in 10s');
+    expect(AUTO_APPROVE_SECONDS).toBe(60);
+    expect(AUTO_APPROVE_MS).toBe(60_000);
+    expect(card().textContent).toContain('Approving on your behalf in 60s unless you object');
     expect(card().querySelector('[role="timer"]')).toBeInTheDocument();
-    tick(5_000);
-    expect(card().textContent).toContain('Approving automatically in 5s');
+    tick(30_000);
+    expect(card().textContent).toContain('Approving on your behalf in 30s unless you object');
     expect(onDecide).not.toHaveBeenCalled();
-    tick(5_200);
+    tick(30_200);
     expect(onDecide).toHaveBeenCalledTimes(1);
-    expect(onDecide).toHaveBeenCalledWith('ap-msg-1', { decision: 'approve', policy: 'simulation-auto' });
-    expect(AUTO_APPROVE_MS).toBe(10_000);
+    // The normal decision, as the viewer (Duty Manager), marked implicit — never a policy.
+    expect(onDecide).toHaveBeenCalledWith('ap-msg-1', {
+      decision: 'approve',
+      method: 'implicit',
+      roleTitle: 'Duty Manager',
+    });
+    expect(onDecide.mock.calls[0]![1].policy).toBeUndefined();
   });
 
   it('pauses while hovered (WCAG 2.2.1) and resumes on leave', () => {
@@ -108,11 +122,11 @@ describe('<DecisionPopup>', () => {
     const { card, wrapper, onDecide } = popup();
     tick(3_000);
     fireEvent.pointerEnter(wrapper());
-    tick(30_000);
+    tick(120_000);
     expect(onDecide).not.toHaveBeenCalled();
-    expect(card().querySelector('[role="timer"]')!.textContent).toBe('Paused while you look · 7s left');
+    expect(card().querySelector('[role="timer"]')!.textContent).toBe('Paused while you look · 57s left');
     fireEvent.pointerLeave(wrapper());
-    tick(6_000);
+    tick(56_000);
     expect(onDecide).not.toHaveBeenCalled();
     tick(1_200);
     expect(onDecide).toHaveBeenCalledTimes(1);
@@ -122,20 +136,29 @@ describe('<DecisionPopup>', () => {
     vi.useFakeTimers();
     const { card, onDecide } = popup();
     act(() => card().focus());
-    tick(30_000);
+    tick(120_000);
     expect(onDecide).not.toHaveBeenCalled();
     act(() => card().blur());
-    tick(10_200);
+    tick(60_200);
     expect(onDecide).toHaveBeenCalledTimes(1);
   });
 
-  it('never auto-approves an airworthiness decision (certifying staff only), even with auto-approve on', () => {
+  it('never approves an airworthiness decision implicitly: certifying staff decide explicitly', () => {
     vi.useFakeTimers();
     const eng = { ...MSG, approvalId: 'ap-eng-1', tool: 'record_engineering_decision' };
     const { card, onDecide } = popup({ pending: [eng] });
-    expect(card().textContent).toContain('never approves itself');
-    tick(120_000);
+    expect(card().textContent).toContain(
+      'Airworthiness decisions need an explicit decision from certifying staff',
+    );
+    expect(card().querySelector('[role="timer"]')).toBeNull();
+    tick(600_000);
     expect(onDecide).not.toHaveBeenCalled();
+    // A person deciding it sends an explicit decision as certifying staff (no method).
+    fireEvent.click(within(card()).getByRole('button', { name: /^Approve/ }));
+    expect(onDecide).toHaveBeenCalledWith('ap-eng-1', {
+      decision: 'approve',
+      roleTitle: 'Certifying Engineer (B1)',
+    });
   });
 
   it('never auto-approves when the toggle is off: the card waits indefinitely, with no countdown UI', () => {
@@ -161,13 +184,13 @@ describe('<DecisionPopup>', () => {
     expect(card().querySelector('[role="timer"]')).not.toBeNull();
   });
 
-  it('auto-approve off: the info tooltip says decisions wait and how to turn auto-approve on', async () => {
+  it('switched off: the info tooltip says decisions wait and how to turn it back on', async () => {
     const { card } = popup({ autoApprove: false });
-    act(() => within(card()).getByRole('button', { name: 'About auto-approve' }).focus());
+    act(() => within(card()).getByRole('button', { name: 'About approve unless I object' }).focus());
     const tip = (await screen.findByRole('tooltip')).textContent;
     expect(tip).toContain(AUTO_APPROVE_OFF_EXPLAINER);
     expect(AUTO_APPROVE_OFF_EXPLAINER).toContain('⌘K');
-    expect(AUTO_APPROVE_OFF_EXPLAINER).toContain('Auto-approved (simulation)');
+    expect(AUTO_APPROVE_OFF_EXPLAINER).toContain('implicit approval');
   });
 
   it('never auto-approves once the viewer starts editing (the DiffEditor), even after cancelling', () => {
@@ -176,9 +199,9 @@ describe('<DecisionPopup>', () => {
     fireEvent.click(within(card()).getByRole('button', { name: /^Edit/ }));
     fireEvent.pointerLeave(wrapper());
     expect(within(card()).getByText('Edit payload')).toBeInTheDocument();
-    tick(30_000);
+    tick(90_000);
     fireEvent.click(within(card()).getByRole('button', { name: 'Cancel' }));
-    tick(30_000);
+    tick(90_000);
     expect(onDecide).not.toHaveBeenCalled();
     expect(card().textContent).toContain('Waiting for your decision');
   });
@@ -222,7 +245,7 @@ describe('<DecisionPopup>', () => {
       />,
     );
     expect(card()).toHaveAttribute('data-popup-approval', 'ap-x-2');
-    tick(9_000);
+    tick(55_000);
     expect(onDecide).not.toHaveBeenCalled();
   });
 
@@ -230,7 +253,7 @@ describe('<DecisionPopup>', () => {
     vi.useFakeTimers();
     const onDecide = vi.fn(async (): Promise<DecideOutcome> => 'conflict');
     const { card } = popup({ onDecide, pending: QUEUE.slice(0, 2) });
-    tick(10_200);
+    tick(60_200);
     await act(async () => {
       await Promise.resolve();
     });
@@ -261,12 +284,12 @@ describe('<DecisionPopup>', () => {
     expect(region.textContent).toContain('Press D to review it.');
   });
 
-  it('the info tooltip explains the simulation in the exact words', async () => {
+  it('the info tooltip explains implicit approval in the exact words', async () => {
     const { card } = popup();
     expect(AUTO_APPROVE_EXPLAINER).toBe(
-      'This is a simulation, so decisions approve themselves after 10 seconds to keep the incident moving. In a real operation, the right approver would be paged, the agent would wait for their answer, and it would follow up if nobody responded.',
+      "If you don't object within 60 seconds, this is approved in your name — the way a duty manager's standing approval works in a busy ops room. It's recorded as your implicit approval, so the record is honest about how it was decided.",
     );
-    act(() => within(card()).getByRole('button', { name: 'Why decisions approve themselves' }).focus());
+    act(() => within(card()).getByRole('button', { name: 'Why this is approved in your name' }).focus());
     expect((await screen.findByRole('tooltip')).textContent).toContain(AUTO_APPROVE_EXPLAINER);
   });
 
@@ -277,9 +300,12 @@ describe('<DecisionPopup>', () => {
     ] as unknown as ProjectedApproval['options'];
     expect(autoApproveRequest({ options, args: {} })).toEqual({
       decision: 'approve',
-      policy: 'simulation-auto',
+      method: 'implicit',
+      roleTitle: 'Duty Manager',
       selectedOptionId: 'o-b',
     });
+    // An option the viewer picked (without confirming) is the one approved.
+    expect(autoApproveRequest({ options, args: {} }, 'o-a').selectedOptionId).toBe('o-a');
   });
 
   it('in history mode, says the card is live', () => {
@@ -302,24 +328,27 @@ describe('<DecisionPopup>', () => {
 describe('the ⌘K auto-approve setting', () => {
   afterEach(() => window.localStorage.clear());
 
-  it('defaults OFF for everyone', () => {
+  it('defaults ON for everyone', () => {
     window.localStorage.clear();
-    expect(readAutoApprove()).toBe(false);
+    expect(readAutoApprove()).toBe(true);
   });
 
-  it('migrates once: a preference stored under the v1 key (on or off) is dropped, so the viewer starts OFF', () => {
-    expect(AUTO_APPROVE_KEY).toBe('ica.autoApprove.v2');
-    for (const legacy of ['on', 'off']) {
-      window.localStorage.setItem(LEGACY_AUTO_APPROVE_KEYS[0], legacy);
-      expect(readAutoApprove()).toBe(false);
-      expect(window.localStorage.getItem(LEGACY_AUTO_APPROVE_KEYS[0])).toBeNull();
+  it('migrates once: a preference stored under the v1/v2 keys (on or off) is dropped, so the viewer starts ON', () => {
+    expect(AUTO_APPROVE_KEY).toBe('ica.autoApprove.v3');
+    expect(LEGACY_AUTO_APPROVE_KEYS).toEqual(['ica.autoApprove', 'ica.autoApprove.v2']);
+    for (const key of LEGACY_AUTO_APPROVE_KEYS) {
+      for (const legacy of ['on', 'off']) {
+        window.localStorage.setItem(key, legacy);
+        expect(readAutoApprove()).toBe(true);
+        expect(window.localStorage.getItem(key)).toBeNull();
+      }
     }
   });
 
-  it('only an explicit ⌘K "on" (v2) turns it on, and it persists', () => {
-    useUi.getState().setAutoApprove(true);
-    expect(window.localStorage.getItem(AUTO_APPROVE_KEY)).toBe('on');
-    expect(readAutoApprove()).toBe(true);
+  it('only an explicit ⌘K "off" (v3) turns it off, and it persists', () => {
+    useUi.getState().setAutoApprove(false);
+    expect(window.localStorage.getItem(AUTO_APPROVE_KEY)).toBe('off');
+    expect(readAutoApprove()).toBe(false);
   });
 
   it('persists per viewer and survives blocked storage', () => {
@@ -396,6 +425,32 @@ describe('"Auto-approved (simulation)" wherever a decision is shown', () => {
     expect(describeEvent(e)).toBe('Auto-approved (simulation)');
     render(<ApproverLine actor={SIM} />);
     expect(document.querySelector('[data-simulation-auto]')!.textContent).toBe('Auto-approved (simulation)');
+  });
+
+  it('an implicit approval reads as the named person, with no objection within 60 s', () => {
+    const SAM = { kind: 'human', name: 'Sam Okafor', roleTitle: 'Duty Manager' } as const;
+    expect(IMPLICIT_SUFFIX).toBe('no objection within 60 s');
+    expect(decisionPhrase(SAM, 'Approved', 'implicit')).toBe(
+      'Approved by Sam Okafor · Duty Manager — no objection within 60 s',
+    );
+    expect(decisionPhrase(SAM, 'Approved', 'explicit')).toBe('Approved by Sam Okafor · Duty Manager');
+    expect(decisionPhrase(SIM, 'Approved', 'implicit')).toBe('Auto-approved (simulation)');
+    expect(implicitShortPhrase(SAM)).toBe('Approved by Sam Okafor (implicit)');
+    const headline = decisionHeadline(
+      { approvalId: 'a', decision: 'approve', decidedBy: SAM, method: 'implicit' },
+      6.4,
+    );
+    expect(headline).toBe('Approved by Sam Okafor (implicit) at m6');
+    expect(headline.length).toBeLessThanOrEqual(60);
+    const e = {
+      type: 'approval.decision',
+      payload: { approvalId: 'a', decision: 'approve', decidedBy: SAM, method: 'implicit' },
+    } as unknown as RunEvent;
+    expect(describeEvent(e)).toBe('Approved by Sam Okafor (implicit)');
+    render(<ApproverLine actor={SAM} method="implicit" />);
+    expect(document.querySelector('[data-implicit]')!.parentElement!.textContent).toBe(
+      'Approved by Sam Okafor · Duty Manager — no objection within 60 s',
+    );
   });
 
   it('decideOptimistically: a 409 is a calm conflict, not an error', async () => {

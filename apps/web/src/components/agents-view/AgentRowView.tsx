@@ -25,6 +25,7 @@ export const ROW_KIND_LABEL: Record<RowKind, string> = {
   stopped: 'Stopped',
   report: 'Report',
   recovery: 'Recovery',
+  continuation: 'Continued',
 };
 
 export function rowIcon(row: AgentRow): { name: IconName; tone: string } {
@@ -51,11 +52,15 @@ export function rowIcon(row: AgentRow): { name: IconName; tone: string } {
     case 'blocked':
       return { name: 'shield', tone: 'text-critical' };
     case 'stopped':
-      return { name: 'stop', tone: 'text-critical' };
+      return row.handover
+        ? { name: 'pause', tone: 'text-fg-muted' }
+        : { name: 'stop', tone: 'text-critical' };
     case 'report':
       return { name: 'check', tone: 'text-good' };
     case 'recovery':
       return { name: 'undo', tone: 'text-fg-muted' };
+    case 'continuation':
+      return { name: 'info', tone: 'text-fg-subtle' };
   }
 }
 
@@ -129,7 +134,8 @@ export const AgentRowView = forwardRef<HTMLButtonElement, AgentRowViewProps>(fun
   const linkText = row.link?.direction === 'out' ? 'Go to brief' : 'Go to delegation';
   // Continuous per column across re-briefs (T1…Tn over the whole run).
   const turn = row.columnTurn ?? row.turn;
-  const divider = row.kind === 'brief' && !!row.rebrief;
+  // Re-briefs and continuations read as quiet dividers across the column.
+  const divider = (row.kind === 'brief' && !!row.rebrief) || row.kind === 'continuation';
   return (
     <div
       data-row={row.key}
@@ -143,7 +149,7 @@ export const AgentRowView = forwardRef<HTMLButtonElement, AgentRowViewProps>(fun
         'rounded-md border transition-shadow',
         divider
           ? 'border-transparent bg-transparent'
-          : ((row.kind === 'waiting' && !live ? undefined : FRAME[row.kind]) ??
+          : (((row.kind === 'waiting' && !live) || row.handover ? undefined : FRAME[row.kind]) ??
               'border-border bg-surface-raised'),
         highlighted && 'ring-2 ring-focus',
         // After the viewed moment (history mode): dashed, muted, still readable (AA contrast).
@@ -169,7 +175,11 @@ export const AgentRowView = forwardRef<HTMLButtonElement, AgentRowViewProps>(fun
             data-rebrief-divider
           >
             <span className="h-px flex-1 bg-border" aria-hidden />
-            <Icon name="arrowLeft" size={10} className="shrink-0 text-fg-subtle" />
+            <Icon
+              name={row.kind === 'continuation' ? 'info' : 'arrowLeft'}
+              size={10}
+              className="shrink-0 text-fg-subtle"
+            />
             <span data-headline className="shrink-0">
               {row.headline}
             </span>

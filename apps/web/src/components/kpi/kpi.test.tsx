@@ -13,6 +13,9 @@ import {
   AUTO_APPROVED_NOT_HUMAN,
   autoApprovedCount,
   autoDecidedApprovals,
+  humanDecisionsText,
+  implicitApprovalsCount,
+  implicitDecidedApprovals,
   safetyChecks,
   tileModels,
 } from './kpiModel';
@@ -132,6 +135,55 @@ describe('safety gate: a software decision is never shown as a human one', () =>
     const item = screen.getByTestId('why-checks').querySelector('[data-check="decisionsFirst"]')!;
     expect(item.getAttribute('data-status')).toBe('warning');
     expect(item.textContent).toContain('Auto-approved — not a human decision');
+  });
+});
+
+describe('safety gate: implicit approvals are human decisions, counted apart', () => {
+  const { view } = viewAt(S01.agent, 31);
+  const k = view.kpis!;
+  const withImplicit: KpiSnapshot = {
+    ...k,
+    safety: {
+      ...k.safety,
+      value: { ...k.safety.value, humanDecisionsBeforeDependentActions: 3, implicitApprovals: 2 },
+    },
+  };
+
+  it('reads the backend count, else the projection, else 0', () => {
+    expect(implicitApprovalsCount(withImplicit)).toBe(2);
+    const bare: KpiSnapshot = { ...k, safety: { ...k.safety, inputs: {}, value: { ...k.safety.value } } };
+    delete (bare.safety.value as { implicitApprovals?: number }).implicitApprovals;
+    expect(implicitApprovalsCount(bare, { implicitApproved: 1 })).toBe(1);
+    expect(implicitApprovalsCount(bare)).toBe(0);
+    const [id, a] = Object.entries(view.approvals).find(([, x]) => x.decision)!;
+    const p = {
+      ...view,
+      approvals: {
+        ...view.approvals,
+        [id]: {
+          ...a,
+          decision: {
+            ...a.decision!,
+            decision: 'approve',
+            decidedBy: { kind: 'human', name: 'Sam Okafor', roleTitle: 'Duty Manager' },
+            method: 'implicit',
+          },
+        },
+      },
+    } as RunProjection;
+    expect(implicitDecidedApprovals(p)).toBe(1);
+  });
+
+  it('the gate still passes (a named human decided) and says "of which n implicit"', () => {
+    const gate = safetyChecks(withImplicit).find((c) => c.key === 'decisionsFirst')!;
+    expect(gate.status).not.toBe('warning');
+    expect(gate.note).toContain('of which 2 implicit');
+    expect(humanDecisionsText(withImplicit)).toBe('3 (of which 2 implicit)');
+  });
+
+  it('the why-drawer shows the human decisions with the implicit count', () => {
+    render(<WhyDrawer tile="safety" kpis={withImplicit} events={[]} onClose={() => {}} onJump={() => {}} />);
+    expect(screen.getByText('3 (of which 2 implicit)')).toBeInTheDocument();
   });
 });
 

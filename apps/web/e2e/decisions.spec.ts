@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * Decisions are always NOW, in mock mode: by default the decision popup waits for the viewer (auto-approve is OFF,
- * with a "Press Space to pause the clock" hint); turned on in ⌘K, it auto-approves after its countdown (shortened
- * here by the mock-only test hook) and the Agents view records "Auto-approved (simulation)"; in history mode the
- * rail still lists the live decisions and the Agents view hides the rows after the viewed moment.
+ * Decisions are always NOW, in mock mode: by default the decision popup approves in the viewer's name unless they
+ * object ("approve unless objected", 60 s; shortened here by the mock-only test hook), and the Agents view records
+ * "Approved by {name} (implicit)"; switched off in ⌘K it waits for the viewer (with a "Press Space to pause the
+ * clock" hint); in history mode the rail still lists the live decisions and the Agents view hides the rows after
+ * the viewed moment.
  */
 import { expect, test, type Page } from '@playwright/test';
 
@@ -19,11 +20,39 @@ async function startS01(page: Page) {
   await page.mouse.move(5, 5);
 }
 
-test('by default the decision popup waits for a person: no countdown, a Space hint; Space pauses the clock', async ({
+test('by default the popup approves in your name after its countdown, recorded as your implicit approval', async ({
   page,
 }) => {
-  // A stored v1 preference ("on") is migrated once to OFF.
-  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove', 'on'));
+  await page.addInitScript(() => {
+    (window as unknown as Record<string, unknown>).__ICA_TEST_AUTO_APPROVE_MS__ = 2_000;
+    // A stored v2 preference ("off", the old default) is dropped once: the viewer starts ON.
+    window.localStorage.setItem('ica.autoApprove.v2', 'off');
+  });
+  await startS01(page);
+
+  const popup = page.locator('[data-decision-popup] article[data-popup-approval="ap-msg-1"]');
+  await expect(popup).toBeVisible({ timeout: 30_000 });
+  await expect(popup).toContainText('Decision needed');
+  await expect(popup).toContainText('Asked by the Passengers agent');
+  await expect(popup.getByRole('timer')).toContainText(/Approving on your behalf in \ds unless you object/);
+  // Not a dialog: the page stays usable.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  // The countdown runs out: approved through the normal route, in the viewer's name, implicitly.
+  await expect(popup).toBeHidden({ timeout: 15_000 });
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Agents' }).click();
+  await expect(page).toHaveURL(/\/agents$/);
+  const decision = page.locator('[data-column="passenger"] [data-kind="decision"]').first();
+  await expect(decision).toContainText(/Approved by Demo presenter \(implicit\) at m\d+/, {
+    timeout: 15_000,
+  });
+  await expect(decision).not.toContainText('Auto-approved (simulation)');
+});
+
+test('switched off in ⌘K, the popup waits for a person: no countdown, a Space hint; Space pauses the clock', async ({
+  page,
+}) => {
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove.v3', 'off'));
   await startS01(page);
   const popup = page.locator('[data-decision-popup] article[data-popup-approval="ap-msg-1"]');
   await expect(popup).toBeVisible({ timeout: 30_000 });
@@ -39,36 +68,11 @@ test('by default the decision popup waits for a person: no countdown, a Space hi
   await expect(popup).toBeVisible();
 });
 
-test('turned on in ⌘K, the popup auto-approves after its countdown, recorded as "Auto-approved (simulation)"', async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    (window as unknown as Record<string, unknown>).__ICA_TEST_AUTO_APPROVE_MS__ = 2_000;
-    window.localStorage.setItem('ica.autoApprove.v2', 'on');
-  });
-  await startS01(page);
-
-  const popup = page.locator('[data-decision-popup] article[data-popup-approval="ap-msg-1"]');
-  await expect(popup).toBeVisible({ timeout: 30_000 });
-  await expect(popup).toContainText('Decision needed');
-  await expect(popup).toContainText('Asked by the Passengers agent');
-  await expect(popup.getByRole('timer')).toContainText(/Approving automatically in \ds/);
-  // Not a dialog: the page stays usable.
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-
-  // The countdown runs out: approved through the normal route as the simulation policy.
-  await expect(popup).toBeHidden({ timeout: 15_000 });
-  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Agents' }).click();
-  await expect(page).toHaveURL(/\/agents$/);
-  const decision = page.locator('[data-column="passenger"] [data-kind="decision"]').first();
-  await expect(decision).toContainText(/Auto-approved \(simulation\) at m\d+/, { timeout: 15_000 });
-  await expect(decision).not.toContainText('Demo presenter');
-});
-
 test('history mode: the rail still lists live decisions; the Agents view hides later rows', async ({
   page,
 }) => {
-  // Auto-approval off (the default): the decision stays pending while we time-travel.
+  // Implicit approval switched off: the decision stays pending while we time-travel.
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove.v3', 'off'));
   await startS01(page);
 
   const rail = page.locator('#zone-decisions');

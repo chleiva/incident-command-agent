@@ -14,7 +14,13 @@ import type { ReactNode } from 'react';
 import type { AgentRow, Fact } from '../../agents/rows';
 import { roleName } from '../../agents/roles';
 import { GlossaryText } from '../../glossary/Term';
-import { SIMULATION_AUTO_LABEL, actorLabel, isSimulationAuto } from '../../lib/format';
+import {
+  IMPLICIT_SUFFIX,
+  SIMULATION_AUTO_LABEL,
+  actorLabel,
+  isImplicitHuman,
+  isSimulationAuto,
+} from '../../lib/format';
 import { ArgsList, ArgValue, CitationChips, LongText } from '../agents/ArgValue';
 import { AUTHORITY_FALLBACK } from '../agents/PolicyCards';
 import { Icon } from '../ui/Icon';
@@ -212,7 +218,11 @@ function DetailBody({ row }: { row: AgentRow }) {
     parts.push(
       <div key="decision" className="text-caption text-fg-muted" data-decision-detail>
         <span className="text-micro text-fg-subtle">
-          {d.decidedBy.kind === 'human' ? 'Human decision' : 'Decision (not a person)'}
+          {d.decidedBy.kind === 'human'
+            ? d.method === 'implicit'
+              ? 'Human decision (implicit: no objection)'
+              : 'Human decision'
+            : 'Decision (not a person)'}
         </span>
         {isSimulationAuto(d.decidedBy) ? (
           <p>
@@ -226,7 +236,9 @@ function DetailBody({ row }: { row: AgentRow }) {
               : d.decision === 'edit'
                 ? 'Approved with edits'
                 : 'Approved'}{' '}
-            by <span className="text-fg">{decidedByLine(d.decidedBy)}</span> at m{Math.round(d.minute)}
+            by <span className="text-fg">{decidedByLine(d.decidedBy)}</span>
+            {isImplicitHuman(d.decidedBy, d.method) && <span data-implicit> — {IMPLICIT_SUFFIX}</span>} at m
+            {Math.round(d.minute)}
           </p>
         )}
         {d.reason && <p>Reason: {d.reason}</p>}

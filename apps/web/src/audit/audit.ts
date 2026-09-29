@@ -18,7 +18,7 @@ import type {
 import { headline } from '../agents/headline';
 import { roleName } from '../agents/roles';
 import type { ApiClient } from '../lib/api';
-import { actorLabel } from '../lib/format';
+import { actorWithMethod } from '../lib/format';
 
 /** JSON above this is rendered on request ("Load full"), never cut. */
 export const LARGE_JSON_BYTES = 1024 * 1024;
@@ -140,7 +140,7 @@ export function outcomeLabel(
 ): { text: string; tone: 'good' | 'warning' | 'critical' | 'neutral' } | null {
   if (e.blocked) return { text: 'Blocked', tone: 'critical' };
   if (e.decision) {
-    const who = actorLabel(e.decision.decidedBy);
+    const who = actorWithMethod(e.decision.decidedBy, e.decision.method);
     if (e.decision.decision === 'reject') return { text: `Rejected · ${who}`, tone: 'critical' };
     return { text: `${e.decision.decision === 'edit' ? 'Edited' : 'Approved'} · ${who}`, tone: 'good' };
   }

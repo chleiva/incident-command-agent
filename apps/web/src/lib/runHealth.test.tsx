@@ -13,11 +13,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { spaceTogglesClock } from '../app/useSpaceToggle';
 import { RunStatusBadge } from '../components/audit/AuditView';
 import { RunStatusCell } from '../components/audit/RunPicker';
-import { RunFailedBanner, RunRecoveryBanner } from '../components/RunHealthBanner';
+import { RunContinuationNote, RunFailedBanner, RunRecoveryBanner } from '../components/RunHealthBanner';
 import { RunEndedCard } from '../components/RunEndedCard';
 import { S01 } from '../test/fixtureViews';
 import { eventMarkers } from './derive';
 import {
+  continuationEvents,
+  isFreshContinuation,
+  latestContinuation,
   plainFailureReason,
   recoveryEvents,
   recoveryState,
@@ -183,6 +186,66 @@ describe('a stopped run reads "stopped", distinct from completed', () => {
     expect(container.textContent).toBe('stopped');
     render(<RunStatusCell run={{ status: 'aborted' }} />);
     expect(screen.getByText('aborted')).toBeInTheDocument();
+  });
+});
+
+describe('continuation in a fresh worker (additive events): informational, never an error', () => {
+  const continued = withTail(() => [
+    ev('run.continuing', { attempt: 1, maxAttempts: 12 }, 21),
+    ev('run.continued', { attempt: 1, atSimMinute: 21.4, pendingApprovals: 1 }, 21.4),
+  ]);
+
+  it('is not recovery and not a failure', () => {
+    expect(recoveryState(continued)).toBeNull();
+    expect(runFailure(foldEvents(continued), continued)).toBeNull();
+    expect(continuationEvents(continued)).toHaveLength(1);
+    const c = latestContinuation(continued)!;
+    expect(c).toMatchObject({ attempt: 1, minute: 21.4 });
+    const at = Date.parse(c.wallTime!);
+    expect(isFreshContinuation(c, at + 5_000)).toBe(true);
+    expect(isFreshContinuation(c, at + 10 * 60_000)).toBe(false);
+  });
+
+  it('a subtle scrubber marker and an info audit entry', () => {
+    const markers = eventMarkers(continued).filter((m) => m.kind === 'continued');
+    expect(markers.map((m) => m.label)).toEqual(['Continued in a fresh worker at m21']);
+    expect(eventMarkers(continued).some((m) => m.kind === 'recovery' || m.kind === 'failed')).toBe(false);
+    const lv = runLevelEvents(continued);
+    expect(lv.map((e) => [e.kind, e.tone])).toEqual([['continued', 'info']]);
+    expect(lv[0]!.text).toMatch(/^Continued in a fresh worker at m21 \(15-minute compute limit\)/);
+    expect(lv[0]!.text).not.toMatch(/error/i);
+  });
+
+  it('the cockpit note says "Continued in a fresh worker at m{t}" and dismisses itself', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const onDismiss = vi.fn();
+      render(<RunContinuationNote continuation={latestContinuation(continued)!} onDismiss={onDismiss} />);
+      const note = screen.getByTestId('run-continuation');
+      expect(note).toHaveAttribute('role', 'status');
+      expect(note.textContent).toContain('Continued in a fresh worker at m21.');
+      expect(note.textContent).not.toMatch(/error|recover/i);
+      vi.advanceTimersByTime(8_000);
+      expect(onDismiss).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('continuations exhausted: stopped with the plain note, not the kill switch', () => {
+    const note = 'Stopped after about 3 hours of real time, the longest a single run may continue.';
+    const events = withTail((s) => [
+      ev(
+        'run.completed',
+        { reason: 'stopped', note, totals: foldEvents(S01.agent).totals, finalKpis: null },
+        21,
+        {
+          seq: s + 1,
+        },
+      ),
+    ]);
+    expect(runLevelEvents(events)).toEqual([expect.objectContaining({ kind: 'stopped', text: note })]);
+    expect(eventMarkers(events).at(-1)!.label).toBe('Run stopped: the longest run time was reached');
   });
 });
 

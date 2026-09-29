@@ -16,6 +16,7 @@ import {
   compileSchema,
   draft,
   summariseScenario,
+  EXPLICIT_ONLY_TOOLS,
   SIMULATION_AUTO_ACTOR,
   type Actor,
   type AppConfig,
@@ -364,7 +365,20 @@ export function createApiHandler(deps: ApiDeps) {
       if (req.policy === 'simulation-auto' && (req.decision !== 'approve' || req.editedArgs)) {
         throw validationFailed(['/policy simulation-auto is only valid with decision approve (no edits)']);
       }
-      // A simulation auto-approval (the viewer's countdown ran out) is recorded as the policy, never as the person.
+      const implicit = req.method === 'implicit';
+      if (implicit && (req.decision !== 'approve' || req.editedArgs || req.policy)) {
+        throw validationFailed([
+          '/method implicit is only valid with decision approve (no edits, no policy)',
+        ]);
+      }
+      // Certifying staff's decisions (airworthiness) always need an explicit decision: never "approve unless objected".
+      if (implicit && EXPLICIT_ONLY_TOOLS.includes(rec.tool)) {
+        throw validationFailed([
+          `/method implicit is not allowed for ${rec.tool}: airworthiness decisions need an explicit decision from certifying staff`,
+        ]);
+      }
+      // A simulation auto-approval is recorded as the policy, never as the person. An implicit approval ("approve
+      // unless objected": the viewer's countdown ran out) is the signed-in person's decision, recorded as implicit.
       const decidedBy: Actor =
         req.policy === 'simulation-auto'
           ? SIMULATION_AUTO_ACTOR
@@ -376,6 +390,7 @@ export function createApiHandler(deps: ApiDeps) {
         ...(req.selectedOptionId ? { selectedOptionId: req.selectedOptionId } : {}),
         ...(req.reason ? { reason: req.reason } : {}),
         decidedBy,
+        ...(implicit ? { method: 'implicit' as const } : {}),
       };
       // Claim the approval atomically first: of two simultaneous decisions only one passes this conditional update,
       // so only one `approval.decision` event is ever written.
@@ -403,6 +418,7 @@ export function createApiHandler(deps: ApiDeps) {
           ...(req.selectedOptionId ? { selectedOptionId: req.selectedOptionId } : {}),
           ...(req.reason ? { reason: req.reason } : {}),
           decidedBy,
+          ...(implicit ? { method: 'implicit' as const } : {}),
           seq: e.seq,
           decidedAt: e.wallTime,
         },

@@ -5,7 +5,7 @@
 /** The exact message passengers received, on a phone, labelled AI-drafted with its approver. */
 import type { PassengerMessage } from '@ica/schema/browser';
 import { AnimatePresence, motion } from 'framer-motion';
-import { decisionPhrase } from '../../lib/format';
+import { decisionPhrase, implicitShortPhrase, isImplicitHuman } from '../../lib/format';
 import { AiDraftedBadge, Badge, Skeleton, type LoadStatus } from '../ui/primitives';
 
 export function PhoneMock({
@@ -71,10 +71,12 @@ export function PhoneMock({
           {message.approvedBy && (
             <span
               className="truncate text-micro text-fg-muted"
-              title={decisionPhrase(message.approvedBy)}
+              title={decisionPhrase(message.approvedBy, 'Approved', message.approvalMethod)}
               data-approved-by
             >
-              {decisionPhrase(message.approvedBy)}
+              {isImplicitHuman(message.approvedBy, message.approvalMethod)
+                ? implicitShortPhrase(message.approvedBy)
+                : decisionPhrase(message.approvedBy)}
             </span>
           )}
         </figcaption>

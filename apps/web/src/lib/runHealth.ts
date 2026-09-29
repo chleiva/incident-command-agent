@@ -9,11 +9,62 @@
  * Self-recovery events are additive and optional (`run.recovering {attempt, reason}`, `run.resumed_after_error
  * {attempt}`): they are read defensively by type name, so an older backend simply never produces them. A recovery
  * is never a failure: the run goes on; only `run.failed` (or a `failed`/`error` status) is final.
+ *
+ * Continuation (`run.continuing {attempt}`, `run.continued {attempt, atSimMinute}`) is not recovery at all: one
+ * worker may run for 15 minutes, so a long run continues in a fresh one. It is informational, never an error.
  */
 import type { RunEvent, RunProjection } from '@ica/schema/browser';
 
 export const RUN_RECOVERING = 'run.recovering';
 export const RUN_RESUMED_AFTER_ERROR = 'run.resumed_after_error';
+export const RUN_CONTINUING = 'run.continuing';
+export const RUN_CONTINUED = 'run.continued';
+
+export interface ContinuationNote {
+  attempt: number | null;
+  /** Sim minute the run continued at. */
+  minute: number;
+  /** Seq of the `run.continued` event (dismissal key). */
+  seq: number;
+  /** Wall time of the `run.continued` event (the cockpit shows the note only while it is fresh). */
+  wallTime: string | null;
+}
+
+/** Every continuation of a run (`run.continued`), in order; none on a backend without continuation. */
+export function continuationEvents(events: readonly RunEvent[]): ContinuationNote[] {
+  const out: ContinuationNote[] = [];
+  for (const e of events) {
+    if ((e.type as string) !== RUN_CONTINUED) continue;
+    const p = (e.payload ?? {}) as { attempt?: unknown; atSimMinute?: unknown };
+    out.push({
+      attempt: typeof p.attempt === 'number' ? p.attempt : null,
+      minute: typeof p.atSimMinute === 'number' ? p.atSimMinute : e.simMinute,
+      seq: e.seq,
+      wallTime: typeof e.wallTime === 'string' ? e.wallTime : null,
+    });
+  }
+  return out;
+}
+
+/** The latest continuation (the cockpit's transient note), or null. */
+export function latestContinuation(events: readonly RunEvent[]): ContinuationNote | null {
+  return continuationEvents(events).at(-1) ?? null;
+}
+
+/** How long after a continuation the cockpit still shows its transient note (a reload later does not). */
+export const CONTINUATION_NOTE_FRESH_MS = 60_000;
+
+/** True while a continuation is recent enough to announce (by the event's wall time). */
+export function isFreshContinuation(c: ContinuationNote, nowMs: number): boolean {
+  if (!c.wallTime) return false;
+  const at = Date.parse(c.wallTime);
+  return Number.isFinite(at) && nowMs - at >= -5_000 && nowMs - at < CONTINUATION_NOTE_FRESH_MS;
+}
+
+/** The note's text: "Continued in a fresh worker at m{t}". */
+export function continuationText(c: Pick<ContinuationNote, 'minute'>): string {
+  return `Continued in a fresh worker at m${Math.round(c.minute)}`;
+}
 
 /** A calm one-line reason for a technical error message (the technical text stays available, expandable). */
 export function plainFailureReason(error: string | undefined | null, where?: string | null): string {
@@ -163,8 +214,9 @@ export function recoveryState(events: readonly RunEvent[]): RecoveryState | null
 export interface RunLevelEvent {
   seq: number;
   minute: number;
-  kind: 'failed' | 'recovering' | 'resumed' | 'stopped' | 'agent_error';
-  tone: 'critical' | 'warning' | 'neutral';
+  kind: 'failed' | 'recovering' | 'resumed' | 'stopped' | 'agent_error' | 'continued';
+  /** `info`: informational only (a continuation in a fresh worker). */
+  tone: 'critical' | 'warning' | 'neutral' | 'info';
   /** Plain-language line. */
   text: string;
   /** The technical detail (expandable). */
@@ -193,7 +245,16 @@ export function runLevelEvents(events: readonly RunEvent[]): RunLevelEvent[] {
         ...base,
         kind: 'stopped',
         tone: 'warning',
-        text: 'Run stopped by the presenter (kill switch)',
+        text: e.payload.note ?? 'Run stopped by the presenter (kill switch)',
+      });
+    } else if (type === RUN_CONTINUED) {
+      const c = continuationEvents([e])[0];
+      if (!c) continue;
+      out.push({
+        ...base,
+        kind: 'continued',
+        tone: 'info',
+        text: `${continuationText(c)} (15-minute compute limit); nothing failed and pending approvals were kept`,
       });
     } else if (e.type === 'agent.aborted' && e.payload.reason === 'error') {
       out.push({

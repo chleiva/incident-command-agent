@@ -8,7 +8,7 @@
  */
 import type { Engineer, PassengerMessage, RunEvent, SwapDecision } from '@ica/schema/browser';
 import { approvalPhrase, blockedPhrase, plainText } from './announce';
-import { ROLE_LABEL } from './format';
+import { ROLE_LABEL, implicitShortPhrase } from './format';
 
 /** Every caption is plain words (no tool names, no JSON): see lib/announce.ts. */
 export function captionFor(e: RunEvent): string | null {
@@ -33,6 +33,9 @@ function rawCaption(e: RunEvent): string | null {
     case 'approval.decision': {
       if (e.payload.decidedBy.kind === 'policy' && e.payload.decidedBy.policy === 'simulation-auto')
         return 'Auto-approved (simulation) — no one decided in time';
+      // "Approve unless objected": approved in the person's name (they did not object within 60 s).
+      if (e.payload.decidedBy.kind === 'human' && e.payload.method === 'implicit')
+        return implicitShortPhrase(e.payload.decidedBy);
       const who = e.payload.decidedBy.kind === 'human' ? e.payload.decidedBy.roleTitle : 'Policy';
       const verb =
         e.payload.decision === 'approve'
@@ -74,6 +77,7 @@ function rawCaption(e: RunEvent): string | null {
     case 'run.resumed':
       return 'World clock resumed';
     case 'run.completed':
+      if (e.payload.note) return e.payload.note;
       return e.payload.reason === 'stopped' ? 'Run stopped by the presenter' : 'Run complete';
     case 'run.failed':
       return 'Run failed — see the agent activity';

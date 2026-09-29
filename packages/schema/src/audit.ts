@@ -10,7 +10,15 @@
  */
 import type { Citation } from './common';
 import type { RunEvent } from './events';
-import { AGENT_ROLES, type Actor, type AgentRole, type RunMode, type RunStatus, type Tier } from './ids';
+import {
+  AGENT_ROLES,
+  type Actor,
+  type AgentRole,
+  type ApprovalMethod,
+  type RunMode,
+  type RunStatus,
+  type Tier,
+} from './ids';
 import type { TraceObjectInfo } from './persistence';
 
 /** Default and maximum entries per `GET /runs/{id}/audit` page. */
@@ -74,6 +82,8 @@ export interface AuditProposal {
 export interface AuditDecision {
   decision: 'approve' | 'edit' | 'reject';
   decidedBy: Actor;
+  /** Addition: `implicit` = approved in the human's name after no objection within 60 s. Absent = explicit. */
+  method?: ApprovalMethod;
   reason?: string;
   editedArgs?: Record<string, unknown>;
   selectedOptionId?: string;
@@ -344,6 +354,7 @@ export function buildAuditEntries(events: RunEvent[], traces: TraceObjectInfo[] 
     t.decision = {
       decision: p.decision,
       decidedBy: p.decidedBy,
+      ...(p.method ? { method: p.method } : {}),
       ...(p.reason ? { reason: p.reason } : {}),
       ...(p.editedArgs ? { editedArgs: p.editedArgs } : {}),
       ...(p.selectedOptionId ? { selectedOptionId: p.selectedOptionId } : {}),

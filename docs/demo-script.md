@@ -39,6 +39,12 @@ listed under *Recent runs* (useful for side-by-side without waiting).
 | `Space` | Pause / resume the world clock (when focus is not on a control) |
 | `F` | Full screen for the focused (or last clicked) zone; `Esc` returns |
 | `A` / `E` / `R` | Approve / edit / reject the focused decision card (`Tab` to it) |
+
+> **Presenter note: cards approve in your name after 60 s.** "Approve unless I object" is on by default: a decision
+> card you leave alone for 60 seconds is approved **in your name**, recorded as your implicit approval ("Approved by
+> {you} — no objection within 60 s"). Hover over (or focus) the card to hold its countdown, press `Space` to pause the
+> world clock, or switch it off in `⌘K` (*Approve unless I object*) so every card waits for you. Airworthiness
+> decisions (certifying staff) never count down: they always need an explicit decision.
 | `←` `→` (`Shift` ×5), `Home`, `End` | On the timeline: step back and forth, go to the start, go live |
 
 ---
@@ -53,7 +59,7 @@ Setup: mock mode, 1920×1080, dark theme, captions on. On *Training scenarios* t
 | 0:00 | *Training scenarios*. Point at **s01 · Towbar shear and nose-gear contact on pushback**; press **Start** | "A tug hits the nose gear during pushback at Manchester. 174 passengers on board." |
 | 0:05 | Cockpit opens; KPI strip and zones fill in under 2 s | "Six numbers answer *how bad is it*. Grey figures are the same moment in today's manual process." |
 | 0:12 | Agent avatars light up; the stream shows the orchestrator briefing four specialists in parallel; the engineer's `E` starts moving on the stand view | "The orchestrator fans out: maintenance pages a B1 engineer, ground asks for a tow, flight ops checks the rotation." |
-| 0:20 | The first card arrives in **Decision needed**: the first passenger message, labelled **AI-drafted**, with a countdown | "Anything that touches people waits for a human. This is the first message, drafted by the passenger agent." |
+| 0:20 | The first card arrives in **Decision needed**: the first passenger message, labelled **AI-drafted**, with its 60 s "approving on your behalf unless you object" countdown | "Anything that touches people waits for a human. This is the first message, drafted by the passenger agent." |
 | 0:25 | Press **A** (or click Approve). The phone mock-up shows the exact SMS with *Approved by …* | "Approved at minute 6. The baseline team sends its first message at minute 28." |
 | 0:35 | The scheduled twist "Second tug unavailable" (caption); stairs and buses appear on the stand | "No tug: ground switches to stairs and buses so nobody is stuck on board." |
 | 0:45 | Calm amber card in the stream: **Blocked: Defer defect** | "The agent tried to defer the defect. That is a certifying engineer's call, so the code blocked it: nothing changed." |
@@ -62,8 +68,8 @@ Setup: mock mode, 1920×1080, dark theme, captions on. On *Training scenarios* t
 | 1:15 | Point at the KPI strip: cost, satisfaction and the 3-hour margin against the grey baseline figures | "Same incident, same world: cheaper, earlier, calmer than the baseline." |
 | 1:25 | Stop recording on the **Run complete** card (or when the swap has settled) | — |
 
-Fallback: if a decision is missed, the card simply waits (the mock replay pauses on it). For a hands-free take, use
-`?autopilot=1`.
+Fallback: if a decision is missed, it is approved in your name after 60 s (recorded as implicit); with the countdown
+switched off in ⌘K the card simply waits (the mock replay pauses on it). For a hands-free take, use `?autopilot=1`.
 
 ---
 
@@ -141,7 +147,7 @@ decision that matters." Point at the badge: simulated systems, fictional carrier
 | The network or the API is down | Switch to mock mode (`npm run dev:mock -w @ica/web`): same UI, recorded s01/s04 runs |
 | The WebSocket drops | Nothing to do: a "reconnecting" toast appears, the client polls every 2 s and says "Reconnected" when it is back. In mock mode you can show this on purpose: **⌘K** → *Simulate a connection drop* |
 | The run is too slow for the slot | **⌘K** → *Set speed 30×* (or press 30× on the timeline) |
-| You miss a decision or a card expires | The card stays in the rail (overdue in red); decide it, or use `?autopilot=1` in mock mode |
+| You miss a decision or a card expires | After 60 s it is approved in your name (implicit); with the countdown off in ⌘K the card stays in the rail (overdue in red): decide it, or use `?autopilot=1` in mock mode |
 | You need a specific moment | `/runs/run-demo-s01?at=31` opens the options decision; `/runs/run-demo-s04?at=15` the s04 matrix |
 | The projector is bright | **⌘K** → *Switch to the light theme* |
 

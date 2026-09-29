@@ -11,7 +11,7 @@ import { expect, test } from '@playwright/test';
 // These flows decide by hand: auto-approval is off by default (the ⌘K setting, persisted per viewer); made
 // explicit here so a stored preference can never turn it on.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove.v2', 'off'));
+  await page.addInitScript(() => window.localStorage.setItem('ica.autoApprove.v3', 'off'));
 });
 
 test('Agents view: waiting → decision, expand, delegation link, time sync, back to live', async ({

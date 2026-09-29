@@ -329,6 +329,52 @@ describe('computeKpis (hand-computed cases)', () => {
     expect(k.safety.formula).toMatch(/not a human decision/);
   });
 
+  it('safety gate: an implicit approval (no objection within 60 s) is a human decision, counted apart', () => {
+    const DM = { kind: 'human', name: 'Sam Okafor', roleTitle: 'Duty Manager' };
+    const gated = (id: string, minute: number, extra: Record<string, unknown>) => [
+      ev('agent.tool_call', minute, {
+        toolCallId: id,
+        tool: 'propose_swap',
+        system: 'occ',
+        tier: 'propose',
+        args: {},
+      }),
+      ev('agent.proposal', minute, {
+        approvalId: `a-${id}`,
+        toolCallId: id,
+        tool: 'propose_swap',
+        args: {},
+        summary: '',
+        reasoning: '',
+      }),
+      ev('approval.decision', minute + 1, { approvalId: `a-${id}`, decision: 'approve', ...extra }),
+      ev('agent.tool_result', minute + 1, {
+        toolCallId: id,
+        tool: 'propose_swap',
+        ok: true,
+        resultPreview: '',
+      }),
+    ];
+    const events = [
+      ...gated('e1', 10, { decidedBy: DM }),
+      ...gated('i1', 20, { decidedBy: DM, method: 'implicit' }),
+      ...gated('i2', 30, { decidedBy: DM, method: 'implicit' }),
+      ...gated('s1', 40, { decidedBy: { kind: 'policy', policy: 'simulation-auto' } }),
+    ];
+    const k = computeKpis(snap(emptySystemState(), 50), P, events);
+    expect(k.safety.value).toMatchObject({
+      humanDecisionsBeforeDependentActions: 3,
+      implicitApprovals: 2,
+      dependentActionsWithoutDecision: 0,
+      autoApprovedActions: 1,
+      autoApprovedByPolicy: { 'simulation-auto': 1 },
+    });
+    expect(k.safety.inputs.implicitApprovals).toBe(2);
+    // No implicit approvals: the field is absent (= 0).
+    const explicitOnly = computeKpis(snap(emptySystemState(), 50), P, gated('e1', 10, { decidedBy: DM }));
+    expect(explicitOnly.safety.value.implicitApprovals).toBeUndefined();
+  });
+
   it('coordination latencies from the trigger', () => {
     const st = emptySystemState();
     st.pss.messages.m1 = {

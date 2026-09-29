@@ -20,7 +20,13 @@ import {
 import { EnvSecretStore, MemoryStore, MemoryTraceStore } from '@ica/store';
 import minimal from '@ica/schema/fixtures/scenario.minimal.json' with { type: 'json' };
 import type { Scenario } from '@ica/schema';
-import { createRunHandler, STOP_MARGIN_MS } from '../handler';
+import {
+  createRunHandler,
+  lambdaSelfInvoker,
+  parseContinuation,
+  parseResume,
+  STOP_MARGIN_MS,
+} from '../handler';
 import { call, scriptByAgent, step, type ScriptStep } from '../llm/scripted';
 import { TOOL_FAILURE_MESSAGE } from './execute';
 import { makeHarness, ofType } from './__fixtures__/harness';
@@ -347,10 +353,10 @@ describe('C: the Run Lambda handler resumes itself (baseline runs too)', () => {
     });
   }
 
-  it('out of Lambda time with work remaining → run.recovering + self-invoke; the resumed invocation completes', async () => {
+  it('out of Lambda time with work remaining → run.continuing + self-invoke; the continued invocation completes', async () => {
     const store = new MemoryStore();
     await baselineRun(store, 'lambda-resume-1');
-    const invocations: { runId: string; resume: { attempt: number } }[] = [];
+    const invocations: { runId: string; continuation: { attempt: number } }[] = [];
     const handler = createRunHandler(() => ({
       store,
       traces: new MemoryTraceStore(),
@@ -359,27 +365,56 @@ describe('C: the Run Lambda handler resumes itself (baseline runs too)', () => {
       env: {},
       clock: new VirtualClock(),
       guardIntervalMs: 5,
-      scheduleResume: async (req) =>
-        void invocations.push({ runId: req.runId, resume: { attempt: req.attempt } }),
+      scheduleResume: async (req) => {
+        expect(req.kind).toBe('continuation');
+        invocations.push({ runId: req.runId, continuation: { attempt: req.attempt } });
+      },
     }));
     // Less than the stop margin left: the run stops at once with its whole chronology still to do.
     const r1 = await handler(
       { runId: 'lambda-resume-1' },
       { getRemainingTimeInMillis: () => STOP_MARGIN_MS - 1 },
     );
-    expect(r1.status).toBe('recovering');
-    expect(invocations).toEqual([{ runId: 'lambda-resume-1', resume: { attempt: 1 } }]);
+    expect(r1.status).toBe('continuing');
+    expect(invocations).toEqual([{ runId: 'lambda-resume-1', continuation: { attempt: 1 } }]);
     const r2 = await handler(invocations[0]!);
     expect(r2.status).toBe('completed');
     const { events } = await store.listEvents('lambda-resume-1', 0, 100_000);
     for (const e of events) expect(validateEvent(e).ok).toBe(true);
-    expect(ofType(events, 'run.recovering')).toHaveLength(1);
-    expect(ofType(events, 'run.resumed_after_error')).toHaveLength(1);
+    // A compute-limit hand-over is a continuation, never an error recovery.
+    expect(ofType(events, 'run.continuing')).toHaveLength(1);
+    expect(ofType(events, 'run.continued')).toHaveLength(1);
+    expect(ofType(events, 'run.recovering')).toHaveLength(0);
+    expect(ofType(events, 'run.resumed_after_error')).toHaveLength(0);
     expect(ofType(events, 'run.started')).toHaveLength(1);
     // the chronology continued: every baseline step ran exactly once
     expect(ofType(events, 'baseline.action')).toHaveLength(scenario.baseline.length);
     expect((await store.getRun('lambda-resume-1'))!.status).toBe('completed');
-    // a duplicate delivery of the resume event is skipped
+    // a duplicate delivery of the continuation event is skipped
     expect((await handler(invocations[0]!)).status).toBe('skipped');
+  });
+});
+
+describe('handler: continuation vs resume invocations', () => {
+  it('parses continuation and resume parts, and self-invokes with the matching payload', async () => {
+    expect(parseContinuation({ attempt: 3 })).toEqual({ attempt: 3 });
+    expect(parseContinuation({ attempt: 0 })).toBeUndefined();
+    expect(parseContinuation({ attempt: 1.5 })).toBeUndefined();
+    expect(parseContinuation('x')).toBeUndefined();
+    expect(parseResume({ attempt: MAX_RUN_RESUMES + 1 })).toBeUndefined();
+    const sent: unknown[] = [];
+    const client = {
+      send: async (cmd: { input: { Payload: Uint8Array } }) => {
+        sent.push(JSON.parse(new TextDecoder().decode(cmd.input.Payload)));
+        return { StatusCode: 202 };
+      },
+    };
+    const invoke = lambdaSelfInvoker('fn', client as never);
+    await invoke({ runId: 'r1', attempt: 2, reason: 'x', kind: 'continuation' });
+    await invoke({ runId: 'r1', attempt: 1, reason: 'y' });
+    expect(sent).toEqual([
+      { runId: 'r1', continuation: { attempt: 2 } },
+      { runId: 'r1', resume: { attempt: 1 } },
+    ]);
   });
 });

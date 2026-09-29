@@ -361,6 +361,26 @@ export function runStoreConformance(name: string, factory: () => Store | Promise
       expect((await store.getRun(meta.runId))!.resumeAttempt).toBe(2);
     });
 
+    it('claimContinuation claims each attempt exactly once, independent of claimResume', async () => {
+      const store = await factory();
+      const meta = makeRunMeta();
+      await store.createRun(meta);
+      expect(await store.claimResume!(meta.runId, 1)).toBe(true);
+      const claims = await Promise.all([
+        store.claimContinuation!(meta.runId, 1),
+        store.claimContinuation!(meta.runId, 1),
+      ]);
+      expect(claims.filter(Boolean)).toHaveLength(1);
+      expect(await store.claimContinuation!(meta.runId, 2)).toBe(true);
+      expect(await store.claimContinuation!(meta.runId, 2)).toBe(false);
+      const after = (await store.getRun(meta.runId))!;
+      expect(after.continuationAttempt).toBe(2);
+      expect(after.resumeAttempt).toBe(1);
+      // a later status update keeps both counters
+      await store.updateRun(meta.runId, { status: 'paused' });
+      expect((await store.getRun(meta.runId))!).toMatchObject({ continuationAttempt: 2, resumeAttempt: 1 });
+    });
+
     it('keeps the additive RunMeta.preparing flag through create and update', async () => {
       const store = await factory();
       const m = makeRunMeta({ preparing: true });

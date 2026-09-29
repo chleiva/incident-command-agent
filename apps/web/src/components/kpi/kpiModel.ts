@@ -38,6 +38,37 @@ export const AUTO_APPROVED_NOT_HUMAN = 'Auto-approved — not a human decision';
 export interface SafetyContext {
   /** Approval-gated actions approved by simulation/policy (not a person), derived from `approval.decision`. */
   autoApproved?: number;
+  /** Of the human decisions, those approved implicitly (no objection within 60 s), derived from the approvals. */
+  implicitApproved?: number;
+}
+
+/** Approvals decided implicitly by a named human ("approve unless objected"). */
+export function implicitDecidedApprovals(p: Pick<RunProjection, 'approvals'>): number {
+  return Object.values(p.approvals).filter(
+    (a) =>
+      a.decision &&
+      a.decision.decision !== 'reject' &&
+      a.decision.decidedBy.kind === 'human' &&
+      a.decision.method === 'implicit',
+  ).length;
+}
+
+/**
+ * Of the human decisions, the implicit ones: the backend's `safety.value.implicitApprovals` (additive field) when
+ * the snapshot carries it, else the count derived from the projection, else 0.
+ */
+export function implicitApprovalsCount(k: KpiSnapshot, ctx?: SafetyContext): number {
+  const fromBackend = [k.safety.value.implicitApprovals, k.safety.inputs.implicitApprovals].find(
+    (x): x is number => typeof x === 'number' && Number.isFinite(x),
+  );
+  return fromBackend ?? ctx?.implicitApproved ?? 0;
+}
+
+/** "5" or "5 (of which 2 implicit)". */
+export function humanDecisionsText(k: KpiSnapshot, ctx?: SafetyContext): string {
+  const n = k.safety.value.humanDecisionsBeforeDependentActions;
+  const i = implicitApprovalsCount(k, ctx);
+  return i > 0 ? `${formatInt(n)} (of which ${formatInt(i)} implicit)` : formatInt(n);
 }
 
 /**
@@ -121,6 +152,7 @@ export function safetyChecks(k: KpiSnapshot, ctx?: SafetyContext): CheckItem[] {
   const s = k.safety.value;
   const presenter = Number(k.safety.inputs.presenterTriggeredAttempts ?? 0);
   const auto = autoApprovedCount(k, ctx);
+  const implicit = implicitApprovalsCount(k, ctx);
   return [
     {
       key: 'noForbiddenAttempts',
@@ -148,7 +180,11 @@ export function safetyChecks(k: KpiSnapshot, ctx?: SafetyContext): CheckItem[] {
             short: AUTO_APPROVED_NOT_HUMAN,
             note: `${AUTO_APPROVED_NOT_HUMAN}: ${auto} approval-gated action${auto === 1 ? ' was' : 's were'} approved by the simulation or a policy, not a person`,
           }
-        : {}),
+        : implicit > 0
+          ? {
+              note: `${formatInt(s.humanDecisionsBeforeDependentActions)} human decision${s.humanDecisionsBeforeDependentActions === 1 ? '' : 's'}, of which ${formatInt(implicit)} implicit (no objection within 60 s)`,
+            }
+          : {}),
     },
     {
       key: 'engineeringDecision',
@@ -333,10 +369,7 @@ export function tileModels(
         seqs: x.safety.contributingSeqs,
         extra: [
           ['Forbidden attempts (blocked in code)', formatInt(x.safety.value.forbiddenAttempts)],
-          [
-            'Human decisions before dependent actions',
-            formatInt(x.safety.value.humanDecisionsBeforeDependentActions),
-          ],
+          ['Human decisions before dependent actions', humanDecisionsText(x, x === k ? ctx : undefined)],
           ['Dependent actions without a decision', formatInt(x.safety.value.dependentActionsWithoutDecision)],
           [
             'Auto-approved (simulation or policy), not a person',

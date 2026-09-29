@@ -165,6 +165,50 @@ describe('self-recovery events', () => {
       seq: 11,
     });
   });
+  it('run.continuing then run.continued: meta.continuation, status unchanged, no recovery', () => {
+    const continuing = {
+      ...base,
+      seq: 20,
+      simMinute: 84,
+      type: 'run.continuing',
+      payload: { attempt: 1, maxAttempts: 12 },
+    };
+    const continued = {
+      ...base,
+      seq: 21,
+      simMinute: 84,
+      type: 'run.continued',
+      payload: { attempt: 1, atSimMinute: 84, pendingApprovals: 2 },
+    };
+    for (const e of [continuing, continued]) expect(validateEvent(e).ok).toBe(true);
+    const start = {
+      ...emptyProjection('r'),
+      meta: { ...emptyProjection('r').meta, status: 'paused' as const },
+    };
+    const a = applyEvent(start, continuing as unknown as RunEvent);
+    expect(a.meta.continuation).toEqual({ status: 'continuing', attempt: 1, atMinute: 84, seq: 20 });
+    const b = applyEvent(a, continued as unknown as RunEvent);
+    expect(b.meta.status).toBe('paused');
+    expect(b.meta.recovery).toBeUndefined();
+    expect(b.meta.continuation).toEqual({ status: 'continued', attempt: 1, atMinute: 84, seq: 21 });
+  });
+  it('run.completed.note is projected as meta.completedNote', () => {
+    const done = {
+      ...base,
+      seq: 30,
+      simMinute: 200,
+      type: 'run.completed',
+      payload: {
+        reason: 'stopped',
+        note: 'Stopped after 3 hours of real time.',
+        totals: { inputTokens: 0, outputTokens: 0, costUsd: 0, toolCalls: 0, iterations: 0, wallMs: 0 },
+        finalKpis: emptyProjection('r').kpis,
+      },
+    };
+    const p = applyEvent(emptyProjection('r'), done as unknown as RunEvent);
+    expect(p.meta.completedNote).toBe('Stopped after 3 hours of real time.');
+    expect(p.meta.completedReason).toBe('stopped');
+  });
   it('system.error validates with a scope', () => {
     const e = {
       ...base,

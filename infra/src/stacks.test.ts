@@ -174,7 +174,7 @@ describe('ApiStack', () => {
     const byDesc = (re: RegExp) => fns.find((p) => re.test(p.Description ?? ''));
     expect(byDesc(/^HTTP API router/)).toMatchObject({ MemorySize: 512, Timeout: 29 });
     // Async since the 29 s fix: the author is no longer behind API Gateway.
-    expect(byDesc(/^Scenario Author/)).toMatchObject({ MemorySize: 1024, Timeout: 300 });
+    expect(byDesc(/^Scenario Author/)).toMatchObject({ MemorySize: 1024, Timeout: 900 });
     for (const re of [/^WebSocket \$connect/, /^WebSocket \$disconnect/, /^DynamoDB stream/]) {
       expect(byDesc(re)?.MemorySize).toBe(256);
     }

@@ -197,6 +197,9 @@ export function TimeScrubber({
                 ...(markers.some((m) => m.kind === 'recovery')
                   ? ([['recovery', 'Recovery']] as typeof MARKER_LEGEND)
                   : []),
+                ...(markers.some((m) => m.kind === 'continued')
+                  ? ([['continued', 'Fresh worker']] as typeof MARKER_LEGEND)
+                  : []),
               ].map(([k, label]) => (
                 <span key={k} className="hidden items-center gap-1 2xl:inline-flex">
                   <MarkerGlyph kind={k} /> {label}

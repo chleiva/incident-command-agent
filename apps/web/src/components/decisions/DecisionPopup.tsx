@@ -8,13 +8,19 @@
  * polite live region; `D` focuses it and A / E / R work while it has focus. Approve · Edit (the DiffEditor) ·
  * Reject (a reason is required).
  *
- * Auto-approval is OFF by default: the card waits for the viewer, with a presenter hint ("Press Space to pause the
- * clock while you decide"). Only when the viewer turns it on in ⌘K does a visible 10 s countdown ("Approving
- * automatically in {s}s") approve the decision as `{kind:'policy', policy:'simulation-auto'}`. It pauses while the
- * card is hovered or focused (WCAG 2.2.1) and resumes on leave; it is cancelled for good once the viewer starts
- * editing or rejecting, or decides manually. A 409 (decided elsewhere first) closes the card gracefully.
+ * Implicit approval ("approve unless objected", owner decision 2026-09-29) is ON by default: a visible 60 s
+ * countdown ("Approving on your behalf in {s}s unless you object") approves the decision IN THE VIEWER'S NAME, sent
+ * as the normal decision plus `method: 'implicit'` (recorded as the signed-in human, implicitly). It pauses while
+ * the card is hovered or focused (WCAG 2.2.1) and resumes on leave; it is cancelled for good once the viewer starts
+ * editing or rejecting, or decides manually. A presenter can switch it off in ⌘K; the card then waits, with a hint
+ * ("Press Space to pause the clock while you decide"). Certifying decisions never count down. A 409 (decided
+ * elsewhere first) closes the card gracefully.
  */
-import type { ApprovalDecisionRequest, ProjectedApproval } from '@ica/schema/browser';
+import {
+  EXPLICIT_ONLY_TOOLS,
+  type ApprovalDecisionRequest,
+  type ProjectedApproval,
+} from '@ica/schema/browser';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
@@ -37,7 +43,9 @@ import {
   AUTO_APPROVE_EXPLAINER,
   AUTO_APPROVE_MS,
   AUTO_APPROVE_OFF_EXPLAINER,
+  CERTIFYING_EXPLAINER,
   autoApproveRequest,
+  implicitCountdownText,
   recommendedOptionId,
 } from '../../lib/autoApprove';
 import type { OptimisticDecision } from '../../store/ui';
@@ -50,8 +58,8 @@ import { approvalPhrase } from '../../lib/announce';
 
 type Mode = 'idle' | 'editing' | 'rejecting';
 
-/** Tools whose decision belongs to certifying staff: a policy approval is refused by the system (in code). */
-const CERTIFYING_TOOLS = new Set(['record_engineering_decision']);
+/** Tools whose decision belongs to certifying staff: always an explicit decision (the API refuses implicit). */
+const CERTIFYING_TOOLS = new Set(EXPLICIT_ONLY_TOOLS);
 
 /**
  * Countdown progress per approval, kept across remounts (dashboard ↔ Agents view) so switching pages does not
@@ -71,7 +79,7 @@ export interface DecisionPopupProps {
   pending: ProjectedApproval[];
   nowMinute: number;
   optimistic?: Record<string, OptimisticDecision>;
-  /** Simulation auto-approval on (⌘K toggle, default OFF). */
+  /** Implicit approval ("approve unless objected") on (⌘K toggle, default ON). */
   autoApprove: boolean;
   /** Countdown length (`AUTO_APPROVE_MS`; a test hook may shorten it in mock mode). */
   durationMs?: number;
@@ -164,8 +172,8 @@ export function DecisionPopup({
       if (out === 'conflict') {
         setClosed((s) => new Set(s).add(approvalId));
         setAnnouncement('That decision was already taken elsewhere; the card closed.');
-      } else if (out === 'ok' && req.policy === 'simulation-auto') {
-        setAnnouncement('Auto-approved (simulation).');
+      } else if (out === 'ok' && req.method === 'implicit') {
+        setAnnouncement('Approved in your name — no objection within 60 seconds.');
       }
       if (out === 'ok') setClosed((s) => new Set(s).add(approvalId));
       return out;
@@ -289,7 +297,7 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
   const hasOptions = !!approval.options?.length;
   const agent = approval.role ? `${roleShortName(approval.role)} agent` : 'An agent';
 
-  // Airworthiness decisions belong to certifying staff: never auto-approved, not even in the simulation.
+  // Airworthiness decisions belong to certifying staff: always an explicit decision, never "unless objected".
   const countdownOn = autoApprove && !certifying && !engaged && !sending && mode === 'idle';
   const running = countdownOn && !paused && remaining > 0;
 
@@ -325,8 +333,8 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
   useEffect(() => {
     if (!countdownOn || paused || remaining > 0 || firedIds.has(approvalId)) return;
     firedIds.add(approvalId);
-    void send(autoApproveRequest(approval));
-  }, [countdownOn, paused, remaining, approvalId, approval, send]);
+    void send(autoApproveRequest(approval, optionId));
+  }, [countdownOn, paused, remaining, approvalId, approval, optionId, send]);
 
   const roleTitle = certifying ? 'Certifying Engineer (B1)' : 'Duty Manager';
   const approve = () =>
@@ -500,8 +508,8 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
       {certifying && (
         <p className="mt-2 flex items-start gap-1 rounded-md bg-warning-bg px-2 py-1 text-caption text-fg">
           <Icon name="shield" size={12} className="mt-0.5 shrink-0 text-warning" />
-          Reserved for certifying staff, so this one never approves itself, even in the simulation. A person
-          must decide it.
+          Airworthiness decisions need an explicit decision from certifying staff, so this one never approves
+          itself.
         </p>
       )}
 
@@ -597,7 +605,7 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
           <>
             <CountdownRing fraction={remaining / durationMs} size={18} />
             <span role="timer" className="num text-fg" data-paused={paused || undefined}>
-              {paused ? `Paused while you look · ${seconds}s left` : `Approving automatically in ${seconds}s`}
+              {paused ? `Paused while you look · ${seconds}s left` : implicitCountdownText(seconds)}
             </span>
           </>
         ) : (
@@ -610,7 +618,7 @@ const PopupCard = forwardRef<HTMLElement, PopupCardProps>(function PopupCard(
             )}
           </span>
         )}
-        <InfoTip on={autoApprove} />
+        <InfoTip on={autoApprove} certifying={certifying} />
       </div>
     </article>
   );
@@ -653,14 +661,20 @@ function CountdownRing({ fraction, size }: { fraction: number; size: number }) {
   );
 }
 
-function InfoTip({ on }: { on: boolean }) {
+function InfoTip({ on, certifying }: { on: boolean; certifying: boolean }) {
   return (
     <Tooltip.Provider delayDuration={200}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <button
             type="button"
-            aria-label={on ? 'Why decisions approve themselves' : 'About auto-approve'}
+            aria-label={
+              certifying
+                ? 'Why this needs an explicit decision'
+                : on
+                  ? 'Why this is approved in your name'
+                  : 'About approve unless I object'
+            }
             className="ml-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-focus"
             data-popup-info
           >
@@ -675,7 +689,7 @@ function InfoTip({ on }: { on: boolean }) {
             collisionPadding={8}
             className="z-[80] max-w-xs rounded-md border border-border bg-surface-raised px-3 py-2 text-caption text-fg shadow-e2"
           >
-            {on ? AUTO_APPROVE_EXPLAINER : AUTO_APPROVE_OFF_EXPLAINER}
+            {certifying ? CERTIFYING_EXPLAINER : on ? AUTO_APPROVE_EXPLAINER : AUTO_APPROVE_OFF_EXPLAINER}
             <Tooltip.Arrow className="fill-surface-raised" />
           </Tooltip.Content>
         </Tooltip.Portal>

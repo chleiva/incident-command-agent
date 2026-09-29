@@ -14,7 +14,13 @@ import {
   DemoForbiddenToolSchema,
   type RunEvent,
 } from './events';
-import { RunModeSchema, RunStatusSchema, literalUnion, type StateSystemName } from './ids';
+import {
+  ApprovalMethodSchema,
+  RunModeSchema,
+  RunStatusSchema,
+  literalUnion,
+  type StateSystemName,
+} from './ids';
 import type { Scenario } from './scenario';
 import type { EvidencePack } from './systems';
 
@@ -49,6 +55,11 @@ export const RunMetaSchema = Type.Object({
   preparing: Opt(Type.Boolean()),
   /** Addition (self-recovery): the latest resume attempt claimed (`Store.claimResume`); absent = never resumed. */
   resumeAttempt: Opt(Type.Integer({ minimum: 1 })),
+  /**
+   * Addition (continuation): the latest continuation attempt claimed (`Store.claimContinuation`); absent = the run
+   * never needed a fresh invocation. Independent of `resumeAttempt`.
+   */
+  continuationAttempt: Opt(Type.Integer({ minimum: 1 })),
 });
 export type RunMeta = Static<typeof RunMetaSchema>;
 
@@ -233,6 +244,13 @@ export const ApprovalDecisionRequestSchema = Type.Object(
      * recorded as `decidedBy: {kind:'policy', policy:'simulation-auto'}`, never as the person.
      */
     policy: Opt(Type.Literal('simulation-auto')),
+    /**
+     * Addition (owner decision 2026-09-29): `implicit` = "approve unless objected" — the signed-in person's 60 s
+     * countdown ran out without an objection. Only with `decision: 'approve'` (no edits), never with `policy`, and
+     * never for a certifying tool (`EXPLICIT_ONLY_TOOLS`; 400). Recorded as `decidedBy` = the signed-in human plus
+     * `method: 'implicit'`. Absent = `explicit`.
+     */
+    method: Opt(ApprovalMethodSchema),
   },
   { additionalProperties: false },
 );
@@ -291,8 +309,11 @@ export interface AuthorDraft {
   errors?: string[];
 }
 export type GetAuthorDraftResponse = AuthorDraft;
-/** A `pending` draft older than this is reported as `failed` (the author Lambda died or timed out). */
-export const AUTHOR_DRAFT_STALE_MS = 6 * 60_000;
+/**
+ * A `pending` draft older than this is reported as `failed` (the author Lambda died or timed out): the author
+ * Lambda's 15-minute timeout plus a minute (was 6 min with the former 5-minute timeout).
+ */
+export const AUTHOR_DRAFT_STALE_MS = 16 * 60_000;
 export interface CreateRunResponse {
   runId: string;
   /** Addition (task 07): the scenario the run uses (a flight-context run creates a private scenario; start the paired

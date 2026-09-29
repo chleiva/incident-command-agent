@@ -5,6 +5,7 @@
 /** Test harness: MemoryStore + VirtualClock + scripted provider + fake registry → `executeRun`. No network. */
 import {
   DEFAULT_RUN_LIMITS,
+  type ExecuteRunInput,
   type LlmProvider,
   type ProviderId,
   type RunDeps,
@@ -45,6 +46,8 @@ export interface HarnessOptions {
   wrapStore?: (store: MemoryStore) => Store;
   /** Self-recovery: `RunDeps.scheduleResume` (tests record the request and call `h.resume`). */
   scheduleResume?: RunDeps['scheduleResume'];
+  /** Continuation: `RunDeps.maxRunContinuations`. */
+  maxRunContinuations?: number;
 }
 
 export interface Harness {
@@ -54,9 +57,11 @@ export interface Harness {
   runId: string;
   deps: RunDeps;
   ctx?: RunContext;
-  run(): Promise<RunResult>;
+  run(signal?: AbortSignal): Promise<RunResult>;
   /** A resumed invocation of the same run (what the Run Lambda does on `{runId, resume: {attempt}}`). */
-  resume(attempt: number): Promise<RunResult>;
+  resume(attempt: number, signal?: AbortSignal): Promise<RunResult>;
+  /** A continued invocation (what the Run Lambda does on `{runId, continuation: {attempt}}`). */
+  continue(attempt: number, signal?: AbortSignal): Promise<RunResult>;
   events(): Promise<RunEvent[]>;
 }
 
@@ -93,6 +98,7 @@ export async function makeHarness(opts: HarnessOptions = {}): Promise<Harness> {
   const deps: RunDeps = {
     store: opts.wrapStore ? opts.wrapStore(store) : store,
     ...(opts.scheduleResume ? { scheduleResume: opts.scheduleResume } : {}),
+    ...(opts.maxRunContinuations !== undefined ? { maxRunContinuations: opts.maxRunContinuations } : {}),
     traces,
     knowledge: fakeKnowledge(),
     llm: {
@@ -109,42 +115,29 @@ export async function makeHarness(opts: HarnessOptions = {}): Promise<Harness> {
     simAutoApproveAfterMs: opts.simAutoApproveAfterMs ?? 0,
     ...(bus ? { bus } : {}),
   };
+  const invoke = (input: Omit<ExecuteRunInput, 'runId' | 'deps'>) =>
+    executeRunWith(
+      { runId, deps, ...input },
+      {
+        registry: opts.registry ?? fakeRegistry(),
+        scenario,
+        log: () => undefined,
+        ...opts.runOptions,
+        onContext: (ctx) => {
+          h.ctx = ctx;
+          opts.runOptions?.onContext?.(ctx);
+        },
+      },
+    );
   const h: Harness = {
     store,
     traces,
     clock,
     runId,
     deps,
-    async run() {
-      return executeRunWith(
-        { runId, deps },
-        {
-          registry: opts.registry ?? fakeRegistry(),
-          scenario,
-          log: () => undefined,
-          ...opts.runOptions,
-          onContext: (ctx) => {
-            h.ctx = ctx;
-            opts.runOptions?.onContext?.(ctx);
-          },
-        },
-      );
-    },
-    async resume(attempt: number) {
-      return executeRunWith(
-        { runId, deps, resume: { attempt } },
-        {
-          registry: opts.registry ?? fakeRegistry(),
-          scenario,
-          log: () => undefined,
-          ...opts.runOptions,
-          onContext: (ctx) => {
-            h.ctx = ctx;
-            opts.runOptions?.onContext?.(ctx);
-          },
-        },
-      );
-    },
+    run: (signal) => invoke(signal ? { signal } : {}),
+    resume: (attempt, signal) => invoke({ resume: { attempt }, ...(signal ? { signal } : {}) }),
+    continue: (attempt, signal) => invoke({ continuation: { attempt }, ...(signal ? { signal } : {}) }),
     async events() {
       return (await store.listEvents(runId, 0, 100_000)).events;
     },

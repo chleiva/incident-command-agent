@@ -43,31 +43,76 @@ export const SHOWCASE_MODEL = deriveAgents(SHOWCASE_EVENTS);
 const S04_MODEL = deriveAgents(S04_EVENTS);
 const PENDING_MODEL = deriveAgents(untilProposal(RECORDINGS[0]!.agent, 'ap-msg-1'));
 
+/**
+ * The showcase, cut at its first pending proposal, then continued in a fresh worker (15-min compute limit): the
+ * orchestrator's hand-over stop, `run.continuing` and `run.continued` (additive events), seqs gap-free.
+ */
+export const CONTINUED_EVENTS: RunEvent[] = (() => {
+  const base = untilProposal(RECORDINGS[0]!.agent, 'ap-msg-1');
+  const last = base.at(-1)!;
+  const orch = base.find((e) => e.type === 'agent.started')!;
+  const tail = (n: number, type: string, payload: object, extra: object = {}) =>
+    ({
+      ...last,
+      seq: last.seq + n,
+      type,
+      actor: { kind: 'world' },
+      agentRunId: undefined,
+      parentAgentRunId: undefined,
+      iteration: undefined,
+      payload,
+      ...extra,
+    }) as unknown as RunEvent;
+  return [
+    ...base,
+    tail(
+      1,
+      'agent.aborted',
+      { role: 'orchestrator', reason: 'stopped', detail: 'run signal aborted' },
+      { agentRunId: orch.agentRunId, actor: { kind: 'agent', role: 'orchestrator' } },
+    ),
+    tail(2, 'run.continuing', { attempt: 1, maxAttempts: 12 }),
+    tail(3, 'run.continued', { attempt: 1, atSimMinute: last.simMinute, pendingApprovals: 1 }),
+  ];
+})();
+const CONTINUED_MODEL = deriveAgents(CONTINUED_EVENTS);
+
 /** A representative row of each type. */
-export function sampleRow(kind: RowKind): { row: AgentRow; model: typeof SHOWCASE_MODEL } {
+export function sampleRow(kind: RowKind, handover = false): { row: AgentRow; model: typeof SHOWCASE_MODEL } {
   const pick = (m: typeof SHOWCASE_MODEL, pred: (r: AgentRow) => boolean) => {
     const row = m.columns.flatMap((c) => c.rows).find(pred);
     return row ? { row, model: m } : null;
   };
   const found =
-    kind === 'waiting'
-      ? pick(PENDING_MODEL, (r) => r.kind === 'waiting')
-      : kind === 'invalidated'
-        ? pick(S04_MODEL, (r) => r.kind === 'invalidated')
-        : kind === 'decision'
-          ? pick(S04_MODEL, (r) => r.kind === 'decision' && r.decision?.decision === 'reject')
-          : kind === 'report'
-            ? pick(SHOWCASE_MODEL, (r) => r.kind === 'report' && r.role === 'maintenance')
-            : kind === 'tool'
-              ? pick(SHOWCASE_MODEL, (r) => r.kind === 'tool' && r.role === 'maintenance' && r.turn === 3)
-              : pick(SHOWCASE_MODEL, (r) => r.kind === kind && !!(kind !== 'brief' || r.link));
+    kind === 'continuation' || handover
+      ? pick(CONTINUED_MODEL, (r) => r.kind === kind && (kind !== 'stopped' || !!r.handover))
+      : kind === 'waiting'
+        ? pick(PENDING_MODEL, (r) => r.kind === 'waiting')
+        : kind === 'invalidated'
+          ? pick(S04_MODEL, (r) => r.kind === 'invalidated')
+          : kind === 'decision'
+            ? pick(S04_MODEL, (r) => r.kind === 'decision' && r.decision?.decision === 'reject')
+            : kind === 'report'
+              ? pick(SHOWCASE_MODEL, (r) => r.kind === 'report' && r.role === 'maintenance')
+              : kind === 'tool'
+                ? pick(SHOWCASE_MODEL, (r) => r.kind === 'tool' && r.role === 'maintenance' && r.turn === 3)
+                : pick(SHOWCASE_MODEL, (r) => r.kind === kind && !!(kind !== 'brief' || r.link));
   if (!found) throw new Error(`no sample row of kind ${kind}`);
   return found;
 }
 
 /** One row in a column-width frame, toggling like it does in a column. */
-export function RowStory({ kind, expanded: initial = false }: { kind: RowKind; expanded?: boolean }) {
-  const { row, model } = sampleRow(kind);
+export function RowStory({
+  kind,
+  expanded: initial = false,
+  handover = false,
+}: {
+  kind: RowKind;
+  expanded?: boolean;
+  /** Stop rows: the calm hand-over to a fresh worker. */
+  handover?: boolean;
+}) {
+  const { row, model } = sampleRow(kind, handover);
   const [expanded, setExpanded] = useState(initial);
   const detailId = `story-${row.key}`;
   return (

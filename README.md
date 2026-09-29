@@ -120,7 +120,7 @@ Every tool has a tier and the runtime, not the model, applies it. A forbidden ca
 
 ![A decision card from the passengers agent lists what approving authorises (sending this exact message, once, to the listed cohorts) and what it does not (any later update, rebooking, care or compensation); the duty manager approves and a green "Approved by Duty Manager" row appears in the passengers column.](docs/media/human-authority.gif)
 
-Each card says exactly what approving authorises and what it does not, so an approval can never be read as a blank cheque. Decisions are recorded with the approver's name and role; simulation auto-approval is off by default and never counts as a human decision.
+Each card says exactly what approving authorises and what it does not, so an approval can never be read as a blank cheque. Decisions are recorded with the approver's name and role. A card left alone for 60 seconds is approved in the signed-in person's name and recorded as their *implicit* approval ("no objection within 60 s"), the way a duty manager's standing approval works; it can be switched off, and airworthiness decisions always need an explicit decision from certifying staff.
 
 ![The engineer's arrival slips by 40 minutes; in the passengers column an amber row reads "Approval withdrawn: engineer ETA changed (m38 → m78)", the orchestrator re-briefs the passengers agent, and a revised passenger message is proposed and approved.](docs/media/assumption-changed.gif)
 
@@ -131,6 +131,7 @@ An approval records the facts it relied on. When the world changes one of them (
 - **Retry.** Transient AWS errors are retried everywhere in the run path (5 attempts, full jitter, 8 s cap). LLM calls retry with backoff and switch to a configured fallback model after repeated provider errors.
 - **Containment.** A failure is contained at the smallest scope: a failed tool call becomes an error result for the agent; a failed agent is aborted and the orchestrator re-briefs; a failed world process is skipped.
 - **Resume.** Only an unwritable event log ends a run, and then the run resumes itself (at most twice) by re-invoking the Run Lambda and rebuilding its state from the log. The cockpit shows failed, stopped and recovering runs calmly and truthfully.
+- **Continuation.** A Lambda runs for at most 15 minutes, and a human-paced run often lasts longer. It then carries on in a fresh invocation with pending approvals, the clock and the speed kept (up to 12 times, about 3 hours of real time). A continuation is not an error and does not use the resume allowance.
 
 ### Time travel and event sourcing
 

@@ -103,8 +103,10 @@ export const ActorSchema = Type.Union([
   Type.Object({
     kind: Type.Literal('policy'),
     /**
-     * `simulation-auto` (addition): a simulation decision that approved itself after a countdown (browser, 10 s) or
-     * the runtime's safety net (120 s). Never shown as a person: the UI reads "Auto-approved (simulation)".
+     * `simulation-auto` (addition): a simulation decision that approved itself through the runtime's safety net
+     * (`SIM_AUTO_APPROVE_AFTER_MS`, default off). Never shown as a person: the UI reads "Auto-approved
+     * (simulation)". The browser's countdown no longer uses it: it approves implicitly in the viewer's name
+     * (`ApprovalDecisionRequest.method: 'implicit'`).
      */
     policy: Type.Union([
       Type.Literal('baseline'),
@@ -119,6 +121,24 @@ export type Actor = Static<typeof ActorSchema>;
 /** Addition: the policy value of a simulation auto-approval (`{kind:'policy', policy:'simulation-auto'}`). */
 export const SIMULATION_AUTO_POLICY = 'simulation-auto' as const;
 export const SIMULATION_AUTO_ACTOR: Actor = { kind: 'policy', policy: SIMULATION_AUTO_POLICY };
+
+/**
+ * Addition (owner decision 2026-09-29): how a human decision was made. `explicit` (the default when absent): the
+ * person pressed approve / edit / reject. `implicit`: "approve unless objected" — the signed-in person let the
+ * browser's countdown run out without objecting, so the decision is theirs (a named human), recorded as implicit.
+ */
+export const APPROVAL_METHODS = ['explicit', 'implicit'] as const;
+export const ApprovalMethodSchema = literalUnion(APPROVAL_METHODS);
+export type ApprovalMethod = Static<typeof ApprovalMethodSchema>;
+
+/** Addition: the countdown after which an unobjected decision is approved implicitly in the viewer's name. */
+export const IMPLICIT_APPROVAL_SECONDS = 60;
+
+/**
+ * Addition: tools whose decision belongs to certifying staff. They always need an explicit decision: never an
+ * implicit approval (the API answers 400) and never a countdown in the browser.
+ */
+export const EXPLICIT_ONLY_TOOLS: readonly string[] = ['record_engineering_decision'];
 
 /** The shipped scenario ids: ten ground families (task 03) and five airborne incidents (task 07). */
 export const SCENARIO_IDS = [

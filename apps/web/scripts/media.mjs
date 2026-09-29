@@ -124,7 +124,7 @@ async function newPage(browser) {
   await context.addInitScript(() => {
     try {
       localStorage.setItem('ica.theme', 'dark');
-      localStorage.setItem('ica.autoApprove.v2', 'off');
+      localStorage.setItem('ica.autoApprove.v3', 'off');
     } catch {
       /* ignore */
     }

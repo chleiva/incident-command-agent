@@ -57,6 +57,8 @@ export type MarkerKind =
   | 'end'
   | 'baseline'
   | 'recovery'
+  /** A continuation in a fresh worker (15-min compute limit): a subtle, informational tick. */
+  | 'continued'
   | 'failed';
 
 export interface Marker {
@@ -117,7 +119,11 @@ export function eventMarkers(events: readonly RunEvent[]): Marker[] {
         out.push({
           ...m,
           kind: 'end',
-          label: e.payload.reason === 'stopped' ? 'Run stopped (kill switch)' : 'Run complete',
+          label: e.payload.note
+            ? 'Run stopped: the longest run time was reached'
+            : e.payload.reason === 'stopped'
+              ? 'Run stopped (kill switch)'
+              : 'Run complete',
         });
         break;
       case 'run.failed':
@@ -142,6 +148,12 @@ export function eventMarkers(events: readonly RunEvent[]): Marker[] {
           });
         } else if (type === 'run.resumed_after_error') {
           out.push({ ...m, kind: 'recovery', label: 'Resumed after a system error' });
+        } else if (type === 'run.continued') {
+          out.push({
+            ...m,
+            kind: 'continued',
+            label: `Continued in a fresh worker at m${Math.round(e.simMinute)}`,
+          });
         }
         break;
       }

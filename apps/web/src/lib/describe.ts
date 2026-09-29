@@ -4,7 +4,15 @@
  */
 /** One-line, human-readable description of any event (jump lists, markers, the why drawer). */
 import type { RunEvent } from '@ica/schema/browser';
-import { ROLE_LABEL, SIMULATION_AUTO_LABEL, actorLabel, humaniseTool, isSimulationAuto } from './format';
+import {
+  ROLE_LABEL,
+  SIMULATION_AUTO_LABEL,
+  actorLabel,
+  humaniseTool,
+  implicitShortPhrase,
+  isImplicitHuman,
+  isSimulationAuto,
+} from './format';
 import { captionFor } from './narrator';
 
 export function describeEvent(e: RunEvent): string {
@@ -27,9 +35,10 @@ export function describeEvent(e: RunEvent): string {
     case 'world.tick':
       return `Minute ${e.payload.simMinute}`;
     case 'approval.decision':
-      return isSimulationAuto(e.payload.decidedBy)
-        ? SIMULATION_AUTO_LABEL
-        : `${actorLabel(e.payload.decidedBy)}: ${e.payload.decision}`;
+      if (isSimulationAuto(e.payload.decidedBy)) return SIMULATION_AUTO_LABEL;
+      if (isImplicitHuman(e.payload.decidedBy, e.payload.method))
+        return implicitShortPhrase(e.payload.decidedBy);
+      return `${actorLabel(e.payload.decidedBy)}: ${e.payload.decision}`;
     case 'baseline.action':
       return `${e.payload.actor}: ${humaniseTool(e.payload.tool)}`;
     default:

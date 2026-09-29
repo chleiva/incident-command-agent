@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 /**
- * Run-level self-recovery. When a run fails (or its Lambda is about to time out with work remaining) the handler
- * schedules a fresh invocation `{runId, resume: {attempt}}` (≤ MAX_RUN_RESUMES). The resumed invocation rebuilds the
+ * Run-level self-recovery and continuation. When a run fails the handler schedules a fresh invocation
+ * `{runId, resume: {attempt}}` (≤ MAX_RUN_RESUMES); when its Lambda is about to reach the compute limit with work
+ * remaining it hands over to `{runId, continuation: {attempt}}` (≤ MAX_RUN_CONTINUATIONS, not an error). The resumed invocation rebuilds the
  * world from the store — it is event-sourced: SYS# rows are the current mock state, the event log is everything
  * that happened — keeps the sim clock where it was, re-attaches pending approvals and restarts the orchestrator with
  * a RESUME BRIEF built deterministically from the log (no LLM call).
@@ -131,7 +132,11 @@ export function buildResumeDigest(
 }
 
 /** Constant instructions + the digest as wrapped data (it quotes model and scenario text: data, never orders). */
-export function resumeBrief(d: ResumeDigest): string {
+export function resumeBrief(d: ResumeDigest, kind: 'error' | 'continuation' = 'error'): string {
+  if (kind === 'continuation') {
+    const text = `The coordination has continued (continuation ${d.attempt}) in a fresh worker at sim minute ${d.resumedAtMinute}, because the previous worker reached its compute time limit. Nothing failed. The airline systems' state is intact and every action already taken stands. Do NOT redo completed work or re-send messages. Read the run log below, re-read the systems you need, then continue: re-brief only the specialists whose work was interrupted or is still needed, follow up the open approvals (they are still pending with the same ids and execute on their own once a person decides), and call report when the incident is under control or every remaining action is waiting on a human.`;
+    return `${text}\n\n${wrapToolResult('runtime:resume', JSON.stringify(d))}`;
+  }
   const text = `The coordination was interrupted by a system error and has been resumed (attempt ${d.attempt}) at sim minute ${d.resumedAtMinute}. The airline systems' state is intact and every action already taken stands. Do NOT redo completed work or re-send messages. Read the run log below, re-read the systems you need, then continue: re-brief only the specialists whose work was interrupted or is still needed, follow up the open approvals (they execute on their own once a person decides), and call report when the incident is under control or every remaining action is waiting on a human.`;
   return `${text}\n\n${wrapToolResult('runtime:resume', JSON.stringify(d))}`;
 }

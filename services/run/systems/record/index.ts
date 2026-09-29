@@ -100,7 +100,10 @@ export function buildEvidencePack(
       channel: m.channel,
       body: m.body,
       aiDrafted: true,
-      approvedBy: actorLabel(m.approvedBy),
+      approvedBy:
+        m.approvalMethod === 'implicit' && m.approvedBy?.kind === 'human'
+          ? `${actorLabel(m.approvedBy)} — no objection within 60 s`
+          : actorLabel(m.approvedBy),
     }));
   const reports = Object.values(state.record.reports);
   const kpis = {

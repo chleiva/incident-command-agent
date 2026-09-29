@@ -14,6 +14,7 @@
  */
 import {
   SHIPPED_SCENARIOS,
+  EXPLICIT_ONLY_TOOLS,
   SIMULATION_AUTO_ACTOR,
   foldEvents,
   summariseScenario,
@@ -72,7 +73,8 @@ interface MockRun {
   seqMap: Map<number, number>;
   decided: Map<string, RunEvent<'approval.decision'>['payload']>;
   /** Recorded decision seq → who actually decided (the approver recorded on its consequences). */
-  deciders: Map<number, Actor>;
+  /** The actor (and, for an implicit approval, the method) who decided each recorded decision now. */
+  deciders: Map<number, { actor: Actor; method?: 'implicit' }>;
   dropped: Set<number>;
   paused: boolean;
   done: boolean;
@@ -504,6 +506,9 @@ export class MockBackend {
     if (!a) return err(404, 'not_found', `Approval ${approvalId} not found`);
     if (a.status !== 'pending' || run.decided.has(approvalId))
       return err(409, 'already_decided', 'Already decided');
+    // Like the API: implicit only approves, and certifying staff's decisions always need an explicit decision.
+    if (req.method === 'implicit' && (req.decision !== 'approve' || EXPLICIT_ONLY_TOOLS.includes(a.tool)))
+      return err(400, 'validation_failed', 'method implicit is not allowed for this decision');
     const payload: RunEvent<'approval.decision'>['payload'] = {
       approvalId,
       decision: req.decision,
@@ -515,12 +520,20 @@ export class MockBackend {
         req.policy === 'simulation-auto'
           ? SIMULATION_AUTO_ACTOR
           : ({ ...PRESENTER, roleTitle: req.roleTitle ?? 'Duty Manager' } as Actor),
+      // "Approve unless objected": the presenter's countdown ran out; still the presenter's decision (like the API).
+      ...(req.method === 'implicit' && req.policy !== 'simulation-auto'
+        ? { method: 'implicit' as const }
+        : {}),
     };
     run.decided.set(approvalId, payload);
     const recorded = run.script.find(
       (e) => e.type === 'approval.decision' && e.payload.approvalId === approvalId,
     );
-    if (recorded) run.deciders.set(recorded.seq, payload.decidedBy);
+    if (recorded)
+      run.deciders.set(recorded.seq, {
+        actor: payload.decidedBy,
+        ...(payload.method === 'implicit' ? { method: 'implicit' as const } : {}),
+      });
     const recommended = a.options?.find((o) => o.recommended)?.id;
     const offPath =
       req.decision === 'reject' ||
@@ -745,7 +758,14 @@ export class MockBackend {
       // The approver recorded on a decision's consequences is whoever decided now (presenter or simulation).
       const decider = run.deciders.get(e.payload.causedBySeq);
       const after = rest.after as Record<string, unknown> | undefined;
-      if (decider && after && 'approvedBy' in after) rest.after = { ...after, approvedBy: decider };
+      if (decider && after && 'approvedBy' in after) {
+        const { approvalMethod: _m, ...base } = after;
+        rest.after = {
+          ...base,
+          approvedBy: decider.actor,
+          ...(decider.method && decider.actor.kind === 'human' ? { approvalMethod: decider.method } : {}),
+        };
+      }
       return { ...e, payload: s ? { ...rest, causedBySeq: s } : rest } as RunEvent;
     }
     if (e.type === 'kpi.update' || e.type === 'run.completed') {

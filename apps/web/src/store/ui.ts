@@ -46,8 +46,8 @@ interface UiState {
   hideThoughts: boolean;
   aboutOpen: boolean;
   /**
-   * Simulation: pending decisions approve themselves after a 10 s countdown. Default OFF (the card waits for the
-   * viewer); turned on per viewer in ⌘K and persisted under `AUTO_APPROVE_KEY` (v2).
+   * Implicit approval ("approve unless objected"): a pending decision is approved in the viewer's name after a 60 s
+   * countdown. Default ON; turned off per viewer in ⌘K and persisted under `AUTO_APPROVE_KEY` (v3).
    */
   autoApprove: boolean;
   setAutoApprove(on: boolean): void;
@@ -81,11 +81,12 @@ const CAPTIONS_KEY = 'ica.captions';
 export const PLAIN_LANGUAGE_KEY = 'ica.plainLanguage';
 export const HIDE_THOUGHTS_KEY = 'ica.agents.hideThoughts';
 /**
- * v2: the default flipped to OFF (demo review). Any preference stored under the v1 key is dropped once, so every
- * viewer starts with auto-approve off; only an explicit ⌘K "on" (written to v2) turns it back on.
+ * v3: implicit approval ("approve unless objected", owner decision 2026-09-29) is ON by default. Preferences stored
+ * under the older keys (v1, v2: when the default was OFF) are dropped once, so every viewer starts with it on; only
+ * an explicit ⌘K "off" (written to v3) turns it off.
  */
-export const AUTO_APPROVE_KEY = 'ica.autoApprove.v2';
-export const LEGACY_AUTO_APPROVE_KEYS = ['ica.autoApprove'] as const;
+export const AUTO_APPROVE_KEY = 'ica.autoApprove.v3';
+export const LEGACY_AUTO_APPROVE_KEYS = ['ica.autoApprove', 'ica.autoApprove.v2'] as const;
 const OPEN_RUN_KEY = 'ica.openRun';
 export const PRESENTER_PACE_KEY = 'ica.presenterPace';
 
@@ -111,10 +112,10 @@ function remove(key: string): void {
   }
 }
 
-/** Auto-approve preference: on only when the viewer turned it on under the v2 key (legacy keys are dropped). */
+/** Implicit-approval preference: on unless the viewer turned it off under the v3 key (legacy keys are dropped). */
 export function readAutoApprove(): boolean {
   for (const k of LEGACY_AUTO_APPROVE_KEYS) remove(k);
-  return read(AUTO_APPROVE_KEY) === 'on';
+  return read(AUTO_APPROVE_KEY) !== 'off';
 }
 
 function readSession(key: string): string | null {

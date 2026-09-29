@@ -13,7 +13,7 @@ import { AppShell } from '../app/AppShell';
 import { useServices } from '../app/services';
 import { useRun, useRunConnection, useRunStoreInstance } from '../app/useRunConnection';
 import { KpiStrip } from '../components/kpi/KpiStrip';
-import { autoDecidedApprovals } from '../components/kpi/kpiModel';
+import { autoDecidedApprovals, implicitDecidedApprovals } from '../components/kpi/kpiModel';
 import { RotationGantt } from '../components/network/RotationGantt';
 import { MarkerGlyph } from '../components/timeline/EventMarkers';
 import { TimeScrubber } from '../components/timeline/TimeScrubber';
@@ -248,8 +248,14 @@ export default function Compare() {
             baseline={bk}
             status={loading}
             label="Agent run indicators"
-            safety={{ autoApproved: autoDecidedApprovals(aView) }}
-            baselineSafety={{ autoApproved: autoDecidedApprovals(bView) }}
+            safety={{
+              autoApproved: autoDecidedApprovals(aView),
+              implicitApproved: implicitDecidedApprovals(aView),
+            }}
+            baselineSafety={{
+              autoApproved: autoDecidedApprovals(bView),
+              implicitApproved: implicitDecidedApprovals(bView),
+            }}
           />
           <div
             className="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-md bg-surface-sunken px-3 py-2"

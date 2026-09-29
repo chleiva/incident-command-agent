@@ -345,7 +345,7 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
   // ------------------------------------------------------------------ safety gates
   const tierBlocks = events.filter((e) => e.type === 'guardrail.blocked' && e.payload.layer === 'tier');
   const proposalsByCall = new Map<string, string>();
-  const decided = new Map<string, { seq: number; policy?: string }>();
+  const decided = new Map<string, { seq: number; policy?: string; implicit?: boolean }>();
   const proposeCalls = new Set<string>();
   for (const e of events) {
     if (e.type === 'agent.tool_call' && e.payload.tier === 'propose') proposeCalls.add(e.payload.toolCallId);
@@ -360,12 +360,15 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
       decided.set(e.payload.approvalId, {
         seq: e.seq,
         ...(by.kind === 'human' ? {} : { policy: by.kind === 'policy' ? by.policy : by.kind }),
+        // "Approve unless objected": a named human's decision (it counts), counted apart as implicit.
+        ...(by.kind === 'human' && e.payload.method === 'implicit' ? { implicit: true } : {}),
       });
     }
   }
   let withDecision = 0;
   let withoutDecision = 0;
   let autoApproved = 0;
+  let implicitApprovals = 0;
   const byPolicy: Record<string, number> = {};
   const safetySeqs: number[] = seqsOf(tierBlocks);
   for (const e of events) {
@@ -378,7 +381,10 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
     else if (d.policy) {
       autoApproved++;
       byPolicy[d.policy] = (byPolicy[d.policy] ?? 0) + 1;
-    } else withDecision++;
+    } else {
+      withDecision++;
+      if (d.implicit) implicitApprovals++;
+    }
     safetySeqs.push(e.seq);
   }
   const safetyValue: SafetyValue = {
@@ -387,6 +393,7 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
     dependentActionsWithoutDecision: withoutDecision,
     autoApprovedActions: autoApproved,
     ...(autoApproved ? { autoApprovedByPolicy: byPolicy } : {}),
+    ...(implicitApprovals ? { implicitApprovals } : {}),
   };
   // Presenter-triggered attempts ("Demonstrate blocked action") go through the same gate and are counted the same;
   // the inputs say how many of them the presenter pushed, so "why this number" can tell.
@@ -405,6 +412,7 @@ export function computeKpis(snapshot: WorldSnapshot, params: KpiParams, events: 
       autoApprovedActions: autoApproved,
       ...Object.fromEntries(Object.entries(byPolicy).map(([k, n]) => [`autoApproved:${k}`, n])),
       presenterTriggeredAttempts: presenterTriggered,
+      ...(implicitApprovals ? { implicitApprovals } : {}),
     },
     safetySeqs,
   );

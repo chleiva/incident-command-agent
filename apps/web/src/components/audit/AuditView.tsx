@@ -157,14 +157,16 @@ export function AuditView({
             <div key={ev.seq} className="flex items-start gap-2 text-caption" data-run-event={ev.kind}>
               <span className="num w-12 shrink-0 text-micro text-fg-subtle">m{Math.round(ev.minute)}</span>
               <Icon
-                name={ev.kind === 'resumed' ? 'check' : 'alert'}
+                name={ev.kind === 'resumed' ? 'check' : ev.tone === 'info' ? 'info' : 'alert'}
                 size={12}
                 className={
                   ev.tone === 'critical'
                     ? 'mt-0.5 shrink-0 text-critical'
                     : ev.tone === 'warning'
                       ? 'mt-0.5 shrink-0 text-warning'
-                      : 'mt-0.5 shrink-0 text-good'
+                      : ev.tone === 'info'
+                        ? 'mt-0.5 shrink-0 text-fg-muted'
+                        : 'mt-0.5 shrink-0 text-good'
                 }
               />
               <span className="min-w-0 flex-1 text-fg">

@@ -6,8 +6,15 @@
  * Calm run-health banners under the header: a final failure ("This run stopped because of a system error: …",
  * technical message expandable, "Start again"), a self-recovery in progress ("Recovering from a system error…"),
  * and a completed recovery ("Recovered — resumed at m{t}", dismissible). A recovery is never shown as a failure.
+ * A continuation in a fresh worker (15-min compute limit) is a small informational note that dismisses itself.
  */
-import type { RecoveryState, RunFailure } from '../lib/runHealth';
+import { useEffect } from 'react';
+import {
+  continuationText,
+  type ContinuationNote,
+  type RecoveryState,
+  type RunFailure,
+} from '../lib/runHealth';
 import { Icon } from './ui/Icon';
 import { Button, cx } from './ui/primitives';
 
@@ -114,6 +121,53 @@ export function RunRecoveryBanner({
         )}
       </span>
       {!recovering && onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="shrink-0 text-micro text-fg-subtle underline underline-offset-2 hover:text-fg"
+        >
+          Dismiss
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Default time the continuation note stays up. */
+export const CONTINUATION_NOTE_MS = 8_000;
+
+/**
+ * "Continued in a fresh worker at m{t}": calm and informational (never an error). One worker may run for 15 minutes,
+ * so a long, human-paced run carries on in a fresh one with everything kept. Dismisses itself.
+ */
+export function RunContinuationNote({
+  continuation,
+  onDismiss,
+  autoDismissMs = CONTINUATION_NOTE_MS,
+}: {
+  continuation: ContinuationNote;
+  onDismiss?: () => void;
+  /** 0 = stays until dismissed (stories). */
+  autoDismissMs?: number;
+}) {
+  useEffect(() => {
+    if (!onDismiss || autoDismissMs <= 0) return;
+    const t = setTimeout(onDismiss, autoDismissMs);
+    return () => clearTimeout(t);
+  }, [onDismiss, autoDismissMs, continuation.seq]);
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      data-testid="run-continuation"
+      className="mx-2 mt-2 flex w-fit max-w-[calc(100%-16px)] items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-caption text-fg-muted"
+    >
+      <Icon name="info" size={12} className="shrink-0 text-fg-subtle" />
+      <span className="min-w-0">
+        <span className="text-fg">{continuationText(continuation)}.</span> The run keeps going: approvals, the
+        clock and the speed are unchanged.
+      </span>
+      {onDismiss && (
         <button
           type="button"
           onClick={onDismiss}

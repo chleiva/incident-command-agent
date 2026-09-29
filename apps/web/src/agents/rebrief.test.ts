@@ -12,7 +12,15 @@ import { describe, expect, it } from 'vitest';
 import { buildAgentsShowcase } from '../mocks/agentsShowcase';
 import { RECORDINGS } from '../mocks/recordings';
 import { alreadyPaged, headline, HEADLINE_MAX } from './headline';
-import { deriveAgents, isRecordingFailure, RECOVERY_HEADLINE, turnCount } from './rows';
+import {
+  CONTINUATION_HEADLINE,
+  deriveAgents,
+  handoverStops,
+  HANDOVER_HEADLINE,
+  isRecordingFailure,
+  RECOVERY_HEADLINE,
+  turnCount,
+} from './rows';
 
 const S01 = RECORDINGS[0]!;
 const SHOWCASE = buildAgentsShowcase();
@@ -136,6 +144,63 @@ describe('resumed after a system error (additive event)', () => {
     expect(row.role).toBe('orchestrator');
     expect(row.headline).toBe('Resumed after a system error — re-briefed from the record');
     expect(RECOVERY_HEADLINE.length).toBeLessThanOrEqual(HEADLINE_MAX);
+  });
+});
+
+// ------------------------------------------------------------------------------------------------ continuation
+describe('continued in a fresh worker (additive events): a neutral divider, never an error', () => {
+  const tail = (n: number, type: string, payload: object, extra: object = {}) =>
+    ({
+      ...last,
+      seq: last.seq + n,
+      type,
+      actor: { kind: 'world' },
+      agentRunId: undefined,
+      payload,
+      ...extra,
+    }) as unknown as RunEvent;
+  const orchRun = S01.agent.find((e) => e.type === 'agent.started')!.agentRunId!;
+  const events = [
+    ...S01.agent,
+    tail(
+      1,
+      'agent.aborted',
+      { role: 'orchestrator', reason: 'stopped', detail: 'run signal aborted' },
+      {
+        agentRunId: orchRun,
+        actor: { kind: 'agent', role: 'orchestrator' },
+      },
+    ),
+    tail(2, 'run.continuing', { attempt: 1, maxAttempts: 12 }),
+    tail(3, 'run.continued', { attempt: 1, atSimMinute: last.simMinute, pendingApprovals: 1 }),
+  ];
+
+  it('a divider row in the orchestrator column; the hand-over stop is calm', () => {
+    const orch = deriveAgents(events).columns[0]!;
+    const row = orch.rows.at(-1)!;
+    expect(row.kind).toBe('continuation');
+    expect(row.headline).toBe('Continued in a fresh worker (15-min compute limit)');
+    expect(CONTINUATION_HEADLINE.length).toBeLessThanOrEqual(HEADLINE_MAX);
+    const stop = orch.rows.find((r) => r.kind === 'stopped' && r.seq === last.seq + 1)!;
+    expect(stop).toMatchObject({ handover: true, headline: HANDOVER_HEADLINE });
+    expect(HANDOVER_HEADLINE.length).toBeLessThanOrEqual(HEADLINE_MAX);
+  });
+
+  it('only stops followed by run.continuing are hand-overs (a kill switch is not)', () => {
+    expect([...handoverStops(events)]).toEqual([last.seq + 1]);
+    const killed = [
+      ...S01.agent,
+      tail(
+        1,
+        'agent.aborted',
+        { role: 'orchestrator', reason: 'stopped', detail: 'kill-switch' },
+        {
+          agentRunId: orchRun,
+        },
+      ),
+      tail(2, 'run.completed', { reason: 'stopped', totals: {}, finalKpis: null }),
+    ];
+    expect(handoverStops(killed).size).toBe(0);
   });
 });
 

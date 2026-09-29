@@ -39,5 +39,17 @@ export const Blocked: Story = { args: { kind: 'blocked' } };
 export const BlockedExpanded: Story = { args: { kind: 'blocked', expanded: true } };
 export const Stopped: Story = { args: { kind: 'stopped' } };
 export const StoppedExpanded: Story = { args: { kind: 'stopped', expanded: true } };
+export const StoppedHandover: Story = {
+  name: 'Stopped for the hand-over to a fresh worker (calm)',
+  args: { kind: 'stopped', handover: true, expanded: true },
+};
+export const Continuation: Story = {
+  name: 'Continued in a fresh worker (divider)',
+  args: { kind: 'continuation' },
+};
+export const ContinuationExpanded: Story = {
+  name: 'Continued in a fresh worker expanded',
+  args: { kind: 'continuation', expanded: true },
+};
 export const Report: Story = { name: 'Report (with screening flag)', args: { kind: 'report' } };
 export const ReportExpanded: Story = { name: 'Report expanded', args: { kind: 'report', expanded: true } };

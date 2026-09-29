@@ -340,6 +340,15 @@ describe('DynamoStore.claimResume (unit, fake client)', () => {
     fail = true;
     expect(await store.claimResume('r1', 1)).toBe(false);
   });
+  it('claimContinuation uses its own counter (continuationAttempt)', async () => {
+    const { sent, client } = fakeClient(() => ({}));
+    const store = new DynamoStore({ tableName: 't', client, retry: { sleep: async () => undefined } });
+    expect(await store.claimContinuation('r1', 3)).toBe(true);
+    expect(sent[0].input.UpdateExpression).toBe('SET continuationAttempt = :a, updatedAt = :now');
+    expect(sent[0].input.ConditionExpression).toBe(
+      'attribute_exists(PK) AND (attribute_not_exists(continuationAttempt) OR continuationAttempt < :a)',
+    );
+  });
 });
 
 describe.skipIf(!endpoint)('DynamoStore against DynamoDB Local (DYNAMO_ENDPOINT)', () => {

@@ -6,7 +6,7 @@
 import type { AuditLlmEntry, AuditToolEntry, AuditEntry } from '@ica/schema/browser';
 import { useEffect, useState } from 'react';
 import { formatBytes, type LoadedTrace } from '../../audit/audit';
-import { actorLabel } from '../../lib/format';
+import { IMPLICIT_SUFFIX, actorLabel, isImplicitHuman } from '../../lib/format';
 import { Button, Skeleton, TierBadge } from '../ui/primitives';
 import { JsonViewer } from './JsonViewer';
 import { LlmTraceView } from './LlmTraceView';
@@ -126,8 +126,11 @@ function ToolDetail({ entry }: { entry: AuditToolEntry }) {
         )}
         {entry.decision && (
           <Note>
-            Decision: {entry.decision.decision} by {actorLabel(entry.decision.decidedBy)} at m
-            {Math.round(entry.decision.simMinute)}
+            Decision: {entry.decision.decision} by {actorLabel(entry.decision.decidedBy)}
+            {isImplicitHuman(entry.decision.decidedBy, entry.decision.method)
+              ? ` — ${IMPLICIT_SUFFIX}`
+              : ''}{' '}
+            at m{Math.round(entry.decision.simMinute)}
             {entry.decision.reason ? ` — “${entry.decision.reason}”` : ''}
             {entry.decision.editedArgs ? ' (arguments edited)' : ''}
           </Note>

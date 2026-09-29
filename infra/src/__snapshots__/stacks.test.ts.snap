@@ -584,7 +584,7 @@ exports[`ApiStack > matches the snapshot 1`] = `
             "Value": "incident-command-agent",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
     },

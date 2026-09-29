@@ -23,6 +23,8 @@ import {
   SIMULATION_AUTO_LABEL,
   actorLabel,
   decisionPhrase,
+  IMPLICIT_SUFFIX,
+  isImplicitHuman,
   formatDuration,
   formatEur,
   humaniseTool,
@@ -103,14 +105,15 @@ export function evidenceSections(input: EvidenceInput): Section[] {
 
   const decided = Object.values(p.approvals).filter((a) => a.decision);
   sections.push({
-    heading: 'Decisions (tier: propose; the approver of each; simulation auto-approvals are marked as such)',
+    heading:
+      'Decisions (tier: propose; the approver of each; implicit approvals and simulation auto-approvals are marked as such)',
     lines: decided.length
       ? decided.map((a) => {
           const d = a.decision!;
           const option = d.selectedOptionId
             ? a.options?.find((o) => o.id === d.selectedOptionId)?.label
             : undefined;
-          return `${clock(d.atMinute)} ${humaniseTool(a.tool)}: ${d.decision.toUpperCase()}${option ? ` — ${option}` : ''} — ${a.summary} — ${isSimulationAuto(d.decidedBy) ? SIMULATION_AUTO_LABEL : `by ${actorLabel(d.decidedBy)}`}${d.reason ? ` (reason: ${d.reason})` : ''}`;
+          return `${clock(d.atMinute)} ${humaniseTool(a.tool)}: ${d.decision.toUpperCase()}${option ? ` — ${option}` : ''} — ${a.summary} — ${isSimulationAuto(d.decidedBy) ? SIMULATION_AUTO_LABEL : `by ${actorLabel(d.decidedBy)}${isImplicitHuman(d.decidedBy, d.method) ? ` — ${IMPLICIT_SUFFIX}` : ''}`}${d.reason ? ` (reason: ${d.reason})` : ''}`;
         })
       : ['No decisions recorded.'],
   });
@@ -144,7 +147,7 @@ export function evidenceSections(input: EvidenceInput): Section[] {
     lines: messages.length
       ? messages.map(
           (m) =>
-            `${m.sentAtMinute !== undefined ? clock(m.sentAtMinute) : '--:--'} [${m.status}] ${m.channel.toUpperCase()} to ${m.cohortIds.join(', ')}: "${m.body}"${m.approvedBy ? ` — ${decisionPhrase(m.approvedBy, 'approved')}` : ''}`,
+            `${m.sentAtMinute !== undefined ? clock(m.sentAtMinute) : '--:--'} [${m.status}] ${m.channel.toUpperCase()} to ${m.cohortIds.join(', ')}: "${m.body}"${m.approvedBy ? ` — ${decisionPhrase(m.approvedBy, 'approved', m.approvalMethod)}` : ''}`,
         )
       : ['No messages.'],
   });

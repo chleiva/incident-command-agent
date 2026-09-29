@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { deriveAgents } from '../../agents/rows';
 import { RECORDINGS } from '../../mocks/recordings';
 import { AgentsBoard } from './AgentsBoard';
-import { boardArgs, SHOWCASE_EVENTS, untilProposal } from './storyData';
+import { boardArgs, CONTINUED_EVENTS, SHOWCASE_EVENTS, untilProposal } from './storyData';
 
 const meta: Meta<typeof AgentsBoard> = {
   title: 'Agents view/Board',
@@ -34,6 +34,10 @@ export const Ended: Story = { name: 'Live (every row type, author banner)', args
 export const History: Story = {
   name: 'History (viewing a past moment)',
   args: { ...ended, cursorSeq: pivot.seq },
+};
+export const Continued: Story = {
+  name: 'Live, continued in a fresh worker (15-min compute limit)',
+  args: boardArgs(CONTINUED_EVENTS, { live: true }),
 };
 export const HideThoughts: Story = { name: 'Hide thoughts', args: { ...ended, hideThoughts: true } };
 export const ErrorState: Story = {
