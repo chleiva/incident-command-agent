@@ -40,3 +40,8 @@ evals/reports/*.local.*
 # Private notes (owner only)
 tech_explanation.md
 ai-solution.md
+
+# Private presentations and review notes (owner only)
+/*.pdf
+/*.pptx
+recommendations-presentation.md
