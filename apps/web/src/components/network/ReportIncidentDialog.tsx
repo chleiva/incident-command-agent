@@ -7,6 +7,9 @@
  * line each), an optional free-text box, a one-glance preview of the scenario that will run, and Start. Picking a
  * type builds the scenario from the flight's context with the templates (free, instant; the server rebuilds it the
  * same way). Free text adds one Scenario Author step (an LLM call). No wizard.
+ *
+ * "Something else" is authoritative free text: the preview is the neutral flight context only (no template incident);
+ * the Scenario Author writes the incident from the description, this flight and, for wide events, the day's network.
  */
 import type { DaySchedule, NetworkFlight } from '@ica/network';
 import type * as Templates from '@ica/network/templates';
@@ -92,8 +95,10 @@ export function ReportIncidentDialog({
   );
   const options = useMemo(() => (lib && ctx ? lib.incidentTypesFor(ctx) : []), [lib, ctx]);
   const preview = useMemo(() => {
-    if (!lib || !selected || selected === OTHER) return null;
+    if (!lib || !selected) return null;
     try {
+      if (selected === OTHER)
+        return lib.buildNeutralScenarioFromFlight(schedule, flight.flight, { atMs }).preview;
       return lib.buildScenarioFromFlight(schedule, flight.flight, selected, { atMs }).preview;
     } catch (e) {
       return { error: e instanceof Error ? e.message : String(e) };
@@ -216,8 +221,9 @@ export function ReportIncidentDialog({
                       <span className="min-w-0 flex-1">
                         <span className="block text-body text-fg">Something else</span>
                         <span className="block text-caption text-fg-muted">
-                          Describe it below; the Scenario Author writes the scenario from your words and this
-                          flight.
+                          Describe it below. The Scenario Author writes the incident from your words and this
+                          flight&apos;s context — plus the day&apos;s network for events that affect many
+                          flights, such as an airspace closure.
                         </span>
                       </span>
                     </label>
@@ -240,8 +246,12 @@ export function ReportIncidentDialog({
                 {text.trim() && (
                   <span className="text-caption text-fg-muted" data-testid="author-note">
                     {mode === 'mock'
-                      ? 'Mock mode: your text is screened and added to the scenario; no LLM call.'
-                      : 'The cockpit opens at once; the Scenario Author adds your details before the world starts (under a minute). Your text is screened and treated as data.'}
+                      ? needsText
+                        ? 'Mock mode: your text is screened and a canned network-wide scenario is written; no LLM call.'
+                        : 'Mock mode: your text is screened and added to the scenario; no LLM call.'
+                      : needsText
+                        ? 'The cockpit opens at once; the Scenario Author writes the incident from your description before the world starts (about a minute). Your words are the facts; they are screened and treated as data.'
+                        : 'The cockpit opens at once; the Scenario Author adds your details before the world starts (under a minute). Your text is screened and treated as data.'}
                   </span>
                 )}
               </label>
@@ -264,8 +274,10 @@ export function ReportIncidentDialog({
               )}
               {!selected && <p className="text-caption text-fg-muted">Pick an incident type.</p>}
               {selected === OTHER && (
-                <p className="text-caption text-fg-muted">
-                  The Scenario Author builds the scenario from your description and this flight's context.
+                <p className="text-caption text-fg" data-testid="other-note">
+                  The Scenario Author writes the incident from your description and this flight&apos;s context
+                  (plus the day&apos;s network for wide events). No template incident is added; if it cannot
+                  build one, nothing runs in its place.
                 </p>
               )}
               {preview && 'error' in preview && (
@@ -275,9 +287,11 @@ export function ReportIncidentDialog({
               )}
               {preview && !('error' in preview) && (
                 <>
-                  <p className="text-body text-fg" data-testid="preview-trigger">
-                    {preview.trigger}
-                  </p>
+                  {selected !== OTHER && (
+                    <p className="text-body text-fg" data-testid="preview-trigger">
+                      {preview.trigger}
+                    </p>
+                  )}
                   <ul className="flex flex-col gap-1 text-caption text-fg-muted">
                     {preview.facts.map((f) => (
                       <li key={f}>{f}</li>
@@ -286,7 +300,8 @@ export function ReportIncidentDialog({
                   {preview.twists.length > 0 && (
                     <p className="text-caption text-fg-subtle">Twists: {preview.twists.join(' · ')}</p>
                   )}
-                  {options.find((o) => o.type.id === selected)?.type.category === 'airborne' && (
+                  {(options.find((o) => o.type.id === selected)?.type.category === 'airborne' ||
+                    (selected === OTHER && (ctx?.phase === 'airborne' || ctx?.phase === 'approach'))) && (
                     <p className="text-caption text-fg" data-testid="commander-authority-note">
                       The commander flies and decides the aircraft. The agents only prepare options and the
                       ground; instructing the crew is blocked.

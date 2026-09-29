@@ -8,16 +8,19 @@
  * (the client never sends a scenario). Deterministic and fast: no LLM in the request path. Free text is screened with
  * the regex heuristics only and handed to the Run Lambda as an authoring request; the Scenario Author patches the
  * template there, before the world starts (services/run/runtime/authoring.ts).
+ *
+ * "Something else" (`incidentType: 'other'`) is authoritative free text: the stored scenario is a NEUTRAL base from
+ * the flight's context only (no template incident); the Author writes the incident layer from the description and a
+ * slice of the day's network. It is never swapped for an unrelated template.
  */
 import { generateDaySchedule, type DaySchedule } from '@ica/network';
 import {
   OTHER_INCIDENT_TYPE,
   TemplateError,
+  buildNeutralScenarioFromFlight,
   buildScenarioFromFlight,
   incidentContext,
   incidentTypeById,
-  incidentTypesFor,
-  type BuiltScenario,
 } from '@ica/network/templates';
 import {
   validateScenario,
@@ -53,9 +56,11 @@ export interface FlightScenarioResult {
 
 const rand = () => Math.random().toString(36).slice(2, 6).padEnd(4, '0');
 
-function build(schedule: DaySchedule, flightId: string, typeId: string, atMs: number, force = false) {
+function build(schedule: DaySchedule, flightId: string, typeId: string | undefined, atMs: number) {
   try {
-    return buildScenarioFromFlight(schedule, flightId, typeId, { atMs, force });
+    return typeId
+      ? buildScenarioFromFlight(schedule, flightId, typeId, { atMs })
+      : buildNeutralScenarioFromFlight(schedule, flightId, { atMs });
   } catch (err) {
     if (err instanceof TemplateError)
       throw new HttpError(err.code === 'flight_not_found' ? 404 : 409, err.code, err.message);
@@ -92,24 +97,8 @@ export async function buildFlightScenario(
       throw new HttpError(422, 'input_rejected', 'the text was rejected by input screening', { screening });
   }
 
-  let base: BuiltScenario;
-  if (type) {
-    base = build(schedule, fc.flightId, type.id, atMs);
-  } else {
-    // 'other': the first startable incident family for this flight's phase is the template; the Author makes it
-    // match the description (or it runs as that standard scenario).
-    const option = incidentTypesFor(ctx).find((o) => o.enabled);
-    if (!option)
-      throw new HttpError(409, 'not_applicable', 'no incident template applies to this flight right now');
-    base = build(schedule, fc.flightId, option.type.id, atMs);
-    base = {
-      ...base,
-      scenario: {
-        ...base.scenario,
-        title: `Reported incident: ${fc.flightId} at ${base.scenario.aircraft.station}`,
-      },
-    };
-  }
+  // 'other': a neutral base from the flight's context only; the Author writes the incident (or the run fails).
+  const base = build(schedule, fc.flightId, type?.id, atMs);
 
   const v = validateScenario(base.scenario);
   if (!v.ok) {
@@ -129,6 +118,8 @@ export async function buildFlightScenario(
   await deps.store.putScenario(scenario);
   if (!req.text) return { scenario };
   const text = screening?.verdict === 'neutralised' ? (screening.neutralisedText ?? req.text) : req.text;
-  const label = type?.label ?? base.type.label;
-  return { scenario, authoring: { text, label }, ...(screening ? { screening } : {}) };
+  const authoring: AuthoringRequest = other
+    ? { text, mode: 'other', network: { seed: fc.seed, date: fc.date, flightId: fc.flightId } }
+    : { text, label: type!.label, mode: 'typed' };
+  return { scenario, authoring, ...(screening ? { screening } : {}) };
 }

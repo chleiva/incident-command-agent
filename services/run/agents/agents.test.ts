@@ -15,8 +15,8 @@ describe('agent roles', () => {
       expect(def.role).toBe(r);
       expect(def.stop).toBe('report_tool');
       expect(def.systemPrompt.length).toBeGreaterThan(400);
-      // tight: stays well under ~1,000 tokens
-      expect(def.systemPrompt.length).toBeLessThan(4500);
+      // tight: stays around ~1,000 tokens (the orchestrator also covers network-wide events)
+      expect(def.systemPrompt.length).toBeLessThan(4800);
       // no template placeholders or interpolation markers
       expect(def.systemPrompt).not.toMatch(/\$\{|\{\{|undefined|\[object Object\]/);
     }

@@ -29,6 +29,7 @@ import {
   type RunEvent,
   type RunMeta,
   type Scenario,
+  type ScenarioAuthoringSummary,
   type ScenarioSummary,
   type ScreeningResult,
   type StateSystemName,
@@ -38,6 +39,7 @@ import { DEFAULT_APP_CONFIG } from '../lib/brand';
 import type { SocketLike, Transport } from '../lib/transport';
 import { mockAudit, mockLlmTrace } from './auditTraces';
 import { MOCK_EVAL_REPORT } from './evalReport';
+import { cannedClosurePatch } from './mockAuthor';
 import { SHOWCASE_RUN_ID, buildAgentsShowcase } from './agentsShowcase';
 import { RECORDINGS, recordingFor, type Recording } from './recordings';
 
@@ -99,7 +101,12 @@ const json = (status: number, body: unknown) =>
 const err = (status: number, code: string, error: string) => json(status, { error, code });
 
 /** `scenario.authoring` started → patched (template seqs far above any recording's). */
-function authoringPrelude(simTime: string): RunEvent[] {
+function authoringPrelude(
+  simTime: string,
+  done: { detail: string; summary?: ScenarioAuthoringSummary } = {
+    detail: 'Scenario enriched from your description',
+  },
+): RunEvent[] {
   const base = { runId: 'mock', actor: { kind: 'world' as const }, simMinute: 0, simTime, wallTime: simTime };
   return [
     {
@@ -112,7 +119,7 @@ function authoringPrelude(simTime: string): RunEvent[] {
       ...base,
       seq: 900_002,
       type: 'scenario.authoring',
-      payload: { status: 'patched', detail: 'Scenario enriched from your description' },
+      payload: { status: 'patched', ...done },
     },
   ] as RunEvent[];
 }
@@ -393,7 +400,10 @@ export class MockBackend {
     const screening = req.text ? screenText(req.text) : undefined;
     if (screening?.verdict === 'rejected')
       return err(422, 'input_rejected', 'the text was rejected by input screening');
-    const airborne = T.incidentTypeById(typeId)?.category === 'airborne';
+    const other = typeId === T.OTHER_INCIDENT_TYPE;
+    const airborne = other
+      ? ctx.phase === 'airborne' || ctx.phase === 'approach'
+      : T.incidentTypeById(typeId)?.category === 'airborne';
     const outstation = !isBase(ctx.station);
     const rec = recordingFor(
       airborne
@@ -404,14 +414,19 @@ export class MockBackend {
     );
     if (!rec) return err(500, 'mock_error', 'no recording');
     // Airborne: the turnback recording moved onto this flight and the airport of the chosen type.
-    const recType = airborne ? typeId : outstation ? 'lightning_strike' : 'pushback_tug_contact';
+    const recType = airborne
+      ? other
+        ? 'air_turnback'
+        : typeId
+      : outstation
+        ? 'lightning_strike'
+        : 'pushback_tug_contact';
     let built;
     let replay;
     try {
-      built =
-        typeId === T.OTHER_INCIDENT_TYPE
-          ? T.buildScenarioFromFlight(schedule, fc.flightId, recType, { atMs, force: true })
-          : T.buildScenarioFromFlight(schedule, fc.flightId, typeId, { atMs });
+      built = other
+        ? T.buildNeutralScenarioFromFlight(schedule, fc.flightId, { atMs })
+        : T.buildScenarioFromFlight(schedule, fc.flightId, typeId, { atMs });
       replay = T.buildScenarioFromFlight(schedule, fc.flightId, recType, {
         atMs,
         template: rec.scenario,
@@ -422,16 +437,21 @@ export class MockBackend {
     }
     // Async authoring (mock): the "Author" adds the screened note to the narrative, announced by scenario.authoring
     // events before the world starts, like the Run Lambda does.
+    // "Something else": the neutral base plus a canned network-wide closure patch, merged by the Run Lambda's code.
     const note = req.text
       ? ` Duty manager's note (screened): «${screening?.neutralisedText ?? req.text}»`
       : '';
-    const scenario: Scenario = {
-      ...built.scenario,
-      ...(typeId === T.OTHER_INCIDENT_TYPE
-        ? { title: `Reported incident: ${fc.flightId} at ${ctx.station}` }
-        : {}),
-      narrative: `${built.scenario.narrative}${note}`,
-    };
+    let scenario: Scenario;
+    if (other) {
+      const slice = T.networkSlice(schedule, Date.parse(built.scenario.startSimTime), {
+        text: req.text ?? '',
+        anchorFlight: fc.flightId,
+      });
+      scenario = T.applyAuthoredPatch(built.scenario, cannedClosurePatch(built.scenario, slice), slice);
+      scenario = { ...scenario, narrative: `${scenario.narrative}${note}` };
+    } else {
+      scenario = { ...built.scenario, narrative: `${built.scenario.narrative}${note}` };
+    }
     const fix = airborne
       ? airborneFixer(fc.flightId, schedule.flights.find((f) => f.flight === fc.flightId)!.from, typeId)
       : (e: RunEvent[]) => e;
@@ -441,7 +461,17 @@ export class MockBackend {
       baseline: fix(replay.remap(rec.baseline)),
     };
     this.scenarios.set(scenario.id, { scenario, recording });
-    const prelude = req.text ? authoringPrelude(scenario.startSimTime) : [];
+    const prelude = req.text
+      ? authoringPrelude(
+          scenario.startSimTime,
+          other
+            ? {
+                detail: 'Scenario written from your description',
+                summary: T.authoringSummaryOf(scenario),
+              }
+            : undefined,
+        )
+      : [];
     const agentId = this.nextRunId();
     const baselineId = req.withBaseline ? this.nextRunId() : undefined;
     const res = this.createRun(

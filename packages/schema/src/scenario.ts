@@ -56,6 +56,9 @@ export const EquipmentKindSchema = literalUnion(EQUIPMENT_KINDS);
 export type EquipmentKind = Static<typeof EquipmentKindSchema>;
 
 export const EVIDENCE_KINDS = ['photo-description', 'techlog', 'report', 'sensor'] as const;
+/** Addition (authoritative free text): what the trigger affects — one aircraft (default) or the network. */
+export const TRIGGER_SCOPES = ['aircraft', 'network'] as const;
+export type TriggerScope = (typeof TRIGGER_SCOPES)[number];
 
 export const SectorSchema = Type.Object(
   {
@@ -108,6 +111,11 @@ export const TriggerSchema = Type.Object(
     atMinute: Minute,
     description: NonEmpty,
     evidence: Type.Array(EvidenceSchema),
+    /**
+     * Addition (authoritative free text): `network` = a network-wide event (e.g. an airspace closure) that affects many
+     * flights; the incident aircraft is not assumed unserviceable and no defect is raised. Omitted = `aircraft`.
+     */
+    scope: Type.Optional(literalUnion(TRIGGER_SCOPES)),
   },
   strict,
 );
@@ -215,6 +223,30 @@ export const RotationLegSchema = Type.Object(
 );
 export type RotationLeg = Static<typeof RotationLegSchema>;
 
+/**
+ * Addition (authoritative free text): another Accent Air flight in the air at sim minute 0, from the day's network
+ * (network-wide incidents). Seeded into `occ.airborne` like `scenario.airborne`; the commander of each flight decides it.
+ */
+export const ScenarioNetworkAirborneSchema = Type.Object(
+  {
+    flight: FlightNumberSchema,
+    tail: TailSchema,
+    from: IataSchema,
+    plannedDestination: IataSchema,
+    position: Type.Object({ lat: Type.Number(), lon: Type.Number() }, strict),
+    altitudeFt: Type.Number({ minimum: 0 }),
+    headingDeg: Type.Number({ minimum: 0, maximum: 360 }),
+    etaMinute: Minute,
+    fuelEnduranceMin: Type.Number({ minimum: 0 }),
+    squawk: literalUnion(['normal', 'pan', 'mayday'] as const),
+    pax: Count,
+  },
+  strict,
+);
+export type ScenarioNetworkAirborne = Static<typeof ScenarioNetworkAirborneSchema>;
+/** Upper bound on extra network flights in one scenario (authoritative free text). */
+export const MAX_NETWORK_AIRBORNE = 25;
+
 export const ScenarioWorldSchema = Type.Object(
   {
     spares: Type.Array(ScenarioSpareSchema),
@@ -235,6 +267,10 @@ export const ScenarioWorldSchema = Type.Object(
         Type.String({ pattern: '^[A-Z]{3}$' }),
         Type.Record(Type.String({ pattern: '^[A-Z]{3}$' }), Type.Number({ minimum: 0 })),
       ),
+    ),
+    /** Addition (authoritative free text): other network flights in the air at sim minute 0. */
+    airborneFlights: Type.Optional(
+      Type.Array(ScenarioNetworkAirborneSchema, { maxItems: MAX_NETWORK_AIRBORNE }),
     ),
   },
   strict,

@@ -12,7 +12,12 @@ import { roleInfo } from '../../agents/roles';
 import { Icon } from '../ui/Icon';
 import { AiDraftedBadge, cx } from '../ui/primitives';
 
-const STEP_LABEL = { started: 'Started', patched: 'Enriched', fallback: 'Standard scenario used' } as const;
+const STEP_LABEL = {
+  started: 'Started',
+  patched: 'Enriched',
+  fallback: 'Standard scenario used',
+  failed: 'Not built',
+} as const;
 
 export function AuthorBanner({ author }: { author: AuthorBannerModel }) {
   const [open, setOpen] = useState(false);

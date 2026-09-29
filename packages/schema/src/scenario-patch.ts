@@ -9,20 +9,45 @@
  * seeded world (services/run/runtime/scenario-patch.ts). All text in a patch is untrusted data.
  */
 import { Type, type Static } from '@sinclair/typebox';
-import { literalUnion } from './ids';
-import { EVIDENCE_KINDS, TwistEffectSchema, type Scenario, type ScenarioTwist } from './scenario';
+import { FlightNumberSchema, IataSchema, TailSchema, literalUnion } from './ids';
+import {
+  COHORT_KINDS,
+  EVIDENCE_KINDS,
+  TRIGGER_SCOPES,
+  TwistEffectSchema,
+  type Scenario,
+  type ScenarioTwist,
+} from './scenario';
+import { COMMANDER_DECISIONS, SQUAWK_STATUSES } from './systems';
 
 const strict = { additionalProperties: false } as const;
 const Text = (max: number) => Type.String({ minLength: 1, maxLength: max });
 
 /** Upper bounds (also stated to the model): keep the Author's output small (≈ 1,500 tokens). */
 export const SCENARIO_PATCH_LIMITS = {
+  /** Extra twists for a typed incident (the template already has its own). */
   twists: 3,
   effectsPerTwist: 4,
   evidence: 4,
   cohorts: 8,
   narrative: 2000,
+  /** Addition (authoritative free text): twists the Author may write for "Something else" (the incident layer). */
+  twistsOther: 5,
+  /** Addition: template twists a patch may remove. */
+  removeTwists: 10,
+  /** Addition: network flights a patch may bring into the scenario (network-wide events). */
+  networkFlights: 25,
+  networkCohortsPerFlight: 4,
+  networkSpares: 5,
 } as const;
+
+/** Addition (authoritative free text): what a network-wide event does to one flight of the day's network. */
+export const NETWORK_FLIGHT_EFFECTS = ['delay', 'hold', 'cancel', 'divert', 'monitor'] as const;
+export type NetworkFlightEffect = (typeof NETWORK_FLIGHT_EFFECTS)[number];
+
+const Evidence = Type.Array(Type.Object({ kind: literalUnion(EVIDENCE_KINDS), text: Text(400) }, strict), {
+  maxItems: SCENARIO_PATCH_LIMITS.evidence,
+});
 
 export const ScenarioPatchSchema = Type.Object(
   {
@@ -35,11 +60,7 @@ export const ScenarioPatchSchema = Type.Object(
         {
           description: Type.Optional(Text(800)),
           /** Replaces the template's evidence. */
-          evidence: Type.Optional(
-            Type.Array(Type.Object({ kind: literalUnion(EVIDENCE_KINDS), text: Text(400) }, strict), {
-              maxItems: SCENARIO_PATCH_LIMITS.evidence,
-            }),
-          ),
+          evidence: Type.Optional(Evidence),
         },
         strict,
       ),
@@ -60,7 +81,103 @@ export const ScenarioPatchSchema = Type.Object(
           },
           strict,
         ),
-        { maxItems: SCENARIO_PATCH_LIMITS.twists },
+        // Typed incidents are held to `twists` (3) by the Run Lambda's check; "Something else" to `twistsOther`.
+        { maxItems: SCENARIO_PATCH_LIMITS.twistsOther },
+      ),
+    ),
+    /** Addition: ids of template twists that contradict the description (removed before merging). */
+    removeTwistIds: Type.Optional(
+      Type.Array(Type.String({ minLength: 1, maxLength: 64 }), {
+        maxItems: SCENARIO_PATCH_LIMITS.removeTwists,
+      }),
+    ),
+    /** Addition: the narrative, rewritten from the description (replaces the template's; wins over `narrative`). */
+    replaceNarrative: Type.Optional(Text(SCENARIO_PATCH_LIMITS.narrative)),
+    /** Addition: the trigger, rewritten from the description (replaces the template's; wins over `trigger`). */
+    replaceTrigger: Type.Optional(
+      Type.Object(
+        {
+          /** Free-form kebab-case, e.g. 'airspace-closure', 'volcanic-ash', 'fumes'. */
+          type: Type.Optional(Type.String({ pattern: '^[a-z][a-z0-9-]{1,39}$' })),
+          scope: Type.Optional(literalUnion(TRIGGER_SCOPES)),
+          description: Text(800),
+          evidence: Type.Optional(Evidence),
+        },
+        strict,
+      ),
+    ),
+    /**
+     * Addition: the commander's decision for the incident flight, as relayed to the ground (airborne only). Replaces
+     * the template's commander-decision twist. Still the Commander's decision: agents never decide it.
+     */
+    commanderDecision: Type.Optional(
+      Type.Object(
+        {
+          atMinute: Type.Number({ minimum: 0, maximum: 60 }),
+          decision: literalUnion(COMMANDER_DECISIONS),
+          /** Required for `divert`; `turnback` returns to the departure airport. */
+          airport: Type.Optional(IataSchema),
+          squawk: Type.Optional(literalUnion(SQUAWK_STATUSES)),
+          overweightLanding: Type.Optional(Type.Boolean()),
+          note: Text(300),
+        },
+        strict,
+      ),
+    ),
+    /**
+     * Addition: a network-wide event. Flights must come from the day's network slice given to the Author; the Run
+     * Lambda resolves them from the schedule (route, tail, times, position) — the Author never writes those.
+     */
+    network: Type.Optional(
+      Type.Object(
+        {
+          flights: Type.Array(
+            Type.Object(
+              {
+                flight: FlightNumberSchema,
+                effect: literalUnion(NETWORK_FLIGHT_EFFECTS),
+                /** Delay/hold minutes. */
+                minutes: Type.Optional(Type.Integer({ minimum: 1, maximum: 720 })),
+                /** Divert only (the commander's decision of that flight, relayed). */
+                divertTo: Type.Optional(IataSchema),
+                /** When it happens (sim minutes; default 0 = the world state at the start). */
+                atMinute: Type.Optional(Type.Number({ minimum: 0, maximum: 240 })),
+                note: Type.Optional(Text(300)),
+                /** Passenger groups (bounded by the flight's booked passengers). Default: one general cohort. */
+                cohorts: Type.Optional(
+                  Type.Array(
+                    Type.Object(
+                      {
+                        kind: literalUnion(COHORT_KINDS),
+                        count: Type.Integer({ minimum: 1, maximum: 400 }),
+                        notes: Type.Optional(Text(200)),
+                      },
+                      strict,
+                    ),
+                    { maxItems: SCENARIO_PATCH_LIMITS.networkCohortsPerFlight },
+                  ),
+                ),
+              },
+              strict,
+            ),
+            { maxItems: SCENARIO_PATCH_LIMITS.networkFlights },
+          ),
+          /** Extra spare aircraft: tails from the network slice, at a network station. */
+          spares: Type.Optional(
+            Type.Array(
+              Type.Object(
+                {
+                  tail: TailSchema,
+                  station: IataSchema,
+                  availableFromMinute: Type.Number({ minimum: 0, maximum: 600 }),
+                },
+                strict,
+              ),
+              { maxItems: SCENARIO_PATCH_LIMITS.networkSpares },
+            ),
+          ),
+        },
+        strict,
       ),
     ),
     /** Tweaks to existing cohorts (by id): passenger count and notes (e.g. a PRM detail). */
@@ -99,14 +216,28 @@ export const PATCH_TWIST_PREFIX = 'dm-twist-';
 /**
  * Merge a patch into a template scenario (pure; the template is not modified). The id, stations, aircraft, crew,
  * baseline, expectations and KPI parameters stay the template's. Unknown cohort ids are ignored here (the Run
- * Lambda's reference check rejects them before merging).
+ * Lambda's reference check rejects them before merging). `commanderDecision` and `network` need the day's network
+ * (positions, routes): they are merged by `applyAuthoredPatch` in `@ica/network/templates`, not here.
  */
 export function applyScenarioPatch(template: Scenario, patch: ScenarioPatch): Scenario {
   const s: Scenario = JSON.parse(JSON.stringify(template)) as Scenario;
   if (patch.title) s.title = patch.title;
-  if (patch.narrative) s.narrative = patch.narrative;
-  if (patch.trigger?.description) s.trigger.description = patch.trigger.description;
-  if (patch.trigger?.evidence?.length) s.trigger.evidence = patch.trigger.evidence.map((e) => ({ ...e }));
+  if (patch.removeTwistIds?.length) {
+    const drop = new Set(patch.removeTwistIds);
+    s.twists = s.twists.filter((t) => !drop.has(t.id));
+  }
+  const narrative = patch.replaceNarrative ?? patch.narrative;
+  if (narrative) s.narrative = narrative;
+  const rt = patch.replaceTrigger;
+  if (rt) {
+    s.trigger.description = rt.description;
+    s.trigger.evidence = (rt.evidence ?? []).map((e) => ({ ...e }));
+    if (rt.type) s.trigger.type = rt.type;
+    if (rt.scope) s.trigger.scope = rt.scope;
+  } else {
+    if (patch.trigger?.description) s.trigger.description = patch.trigger.description;
+    if (patch.trigger?.evidence?.length) s.trigger.evidence = patch.trigger.evidence.map((e) => ({ ...e }));
+  }
   if (patch.cohorts?.length) {
     const byId = new Map(patch.cohorts.map((c) => [c.id, c]));
     s.world.cohorts = s.world.cohorts.map((c) => {

@@ -31,7 +31,36 @@ export const Fallback: Story = {
   args: {
     authoring: {
       status: 'fallback',
-      detail: 'Author unavailable — running the standard pushback tug contact scenario',
+      detail: "Couldn't apply your details — running the standard pushback tug contact scenario",
+      seq: 3,
+    },
+  },
+};
+/** "Something else", authored: the card shows what the Author wrote, so a mismatch is visible at once. */
+export const WrittenFromDescription: Story = {
+  args: {
+    authoring: {
+      status: 'patched',
+      detail: 'Scenario written from your description',
+      seq: 3,
+      summary: {
+        title: 'UK airspace closed by volcanic ash',
+        triggerType: 'airspace-closure',
+        trigger: 'UK airspace closed: a volcanic ash cloud covers the UK and much of Europe.',
+        narrative:
+          'Volcanic ash from an eruption covers much of European airspace and the UK has closed its airspace. ACX832 is in the air; UK departures are held and flights bound for the UK must divert.',
+        affectedFlights: 9,
+        network: true,
+      },
+    },
+  },
+};
+/** "Something else" that could not be authored: calm, and nothing unrelated runs. */
+export const NotBuilt: Story = {
+  args: {
+    authoring: {
+      status: 'failed',
+      detail: "Couldn't build a scenario from that description — try rephrasing or choose an incident type",
       seq: 3,
     },
   },

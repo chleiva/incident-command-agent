@@ -34,6 +34,8 @@ export interface BuildOptions {
   template?: Scenario;
   /** Skip the phase/station applicability check (tests, mock recordings). */
   force?: boolean;
+  /** Airborne: where the aircraft lands in the scenario (default: the type's arrival, `arrivalFor`). */
+  arrival?: string;
 }
 
 export interface BuiltScenario {
@@ -240,7 +242,7 @@ export function buildScenarioFromFlight(
   if (air && !isAirborne(airState!.phase))
     throw new TemplateError('the aircraft is not in the air', 'not_applicable');
 
-  const S = air ? (arrivalFor(type, ctx) ?? flight.from) : ctx.station;
+  const S = air ? (opts.arrival ?? arrivalFor(type, ctx) ?? flight.from) : ctx.station;
   const B = ctx.tail.base;
   const nextSectors = air ? ctx.dayLegs.filter((l) => l.stdMs > flight.stdMs) : ctx.nextSectors;
   const first = air ? flight : ctx.nextSectors[0]!;

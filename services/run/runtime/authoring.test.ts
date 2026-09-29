@@ -272,7 +272,7 @@ describe('executeRun with async authoring', () => {
     const auth = ofType(r.agentEvents, 'scenario.authoring')[0];
     expect(auth.payload).toMatchObject({
       status: 'fallback',
-      detail: 'Author unavailable — running the standard pushback tug contact scenario',
+      detail: "Couldn't apply your details — running the standard pushback tug contact scenario",
     });
   });
 });

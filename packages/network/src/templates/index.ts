@@ -8,3 +8,6 @@ export * from './remap';
 export * from './library';
 export * from './build';
 export * from './brief';
+export * from './neutral';
+export * from './slice';
+export * from './authored';

@@ -254,6 +254,18 @@
               }
             }
           }
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "const": "aircraft",
+              "type": "string"
+            },
+            {
+              "const": "network",
+              "type": "string"
+            }
+          ]
         }
       }
     },
@@ -785,6 +797,99 @@
                   "minimum": 0,
                   "type": "number"
                 }
+              }
+            }
+          }
+        },
+        "airborneFlights": {
+          "maxItems": 25,
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "flight",
+              "tail",
+              "from",
+              "plannedDestination",
+              "position",
+              "altitudeFt",
+              "headingDeg",
+              "etaMinute",
+              "fuelEnduranceMin",
+              "squawk",
+              "pax"
+            ],
+            "properties": {
+              "flight": {
+                "pattern": "^ACX[1-9][0-9]{2}$",
+                "type": "string"
+              },
+              "tail": {
+                "pattern": "^AX-[A-Z]{3}$",
+                "type": "string"
+              },
+              "from": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "plannedDestination": {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              "position": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "lat",
+                  "lon"
+                ],
+                "properties": {
+                  "lat": {
+                    "type": "number"
+                  },
+                  "lon": {
+                    "type": "number"
+                  }
+                }
+              },
+              "altitudeFt": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "headingDeg": {
+                "minimum": 0,
+                "maximum": 360,
+                "type": "number"
+              },
+              "etaMinute": {
+                "minimum": 0,
+                "description": "Sim minutes since scenario start",
+                "type": "number"
+              },
+              "fuelEnduranceMin": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "squawk": {
+                "anyOf": [
+                  {
+                    "const": "normal",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pan",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mayday",
+                    "type": "string"
+                  }
+                ]
+              },
+              "pax": {
+                "minimum": 0,
+                "type": "integer"
               }
             }
           }

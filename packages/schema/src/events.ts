@@ -76,8 +76,23 @@ const SpeedSchema = Type.Number({ minimum: 0, maximum: 60, description: 'Sim-tim
 
 /** Payload schema per event type. Keys are the event `type` strings. */
 /** Addition (async authoring): `scenario.authoring.status`. */
-export const SCENARIO_AUTHORING_STATUSES = ['started', 'patched', 'fallback'] as const;
+/** `failed` (addition, authoritative free text): "Something else" could not be authored; the run does not start. */
+export const SCENARIO_AUTHORING_STATUSES = ['started', 'patched', 'fallback', 'failed'] as const;
 export type ScenarioAuthoringStatus = (typeof SCENARIO_AUTHORING_STATUSES)[number];
+
+/** Addition (authoritative free text): the authored scenario at a glance (all text untrusted, AI-drafted). */
+export const ScenarioAuthoringSummarySchema = Type.Object({
+  title: Str,
+  triggerType: Str,
+  trigger: Str,
+  /** The narrative's opening (≤ 400 characters). */
+  narrative: Str,
+  /** Distinct flights in the scenario (the incident aircraft's rotation plus any network flights). */
+  affectedFlights: Type.Integer({ minimum: 0 }),
+  /** True for a network-wide event (`trigger.scope === 'network'`). */
+  network: Opt(Type.Boolean()),
+});
+export type ScenarioAuthoringSummary = Static<typeof ScenarioAuthoringSummarySchema>;
 
 export const EventPayloadSchemas = {
   'run.created': Type.Object({
@@ -337,6 +352,9 @@ export const EventPayloadSchemas = {
    * Addition (async authoring): preparing a flight-context scenario from the duty manager's free text before the
    * world starts. `started` (written by the API with `run.created`), then `patched` (the Author's patch was merged and
    * validated) or `fallback` (the template scenario is used unchanged). Actor `world`; `detail` is UI copy.
+   * Addition (authoritative free text): `failed` — a "Something else" description could not be turned into a
+   * scenario; no template is substituted and the run (and its paired baseline) ends as failed. `summary` (with
+   * `patched`): what the authored scenario says, for the cockpit's "Scenario from your description" card.
    */
   'scenario.authoring': Type.Object({
     status: literalUnion(SCENARIO_AUTHORING_STATUSES),
@@ -345,6 +363,7 @@ export const EventPayloadSchemas = {
     errors: Opt(Type.Array(Str)),
     /** The Author's LLM spend (not included in the run's totals). */
     costUsd: Opt(Type.Number({ minimum: 0 })),
+    summary: Opt(ScenarioAuthoringSummarySchema),
   }),
 } satisfies Record<string, TObject>;
 

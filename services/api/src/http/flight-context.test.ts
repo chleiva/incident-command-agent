@@ -4,6 +4,7 @@
  */
 import { flightTimes, generateDaySchedule } from '@ica/network';
 import {
+  buildNeutralScenarioFromFlight,
   buildScenarioFromFlight,
   incidentContext,
   incidentTypeById,
@@ -128,7 +129,7 @@ describe('POST /runs with a flight context', () => {
       expect(h.launches).toEqual([
         {
           runId: body.runId,
-          authoring: { text: 'Leak is getting worse', label: incidentTypeById(type)!.label },
+          authoring: { text: 'Leak is getting worse', label: incidentTypeById(type)!.label, mode: 'typed' },
         },
       ]);
       expect((await h.store.getRun(body.runId))?.preparing).toBe(true);
@@ -187,7 +188,7 @@ describe('POST /runs with a flight context', () => {
     ).toBe(400);
   });
 
-  it("refuses rejected text before creating anything, and builds a template for 'other'", async () => {
+  it("refuses rejected text before creating anything, and builds a neutral base for 'other'", async () => {
     const h = makeDeps();
     h.setScreenResult({ verdict: 'rejected', findings: [{ pattern: 'x', excerpt: 'y' }] });
     const rej = await h.handler(
@@ -198,14 +199,34 @@ describe('POST /runs with a flight context', () => {
     expect(rej.statusCode).toBe(422);
     expect(h.launched).toEqual([]);
     h.setScreenResult({ verdict: 'clean', findings: [] });
+    const text = 'UK decided to close air space, volcano eruption has covered european air with ashes';
     const other = await h.handler(
       req('POST', '/runs', {
-        body: { flightContext, incidentType: 'other', text: 'Smell of burning in the galley', mode: 'agent' },
+        body: { flightContext, incidentType: 'other', text, mode: 'agent', withBaseline: true },
       }),
     );
     expect(other.statusCode).toBe(201);
-    const s = await h.store.getScenario(json<{ scenarioId: string }>(other).scenarioId);
-    expect(s?.title).toBe(`Reported incident: ${flight.flight} at ${s?.aircraft.station}`);
-    expect(h.launches.at(-1)?.authoring?.text).toBe('Smell of burning in the galley');
+    const body = json<{ scenarioId: string; runId: string; pairedRunId: string }>(other);
+    const s = await h.store.getScenario(body.scenarioId);
+    // The server rebuilds exactly the neutral base the dialog previewed (plus the per-report id suffix).
+    const preview = buildNeutralScenarioFromFlight(schedule, flight.flight, {
+      atMs: Date.parse(at),
+    }).scenario;
+    expect(s).toEqual({ ...preview, id: body.scenarioId });
+    expect(s?.title).toBe(`Reported incident: ${flight.flight}`);
+    expect(s?.trigger.type).toBe('reported');
+    expect(s?.twists).toEqual([]);
+    expect(JSON.stringify(s)).not.toMatch(/fume|smell|acrid|smoke|tug contact|shear pin/i);
+    expect(h.launches.at(-2)).toEqual({
+      runId: body.runId,
+      authoring: { text, mode: 'other', network: { seed: SEED, date: DATE, flightId: flight.flight } },
+    });
+    expect(h.launches.at(-1)).toEqual({ runId: body.pairedRunId });
+    // "Start again" on a base whose incident was never written is refused (it would run no incident at all).
+    const again = await h.handler(
+      req('POST', '/runs', { body: { scenarioId: body.scenarioId, mode: 'agent' } }),
+    );
+    expect(again.statusCode).toBe(409);
+    expect(json<{ code: string }>(again).code).toBe('scenario_not_authored');
   });
 });

@@ -46,6 +46,7 @@ import { createAuditRoutes } from './audit';
 import { errorFields, silentLogger } from '../util/log';
 import { isNotImplemented, type ApiDeps } from './deps';
 import { defaultDraftId, presentDraft } from './drafts';
+import { isNeutralScenario } from '@ica/network/templates';
 import { buildFlightScenario } from './flight-context';
 import { HttpError, badRequest, conflict, notFound, validationFailed } from './errors';
 import { createRouter, humanActor, type RouteContext, type RouteTable } from './router';
@@ -223,6 +224,13 @@ export function createApiHandler(deps: ApiDeps) {
         if (!req.scenarioId) throw badRequest('scenarioId or flightContext is required');
         if (req.withBaseline) throw badRequest('withBaseline needs a flightContext');
         scenario = await findScenario(req.scenarioId);
+        // A "Something else" base whose incident was never written must not run as it is (or as anything else).
+        if (scenario && isNeutralScenario(scenario))
+          throw new HttpError(
+            409,
+            'scenario_not_authored',
+            'This report was never turned into a scenario — report the incident again from the flight',
+          );
       }
       if (!scenario) throw notFound('scenario', 'scenario_not_found');
       if (req.pairedRunId && !(await store.getRun(req.pairedRunId))) {

@@ -258,6 +258,43 @@ describe('mock backend', () => {
     }
   });
 
+  it('"Something else": a neutral base plus the mock Author\'s canned network closure, announced with a summary', async () => {
+    const { flightTimes, generateDaySchedule } = await import('@ica/network');
+    const schedule = generateDaySchedule('accent-air', '2026-09-27');
+    const f = schedule.flights.find((x) => !x.cancelled && x.from === 'MAN' && x.distanceKm > 1200)!;
+    const t = flightTimes(f);
+    const at = (t.takeoffMs + t.landingMs) / 2;
+    const { api } = setup();
+    const created = api.createRun({
+      flightContext: {
+        seed: 'accent-air',
+        date: '2026-09-27',
+        flightId: f.flight,
+        at: new Date(at).toISOString(),
+      },
+      incidentType: 'other',
+      text: 'UK decided to close air space, volcano eruption has covered european air with ashes',
+      mode: 'agent',
+      speed: 30,
+    });
+    await settle(200);
+    const res = await created;
+    expect(res.preparing).toBe(true);
+    const sp = api.getScenario(res.scenarioId!);
+    await settle(100);
+    const s = await sp;
+    expect(s.trigger).toMatchObject({ type: 'airspace-closure', scope: 'network' });
+    expect(JSON.stringify(s)).not.toMatch(/fume|smell|acrid/i);
+    expect(s.twists.find((x) => x.id === 'tw-commander-decision')?.title).toMatch(/Commander: returning to/);
+    await settle(5_000);
+    const p = all(api, res.runId);
+    await settle(200);
+    const authoring = foldEvents(await p).meta.authoring;
+    expect(authoring?.status).toBe('patched');
+    expect(authoring?.summary).toMatchObject({ triggerType: 'airspace-closure', network: true });
+    expect(authoring!.summary!.affectedFlights).toBeGreaterThan(3);
+  });
+
   it('authors a Training scenario asynchronously: 202 + draft, polled until ready; rejects injected text', async () => {
     // The mock author finishes on the wall clock: real timers here.
     vi.useRealTimers();

@@ -13,6 +13,7 @@ Do:
 - Draft, then propose sending, the first message quickly; follow up when the picture changes.
 - Estimate EU261/UK261 exposure and watch the 3-hour threshold. Offer care (meals and refreshments, hotel if overnight) when the delay warrants it, and rebooking onto options with seats for cohorts that will miss connections.
 - Search passenger-rights law for any rights statement and cite it.
+- Several flights affected (a network-wide event): inform every affected flight's cohorts, the largest and most vulnerable groups first, in neutral words about the event.
 - After a diversion or turnback, plan care at the arrival airport for everyone on board (refreshments, hotels if overnight) and onward travel.
 
 Message rules (every message):

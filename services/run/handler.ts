@@ -122,9 +122,23 @@ export function lambdaSelfInvoker(
 /** Validate the (untrusted) authoring part of an invocation; malformed → ignored (the template scenario stands). */
 export function parseAuthoring(x: unknown): AuthoringRequest | undefined {
   if (!x || typeof x !== 'object') return undefined;
-  const { text, label } = x as { text?: unknown; label?: unknown };
+  const { text, label, mode, network: n } = x as Record<string, unknown>;
   if (typeof text !== 'string' || !text.trim() || text.length > 4000) return undefined;
-  return { text, ...(typeof label === 'string' && label.length <= 80 ? { label } : {}) };
+  const net = n as { seed?: unknown; date?: unknown; flightId?: unknown } | undefined;
+  const network =
+    net && typeof net.seed === 'string' && net.seed.length <= 64 && typeof net.date === 'string'
+      ? /^\d{4}-\d{2}-\d{2}$/.test(net.date) &&
+        typeof net.flightId === 'string' &&
+        /^ACX\d{3}$/.test(net.flightId)
+        ? { seed: net.seed, date: net.date, flightId: net.flightId }
+        : undefined
+      : undefined;
+  return {
+    text,
+    ...(typeof label === 'string' && label.length <= 80 ? { label } : {}),
+    ...(mode === 'other' || mode === 'typed' ? { mode } : {}),
+    ...(network ? { network } : {}),
+  };
 }
 
 /** Stop gracefully when less than this much Lambda time remains. */

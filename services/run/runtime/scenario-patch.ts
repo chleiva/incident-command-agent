@@ -8,14 +8,20 @@
  * then the merged scenario against the scenario schema. Pure.
  */
 import {
+  SCENARIO_PATCH_LIMITS,
   ScenarioPatchSchema,
-  applyScenarioPatch,
   compileSchema,
   validateScenario,
   type Scenario,
   type ScenarioPatch,
   type SystemState,
 } from '@ica/schema';
+import {
+  NEUTRAL_TRIGGER_TYPE,
+  applyAuthoredPatch,
+  networkPatchErrors,
+  type NetworkSlice,
+} from '@ica/network/templates';
 import type { Registry } from './registry';
 import { hash32, seededRng } from './util';
 
@@ -31,7 +37,7 @@ export interface TemplateRefs {
   cohorts: Set<string>;
 }
 
-/** Identifiers a patch may mention: the template's own. */
+/** Identifiers a patch may mention: the template's own (plus, with a network patch, the flights it brings in). */
 export function templateRefs(t: Scenario): TemplateRefs {
   const tails = new Set<string>([t.aircraft.tail]);
   const flights = new Set<string>();
@@ -59,6 +65,12 @@ export function templateRefs(t: Scenario): TemplateRefs {
     flights.add(t.airborne.flight);
     stations.add(t.airborne.from);
     stations.add(t.airborne.plannedDestination);
+  }
+  for (const a of t.world.airborneFlights ?? []) {
+    flights.add(a.flight);
+    tails.add(a.tail);
+    stations.add(a.from);
+    stations.add(a.plannedDestination);
   }
   return { tails, flights, stations, cohorts: new Set(t.world.cohorts.map((c) => c.id)) };
 }
@@ -107,18 +119,61 @@ export function entityIndexText(ids: Map<string, Set<string>>): string {
     .join('\n');
 }
 
+export interface PatchCheckOptions {
+  /**
+   * `other` ("Something else"): the base is neutral and the patch must write the incident layer (replaceTrigger with
+   * a type, and the narrative); up to `twistsOther` twists. `typed` (default): details on a template, ≤ `twists`.
+   */
+  mode?: 'typed' | 'other';
+  /** The day's network slice the Author was given (network-wide events). */
+  slice?: NetworkSlice;
+}
+
 /** Validate a proposed patch against the template; on success, the merged, schema-valid scenario. */
 export function checkScenarioPatch(
   template: Scenario,
   input: unknown,
   registry: Pick<Registry, 'seedAll'>,
-  ids: Map<string, Set<string>> = seededEntityIds(template, registry),
+  ids?: Map<string, Set<string>>,
+  opts: PatchCheckOptions = {},
 ): PatchCheck {
   const v = validatePatchSchema(input);
   if (!v.ok) return { ok: false, errors: v.errors.slice(0, 20) };
   const patch = v.value as ScenarioPatch;
-  const refs = templateRefs(template);
+  const other = opts.mode === 'other';
   const errors: string[] = [];
+
+  if (!other && (patch.twists?.length ?? 0) > SCENARIO_PATCH_LIMITS.twists)
+    errors.push(`/twists at most ${SCENARIO_PATCH_LIMITS.twists} extra twists for a typed incident`);
+  if (other) {
+    if (!patch.replaceTrigger?.type)
+      errors.push('/replaceTrigger is required, with a type: write the incident from the description');
+    if (!patch.replaceNarrative && !patch.narrative)
+      errors.push('/replaceNarrative is required: write the incident from the description');
+    if (patch.replaceTrigger?.type === NEUTRAL_TRIGGER_TYPE)
+      errors.push(`/replaceTrigger/type "${NEUTRAL_TRIGGER_TYPE}" is the placeholder; name the incident`);
+  }
+  const twistIds = new Set(template.twists.map((t) => t.id));
+  for (const [i, id] of (patch.removeTwistIds ?? []).entries())
+    if (!twistIds.has(id)) errors.push(`/removeTwistIds/${i} "${id}" is not a twist of the template`);
+  errors.push(...networkPatchErrors(template, patch, opts.slice));
+  if (errors.length) return { ok: false, errors: [...new Set(errors)].slice(0, 20) };
+
+  // The world the patch's own twists act on: the template plus the network flights it brings in.
+  const world =
+    patch.network || patch.commanderDecision
+      ? applyAuthoredPatch(
+          template,
+          {
+            ...(patch.network ? { network: patch.network } : {}),
+            ...(patch.commanderDecision ? { commanderDecision: patch.commanderDecision } : {}),
+          },
+          opts.slice,
+        )
+      : template;
+  const refs = templateRefs(world);
+  for (const st of opts.slice?.stations ?? []) refs.stations.add(st);
+  if (world !== template || !ids) ids = seededEntityIds(world, registry);
 
   for (const [i, c] of (patch.cohorts ?? []).entries())
     if (!refs.cohorts.has(c.id)) errors.push(`/cohorts/${i}/id "${c.id}" is not a cohort of the template`);
@@ -135,7 +190,7 @@ export function checkScenarioPatch(
           errors.push(`${at} unknown entity kind ${e.system}/${e.entity}`);
       } else if (e.op === 'delay') {
         if (!refs.flights.has(e.flight))
-          errors.push(`${at}/flight ${e.flight} is not a flight of the template`);
+          errors.push(`${at}/flight ${e.flight} is not a flight of the template or the network patch`);
       }
     }
   }
@@ -153,7 +208,12 @@ export function checkScenarioPatch(
   }
   if (errors.length) return { ok: false, errors: [...new Set(errors)].slice(0, 20) };
 
-  const merged = applyScenarioPatch(template, patch);
+  const merged = applyAuthoredPatch(template, patch, opts.slice);
+  if (merged.trigger.type === NEUTRAL_TRIGGER_TYPE)
+    return {
+      ok: false,
+      errors: ['/replaceTrigger the incident has not been written (the trigger is the placeholder)'],
+    };
   const sv = validateScenario({ ...merged, id: template.id, visibility: template.visibility });
   if (!sv.ok) return { ok: false, errors: sv.errors.slice(0, 20) };
   return { ok: true, scenario: sv.value, patch };

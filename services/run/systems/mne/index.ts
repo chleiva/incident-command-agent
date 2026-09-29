@@ -81,13 +81,15 @@ export function defectView(d: Defect): Omit<Defect, 'ata'> & { ata: string; melI
 
 export function seedMne(scenario: Scenario): SystemStateOf<'mne'> {
   const a = scenario.aircraft;
-  // The incident aircraft starts unserviceable (the trigger); nothing about its record is assumed.
+  // The incident aircraft starts unserviceable (the trigger); nothing about its record is assumed. A network-wide
+  // event (trigger scope `network`, e.g. an airspace closure) raises no defect: the aircraft is serviceable.
+  const network = scenario.trigger.scope === 'network';
   const aircraft: Record<string, Aircraft> = {
     [a.tail]: {
       tail: a.tail,
       type: a.type,
       station: a.station,
-      status: 'unserviceable',
+      status: network ? 'serviceable' : 'unserviceable',
       stand: a.stand,
       ...recordOf(a.maintenance),
     },
@@ -104,6 +106,7 @@ export function seedMne(scenario: Scenario): SystemStateOf<'mne'> {
       ...recordOf(s.maintenance),
     };
   }
+  if (network) return { aircraft, defects: {}, workOrders: {}, techlog: {}, decisions: {} };
   const evidence = scenario.trigger.evidence.map((e) => e.text).join('\n');
   const mel = melRefsFromText(evidence);
   const defectId = 'DEF-001';

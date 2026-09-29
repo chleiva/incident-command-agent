@@ -28,6 +28,7 @@ import {
   type ApprovalStatus,
   type RunEvent,
   type ScenarioAuthoringStatus,
+  type ScenarioAuthoringSummary,
 } from './events';
 import type { Actor, AgentRole, ApprovalMethod, RunMode, RunStatus } from './ids';
 import type { KpiSnapshot } from './kpi';
@@ -139,7 +140,13 @@ export interface RunProjection {
     startedWallTime?: string;
     endedWallTime?: string;
     /** Addition (async authoring): the latest `scenario.authoring` (preparing the scenario from free text). */
-    authoring?: { status: ScenarioAuthoringStatus; detail: string; seq: number };
+    authoring?: {
+      status: ScenarioAuthoringStatus;
+      detail: string;
+      seq: number;
+      /** Addition (authoritative free text): the authored scenario at a glance (with `patched`). */
+      summary?: ScenarioAuthoringSummary;
+    };
     /**
      * Addition (self-recovery): the latest `run.recovering` / `run.resumed_after_error` ("Recovered from a system
      * error — resumed at m{atMinute}").
@@ -550,7 +557,15 @@ export function applyEvent(state: RunProjection, e: RunEvent): RunProjection {
     case 'scenario.authoring':
       return {
         ...s,
-        meta: { ...s.meta, authoring: { status: e.payload.status, detail: e.payload.detail, seq: e.seq } },
+        meta: {
+          ...s.meta,
+          authoring: {
+            status: e.payload.status,
+            detail: e.payload.detail,
+            seq: e.seq,
+            ...(e.payload.summary ? { summary: e.payload.summary } : {}),
+          },
+        },
       };
     default:
       // twist.requested, control.requested, world.process and future types: no projected state.

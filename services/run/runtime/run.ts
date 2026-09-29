@@ -33,7 +33,8 @@ import { screenText, type ScreenInputOptions } from '../guardrails/screen-input'
 import { wrapScenarioData } from '../guardrails/wrap';
 import { WorldEngine } from '../world/engine';
 import { runAgent } from './agent';
-import { prepareRunScenario } from './authoring';
+import { isNeutralScenario } from '@ica/network/templates';
+import { AUTHORING_COPY, prepareRunScenario } from './authoring';
 import type { ApprovalPolicy } from './approvals';
 import { RUN_SIGNAL_ABORT_DETAIL, RunContext } from './context';
 import { reattachApproval } from './execute';
@@ -236,16 +237,20 @@ export async function executeRunWith(
   }
   // Async authoring: patch the template scenario from the free text (authoring run) or wait for it (paired run).
   if (!restart && !opts.scenario && (input.authoring || meta.preparing)) {
-    await prepareRunScenario(meta, input.authoring, deps, {
+    const prep = await prepareRunScenario(meta, input.authoring, deps, {
       registry,
       signal: input.signal,
       loadScenario: (id) => loadScenario(deps, id),
       log: opts.log ?? ((line) => console.log(JSON.stringify({ runId, ...line }))),
     });
+    // "Something else" that could not be authored: the run has been ended (never an unrelated template).
+    if (!prep.proceed) return { runId, status: 'failed', error: prep.error };
   }
   const scenario = opts.scenario ?? (await loadScenario(deps, meta.scenarioId));
   if (!scenario)
     return failRun(deps, runId, `scenario not found: ${meta.scenarioId}`, 'executeRun.loadScenario');
+  if (!resume && isNeutralScenario(scenario))
+    return failRun(deps, runId, AUTHORING_COPY.failed, 'scenario.authoring');
   const valid = validateScenario(scenario);
   if (!valid.ok)
     return failRun(

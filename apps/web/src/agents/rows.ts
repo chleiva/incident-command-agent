@@ -291,6 +291,8 @@ export function reportHeadline(report: AgentReportEvent): string {
 export function authoringLine(status: AuthoringStep['status'], detail: string): string {
   if (status === 'patched') return 'Scenario enriched from your description';
   if (status === 'started') return 'Preparing the scenario from your description…';
+  if (status === 'failed')
+    return detail || "Couldn't build a scenario from that description — nothing was run in its place";
   return detail || 'Standard scenario used: your description could not be applied';
 }
 

@@ -18,9 +18,31 @@ export const APPROACH_MIN = 12;
 const DESCENT_MIN = 25;
 
 export function seedAirborne(scenario: Scenario): Record<string, AirborneFlight> {
+  const out: Record<string, AirborneFlight> = {};
+  // Addition (authoritative free text): other network flights in the air (network-wide events).
+  for (const n of scenario.world.airborneFlights ?? []) {
+    out[n.flight] = {
+      flight: n.flight,
+      tail: n.tail,
+      phase: n.etaMinute <= APPROACH_MIN ? 'approach' : 'airborne',
+      squawk: n.squawk,
+      from: n.from,
+      plannedDestination: n.plannedDestination,
+      destination: n.plannedDestination,
+      lat: n.position.lat,
+      lon: n.position.lon,
+      positionAtMinute: 0,
+      altitudeFt: n.altitudeFt,
+      headingDeg: n.headingDeg,
+      etaMinute: n.etaMinute,
+      fuelEnduranceMin: n.fuelEnduranceMin,
+      pax: n.pax,
+    };
+  }
   const a = scenario.airborne;
-  if (!a) return {};
+  if (!a) return out;
   return {
+    ...out,
     [a.flight]: {
       flight: a.flight,
       tail: scenario.aircraft.tail,

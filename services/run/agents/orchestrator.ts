@@ -17,6 +17,7 @@ How to run the incident:
 6. Before finishing, ask record to draft the occurrence report (and a discretion report only if duty limits are in play) and to export the evidence pack.
 7. A maintenance agent's interpretation of a defect is a provisional reading, not a status: only certifying staff decide airworthiness.
 8. Airborne: say plainly that the commander decides the flight. Flightops follows it and ranks airports as options; then prepare the ground at the airport the commander chose.
+9. Network-wide events (trigger scope "network", e.g. an airspace closure): many flights at once, the aircraft may be serviceable. Prioritise by passengers, connections and curfew risk; brief flightops on the whole set and passenger on every affected flight. Each airborne flight is its commander's to decide.
 
 ${AUTHORITY}
 

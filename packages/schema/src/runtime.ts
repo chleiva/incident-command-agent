@@ -342,6 +342,17 @@ export interface AuthoringRequest {
   text: string;
   /** The incident type's label, for the fallback notice ("running the standard … scenario"). */
   label?: string;
+  /**
+   * Addition (authoritative free text): `other` = "Something else": the scenario is a neutral base from the flight's
+   * context and the Author writes the whole incident layer (no template is substituted on failure: the run fails).
+   * `typed` (default) = details on a typed incident's template (fallback: the plain template).
+   */
+  mode?: 'typed' | 'other';
+  /**
+   * Addition (authoritative free text): the day's network the report was made against (the Run Lambda regenerates
+   * the schedule from `seed` + `date` and gives the Author a compact slice of it, for network-wide events).
+   */
+  network?: { seed: string; date: string; flightId: string };
 }
 
 /** Addition (self-recovery): schedule a fresh invocation that resumes `runId` (Run Lambda: async self-invoke). */

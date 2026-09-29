@@ -65,6 +65,34 @@ test('report a ground incident from the map: list → preview → start → cock
   await expect(page.getByRole('link', { name: 'Side-by-side' })).toBeAttached();
 });
 
+test('report "Something else": the Author writes the incident from the description (network-wide)', async ({
+  page,
+}) => {
+  await page.goto('/?at=12:00&timescale=4');
+  await page.getByRole('button', { name: 'Airborne', exact: true }).click();
+  await page.getByRole('listbox', { name: 'Flights' }).getByRole('option').first().click();
+  await page.getByTestId('flight-panel').getByRole('button', { name: 'Report incident' }).click();
+  const dialog = page.getByTestId('report-dialog');
+  await dialog.locator('[data-incident-type="other"] input[type="radio"]').check();
+  // The copy says the Author writes the incident from the description; no template trigger is previewed.
+  await expect(dialog.getByTestId('other-note')).toContainText('writes the incident from your description');
+  await expect(dialog.getByTestId('preview-trigger')).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: 'Start' })).toBeDisabled();
+  await dialog
+    .getByRole('textbox')
+    .fill('UK decided to close air space, volcano eruption has covered european air with ashes');
+  await dialog.getByRole('button', { name: 'Start' }).click();
+
+  await expect(page).toHaveURL(/\/runs\/run-mock-/, { timeout: 3_000 });
+  const notice = page.getByTestId('scenario-authoring');
+  await expect(notice).toHaveAttribute('data-status', 'patched', { timeout: 10_000 });
+  const card = page.getByTestId('authored-scenario-card');
+  await expect(card).toBeVisible();
+  await expect(card.getByTestId('authored-trigger')).toContainText('airspace closed');
+  await expect(card.getByTestId('authored-flights')).toContainText(/Affects \d+ flights/);
+  await expect(card).not.toContainText(/fumes|smell/i);
+});
+
 test('home is the live network: search, filter and open an airborne flight', async ({ page }) => {
   await page.goto('/?at=12:00');
   await expect(page.getByTestId('network-map').locator('canvas')).toBeVisible();
