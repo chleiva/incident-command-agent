@@ -9,7 +9,7 @@
  * - Prompt caching: `cache_control: {type:'ephemeral'}` on the system prompt, on the last tool, on any text block
  *   flagged `cache` (the `<scenario_data>` block) and, with `cacheHints.messages`, a moving breakpoint on the last
  *   message block. At most 4 breakpoints are sent.
- * - Sampling: Sonnet 5 / Opus 4.7+ / Opus 5.x / Fable reject `temperature` (400), so it is omitted for them; the
+ * - Sampling: Sonnet 5 / Sonnet 5.5 / Opus 4.7+ / Opus 5.x / Fable reject `temperature` (400), so it is omitted for them; the
  *   runtime still enforces `LLM_TEMPERATURE ≤ 0.2` for the models that accept it (NFR-03).
  * - Thinking: disabled where the model allows it (cheaper, and no thinking blocks to round-trip); for models where
  *   thinking cannot be disabled, the native assistant content is returned as `providerContent` and echoed back.
@@ -34,13 +34,20 @@ export interface AnthropicOptions {
 
 interface ModelCaps {
   sampling: boolean;
-  thinking: 'disable' | 'omit';
+  /**
+   * `disable`: send `{type:'disabled'}` (Sonnet 5, Opus 4.7/4.8). `between_tools`: send `{type:'between_tools'}` —
+   * Sonnet 5.5's thinking-off mode (`disabled` is a 400 there; it takes no other field and needs effort ≤ high).
+   * `omit`: leave thinking unset (models where it can't be turned off, or older models that default to off).
+   */
+  thinking: 'disable' | 'between_tools' | 'omit';
 }
 
 /** Per-model request surface (see the claude-api skill model table). */
 export function anthropicModelCaps(model: string): ModelCaps {
   const m = model.toLowerCase();
   if (/haiku|sonnet-4-[0-6]|opus-4-[0-6]|claude-3/.test(m)) return { sampling: true, thinking: 'omit' };
+  // Sonnet 5.5 and later Sonnet 5.x: `disabled` thinking and non-default sampling are 400s; thinking off = between_tools.
+  if (/sonnet-5-\d/.test(m)) return { sampling: false, thinking: 'between_tools' };
   if (/sonnet-5|opus-4-[78]/.test(m)) return { sampling: false, thinking: 'disable' };
   // Opus 5.x, Fable, Mythos and unknown future models: thinking always on, no sampling params.
   return { sampling: false, thinking: 'omit' };
@@ -119,6 +126,7 @@ export function buildAnthropicBody(req: LlmRequest): Record<string, unknown> {
   }
   if (caps.sampling) body.temperature = req.temperature;
   if (caps.thinking === 'disable') body.thinking = { type: 'disabled' };
+  else if (caps.thinking === 'between_tools') body.thinking = { type: 'between_tools' };
   return body;
 }
 

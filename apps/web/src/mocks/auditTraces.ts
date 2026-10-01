@@ -123,7 +123,7 @@ export function mockLlmTrace(
   }
   const now = calls.filter((c) => c.iteration === thought.iteration);
   const u = thought.usage;
-  const model = u?.model ?? 'claude-sonnet-5';
+  const model = u?.model ?? 'claude-sonnet-5-5';
   const usage = {
     inputTokens: u?.inputTokens ?? 0,
     outputTokens: u?.outputTokens ?? 0,

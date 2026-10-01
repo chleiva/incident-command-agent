@@ -12,7 +12,7 @@ import {
 } from '@ica/schema';
 
 export const MAX_TEMPERATURE = 0.2;
-export const DEFAULT_MODEL = 'claude-sonnet-5';
+export const DEFAULT_MODEL = 'claude-sonnet-5-5';
 export const DEFAULT_MAX_TOKENS = 4096;
 
 type Env = Record<string, string | undefined>;

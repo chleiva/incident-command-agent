@@ -48,7 +48,7 @@ Set at least:
 
 | Variable | Example | Notes |
 |---|---|---|
-| `LLM_PROVIDER`, `LLM_MODEL` | `anthropic`, `claude-sonnet-5` | Copied into the Lambda environment at synth time |
+| `LLM_PROVIDER`, `LLM_MODEL` | `anthropic`, `claude-sonnet-5-5` | Copied into the Lambda environment at synth time |
 | `AWS_REGION` | `eu-west-2` | Any region with Cognito, API Gateway WebSockets and (optionally) Bedrock |
 | `ALERT_EMAIL` | `you@example.org` | Alarm and budget e-mails when monitoring is enabled (`-c monitoring=true`) |
 | `COGNITO_DOMAIN_PREFIX` | `ica-yourname-1234` | Hosted UI at `https://<prefix>.auth.<region>.amazoncognito.com` |

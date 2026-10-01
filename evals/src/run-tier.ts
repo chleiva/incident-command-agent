@@ -130,7 +130,7 @@ export async function runTier(opts: TierOptions, deps: TierDeps): Promise<TierOu
   }
   if (opts.live && !isLive)
     throw new BudgetRefusal(`--live is only valid with --tier smoke|core|full (got ${opts.tier}).`);
-  const agentModel = opts.agentModel ?? env.LLM_MODEL ?? 'claude-sonnet-5';
+  const agentModel = opts.agentModel ?? env.LLM_MODEL ?? 'claude-sonnet-5-5';
   const judgeModel = opts.judgeModel ?? env.EVAL_JUDGE_MODEL ?? DEFAULT_JUDGE_MODEL;
   const rubric = loadRubric(paths.rubrics);
   let cases = selectCases(deps.cases, opts.tier, opts.caseIds, paths.traces);

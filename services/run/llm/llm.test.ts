@@ -82,6 +82,17 @@ describe('anthropic adapter', () => {
     expect(anthropicModelCaps('claude-opus-5-5')).toEqual({ sampling: false, thinking: 'omit' });
   });
 
+  it('Sonnet 5.5 turns thinking off with between_tools (disabled is a 400) and sends no temperature', () => {
+    const body = buildAnthropicBody({ ...REQ, model: 'claude-sonnet-5-5' }) as Record<string, any>;
+    expect(body.thinking).toEqual({ type: 'between_tools' });
+    expect(body.temperature).toBeUndefined();
+    expect(body.tool_choice).toEqual({ type: 'auto' }); // forced tool_choice is a 400 on Sonnet 5.5
+    expect(anthropicModelCaps('claude-sonnet-5-5')).toEqual({ sampling: false, thinking: 'between_tools' });
+    // Sonnet 5 keeps the explicit disabled mode.
+    const s5 = buildAnthropicBody({ ...REQ, model: 'claude-sonnet-5' }) as Record<string, any>;
+    expect(s5.thinking).toEqual({ type: 'disabled' });
+  });
+
   it('parses text, tool calls, stop reason and usage including cache reads/writes', () => {
     const r = parseAnthropicResponse(
       {
@@ -334,7 +345,7 @@ describe('config, pricing and redaction', () => {
     });
     expect(c.limits.budgetUsd).toBe(0.5);
     expect(c.limits.horizonMin).toBe(60);
-    expect(llmConfigFromEnv({}).model).toBe('claude-sonnet-5');
+    expect(llmConfigFromEnv({}).model).toBe('claude-sonnet-5-5');
   });
 
   it('computes cost including cache reads and writes', () => {

@@ -45,7 +45,7 @@ function providerId(name: string, v: string): ProviderId {
 /** `LlmConfig` for the runtime from the documented env variables (.env.example). */
 export function llmConfigFromEnv(env: Env): LlmConfig {
   const provider = providerId('LLM_PROVIDER', envStr(env, 'LLM_PROVIDER', 'anthropic'));
-  const model = envStr(env, 'LLM_MODEL', 'claude-sonnet-5');
+  const model = envStr(env, 'LLM_MODEL', 'claude-sonnet-5-5');
   const temperature = envNum(env, 'LLM_TEMPERATURE', MAX_TEMPERATURE);
   if (temperature < 0 || temperature > MAX_TEMPERATURE) {
     throw new Error(`LLM_TEMPERATURE must be between 0 and ${MAX_TEMPERATURE} (NFR-03)`);

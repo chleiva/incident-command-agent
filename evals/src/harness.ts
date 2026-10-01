@@ -150,7 +150,7 @@ async function newRun(
 function llmConfigFor(opts: CaseRunOptions, provider: ProviderId): LlmConfig {
   return {
     provider,
-    model: opts.llm?.model ?? 'claude-sonnet-5',
+    model: opts.llm?.model ?? 'claude-sonnet-5-5',
     temperature: 0.2,
     maxTokens: opts.llm?.maxTokens ?? 4096,
     limits: { ...EVAL_RUN_LIMITS, ...(opts.budgetUsd !== undefined ? { budgetUsd: opts.budgetUsd } : {}) },
