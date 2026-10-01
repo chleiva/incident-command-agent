@@ -96,7 +96,8 @@ export class WebStack extends Stack {
         customHeaders: [
           {
             header: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+            // microphone=(self): the report dialog's optional dictation (browser speech recognition, same origin only).
+            value: 'camera=(), microphone=(self), geolocation=(), payment=(), usb=()',
             override: true,
           },
         ],

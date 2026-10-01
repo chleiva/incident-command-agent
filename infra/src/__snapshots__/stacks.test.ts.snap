@@ -5213,7 +5213,7 @@ exports[`WebStack and WebWafStack > matches the snapshots 1`] = `
               {
                 "Header": "Permissions-Policy",
                 "Override": true,
-                "Value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+                "Value": "camera=(), microphone=(self), geolocation=(), payment=(), usb=()",
               },
             ],
           },

@@ -19,6 +19,7 @@ import { PACE_FAST, PACE_SLOW } from '../../lib/presenterPace';
 import { useUi } from '../../store/ui';
 import { Icon } from '../ui/Icon';
 import { Badge, Button, cx } from '../ui/primitives';
+import { DictateButton } from './DictateButton';
 
 type TemplatesLib = typeof Templates;
 
@@ -243,6 +244,13 @@ export function ReportIncidentDialog({
                   placeholder="e.g. Engineer on stand says the leak is getting worse; two PRM passengers already on board."
                   className="rounded-md border border-border-control/70 bg-surface-sunken p-2 text-body text-fg placeholder:text-fg-subtle"
                 />
+                {needsText && (
+                  <DictateButton
+                    onText={(phrase) =>
+                      setText((t) => (t.trim() ? `${t.trimEnd()} ${phrase}` : phrase).slice(0, 4000))
+                    }
+                  />
+                )}
                 {text.trim() && (
                   <span className="text-caption text-fg-muted" data-testid="author-note">
                     {mode === 'mock'
